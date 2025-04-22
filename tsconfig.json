@@ -3,5 +3,15 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    // 配置@
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@com/*": ["src/components/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "exclude": ["node_modules"]
 }
