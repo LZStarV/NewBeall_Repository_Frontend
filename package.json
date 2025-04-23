@@ -11,6 +11,7 @@
     "fix": "eslint src --fix"
   },
   "dependencies": {
+    "@layui/layui-vue": "^2.22.0",
     "@types/node": "^22.14.1",
     "axios": "^1.8.4",
     "newbeall": "file:",

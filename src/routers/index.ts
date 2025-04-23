@@ -1,12 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-// 导入路由页面的配置
 import routes from './routes'
 
-// 路由参数配置
 const router = createRouter({
-    history: createWebHistory(),
-    routes: routes,
+    history: createWebHistory(),  // HTML5模式
+    routes: routes
 })
 
 // 全局前置守卫
