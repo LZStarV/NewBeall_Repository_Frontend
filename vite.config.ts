@@ -20,7 +20,7 @@ export default defineConfig({
     preprocessorOptions: {
       // scss全局文件引入
       scss: {
-        additionalData: '@use "@/assets/styles/global.scss" as *;'
+        additionalData: '@use "@/styles/global.scss" as *;'
       },
     },
   },
