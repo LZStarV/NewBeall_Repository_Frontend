@@ -1,9 +1,11 @@
-import { createApp } from 'vue'
-import { createPinia } from "pinia";
-import router from '@/routers/index.ts'
 import Layui from '@layui/layui-vue'
-import '@layui/layui-vue/lib/index.css'
-import App from '@/App.vue'
+import { createPinia } from "pinia";
+import { createApp } from 'vue';
+
+import App from '@/App.vue';
+import router from '@/routers/index.ts';
+import '@layui/layui-vue/lib/index.css';
+
 
 const pinia = createPinia()
 
