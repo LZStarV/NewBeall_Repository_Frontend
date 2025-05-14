@@ -69,15 +69,6 @@ $sidebar-active-icon-color: #ffffff; // 激活项图标颜色
 $sidebar-hover-background-color: lighten($primary-color, 10%); // 悬浮项背景色
 $sidebar-user-profile-background: darken($primary-color, 5%); // 用户信息区域背景
 
-// 侧边栏
-$sidebar-background-color: $primary-color; // 如果没有背景图片, 使用主色
-$sidebar-text-color: $text-primary; // 侧边栏文字颜色
-$sidebar-icon-color: $text-primary; // 侧边栏图标颜色
-$sidebar-active-background-color: $primary-color; // 激活项背景色 (当前是主色)
-$sidebar-active-text-color: #ffffff; // 激活项文字颜色
-$sidebar-active-icon-color: #ffffff; // 激活项图标颜色
-$sidebar-hover-background-color: lighten($primary-color, 10%); // 悬浮项背景色
-$sidebar-user-profile-background: darken($primary-color, 5%); // 用户信息区域背景
 
 // 侧边栏次级菜单
 $sidebar-submenu-text-color: $text-regular; // 次级菜单文字颜色
