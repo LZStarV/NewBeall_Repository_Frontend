@@ -1,0 +1,112 @@
+// 主题颜色变量
+$primary-color: #2d72eb;      // 主色调
+$primary-color-light: lighten($primary-color, 30%); // 主色调浅色版本，用于背景、边框等
+$success-color: #67c23a;      // 成功色
+$warning-color: #e6a23c;      // 警告色
+$danger-color: #f56c6c;       // 危险色
+$info-color: #909399;         // 信息色
+
+// 文字颜色
+$text-primary: #303133;       // 主要文字
+$text-regular: #606266;       // 常规文字
+$text-secondary: #909399;     // 次要文字
+$text-placeholder: #c0c4cc;   // 占位文字
+
+// 边框颜色
+$border-color-base: #dcdfe6;  // 一级边框
+$border-color-light: #e4e7ed; // 二级边框
+$border-color-lighter: #ebeef5; // 三级边框
+$border-color-extra-light: #f2f6fc; // 四级边框
+$border-color-primary-light: $primary-color-light; // 主色调浅色边框
+
+// 背景颜色
+$background-color-base: #f6f7fb; // 系统背景色
+
+// 字体大小
+$font-size-extra-large: 20px;
+$font-size-large: 18px;
+$font-size-medium: 16px;
+$font-size-base: 14px;
+$font-size-small: 13px;
+$font-size-extra-small: 12px;
+
+// 字体族
+$font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+
+// 圆角
+$border-radius-base: 4px;
+$border-radius-small: 2px;
+$border-radius-large: 8px;
+$border-radius-circle: 50%;
+
+// 间距
+$spacing-base: 8px;
+$spacing-small: 4px;
+$spacing-medium: 16px;
+$spacing-large: 24px;
+$spacing-extra-large: 32px;
+
+// 阴影
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+// 过渡
+$transition-duration: 0.3s;
+$transition-timing-function: ease-in-out;
+
+// 导航栏/头部
+$header-background-color: $primary-color; // 如果没有背景图片, 使用主色
+$header-text-color: #ffffff; // 导航栏文字颜色
+$header-icon-color: #ffffff; // 导航栏图标颜色
+
+// 侧边栏
+$sidebar-background-color: $primary-color; // 如果没有背景图片, 使用主色
+$sidebar-text-color: $text-primary; // 侧边栏文字颜色
+$sidebar-icon-color: $text-primary; // 侧边栏图标颜色
+$sidebar-active-background-color: $primary-color; // 激活项背景色 (当前是主色)
+$sidebar-active-text-color: #ffffff; // 激活项文字颜色
+$sidebar-active-icon-color: #ffffff; // 激活项图标颜色
+$sidebar-hover-background-color: lighten($primary-color, 10%); // 悬浮项背景色
+$sidebar-user-profile-background: darken($primary-color, 5%); // 用户信息区域背景
+
+// 侧边栏
+$sidebar-background-color: $primary-color; // 如果没有背景图片, 使用主色
+$sidebar-text-color: $text-primary; // 侧边栏文字颜色
+$sidebar-icon-color: $text-primary; // 侧边栏图标颜色
+$sidebar-active-background-color: $primary-color; // 激活项背景色 (当前是主色)
+$sidebar-active-text-color: #ffffff; // 激活项文字颜色
+$sidebar-active-icon-color: #ffffff; // 激活项图标颜色
+$sidebar-hover-background-color: lighten($primary-color, 10%); // 悬浮项背景色
+$sidebar-user-profile-background: darken($primary-color, 5%); // 用户信息区域背景
+
+// 侧边栏次级菜单
+$sidebar-submenu-text-color: $text-regular; // 次级菜单文字颜色
+$sidebar-submenu-active-text-color: $warning-color; // 次级菜单激活项文字颜色
+$sidebar-submenu-hover-text-color: lighten($warning-color, 2%); // 次级菜单悬浮项文字颜色
+
+// 表格
+$table-header-bg: #fef9f5; // 表头背景色（浅红色，从图片中提取）
+$table-text-color: $text-regular; // 表格文字颜色
+$table-header-text-color: $text-primary; // 表头文字颜色
+$table-row-selected-background-color: #f4f8ff; // 表格行选中背景色
+$table-row-selected-border-color: $primary-color-light; // 表格行选中边框色
+
+// 表单
+$input-height: 32px; // 输入框高度
+$input-border-color: $border-color-base; // 输入框边框颜色
+$input-focus-border-color: $primary-color-light; // 输入框聚焦边框颜色
+$input-focus-box-shadow: 0 0 0 2px rgba($primary-color, 0.2); // 输入框聚焦阴影
+$input-placeholder-color: $text-placeholder; // 输入框占位符颜色
+$input-disabled-background-color: #f5f5f5; // 输入框禁用背景色
+$input-disabled-border-color: $border-color-light; // 输入框禁用边框颜色
+$input-disabled-text-color: $text-placeholder; // 输入框禁用文字颜色
+$input-padding: 0 $spacing-base; // 输入框内边距
+$input-background-color: #ffffff; // 输入框背景色
+$input-text-color: $text-regular; // 输入框文字颜色
+
+// 卡片/面板
+$card-background-color: #ffffff; // 卡片背景色（常规）
+$card-background-color-light: #f4f8ff; // 卡片背景色（浅蓝色，从图片中提取）
+$card-header-background-color: #e3f0ff; // 卡片头部背景色
+$card-header-text-color: $text-primary; // 卡片文字颜色
+$card-border-color-active: $primary-color-light; // 卡片激活边框颜色
