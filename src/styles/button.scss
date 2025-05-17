@@ -1,0 +1,67 @@
+// 引入主题变量
+@import './theme.scss';
+
+$btn-background-color-warning: #fec842; // 暖色按钮背景色
+$btn-background-color-danger: #ff7044;  // 危险按钮背景色
+$btn-background-color-plain: #dcdcdc;   // 灰色按钮背景色
+
+// 覆盖Layui-Vue按钮相关CSS变量
+:root {
+  // 覆盖基础按钮文字颜色样式
+  --button-text-color: #{$text-primary};
+
+  // 覆盖暖色按钮样式
+  --button-warm-background-color: #{$btn-background-color-warning};
+  --button-warm-border-color: #{$btn-background-color-warning};
+
+  // 覆盖警告按钮样式
+  --button-danger-background-color: #{$btn-background-color-danger};
+  --button-danger-border-color: #{$btn-background-color-danger};
+}
+
+// 渐变按钮样式片段（设置按钮背景为渐变色）
+@mixin btn-background-gradient($from-color, $to-color) {
+  background: linear-gradient(to right, $from-color, $to-color);
+  border: none;
+  color: var(--button-normal-text-color);
+}
+
+// 主色调渐变按钮样式，可以覆盖在按钮上
+.btn-background-primary-gradient {
+  $primary-gradient-left-color: lighten(saturate(adjust-hue($primary-color, -13deg), 10%), 17%);
+  $primary-gradient-right-color: lighten($primary-color, 8%);
+
+  @include btn-background-gradient($primary-gradient-left-color, $primary-gradient-right-color);
+}
+
+// 危险渐变按钮样式，可以覆盖在按钮上
+.btn-background-danger-gradient {
+  $danger-gradient-left-color: #fc9649;
+  $danger-gradient-right-color: #f36d45;
+
+  @include btn-background-gradient($danger-gradient-left-color, $danger-gradient-right-color);
+}
+
+// 覆盖百搭按钮样式，增加主色调渐变效果
+.layui-btn-normal {
+  @extend .btn-background-primary-gradient;
+}
+
+// 简约按钮上色样式片段（没有背景，只为按钮内容和边框上色）
+@mixin btn-simple($color) {
+  background: transparent;
+  border: solid 1px $color;
+  color: $color;
+}
+
+// 主色调边框、主色调内容按钮样式
+.btn-border-primary {
+  @include btn-simple($primary-color);
+}
+
+// 灰色按钮样式
+.btn-background-grey {
+  color: $text-primary;
+  background-color: $btn-background-color-plain;
+  border: none;
+}
