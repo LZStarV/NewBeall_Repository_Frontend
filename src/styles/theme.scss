@@ -1,6 +1,7 @@
 // 主题颜色变量
 $primary-color: #2d72eb;      // 主色调
-$primary-color-light: lighten($primary-color, 30%); // 主色调浅色版本，用于背景、边框等
+$primary-color-light: lighten($primary-color, 30%); // 主色调浅色版本，用于边框等
+$light-blue-background-color: #f4f8ff;// 浅蓝色背景色
 $success-color: #67c23a;      // 成功色
 $warning-color: #e6a23c;      // 警告色
 $danger-color: #f56c6c;       // 危险色
@@ -76,13 +77,6 @@ $sidebar-submenu-text-color: $text-regular; // 次级菜单文字颜色
 $sidebar-submenu-active-text-color: $warning-color; // 次级菜单激活项文字颜色
 $sidebar-submenu-hover-text-color: lighten($warning-color, 2%); // 次级菜单悬浮项文字颜色
 
-// 表格
-$table-header-bg: #fef9f5; // 表头背景色（浅红色，从图片中提取）
-$table-text-color: $text-regular; // 表格文字颜色
-$table-header-text-color: $text-primary; // 表头文字颜色
-$table-row-selected-background-color: #f4f8ff; // 表格行选中背景色
-$table-row-selected-border-color: $primary-color-light; // 表格行选中边框色
-
 // 表单
 $input-height: 32px; // 输入框高度
 $input-border-color: $border-color-base; // 输入框边框颜色
@@ -98,7 +92,7 @@ $input-text-color: $text-regular; // 输入框文字颜色
 
 // 卡片/面板
 $card-background-color: #ffffff; // 卡片背景色（常规）
-$card-background-color-light: #f4f8ff; // 卡片背景色（浅蓝色，从图片中提取）
+$card-background-color-light: $light-blue-background-color; // 卡片背景色
 $card-header-background-color: #e3f0ff; // 卡片头部背景色
 $card-header-text-color: $text-primary; // 卡片文字颜色
 $card-border-color-active: $primary-color-light; // 卡片激活边框颜色

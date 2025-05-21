@@ -1,0 +1,80 @@
+@import "./theme.scss"; // 导入全局主题变量
+
+// 表格相关变量
+$table-header-bg: #fef9f5; // 表头背景色（浅红色，从图片中提取）
+$table-text-color: $text-regular; // 表格文字颜色
+$table-header-text-color: $text-primary; // 表头文字颜色
+$table-row-selected-border-color: $primary-color-light; // 表格行选中边框色
+$table-row-hover-border-color: $border-color-light; // 表格行悬停边框色
+
+// 分页器相关变量
+$paginator-item-size: 32px; // 分页器项目大小
+$paginator-item-margin: 4px; // 分页器项目间距
+$paginator-text-color: $text-regular; // 分页器文字颜色
+$paginator-active-background-color: $primary-color; // 分页器激活项背景色
+$paginator-active-text-color: #ffffff; // 分页器激活项文字颜色
+$paginator-border-radius: $border-radius-base; // 分页器圆角
+
+// 覆盖Layui-Vue表格相关CSS变量
+.layui-table {
+  border-radius: $border-radius-base;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  th,
+  td {
+    border: none; // 去掉边框
+    font-size: 10px;
+  }
+  th {
+    color: $table-header-text-color;
+    font-weight: bold;
+  }
+  td {
+    color: $table-text-color;
+  }
+}
+
+// 去除边框
+[class^="layui-table"] {
+  border: none;
+  border-width: 0;
+}
+
+// 表格工具条
+.layui-table-tool {
+  background-color: #ffffff !important;
+  .layui-inline[lay-event] {
+    border: none; // 去掉边框
+  }
+}
+// 表格头部背景色
+.layui-table-header .layui-table-cell {
+  background-color: $table-header-bg;
+}
+
+// 表格勾选图标样式
+.layui-checkbox[size="md"] .layui-form-checkbox[lay-skin="primary"] {
+  .layui-icon {
+    height: 10px;
+    box-sizing: content-box;
+    font-size: 8px;
+    font-weight: bold;
+    line-height: 10px;
+    width: 10px;
+    border-radius: 2px;
+  }
+  .layui-checkbox-label {
+    height: 14px;
+  }
+}
+
+// 表格斑马纹样式(未覆盖成功)
+.layui-table[lay-even] tr:nth-child(even) {
+  background-color: $light-blue-background-color !important; // 使用浅蓝色背景
+}
+
+// 表格选中行样式
+
+// 表格行悬浮效果
+
+// 分页器样式
