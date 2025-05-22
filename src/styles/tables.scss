@@ -6,6 +6,8 @@ $table-text-color: $text-regular; // 表格文字颜色
 $table-header-text-color: $text-primary; // 表头文字颜色
 $table-row-selected-border-color: $primary-color-light; // 表格行选中边框色
 $table-row-hover-border-color: $border-color-light; // 表格行悬停边框色
+$table-row-border-radius: $border-radius-large; // 表格边框圆角
+$table-focus-border-color: lighten(saturate(adjust-hue($primary-color, -10deg), 10%), 17%);
 
 // 分页器相关变量
 $paginator-item-size: 32px; // 分页器项目大小
@@ -14,6 +16,11 @@ $paginator-text-color: $text-regular; // 分页器文字颜色
 $paginator-active-background-color: $primary-color; // 分页器激活项背景色
 $paginator-active-text-color: #ffffff; // 分页器激活项文字颜色
 $paginator-border-radius: $border-radius-base; // 分页器圆角
+
+// 表格hover或选中行的统一背景色样式
+@mixin table-hover-background {
+  background-color: $light-blue-background-color !important; // 使用浅蓝色背景
+}
 
 // 覆盖Layui-Vue表格相关CSS变量
 .layui-table {
@@ -31,6 +38,35 @@ $paginator-border-radius: $border-radius-base; // 分页器圆角
   }
   td {
     color: $table-text-color;
+  }
+
+  tbody {
+    tr {
+      &:hover {
+        td {
+          @include table-hover-background;
+        }
+      }
+
+      // 表格行两边的圆角
+      td {
+        &:first-child {
+          border-radius: $table-row-border-radius 0 0 $table-row-border-radius;
+        }
+        &:last-child {
+          border-radius: 0 $table-row-border-radius $table-row-border-radius 0;
+        }
+      }
+    }
+  }
+
+  // 表格斑马纹样式
+  &.layui-table-even {
+    tr:nth-child(2n) {
+      td {
+        @include table-hover-background;
+      }
+    }
   }
 }
 
@@ -69,9 +105,9 @@ $paginator-border-radius: $border-radius-base; // 分页器圆角
 }
 
 // 表格斑马纹样式(未覆盖成功)
-.layui-table[lay-even] tr:nth-child(even) {
-  background-color: $light-blue-background-color !important; // 使用浅蓝色背景
-}
+// .layui-table[lay-even] tr:nth-child(even) {
+//   background-color: $light-blue-background-color !important; // 使用浅蓝色背景
+// }
 
 // 表格选中行样式
 
