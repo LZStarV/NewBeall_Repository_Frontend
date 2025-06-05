@@ -6,13 +6,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-
-import { useUserStore } from '@/store/user';
+import { useUserStore } from '@/store/modules/user';
 // import type { UserType } from '@/types/user';
 
 const userStore = useUserStore();
 
-const userInfo = ref(userStore.userData)
+const userInfo = ref(userStore.userData);
 
 </script>
 

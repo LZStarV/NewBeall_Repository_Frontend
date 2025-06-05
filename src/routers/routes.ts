@@ -5,5 +5,5 @@ const routes = [
         title: '首页',
         component: () => import('@/pages/HomePage.vue')
     }
-]
-export default routes
+];
+export default routes;

@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { defineConfig } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
 import pluginVue from 'eslint-plugin-vue';
@@ -31,6 +30,7 @@ export default defineConfig([
     rules: {
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+      'semi': 'error',
     },
   },
 
@@ -94,45 +94,6 @@ export default defineConfig([
           },
         },
       ],
-    },
-  },
-
-  // ==================== 导入/导出规则 ====================
-  {
-    files: ['**/*.{js,ts,vue}'],
-    rules: {
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
-          pathGroups: [
-            {
-              pattern: '@/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@layui/**',
-              group: 'external',
-              position: 'before',
-            },
-          ],
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
-          'newlines-between': 'always',
-        },
-      ],
-      'import/no-duplicates': ['error', { considerQueryString: true }],
-      'import/no-unresolved': 'off',
     },
   },
 
