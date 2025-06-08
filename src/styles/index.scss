@@ -1,12 +1,11 @@
-// 导入重置样式
-@import './reset.scss';
+// 1. 变量和工具类
+@import './variables';
+@import './mixins';
 
-// 导入全局样式
-@import './global.scss';
+// 2. 基础样式
+@import './reset';
+@import './global';
 
-@import './mixins.scss';
-
-// 导入其他组件样式
-@import './button/button.scss';
-
-@import './table/tables.scss';
+// 3. 组件样式
+@import './button/button';
+@import './table/tables';
