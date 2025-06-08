@@ -31,5 +31,10 @@ export default defineConfig({
         additionalData: '@use "@/styles/global.scss" as *;'
       },
     },
+    modules: {
+      // css modules 配置
+      localsConvention: 'camelCaseOnly'
+      // 使用css modules时，需要用驼峰式来访问类名，如style.buttonColor而不是style['button-color']
+    }
   },
 });
