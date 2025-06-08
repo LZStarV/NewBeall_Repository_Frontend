@@ -1,0 +1,60 @@
+// Flex布局
+/**
+ * Flex布局相关的mixin
+ * @param {string} $direction - flex方向，默认row
+ * @param {string} $justify - 主轴对齐方式，默认flex-start
+ * @param {string} $align - 交叉轴对齐方式，默认stretch
+ */
+@mixin flex($direction: row, $justify: flex-start, $align: stretch) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+// 居中布局
+@mixin flex-center {
+  @include flex(row, center, center);
+}
+
+// 两端对齐布局
+@mixin flex-between {
+  @include flex(row, space-between, center);
+}
+
+// 内外边距
+@mixin padding($top: 0, $right: $top, $bottom: $top, $left: $right) {
+  padding: $top $right $bottom $left;
+}
+
+@mixin margin($top: 0, $right: $top, $bottom: $top, $left: $right) {
+  margin: $top $right $bottom $left;
+}
+
+// 文本省略处理
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/**
+ * 过渡动画
+ * @param {string} $properties - 过渡的属性列表
+ */
+@mixin transition($properties...) {
+  $transitions: ();
+  @each $property in $properties {
+    $transitions: append($transitions, $property 0.3s ease-in-out, comma);
+  }
+  transition: $transitions;
+}
+
+// 其他必要的 mixin
