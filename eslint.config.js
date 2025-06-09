@@ -107,6 +107,7 @@ export default defineConfig([
             '**/coverage/**',
             '**/.vite/**',
             '**/.history/**',
+            '.cz-config.js',
         ],
     },
 ]);
