@@ -20,6 +20,7 @@ module.exports = {
         { name: 'typescript' },
         { name: 'Vue' },
         { name: 'node' },
+        { name: 'markdown' },
     ],
     messages: {
         type: '选择一种你的提交类型:',
