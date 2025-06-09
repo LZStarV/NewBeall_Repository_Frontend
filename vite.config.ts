@@ -18,6 +18,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@com': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@store': path.resolve(__dirname, './src/store'),
+      '@styles': path.resolve(__dirname, './src/styles'),
     }
   },
   css: {
@@ -27,5 +31,10 @@ export default defineConfig({
         additionalData: '@use "@/styles/global.scss" as *;'
       },
     },
+    modules: {
+      // css modules 配置
+      localsConvention: 'camelCaseOnly'
+      // 使用css modules时，需要用驼峰式来访问类名，如style.buttonColor而不是style['button-color']
+    }
   },
 });
