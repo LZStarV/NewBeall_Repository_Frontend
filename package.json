@@ -3,6 +3,23 @@
     "private": true,
     "version": "0.0.0",
     "type": "module",
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged",
+            "commit-msg": "commitlint --config .commitlintrc.js -E HUSKY_GIT_PARAMS"
+        }
+    },
+    "lint-staged": {
+        "*.{ts,tsx,js}": [
+            "eslint"
+        ],
+        "*.{css,less,scss}": [
+            "stylelint --config .stylelintrc.js"
+        ],
+        "*.{ts,tsx,js,json,html,yml,css,less,scss,md}": [
+            "prettier --write"
+        ]
+    },
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc -b && vite build",
@@ -11,6 +28,7 @@
         "lint": "eslint . --ext .js,.ts,.vue",
         "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
         "lint:strict": "eslint . --ext .js,.ts,.vue --max-warnings 0",
+        "lint-staged": "lint-staged",
         "prepare": "husky install"
     },
     "dependencies": {
@@ -29,6 +47,8 @@
         "vue-router": "^4.5.0"
     },
     "devDependencies": {
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
         "@eslint/css": "^0.7.0",
         "@eslint/js": "^9.26.0",
         "@eslint/json": "^0.12.0",
@@ -39,6 +59,7 @@
         "eslint-plugin-vue": "^10.1.0",
         "globals": "^16.1.0",
         "husky": "^8.0.0",
+        "lint-staged": "^15.5.2",
         "prettier": "3.5.3",
         "sass": "^1.87.0",
         "stylelint": "^16.20.0",
@@ -48,10 +69,5 @@
         "vite": "^6.3.1",
         "vitest": "^3.2.2",
         "vue-tsc": "^2.2.8"
-    },
-    "lint-staged": {
-        "*.{js,ts,vue}": "eslint --cache --fix",
-        "*.css": "stylelint --fix",
-        "*.{js,css,md}": "prettier --write"
     }
 }
