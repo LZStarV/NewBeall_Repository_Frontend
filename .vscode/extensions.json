@@ -1,0 +1,20 @@
+{
+    "recommendations": [
+        "editorconfig.editorconfig",
+        "steoates.autoimport",
+        "pranaygp.vscode-css-peek",
+        "dbaeumer.vscode-eslint",
+        "mhutchie.git-graph",
+        "antfu.goto-alias",
+        "visualstudioexptteam.vscodeintellicode",
+        "lllllllqw.jsdoc",
+        "christian-kohler.path-intellisense",
+        "esbenp.prettier-vscode",
+        "stylelint.vscode-stylelint",
+        "vitest.explorer",
+        "vue.volar",
+        "hollowtree.vue-snippets",
+        "dariofuzinato.vue-peek",
+        "tplesnar.vue-peek-base-components"
+    ]
+}
