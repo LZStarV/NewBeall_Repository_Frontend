@@ -1,7 +1,6 @@
 <template>
   <div>
     Hello, {{ userInfo.username }}
-    <p>aaa</p>
   </div>
 </template>
 
