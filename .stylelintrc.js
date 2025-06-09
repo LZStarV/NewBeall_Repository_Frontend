@@ -1,7 +1,17 @@
 module.exports = {
     // 从标准配置中继承规则
-    extends: ['stylelint-config-standard'],
-
+    extends: [
+        'stylelint-config-standard',
+        'stylelint-config-rational-order',
+        'prettier',
+        'stylelint-config-rational-order',
+    ],
+    overrides: [
+        {
+            files: ['**/*.scss'],
+            customSyntax: 'postcss-scss',
+        },
+    ],
     // 规则配置
     rules: {
         // 禁用注释前的空行规则
@@ -18,6 +28,15 @@ module.exports = {
         'rule-empty-line-before': 'always',
     },
 
+    // 使用插件来检查声明块中未使用的属性
+    plugins: [
+        'stylelint-declaration-block-no-ignored-properties',
+        'stylelint-prettier',
+    ],
+    rules: {
+        // 检查声明块中未使用的属性
+        'plugin/declaration-block-no-ignored-properties': true,
+    },
     // 忽略检查的文件或文件夹
     ignoreFiles: ['node_modules/**/*', 'build/**/*'],
 };
