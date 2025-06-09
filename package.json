@@ -20,6 +20,11 @@
             "prettier --write"
         ]
     },
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-customizable"
+        }
+    },
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc -b && vite build",
@@ -29,12 +34,17 @@
         "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
         "lint:strict": "eslint . --ext .js,.ts,.vue --max-warnings 0",
         "lint-staged": "lint-staged",
+        "commit": "git-cz",
         "prepare": "husky install"
     },
     "dependencies": {
         "@layui/layui-vue": "^2.22.0",
         "@types/node": "^22.14.1",
         "axios": "^1.8.4",
+        "commitizen": "^4.3.1",
+        "commitlint-config-cz": "^0.13.3",
+        "cz-conventional-changelog": "^3.3.0",
+        "cz-customizable": "^7.4.0",
         "eslint-config-prettier": "^10.1.5",
         "newbeall": "file:",
         "pinia": "^3.0.2",
