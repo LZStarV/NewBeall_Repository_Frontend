@@ -1,17 +1,17 @@
 import Layui from '@layui/layui-vue';
-import { createPinia } from "pinia";
+import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
 import App from '@/App.vue';
 import router from '@/routers/index.ts';
-import '@layui/layui-vue/lib/index.css';
 // 引入全局样式
+import '@layui/layui-vue/lib/index.css';
 import '@/styles/index.scss';
+//全局注册面包屑组件
+import BaseBreadcrumb from '@/components/Breadcrumb.vue';
 
 const pinia = createPinia();
+const app = createApp(App);
+app.component('BaseBreadcrumb', BaseBreadcrumb);
 
-createApp(App)
-    .use(router)
-    .use(pinia)
-    .use(Layui)
-    .mount('#app');
+app.use(router).use(pinia).use(Layui).mount('#app');
