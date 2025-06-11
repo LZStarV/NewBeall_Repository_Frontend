@@ -2,10 +2,9 @@ import { test, expect } from 'vitest';
 import Home from '@/pages/HomePage.vue';
 
 test('first test', () => {
-    expect(1 + 1).toBe(2);
+    expect(1 + 1).toBe(3);
 });
 
-test('vuee test', () => {
+test('vue test', () => {
     console.log(Home);
-    
 });

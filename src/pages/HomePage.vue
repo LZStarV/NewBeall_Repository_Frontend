@@ -1,7 +1,6 @@
 <template>
   <div>
     Hello, {{ userInfo.username }}
-    <p>测试修改</p>
   </div>
 </template>
 
