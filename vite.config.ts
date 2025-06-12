@@ -28,7 +28,10 @@ export default defineConfig({
     preprocessorOptions: {
       // scss全局文件引入
       scss: {
-        additionalData: '@use "@/styles/global.scss" as *;'
+        additionalData: `
+          @use "@styles/variables.scss" as *;
+          @use "@styles/mixins.scss" as *;
+        `
       },
     },
     modules: {

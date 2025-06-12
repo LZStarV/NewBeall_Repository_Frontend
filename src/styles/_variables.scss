@@ -1,7 +1,6 @@
 // 主题颜色变量
 $primary-color: #2d72eb;      // 主色调
 $primary-color-light: lighten($primary-color, 30%); // 主色调浅色版本，用于边框等
-$light-blue-background-color: #f4f8ff;// 浅蓝色背景色
 $success-color: #67c23a;      // 成功色
 $warning-color: #e6a23c;      // 警告色
 $danger-color: #f56c6c;       // 危险色
@@ -22,6 +21,8 @@ $border-color-primary-light: $primary-color-light; // 主色调浅色边框
 
 // 背景颜色
 $background-color-base: #f6f7fb; // 系统背景色
+$background-color-page: #ffffff;
+$light-blue-background-color: #f4f8ff; // 浅蓝色背景色
 
 // 字体大小
 $font-size-extra-large: 20px;
