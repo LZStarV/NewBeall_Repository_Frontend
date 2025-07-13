@@ -1,4 +1,5 @@
-@import "../variables"; // 导入全局主题变量
+@use 'sass:color';
+@use '../variables' as *;
 
 // 表格相关变量
 $table-header-bg: #fef9f5; // 表头背景色（浅红色，从图片中提取）
@@ -7,7 +8,9 @@ $table-header-text-color: $text-primary; // 表头文字颜色
 $table-row-selected-border-color: $primary-color-light; // 表格行选中边框色
 $table-row-hover-border-color: $border-color-light; // 表格行悬停边框色
 $table-row-border-radius: $border-radius-large; // 表格边框圆角
-$table-focus-border-color: lighten(saturate(adjust-hue($primary-color, -10deg), 10%), 17%);
+$table-focus-border-color: color.adjust(color.adjust(color.adjust($primary-color, $hue: -10deg),
+      $saturation: 10%),
+    $lightness: 17%);
 
 // 分页器相关变量
 $paginator-item-size: 32px; // 分页器项目大小

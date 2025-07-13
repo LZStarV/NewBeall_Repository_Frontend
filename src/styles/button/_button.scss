@@ -1,5 +1,5 @@
-// 引入主题变量
-@import '../variables';
+@use 'sass:color';
+@use "../variables" as *;
 
 $btn-background-color-warning: #fec842; // 暖色按钮背景色
 $btn-background-color-danger: #ff7044;  // 危险按钮背景色
@@ -28,8 +28,10 @@ $btn-background-color-plain: #dcdcdc;   // 灰色按钮背景色
 
 // 主色调渐变按钮样式，可以覆盖在按钮上
 .btn-background-primary-gradient {
-  $primary-gradient-left-color: lighten(saturate(adjust-hue($primary-color, -13deg), 10%), 17%);
-  $primary-gradient-right-color: lighten($primary-color, 8%);
+  $primary-gradient-left-color: color.adjust(color.adjust(color.adjust($primary-color, $hue: -13deg),
+        $saturation: 10%),
+      $lightness: 17%);
+  $primary-gradient-right-color: color.adjust($primary-color, $lightness: 8%);
 
   @include btn-background-gradient($primary-gradient-left-color, $primary-gradient-right-color);
 }

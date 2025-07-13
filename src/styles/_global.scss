@@ -1,5 +1,5 @@
-// 引入主题变量
-@import './variables';
+@use 'sass:color';
+@use './variables' as *;
 
 // 全局基础样式
 body {
@@ -17,7 +17,7 @@ body {
 :root {
     // 覆盖Layui-Vue组件库变量
     --global-primary-color: #{$primary-color};
-    --global-checked-color: #{lighten($primary-color, 10%)};
+    --global-checked-color: #{color.adjust($primary-color, $lightness: 10%)};
     --global-normal-color: #{$info-color};
     --global-warm-color: #{$warning-color};
     --global-danger-color: #{$danger-color};

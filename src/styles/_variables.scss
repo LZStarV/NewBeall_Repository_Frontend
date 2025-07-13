@@ -1,6 +1,8 @@
+@use 'sass:color';
+
 // 主题颜色变量
 $primary-color: #2d72eb;      // 主色调
-$primary-color-light: lighten($primary-color, 30%); // 主色调浅色版本，用于边框等
+$primary-color-light: color.adjust($primary-color, $lightness: 30%); // 主色调浅色版本，用于边框等
 $success-color: #67c23a;      // 成功色
 $warning-color: #e6a23c;      // 警告色
 $danger-color: #f56c6c;       // 危险色
@@ -69,14 +71,12 @@ $sidebar-icon-color: $text-primary; // 侧边栏图标颜色
 $sidebar-active-background-color: $primary-color; // 激活项背景色 (当前是主色)
 $sidebar-active-text-color: #ffffff; // 激活项文字颜色
 $sidebar-active-icon-color: #ffffff; // 激活项图标颜色
-$sidebar-hover-background-color: lighten($primary-color, 10%); // 悬浮项背景色
-$sidebar-user-profile-background: darken($primary-color, 5%); // 用户信息区域背景
-
-
+$sidebar-hover-background-color: color.adjust($primary-color, $lightness: 10%); // 悬浮项背景色
+$sidebar-user-profile-background: color.adjust($primary-color, $lightness: -5%); // 用户信息区域背景
 // 侧边栏次级菜单
 $sidebar-submenu-text-color: $text-regular; // 次级菜单文字颜色
 $sidebar-submenu-active-text-color: $warning-color; // 次级菜单激活项文字颜色
-$sidebar-submenu-hover-text-color: lighten($warning-color, 2%); // 次级菜单悬浮项文字颜色
+$sidebar-submenu-hover-text-color: color.adjust($warning-color, $lightness: 2%);; // 次级菜单悬浮项文字颜色
 
 // 表单
 $input-height: 32px; // 输入框高度

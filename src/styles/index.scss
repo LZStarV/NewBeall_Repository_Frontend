@@ -1,11 +1,11 @@
 // 1. 变量和工具类
-@import './variables';
-@import './mixins';
+@use './variables';
+@use './mixins';
 
 // 2. 基础样式
-@import './reset';
-@import './global';
+@use './reset';
+@use './global';
 
 // 3. 组件样式
-@import './button/button';
-@import './table/tables';
+@use './button/button';
+@use './table/tables';
