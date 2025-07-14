@@ -32,7 +32,7 @@ export function addRouteRecursive(
             .replace(/\.vue$/, '')
             .replace(/\[(\w+)\]/g, ':$1') // 动态参数
             .replace(/Page$/, '') // 移除Page后缀
-            .replace(/index$/i, '') // index.vue 代表父级路径
+            .replace(/home$/i, '') // HomePage.vue 代表父级路径
             .toLowerCase() || '';
 
     let existingRoute = parentRoutes.find(
