@@ -57,6 +57,12 @@ for (const path in pages) {
     addRouteRecursive(segments, component, mainLayoutRoute.children!);
 }
 
+// 移除与静态路由重复的页面路由
+const staticPaths = new Set(staticRoutes.map((route) => route.path.slice(1))); // 裁切掉第一个'/'
+mainLayoutRoute.children = mainLayoutRoute.children!.filter(
+    (route) => !staticPaths.has(route.path),
+);
+
 // 移除 otherRoutes，因为所有页面已嵌套到 MainLayout
 const otherRoutes: RouteRecordRaw[] = [];
 
