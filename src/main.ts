@@ -10,6 +10,9 @@ import '@/styles/index.scss';
 //全局注册面包屑组件
 import BaseBreadcrumb from '@/components/Breadcrumb.vue';
 
+// svg图标插件
+import 'virtual:svg-icons-register';
+
 const pinia = createPinia();
 const app = createApp(App);
 app.component('BaseBreadcrumb', BaseBreadcrumb);

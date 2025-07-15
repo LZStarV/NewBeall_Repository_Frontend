@@ -16,6 +16,14 @@ const layouts = import.meta.glob('../layouts/*.vue', { eager: true }) as Record<
 // 导入所有页面组件
 const pages = import.meta.glob('../pages/**/*.vue');
 
+// 过滤掉components和component文件夹下的vue文件，不生成路由
+const filteredPages: Record<string, () => Promise<unknown>> = {};
+for (const path in pages) {
+    if (!path.includes('/components/') && !path.includes('/component/')) {
+        filteredPages[path] = pages[path];
+    }
+}
+
 // 存放布局组件的路由
 const layoutRoutes: RouteRecordRaw[] = [];
 
@@ -48,8 +56,8 @@ if (!mainLayoutRoute) {
 }
 
 // 遍历所有页面，添加到 MainLayout 的子路由
-for (const path in pages) {
-    const component = pages[path];
+for (const path in filteredPages) {
+    const component = filteredPages[path];
     const pagePath = path.replace('../pages/', '');
     const segments = pagePath.split('/');
 
