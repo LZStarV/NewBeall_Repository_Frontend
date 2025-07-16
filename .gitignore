@@ -25,3 +25,12 @@ dist-ssr
 *.sln
 *.sw?
 .eslintcache
+
+# Environment variables
+.env.local
+.env.*.local
+
+# 如果需要保护敏感信息，可以取消注释下面的行
+# .env
+# .env.development
+# .env.production

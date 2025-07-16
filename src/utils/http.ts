@@ -6,6 +6,7 @@ import type {
 } from 'axios';
 import useAuthStore from '@/stores/auth';
 import type { ApiResponse } from '@/types/Api/index';
+import env from './env';
 
 class HttpClient {
     private instance: AxiosInstance;
@@ -77,6 +78,6 @@ class HttpClient {
     }
 }
 
-const http = new HttpClient('');
+const http = new HttpClient(env.getApiBaseUrl());
 
 export default http;
