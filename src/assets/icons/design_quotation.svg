@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21" height="21" viewBox="0 0 21 21" fill="none">
+<path d="M20.5 10.5C20.5 16.0228 16.0228 20.5 10.5 20.5C4.97715 20.5 0.5 16.0228 0.5 10.5C0.5 4.97715 4.97715 0.5 10.5 0.5C16.0228 0.5 20.5 4.97715 20.5 10.5Z" stroke="currentColor" stroke-width="1"      fill="currentColor" fill-opacity="NaN">
+</path>
+<path d="M7.69999 7.2C7.69999 7.5866 7.38659 7.9 6.99999 7.9C6.61339 7.9 6.29999 7.5866 6.29999 7.2C6.29999 6.8134 6.61339 6.5 6.99999 6.5C7.38659 6.5 7.69999 6.8134 7.69999 7.2Z"   fill="currentColor" >
+</path>
+<path d="M14.9 14.6C14.9 14.9866 14.5866 15.3 14.2 15.3C13.8134 15.3 13.5 14.9866 13.5 14.6C13.5 14.2134 13.8134 13.9 14.2 13.9C14.5866 13.9 14.9 14.2134 14.9 14.6Z"   fill="currentColor" >
+</path>
+<path    stroke="currentColor" stroke-width="1"  stroke-linecap="round"  d="M14.9 5.29997L6.09998 16.3">
+</path>
+</svg>
