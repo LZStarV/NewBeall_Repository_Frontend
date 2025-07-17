@@ -15,8 +15,8 @@ charset = utf-8
 [*.js]
 # 使用空格缩进
 indent_style = space
-# 缩进大小为 4
-indent_size = 4
+# 缩进大小为 2
+indent_size = 2
 
 # 匹配 Markdown 文件
 [*.md]
