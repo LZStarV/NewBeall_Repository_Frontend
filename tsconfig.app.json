@@ -17,13 +17,11 @@
       "@pages/*": ["src/pages/*"],
       "@assets/*": ["src/assets/*"],
       "@store/*": ["src/store/*"],
-      "@styles/*": ["src/styles/*"],
+      "@styles/*": ["src/styles/*"]
       // "@types/*": ["src/types/*"] 此条会和TypeScript特殊保留名称冲突，不可用
     },
-    "types": ["vite/client"]
+    "types": ["vite/client", "vite-plugin-svg-icons/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts"],
-  "types": [
-    "vitest/globals"
-  ]
+  "types": ["vitest/globals"]
 }
