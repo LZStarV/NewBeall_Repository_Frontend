@@ -360,6 +360,18 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// 标题动态模糊效果
+@keyframes pulse-blur {
+  0%,
+  100% {
+    filter: blur(2px);
+  }
+
+  50% {
+    filter: blur(8px);
+  }
+}
+
 .all {
   overflow: hidden;
 
@@ -382,8 +394,6 @@ onUnmounted(() => {
   }
 }
 
-$right-nav-width: 4.5rem;
-
 .right-nav-affix {
   right: 0;
   transition: right $transition-duration $transition-timing-function;
@@ -395,11 +405,13 @@ $right-nav-width: 4.5rem;
     top: 6rem;
     right: 0;
     transform: translateY(-50%);
-    width: 10px;
-    height: 60px;
+    width: 0.8rem;
+    height: 6rem;
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: $border-radius-large 0 0 $border-radius-large;
   }
+
+  $right-nav-width: 4.5rem;
 
   &:hover {
     right: $right-nav-width;
@@ -431,7 +443,7 @@ $right-nav-width: 4.5rem;
 
       .right-nav-text {
         margin-top: $spacing-small;
-        font-size: $font-size-extra-small;
+        font-size: 0.8rem;
       }
     }
   }
@@ -460,20 +472,6 @@ $header-container-height: 4rem;
   }
 }
 
-$logo-height: 10rem;
-
-// 标题动态模糊效果
-@keyframes pulse-blur {
-  0%,
-  100% {
-    filter: blur(2px);
-  }
-
-  50% {
-    filter: blur(8px);
-  }
-}
-
 .main-content {
   overflow: hidden;
 
@@ -483,8 +481,10 @@ $logo-height: 10rem;
     justify-content: center;
 
     position: relative;
-    top: calc(3 * $header-container-height);
+    top: 12rem;
   }
+
+  $logo-height: 10rem;
 
   .img-bottom,
   .img-top {
@@ -559,7 +559,7 @@ $logo-height: 10rem;
 
     .feature-text {
       margin-top: $spacing-base;
-      font-size: $font-size-medium;
+      font-size: 1rem;
       text-align: center;
     }
 
@@ -567,7 +567,7 @@ $logo-height: 10rem;
       text-align: center;
       line-height: 1.2rem;
       padding: $spacing-medium 0;
-      font-size: $font-size-base;
+      font-size: 0.9rem;
       opacity: 0.7;
     }
   }
@@ -584,15 +584,15 @@ $logo-height: 10rem;
     text-align: center;
 
     .stat-value {
-      font-size: calc($font-size-extra-large * 3);
+      font-size: 4rem;
       font-weight: bold;
       color: $primary-color;
-      opacity: 0.8;
+      opacity: 0.75;
     }
 
     .stat-label {
       margin-top: $spacing-large;
-      font-size: $font-size-extra-large;
+      font-size: 1.5rem;
       color: #ffffff;
     }
   }
@@ -600,12 +600,12 @@ $logo-height: 10rem;
 
 .function-section {
   text-align: center;
-  margin-top: calc($spacing-extra-large * 2);
+  margin-top: 2.5rem;
 
   .function-text {
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 2);
-    margin-bottom: $spacing-medium;
+    font-size: 3rem;
+    margin-bottom: 1rem;
   }
 
   @media (max-width: 768px) {
@@ -634,16 +634,16 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 7rem;
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 3);
+    font-size: 3rem;
   }
 
   p {
     text-align: center;
     margin-top: $spacing-large;
     color: #ffffff;
-    font-size: calc($font-size-large * 1.2);
+    font-size: 2rem;
     line-height: 1.8;
   }
 
@@ -659,17 +659,14 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 9rem;
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 2);
+    font-size: 2.5rem;
   }
 
   .privileged-table {
     margin-top: $spacing-large;
     width: 80%;
-  }
-
-  .privileged-table-cell {
   }
 }
 
@@ -679,7 +676,7 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 9rem;
     color: #ffffff;
     font-size: calc($font-size-extra-large * 2);
   }
@@ -741,15 +738,15 @@ $logo-height: 10rem;
       letter-spacing: 0.5px;
     }
   }
-}
 
-@media (max-width: 768px) {
-  .footer {
-    padding: 1.2rem 0 0.5rem 0;
+  @media (max-width: $pad_layout_breakpoint) {
+    .footer {
+      padding: 1.2rem 0 0.5rem 0;
 
-    .footer-content {
-      font-size: 0.92rem;
-      padding: 0 1rem;
+      .footer-content {
+        font-size: 0.92rem;
+        padding: 0 1rem;
+      }
     }
   }
 }
