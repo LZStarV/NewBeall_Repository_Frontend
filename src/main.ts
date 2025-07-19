@@ -7,6 +7,11 @@ import router from '@/routers/index.ts';
 // 引入全局样式
 import '@layui/layui-vue/lib/index.css';
 import '@/styles/index.scss';
+
+// 引入Bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min.js';
+
 //全局注册面包屑组件
 import BaseBreadcrumb from '@/components/Breadcrumb.vue';
 

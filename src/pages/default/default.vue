@@ -55,9 +55,9 @@
 
     <!--  侧边固钉-->
     <lay-affix
+      v-if="target"
       style="left: unset"
       class="right-nav-affix"
-      v-if="target"
       :target="target"
       position="top"
       :offset="350"
@@ -76,7 +76,7 @@
             <div class="right-nav-text">添加客服</div>
           </div>
         </lay-tooltip>
-        <div @click="onlineConsultation" class="right-nav-item">
+        <div class="right-nav-item" @click="onlineConsultation">
           <SvgIcon name="consultation" class="right-nav-img" />
           <div class="right-nav-text">在线咨询</div>
         </div>
@@ -91,11 +91,13 @@
       <!-- 头部导航 -->
       <lay-header class="header-container">
         <lay-menu class="menu">
-          <lay-menu-item @click="refreshPage">首页</lay-menu-item>
-          <lay-menu-item @click="jumpToSection('function-section')"
-            >宣传片</lay-menu-item
-          >
-          <lay-menu-item>登录 </lay-menu-item>
+          <lay-menu-item @click="refreshPage"> 首页 </lay-menu-item>
+          <lay-menu-item @click="jumpToSection('function-section')">
+            宣传片
+          </lay-menu-item>
+          <lay-menu-item @click="router.push({ path: '/login' })"
+            >登录
+          </lay-menu-item>
           <lay-menu-item>
             <lay-button> 注册 </lay-button>
           </lay-menu-item>
@@ -140,11 +142,11 @@
               <div class="stat-value">
                 <lay-count-up
                   :ref="(el) => (countUpRefs[index] = el)"
-                  :startVal="0"
-                  :endVal="stat.value"
+                  :start-val="0"
+                  :end-val="stat.value"
                   :autoplay="false"
                   suffix="%"
-                ></lay-count-up>
+                />
               </div>
 
               <p class="stat-label">
@@ -155,7 +157,7 @@
         </section>
 
         <!-- 功能展示区 -->
-        <section class="function-section" id="function-section">
+        <section id="function-section" class="function-section">
           <p class="function-text">设计报价功能展示</p>
 
           <div class="function-video-container">
@@ -179,11 +181,11 @@
           </p>
           <lay-row space="10" class="usage-img-container">
             <lay-col
+              v-for="(item, index) in usageImg"
+              :key="index"
               md="4"
               sm="12"
               xs="24"
-              v-for="(item, index) in usageImg"
-              :key="index"
             >
               <img class="usage-img" :src="item.url" :alt="item.name" />
             </lay-col>
@@ -199,68 +201,74 @@
             even
             size="sm"
             height="30rem"
-            cellClassName="privileged-table-cell"
+            cell-class-name="privileged-table-cell"
             :default-toolbar="false"
             :columns="privilegedColumn"
             :data-source="privilegedData"
-          >
-          </lay-table>
+          />
         </section>
 
         <!-- 常见问题 -->
         <section class="question-section">
           <h1>常见问题</h1>
 
-          <div class="accordion" id="alternatingAccordion">
-            <!-- 循环生成面板项，通过index判断左右 -->
-            <div
-              v-for="(item, index) in questions"
-              :key="index"
-              class="accordion-item mb-3"
-            >
-              <!-- 标题栏：左右交替对齐 -->
-              <h2 class="accordion-header" :id="`heading${item.question}`">
+          <div id="alternatingAccordion" class="accordion">
+            <div v-for="(item, index) in questions" :key="index">
+              <h2 :id="`heading${index}`" class="accordion-header">
+                <!-- 手风琴标题 -->
                 <button
                   class="accordion-button"
-                  :class="{ 'ms-auto': index % 2 !== 0 }"
+                  :class="
+                    index % 2 === 0 ? 'accordion-left' : 'accordion-right'
+                  "
                   type="button"
                   data-bs-toggle="collapse"
-                  aria-expanded="true"
-                  :data-bs-target="`#heading${item.question}`"
-                  :aria-controls="`heading${item.question}`"
+                  :data-bs-target="`#collapse${index}`"
+                  :aria-controls="`collapse${index}`"
                 >
                   {{ item.question }}
                 </button>
               </h2>
-
-              <!-- 内容区域：左右交替布局 -->
+              <!-- 手风琴内容 -->
               <div
-                :id="`heading${item.question}`"
-                class="accordion-collapse collapse show"
-                :aria-labelledby="`heading${item.question}`"
+                :id="`collapse${index}`"
+                class="accordion-collapse collapse"
+                :class="index % 2 === 0 ? 'accordion-left' : 'accordion-right'"
+                :aria-labelledby="`heading${index}`"
                 data-bs-parent="#alternatingAccordion"
               >
                 <div class="accordion-body">
-                  <div class="row">
-                    <!-- 奇数项：内容居左；偶数项：内容居右 -->
-                    <div
-                      :class="index % 2 === 0 ? 'col-12' : 'col-12 text-end'"
-                    >
-                      {{ item.answer }}
-                    </div>
-                  </div>
+                  {{ item.answer }}
                 </div>
               </div>
             </div>
           </div>
         </section>
       </lay-body>
+
+      <!-- 底部版权 -->
+      <lay-footer class="footer">
+        <div class="footer-content">
+          <p>电话: 020-32030561</p>
+          <p>广州壹新网络科技有限公司</p>
+          <p>
+            广州市黄埔区科学城南翔一路68号1栋1C07房 Copyright ©
+            2018-2022广州壹新网络科技
+          </p>
+        </div>
+      </lay-footer>
     </lay-layout>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import {
+  ref,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  type ComponentPublicInstance,
+} from 'vue';
 import { useRouter } from 'vue-router';
 
 import cover_logo from '@assets/image/default/cover_logo.png';
@@ -286,8 +294,8 @@ const video_url =
 const target = ref();
 // 整个统计区域的DOM
 const statsRef = ref(null);
-// 存储所有count-up组件实例
-const countUpRefs = ref([]);
+// 存储所有count-up组件实例或元素（类型宽泛以兼容ref回调）
+const countUpRefs = ref<Array<ComponentPublicInstance | Element | null>>([]);
 // 避免重复触发
 const hasAnimated = ref(false);
 
@@ -314,7 +322,7 @@ const onlineConsultation = () => {
 };
 
 // 判断是否在视口
-const isInViewport = (el) => {
+const isInViewport = (el: any) => {
   if (!el) return false;
   const rect = el.getBoundingClientRect();
   // 宽松判断：元素顶部进入视口底部100px内即触发
@@ -325,9 +333,12 @@ const isInViewport = (el) => {
 const handleScroll = () => {
   if (hasAnimated.value) return; // 已执行过则跳过
   if (isInViewport(statsRef.value)) {
-    // 触发所有count-up动画
+    // 只触发组件实例的count-up动画
     countUpRefs.value.forEach((instance) => {
-      instance?.start(); // 安全调用start方法
+      // 只对组件实例调用start方法
+      if (instance && typeof (instance as any).start === 'function') {
+        (instance as any).start();
+      }
     });
     hasAnimated.value = true;
   }
@@ -349,8 +360,19 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// 标题动态模糊效果
+@keyframes pulse-blur {
+  0%,
+  100% {
+    filter: blur(2px);
+  }
+
+  50% {
+    filter: blur(8px);
+  }
+}
+
 .all {
-  height: 500vh;
   overflow: hidden;
 
   .blur-color-block {
@@ -371,7 +393,6 @@ onUnmounted(() => {
     }
   }
 }
-$right-nav-width: 4.5rem;
 
 .right-nav-affix {
   right: 0;
@@ -384,11 +405,13 @@ $right-nav-width: 4.5rem;
     top: 6rem;
     right: 0;
     transform: translateY(-50%);
-    width: 10px;
-    height: 60px;
+    width: 0.8rem;
+    height: 6rem;
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: $border-radius-large 0 0 $border-radius-large;
   }
+
+  $right-nav-width: 4.5rem;
 
   &:hover {
     right: $right-nav-width;
@@ -420,7 +443,7 @@ $right-nav-width: 4.5rem;
 
       .right-nav-text {
         margin-top: $spacing-small;
-        font-size: $font-size-extra-small;
+        font-size: 0.8rem;
       }
     }
   }
@@ -449,19 +472,6 @@ $header-container-height: 4rem;
   }
 }
 
-$logo-height: 10rem;
-
-// 标题动态模糊效果
-@keyframes pulse-blur {
-  0%,
-  100% {
-    filter: blur(2px);
-  }
-  50% {
-    filter: blur(8px);
-  }
-}
-
 .main-content {
   overflow: hidden;
 
@@ -471,8 +481,11 @@ $logo-height: 10rem;
     justify-content: center;
 
     position: relative;
-    top: calc(3 * $header-container-height);
+    top: 12rem;
   }
+
+  $logo-height: 10rem;
+
   .img-bottom,
   .img-top {
     height: $logo-height;
@@ -503,12 +516,14 @@ $logo-height: 10rem;
       &:nth-child(1) {
         margin-right: $spacing-small;
       }
+
       &:nth-child(2) {
         margin-left: $spacing-small;
       }
     }
 
     $title-text-letter-spacing: 2rem;
+
     .title-text {
       color: #ffffff;
       font-size: $text-section-height;
@@ -544,7 +559,7 @@ $logo-height: 10rem;
 
     .feature-text {
       margin-top: $spacing-base;
-      font-size: $font-size-medium;
+      font-size: 1rem;
       text-align: center;
     }
 
@@ -552,7 +567,7 @@ $logo-height: 10rem;
       text-align: center;
       line-height: 1.2rem;
       padding: $spacing-medium 0;
-      font-size: $font-size-base;
+      font-size: 0.9rem;
       opacity: 0.7;
     }
   }
@@ -569,15 +584,15 @@ $logo-height: 10rem;
     text-align: center;
 
     .stat-value {
-      font-size: calc($font-size-extra-large * 3);
+      font-size: 4rem;
       font-weight: bold;
       color: $primary-color;
-      opacity: 0.8;
+      opacity: 0.75;
     }
 
     .stat-label {
       margin-top: $spacing-large;
-      font-size: $font-size-extra-large;
+      font-size: 1.5rem;
       color: #ffffff;
     }
   }
@@ -585,12 +600,12 @@ $logo-height: 10rem;
 
 .function-section {
   text-align: center;
-  margin-top: calc($spacing-extra-large * 2);
+  margin-top: 2.5rem;
 
   .function-text {
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 2);
-    margin-bottom: $spacing-medium;
+    font-size: 3rem;
+    margin-bottom: 1rem;
   }
 
   @media (max-width: 768px) {
@@ -619,16 +634,16 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 7rem;
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 3);
+    font-size: 3rem;
   }
 
   p {
     text-align: center;
     margin-top: $spacing-large;
     color: #ffffff;
-    font-size: calc($font-size-large * 1.2);
+    font-size: 2rem;
     line-height: 1.8;
   }
 
@@ -644,16 +659,14 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 9rem;
     color: #ffffff;
-    font-size: calc($font-size-extra-large * 2);
+    font-size: 2.5rem;
   }
 
   .privileged-table {
     margin-top: $spacing-large;
     width: 80%;
-  }
-  .privileged-table-cell {
   }
 }
 
@@ -663,24 +676,78 @@ $logo-height: 10rem;
   align-items: center;
 
   h1 {
-    margin-top: calc($spacing-extra-large * 3);
+    margin-top: 9rem;
     color: #ffffff;
     font-size: calc($font-size-extra-large * 2);
   }
 
-  /* 左侧面板标题样式 */
-  .accordion-item:nth-child(odd) .accordion-button {
-    background-color: #f8f9fa;
+  $accordion-item-width: 49.5vw;
+
+  .accordion {
+    width: 100vw;
+    --bs-accordion-bg: #ffffff00;
+    --bs-accordion-border-color: #ffffff00;
+
+    .accordion-button {
+      width: $accordion-item-width;
+      height: 4.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      border-radius: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .accordion-collapse {
+      width: $accordion-item-width;
+      border-radius: 0.5rem;
+    }
+
+    .accordion-left {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .accordion-right {
+      justify-self: flex-end;
+      background-color: rgba(45, 114, 235, 0.3);
+    }
+
+    .accordion-body {
+      color: #ffffff;
+    }
+  }
+}
+
+.footer {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  margin-top: 2.5rem;
+  padding: 1rem 0 1rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  .footer-content {
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.8;
+
+    p {
+      margin: 0.2rem 0;
+      opacity: 0.85;
+      letter-spacing: 0.5px;
+    }
   }
 
-  /* 右侧面板标题样式 */
-  .accordion-item:nth-child(even) .accordion-button {
-    background-color: #e9ecef;
-  }
+  @media (max-width: $pad_layout_breakpoint) {
+    .footer {
+      padding: 1.2rem 0 0.5rem 0;
 
-  /* 内容区域左右间距调整 */
-  .accordion-body .col-12 {
-    padding: 1rem;
+      .footer-content {
+        font-size: 0.92rem;
+        padding: 0 1rem;
+      }
+    }
   }
 }
 </style>

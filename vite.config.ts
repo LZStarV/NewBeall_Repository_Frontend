@@ -29,7 +29,6 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
       '@store': path.resolve(__dirname, './src/stores'),
       '@styles': path.resolve(__dirname, './src/styles'),
-      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
     },
   },
   css: {
