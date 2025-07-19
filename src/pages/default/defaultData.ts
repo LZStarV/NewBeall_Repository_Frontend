@@ -86,34 +86,41 @@ const privilegedColumn = [
     title: '功能',
     width: '120px',
     key: 'name',
+    type: 'normal',
   },
   {
     title: '个人版',
+    type: 'normal',
     children: [
       {
         title: '普通版',
         key: 'normal',
         width: '100px',
+        type: 'normal',
       },
       {
         title: '会员版',
         key: 'member',
         width: '100px',
+        type: 'normal',
       },
     ],
   },
   {
     title: '企业版',
+    type: 'normal',
     children: [
       {
         title: '工程集成商',
         key: 'engineeringIntegrators',
         width: '100px',
+        type: 'normal',
       },
       {
         title: '产品供应商',
         key: 'productSuppliers',
         width: '100px',
+        type: 'normal',
       },
     ],
   },
