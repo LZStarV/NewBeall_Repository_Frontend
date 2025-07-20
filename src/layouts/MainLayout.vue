@@ -25,9 +25,9 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import Header from '@/components/Header.vue'
-import Sidebar from '@/components/Sidebar.vue'
-import Tabs from '@/components/Tabs.vue'
+import Header from '@/components/Header.vue';
+import Sidebar from '@/components/Sidebar.vue';
+import Tabs from '@/components/Tabs.vue';
 
 const sidebarCollapsed = ref(false);
 

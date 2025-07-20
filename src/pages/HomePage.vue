@@ -1,76 +1,28 @@
 <template>
   <div class="page">
-    <lay-button
-      type="primary"
-      @click="getOrderData"
-    >
-      原始按钮
-    </lay-button>
-    <lay-button
-      type="primary"
-      @click="getOrderData2"
-    >
-      原始按钮
-    </lay-button>
+    <lay-button type="primary" @click="getOrderData"> 原始按钮 </lay-button>
+    <lay-button type="primary" @click="getOrderData2"> 原始按钮 </lay-button>
 
     <div class="test">
       <lay-container fluid>
         <lay-row space="10">
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div
-              class="grid-demo"
-            >
-              1
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">1</div>
           </lay-col>
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div class="grid-demo">
-              2
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">2</div>
           </lay-col>
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div class="grid-demo">
-              3
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">3</div>
           </lay-col>
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div class="grid-demo">
-              4
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">4</div>
           </lay-col>
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div class="grid-demo">
-              5
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">5</div>
           </lay-col>
-          <lay-col
-            md="4"
-            sm="12"
-            xs="24"
-          >
-            <div class="grid-demo">
-              6
-            </div>
+          <lay-col md="4" sm="12" xs="24">
+            <div class="grid-demo">6</div>
           </lay-col>
         </lay-row>
       </lay-container>
@@ -103,7 +55,6 @@ const getOrderData2 = async () => {
     console.log('获取最近六月订单数量');
   }
 };
-
 </script>
 
 <style lang="scss" scoped>
