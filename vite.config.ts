@@ -48,4 +48,15 @@ export default defineConfig({
       // 使用css modules时，需要用驼峰式来访问类名，如style.buttonColor而不是style['button-color']
     },
   },
+  // 服务器配置(解决跨域问题)
+  server: {
+    host: '0.0.0.0', // 允许外部访问
+    proxy: {
+      '/api': {
+        target: 'http://120.78.76.80:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 });
