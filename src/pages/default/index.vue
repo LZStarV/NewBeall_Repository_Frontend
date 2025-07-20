@@ -1,264 +1,228 @@
 <template>
-  <div class="all">
-    <!-- 背景 -->
-    <section class="blur-color-block">
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <!-- 左上角紫色块 -->
-        <path
-          d="M0,0 Q10,10 50,40 T70,60 L0,60 Z"
-          fill="#BAB0FF"
-          filter="blur(6px)"
-          opacity="1"
-        />
-        <!-- 右上角蓝色块 -->
-        <path
-          d="M40,0 Q100,-10 100,30 T50,50 L40,0 Z"
-          fill="#65B1F0"
-          filter="blur(6px)"
-          opacity="0.7"
-        />
-        <!-- 左下角深蓝色块 -->
-        <ellipse
-          cx="20"
-          cy="80"
-          rx="30"
-          ry="25"
-          fill="#2E7BFF"
-          filter="blur(6px)"
-          opacity="0.7"
-        />
-        <!-- 右下角青色块 -->
-        <path
-          d="M75,50 Q100,90 100,70 T80,60 L75,100 Z"
-          fill="#2FCAED"
-          filter="blur(6px)"
-          opacity="0.7"
-        />
-      </svg>
-    </section>
-
-    <!-- 返回顶部 -->
-    <lay-backtop
-      style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12)"
-      bgcolor="rgba(255, 255, 255, 0.5)"
-      circle
-    >
-      <template #default>
-        <SvgIcon name="back_to_top" class="back-to-top-icon" />
-      </template>
-    </lay-backtop>
-
-    <!--  侧边固钉-->
-    <lay-affix
-      v-if="target"
-      style="left: unset"
-      class="right-nav-affix"
-      :target="target"
-      position="top"
-      :offset="350"
-    >
-      <div class="right-nav">
-        <lay-tooltip trigger="hover">
-          <template #content>
-            <img
-              style="width: 10rem"
-              :src="customer_service_QR"
-              alt="客服二维码"
-            />
+  <cover-layout>
+    <template #content>
+      <div class="all">
+        <!-- 返回顶部 -->
+        <lay-backtop
+          style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12)"
+          bgcolor="rgba(255, 255, 255, 0.5)"
+          circle
+        >
+          <template #default>
+            <SvgIcon name="back_to_top" class="back-to-top-icon" />
           </template>
-          <div class="right-nav-item">
-            <SvgIcon name="message_2" class="right-nav-img" />
-            <div class="right-nav-text">添加客服</div>
-          </div>
-        </lay-tooltip>
-        <div class="right-nav-item" @click="onlineConsultation">
-          <SvgIcon name="consultation" class="right-nav-img" />
-          <div class="right-nav-text">在线咨询</div>
-        </div>
-        <div class="right-nav-item">
-          <SvgIcon name="feedback" class="right-nav-img" />
-          <div class="right-nav-text">反馈建议</div>
-        </div>
-      </div>
-    </lay-affix>
+        </lay-backtop>
 
-    <lay-layout class="content">
-      <!-- 头部导航 -->
-      <lay-header class="header-container">
-        <lay-menu class="menu">
-          <lay-menu-item @click="refreshPage"> 首页 </lay-menu-item>
-          <lay-menu-item @click="jumpToSection('function-section')">
-            宣传片
-          </lay-menu-item>
-          <lay-menu-item @click="router.push({ path: '/login' })"
-            >登录
-          </lay-menu-item>
-          <lay-menu-item>
-            <lay-button> 注册 </lay-button>
-          </lay-menu-item>
-        </lay-menu>
-      </lay-header>
-
-      <!-- 主内容区 -->
-      <lay-body class="main-content">
-        <!-- logo区域 -->
-        <section class="title-section">
-          <img :src="cover_logo" alt="Newbeall" class="img-bottom" />
-          <img :src="cover_logo" alt="Newbeall" class="img-top" />
-
-          <div class="text-section">
-            <div class="dash"></div>
-            <div class="title-text">设计报价管理云平台</div>
-            <div class="dash"></div>
-          </div>
-        </section>
-
-        <!-- 特性展示 -->
-        <lay-row space="10" gutter="20" class="features-section">
-          <lay-col
-            v-for="(feature, index) in features"
-            :key="index"
-            md="6"
-            class="feature-col"
-          >
-            <lay-container class="feature-item">
-              <span class="feature-text">{{ feature.title }}</span>
-              <div class="feature-content">
-                <p>{{ feature.desc }}</p>
-              </div>
-            </lay-container>
-          </lay-col>
-        </lay-row>
-
-        <!-- 数据指标 -->
-        <section ref="statsRef" class="stats-section">
-          <div v-for="(stat, index) in stats" :key="index">
-            <div class="stat-card">
-              <div class="stat-value">
-                <lay-count-up
-                  :ref="(el) => (countUpRefs[index] = el)"
-                  :start-val="0"
-                  :end-val="stat.value"
-                  :autoplay="false"
-                  suffix="%"
+        <!--  侧边固钉-->
+        <lay-affix
+          v-if="target"
+          style="left: unset"
+          class="right-nav-affix"
+          :target="target"
+          position="top"
+          :offset="350"
+        >
+          <div class="right-nav">
+            <lay-tooltip trigger="hover">
+              <template #content>
+                <img
+                  style="width: 10rem"
+                  :src="customer_service_QR"
+                  alt="客服二维码"
                 />
+              </template>
+              <div class="right-nav-item">
+                <SvgIcon name="message_2" class="right-nav-img" />
+                <div class="right-nav-text">添加客服</div>
               </div>
-
-              <p class="stat-label">
-                {{ stat.label }}
-              </p>
+            </lay-tooltip>
+            <div class="right-nav-item" @click="onlineConsultation">
+              <SvgIcon name="consultation" class="right-nav-img" />
+              <div class="right-nav-text">在线咨询</div>
+            </div>
+            <div class="right-nav-item">
+              <SvgIcon name="feedback" class="right-nav-img" />
+              <div class="right-nav-text">反馈建议</div>
             </div>
           </div>
-        </section>
+        </lay-affix>
 
-        <!-- 功能展示区 -->
-        <section id="function-section" class="function-section">
-          <p class="function-text">设计报价功能展示</p>
+        <lay-layout class="content">
+          <!-- 头部导航 -->
+          <lay-header class="header-container">
+            <lay-menu class="menu">
+              <lay-menu-item @click="refreshPage"> 首页 </lay-menu-item>
+              <lay-menu-item @click="jumpToSection('function-section')">
+                宣传片
+              </lay-menu-item>
+              <lay-menu-item @click="router.push({ path: '/login' })"
+                >登录
+              </lay-menu-item>
+              <lay-menu-item>
+                <lay-button> 注册 </lay-button>
+              </lay-menu-item>
+            </lay-menu>
+          </lay-header>
 
-          <div class="function-video-container">
-            <video
-              class="function-video"
-              controls
-              preload="metadata"
-              :src="video_url"
-            >
-              您的浏览器不支持视频标签。
-            </video>
-          </div>
-        </section>
+          <!-- 主内容区 -->
+          <lay-body class="main-content">
+            <!-- logo区域 -->
+            <section class="title-section">
+              <img :src="cover_logo" alt="Newbeall" class="img-bottom" />
+              <img :src="cover_logo" alt="Newbeall" class="img-top" />
 
-        <!-- 谁可以用？ -->
-        <section class="usage-section">
-          <h1>谁可以用</h1>
-          <p>
-            针对智能化工程领域<br />无论你是工程集成、产品销售、顾问设计<br />
-            只要你有给客户报价的需求<br />都是我们的客户
-          </p>
-          <lay-row space="10" class="usage-img-container">
-            <lay-col
-              v-for="(item, index) in usageImg"
-              :key="index"
-              md="4"
-              sm="12"
-              xs="24"
-            >
-              <img class="usage-img" :src="item.url" :alt="item.name" />
-            </lay-col>
-          </lay-row>
-        </section>
+              <div class="text-section">
+                <div class="dash"></div>
+                <div class="title-text">设计报价管理云平台</div>
+                <div class="dash"></div>
+              </div>
+            </section>
 
-        <!-- 平台特权 -->
-        <section class="privileged-section">
-          <h1>平台会员特别服务</h1>
-
-          <lay-table
-            class="privileged-table"
-            even
-            size="sm"
-            height="30rem"
-            cell-class-name="privileged-table-cell"
-            :default-toolbar="false"
-            :columns="privilegedColumn"
-            :data-source="privilegedData"
-          />
-        </section>
-
-        <!-- 常见问题 -->
-        <section class="question-section">
-          <h1>常见问题</h1>
-
-          <div id="alternatingAccordion" class="accordion">
-            <div v-for="(item, index) in questions" :key="index">
-              <h2 :id="`heading${index}`" class="accordion-header">
-                <!-- 手风琴标题 -->
-                <button
-                  class="accordion-button"
-                  :class="
-                    index % 2 === 0 ? 'accordion-left' : 'accordion-right'
-                  "
-                  type="button"
-                  data-bs-toggle="collapse"
-                  :data-bs-target="`#collapse${index}`"
-                  :aria-controls="`collapse${index}`"
-                >
-                  {{ item.question }}
-                </button>
-              </h2>
-              <!-- 手风琴内容 -->
-              <div
-                :id="`collapse${index}`"
-                class="accordion-collapse collapse"
-                :class="index % 2 === 0 ? 'accordion-left' : 'accordion-right'"
-                :aria-labelledby="`heading${index}`"
-                data-bs-parent="#alternatingAccordion"
+            <!-- 特性展示 -->
+            <lay-row space="10" gutter="20" class="features-section">
+              <lay-col
+                v-for="(feature, index) in features"
+                :key="index"
+                md="6"
+                class="feature-col"
               >
-                <div class="accordion-body">
-                  {{ item.answer }}
+                <lay-container class="feature-item">
+                  <span class="feature-text">{{ feature.title }}</span>
+                  <div class="feature-content">
+                    <p>{{ feature.desc }}</p>
+                  </div>
+                </lay-container>
+              </lay-col>
+            </lay-row>
+
+            <!-- 数据指标 -->
+            <section ref="statsRef" class="stats-section">
+              <div v-for="(stat, index) in stats" :key="index">
+                <div class="stat-card">
+                  <div class="stat-value">
+                    <lay-count-up
+                      :ref="(el) => (countUpRefs[index] = el)"
+                      :start-val="0"
+                      :end-val="stat.value"
+                      :autoplay="false"
+                      suffix="%"
+                    />
+                  </div>
+
+                  <p class="stat-label">
+                    {{ stat.label }}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-      </lay-body>
+            </section>
 
-      <!-- 底部版权 -->
-      <lay-footer class="footer">
-        <div class="footer-content">
-          <p>电话: 020-32030561</p>
-          <p>广州壹新网络科技有限公司</p>
-          <p>
-            广州市黄埔区科学城南翔一路68号1栋1C07房 Copyright ©
-            2018-2022广州壹新网络科技
-          </p>
-        </div>
-      </lay-footer>
-    </lay-layout>
-  </div>
+            <!-- 功能展示区 -->
+            <section id="function-section" class="function-section">
+              <p class="function-text">设计报价功能展示</p>
+
+              <div class="function-video-container">
+                <video
+                  class="function-video"
+                  controls
+                  preload="metadata"
+                  :src="video_url"
+                >
+                  您的浏览器不支持视频标签。
+                </video>
+              </div>
+            </section>
+
+            <!-- 谁可以用？ -->
+            <section class="usage-section">
+              <h1>谁可以用</h1>
+              <p>
+                针对智能化工程领域<br />无论你是工程集成、产品销售、顾问设计<br />
+                只要你有给客户报价的需求<br />都是我们的客户
+              </p>
+              <lay-row space="10" class="usage-img-container">
+                <lay-col
+                  v-for="(item, index) in usageImg"
+                  :key="index"
+                  md="4"
+                  sm="12"
+                  xs="24"
+                >
+                  <img class="usage-img" :src="item.url" :alt="item.name" />
+                </lay-col>
+              </lay-row>
+            </section>
+
+            <!-- 平台特权 -->
+            <section class="privileged-section">
+              <h1>平台会员特别服务</h1>
+
+              <lay-table
+                class="privileged-table"
+                even
+                size="sm"
+                height="30rem"
+                cell-class-name="privileged-table-cell"
+                :default-toolbar="false"
+                :columns="privilegedColumn"
+                :data-source="privilegedData"
+              />
+            </section>
+
+            <!-- 常见问题 -->
+            <section class="question-section">
+              <h1>常见问题</h1>
+
+              <div id="alternatingAccordion" class="accordion">
+                <div v-for="(item, index) in questions" :key="index">
+                  <h2 :id="`heading${index}`" class="accordion-header">
+                    <!-- 手风琴标题 -->
+                    <button
+                      class="accordion-button"
+                      :class="
+                        index % 2 === 0 ? 'accordion-left' : 'accordion-right'
+                      "
+                      type="button"
+                      data-bs-toggle="collapse"
+                      :data-bs-target="`#collapse${index}`"
+                      :aria-controls="`collapse${index}`"
+                    >
+                      {{ item.question }}
+                    </button>
+                  </h2>
+                  <!-- 手风琴内容 -->
+                  <div
+                    :id="`collapse${index}`"
+                    class="accordion-collapse collapse"
+                    :class="
+                      index % 2 === 0 ? 'accordion-left' : 'accordion-right'
+                    "
+                    :aria-labelledby="`heading${index}`"
+                    data-bs-parent="#alternatingAccordion"
+                  >
+                    <div class="accordion-body">
+                      {{ item.answer }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </lay-body>
+
+          <!-- 底部版权 -->
+          <lay-footer class="footer">
+            <div class="footer-content">
+              <p>电话: 020-32030561</p>
+              <p>广州壹新网络科技有限公司</p>
+              <p>
+                广州市黄埔区科学城南翔一路68号1栋1C07房 Copyright ©
+                2018-2022广州壹新网络科技
+              </p>
+            </div>
+          </lay-footer>
+        </lay-layout>
+      </div>
+    </template>
+  </cover-layout>
 </template>
 
 <script lang="ts" setup>
@@ -284,6 +248,7 @@ import {
 } from './defaultData.ts';
 
 import SvgIcon from '@com/SvgIcon.vue';
+import CoverLayout from '@/layouts/CoverLayout.vue';
 
 const router = useRouter();
 
@@ -374,24 +339,6 @@ onUnmounted(() => {
 
 .all {
   overflow: hidden;
-
-  .blur-color-block {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #bab0ff;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-
-    svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-      transform: translateZ(0); // 硬件加速，提升性能
-      backface-visibility: hidden; // 优化渲染
-    }
-  }
 }
 
 .right-nav-affix {

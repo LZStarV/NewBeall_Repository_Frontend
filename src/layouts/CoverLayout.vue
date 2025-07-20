@@ -40,7 +40,7 @@
         />
       </svg>
     </div>
-    <router-view />
+    <slot name="content"></slot>
   </div>
 </template>
 
