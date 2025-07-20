@@ -18,7 +18,7 @@ class Environment {
   constructor() {
     this.config = {
       API_BASE_URL:
-        import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+        import.meta.env.VITE_API_BASE_URL || '',
       APP_TITLE: import.meta.env.VITE_APP_TITLE || 'NewBeall Repository',
       APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
       APP_ENV: import.meta.env.VITE_APP_ENV || 'development',
