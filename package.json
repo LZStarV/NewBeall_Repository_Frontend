@@ -50,6 +50,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "cz-customizable": "^7.4.0",
     "eslint-config-prettier": "^10.1.5",
+    "js-cookie": "^3.0.5",
     "newbeall": "file:",
     "pinia": "^3.0.2",
     "postcss-scss": "^4.0.9",
