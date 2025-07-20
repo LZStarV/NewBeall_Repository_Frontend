@@ -37,8 +37,7 @@
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
     "lint:strict": "eslint . --ext .js,.ts,.vue --max-warnings 0",
     "lint-staged": "lint-staged",
-    "commit": "git-cz",
-    "prepare": "husky install"
+    "commit": "git-cz"
   },
   "dependencies": {
     "@layui/layui-vue": "^2.22.0",
