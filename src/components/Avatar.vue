@@ -1,9 +1,8 @@
 <!-- 封装lay-avatar -->
 <template>
   <lay-avatar
-    :src="prefix + url"
+    :src="avatarUrl"
     :alt="alt"
-    :fallback="defaultImgUrl"
     :radius="radius"
     :style="{ width: size, height: size }"
   />
@@ -11,7 +10,7 @@
 
 <script setup lang="ts">
 import env from '@/utils/env';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 // 默认头像链接
 const defaultImgUrl = env.getApiBaseUrl() + '/static/img/images/newbeall.png';
@@ -32,11 +31,15 @@ const {
   radius?: boolean; // 是否圆形
 }>();
 
+const updateAvatar = (newUrl: string) => {
+  if (newUrl.length > 0) avatarUrl.value = prefix + url;
+  else avatarUrl.value = defaultImgUrl;
+};
+
 watch(
   () => url,
-  (newVal) => {
-    if (newVal.length > 0) avatarUrl.value = prefix + url;
-    else avatarUrl.value = defaultImgUrl;
-  },
+  (newVal) => updateAvatar(newVal),
 );
+
+onMounted(() => updateAvatar(url));
 </script>
