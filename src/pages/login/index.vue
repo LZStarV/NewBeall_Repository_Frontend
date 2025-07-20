@@ -1,163 +1,170 @@
 <template>
-  <div class="login-page">
-    <section class="login-card">
-      <div class="login-left">
-        <img :src="loginbjt" alt="企业数字化管理背景" class="loginbjt" />
-      </div>
+  <cover-layout>
+    <template #content>
+      <div class="login-page">
+        <section class="login-card">
+          <div class="login-left">
+            <img :src="loginbjt" alt="企业数字化管理背景" class="loginbjt" />
+          </div>
 
-      <div class="login-right">
-        <p class="welcome-text">欢迎登录</p>
+          <div class="login-right">
+            <p class="welcome-text">欢迎登录</p>
 
-        <lay-form
-          required
-          class="login-form"
-          :model="form"
-          isLabelTooltip
-          @submit.prevent="handleLogin"
-        >
-          <lay-form-item
-            label="用户名"
-            prop="username"
-            :label-width="labelWidth"
-            required
-            required-error-message="请输入用户名"
-            class="form-group"
-          >
-            <lay-input
-              v-model="form.username"
-              placeholder="请输入用户名"
-              :class="{ 'input-focus': usernameFocus }"
-              @focus="usernameFocus = true"
-              @blur="usernameFocus = false"
-              @keydown.enter="handleLogin"
-            />
-          </lay-form-item>
-
-          <lay-form-item
-            label="密码"
-            prop="password"
-            :label-width="labelWidth"
-            required
-            required-error-message="请输入密码"
-            class="form-group"
-          >
-            <lay-input
-              v-model="form.password"
-              type="password"
-              placeholder="请输入密码"
-              :class="{ 'input-focus': passwordFocus }"
-              @focus="passwordFocus = true"
-              @blur="passwordFocus = false"
-              @keydown.enter="handleLogin"
-            />
-          </lay-form-item>
-
-          <lay-form-item
-            label="验证码"
-            prop="captcha"
-            :label-width="labelWidth"
-            required
-            required-error-message="请输入验证码"
-            class="form-group"
-          >
-            <div class="captcha">
-              <lay-input
-                v-model="form.captcha"
-                placeholder="请输入验证码"
-                :class="{ 'input-focus': captchaFocus }"
-                @focus="captchaFocus = true"
-                @blur="captchaFocus = false"
-                @keydown.enter="handleLogin"
-              />
-              <img
-                v-if="captchaUrl"
-                :src="captchaUrl"
-                alt="验证码图片"
-                class="captcha-item"
-                @click="refreshCaptcha"
-              />
-              <span v-else class="captcha-item" @click="refreshCaptcha"
-                >点击获取验证码</span
+            <lay-form
+              required
+              class="login-form"
+              :model="form"
+              isLabelTooltip
+              @submit.prevent="handleLogin"
+            >
+              <lay-form-item
+                label="用户名"
+                prop="username"
+                :label-width="labelWidth"
+                required
+                required-error-message="请输入用户名"
+                class="form-group"
               >
-            </div>
-          </lay-form-item>
+                <lay-input
+                  v-model="form.username"
+                  placeholder="请输入用户名"
+                  :class="{ 'input-focus': usernameFocus }"
+                  @focus="usernameFocus = true"
+                  @blur="usernameFocus = false"
+                  @keydown.enter="handleLogin"
+                />
+              </lay-form-item>
 
-          <!-- 记住密码和协议选项 -->
-          <div class="down-check">
-            <div class="remember-me">
-              <lay-checkbox
-                v-model="rememberMe"
-                skin="primary"
-                name="remember"
-                label="7天免登录"
-              />
-              <lay-checkbox
-                v-model="agreement"
-                skin="primary"
-                name="agreement"
-                label="我已阅读并同意"
-              />
-            </div>
-
-            <div class="link-section">
-              <div>
-                <router-link to="/service">忘记密码</router-link>
-                <lay-line direction="vertical" theme="black" />
-                <router-link to="/register">注册账号</router-link>
-              </div>
-              <div>
-                <router-link to="/service">服务协议</router-link>
-                <lay-line direction="vertical" theme="black" />
-                <router-link to="/privacy">隐私协议</router-link>
-              </div>
-            </div>
-          </div>
-
-          <lay-form-item>
-            <lay-ripple class="login-ripple">
-              <button
-                class="login-btn"
-                :class="{ 'opacity-75 cursor-not-allowed': loginLoading }"
-                :disabled="loginLoading || !agreement"
-                @click="handleLogin"
+              <lay-form-item
+                label="密码"
+                prop="password"
+                :label-width="labelWidth"
+                required
+                required-error-message="请输入密码"
+                class="form-group"
               >
-                {{ loginLoading ? '登录中...' : '登录' }}
-              </button>
-            </lay-ripple>
-          </lay-form-item>
-        </lay-form>
+                <lay-input
+                  v-model="form.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  :class="{ 'input-focus': passwordFocus }"
+                  @focus="passwordFocus = true"
+                  @blur="passwordFocus = false"
+                  @keydown.enter="handleLogin"
+                />
+              </lay-form-item>
 
-        <!-- 其他登录方式 -->
-        <div class="other-login-section">
-          <lay-line>
-            <span class="divider-text">其他登录方式</span>
-          </lay-line>
+              <lay-form-item
+                label="验证码"
+                prop="captcha"
+                :label-width="labelWidth"
+                required
+                required-error-message="请输入验证码"
+                class="form-group"
+              >
+                <div class="captcha">
+                  <lay-input
+                    v-model="form.captcha"
+                    placeholder="请输入验证码"
+                    :class="{ 'input-focus': captchaFocus }"
+                    @focus="captchaFocus = true"
+                    @blur="captchaFocus = false"
+                    @keydown.enter="handleLogin"
+                  />
+                  <img
+                    v-if="captchaUrl"
+                    :src="captchaUrl"
+                    alt="验证码图片"
+                    class="captcha-item"
+                    @click="refreshCaptcha"
+                  />
+                  <span v-else class="captcha-item" @click="refreshCaptcha"
+                    >点击获取验证码</span
+                  >
+                </div>
+              </lay-form-item>
 
-          <div class="login-logo-section">
-            <lay-icon class="login-logo-item" type="layui-icon-login-wechat" />
-            <lay-icon class="login-logo-item" type="layui-icon-login-qq" />
+              <!-- 记住密码和协议选项 -->
+              <div class="down-check">
+                <div class="remember-me">
+                  <lay-checkbox
+                    v-model="rememberMe"
+                    skin="primary"
+                    name="remember"
+                    label="7天免登录"
+                  />
+                  <lay-checkbox
+                    v-model="agreement"
+                    skin="primary"
+                    name="agreement"
+                    label="我已阅读并同意"
+                  />
+                </div>
+
+                <div class="link-section">
+                  <div>
+                    <router-link to="/service">忘记密码</router-link>
+                    <lay-line direction="vertical" theme="black" />
+                    <router-link to="/register">注册账号</router-link>
+                  </div>
+                  <div>
+                    <a href="https://newbeall.com/serviceAgreement">服务协议</a>
+                    <lay-line direction="vertical" theme="black" />
+                    <a href="https://newbeall.com/privacyPolicy">隐私协议</a>
+                  </div>
+                </div>
+              </div>
+
+              <lay-form-item>
+                <lay-ripple class="login-ripple">
+                  <button
+                    class="login-btn"
+                    :class="{ 'opacity-75 cursor-not-allowed': loginLoading }"
+                    :disabled="loginLoading || !agreement"
+                    @click="handleLogin"
+                  >
+                    {{ loginLoading ? '登录中...' : '登录' }}
+                  </button>
+                </lay-ripple>
+              </lay-form-item>
+            </lay-form>
+
+            <!-- 其他登录方式 -->
+            <div class="other-login-section">
+              <lay-line>
+                <span class="divider-text">其他登录方式</span>
+              </lay-line>
+
+              <div class="login-logo-section">
+                <lay-icon
+                  class="login-logo-item"
+                  type="layui-icon-login-wechat"
+                />
+                <lay-icon class="login-logo-item" type="layui-icon-login-qq" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 右下角二维码区域 -->
-      <div class="qrcode-container">
-        <lay-tooltip trigger="hover">
-          <template #content>
-            <img
-              :src="customer_service_QR"
-              alt="扫码登录"
-              class="qrcode-icon"
-            />
-          </template>
-          <div class="qrcode-popup">
-            <img :src="QRCode" alt="登录二维码" class="full-qrcode" />
-            <p class="qrcode-desc">扫码登录更快捷</p>
+          <!-- 右下角二维码区域 -->
+          <div class="qrcode-container">
+            <lay-tooltip trigger="hover">
+              <template #content>
+                <img
+                  :src="customer_service_QR"
+                  alt="扫码登录"
+                  class="qrcode-icon"
+                />
+              </template>
+              <div class="qrcode-popup">
+                <img :src="QRCode" alt="登录二维码" class="full-qrcode" />
+                <p class="qrcode-desc">扫码登录更快捷</p>
+              </div>
+            </lay-tooltip>
           </div>
-        </lay-tooltip>
+        </section>
       </div>
-    </section>
-  </div>
+    </template>
+  </cover-layout>
 </template>
 
 <script setup>
@@ -167,6 +174,7 @@ import { layer } from '@layui/layui-vue';
 import loginbjt from '@assets/image/default/loginbjt.png';
 import QRCode from '@assets/image/default/QRcode.png';
 import customer_service_QR from '@assets/image/default/customer_service_QR.jpg';
+import CoverLayout from '@/layouts/CoverLayout.vue';
 
 import loginApi from '@/api/login/loginApi';
 import notify from '@/utils/notify.js';
