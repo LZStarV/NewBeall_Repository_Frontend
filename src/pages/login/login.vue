@@ -8,8 +8,21 @@
       <div class="login-right">
         <p class="welcome-text">欢迎登录</p>
 
-        <lay-form class="login-form" @submit.prevent="handleLogin">
-          <lay-form-item label="用户名" required class="form-group">
+        <lay-form
+          required
+          class="login-form"
+          :model="form"
+          isLabelTooltip
+          @submit.prevent="handleLogin"
+        >
+          <lay-form-item
+            label="用户名"
+            prop="username"
+            :label-width="labelWidth"
+            required
+            required-error-message="请输入用户名"
+            class="form-group"
+          >
             <lay-input
               v-model="form.username"
               placeholder="请输入用户名"
@@ -20,10 +33,17 @@
             />
           </lay-form-item>
 
-          <lay-form-item label="密码" required class="form-group">
+          <lay-form-item
+            label="密码"
+            prop="password"
+            :label-width="labelWidth"
+            required
+            required-error-message="请输入密码"
+            class="form-group"
+          >
             <lay-input
-              type="password"
               v-model="form.password"
+              type="password"
               placeholder="请输入密码"
               :class="{ 'input-focus': passwordFocus }"
               @focus="passwordFocus = true"
@@ -32,8 +52,14 @@
             />
           </lay-form-item>
 
-          <!-- 验证码区域 -->
-          <lay-form-item label="验证码" required class="form-group">
+          <lay-form-item
+            label="验证码"
+            prop="captcha"
+            :label-width="labelWidth"
+            required
+            required-error-message="请输入验证码"
+            class="form-group"
+          >
             <div class="captcha">
               <lay-input
                 v-model="form.captcha"
@@ -47,8 +73,8 @@
                 v-if="captchaUrl"
                 :src="captchaUrl"
                 alt="验证码图片"
-                @click="refreshCaptcha"
                 class="captcha-item"
+                @click="refreshCaptcha"
               />
               <span v-else class="captcha-item" @click="refreshCaptcha"
                 >点击获取验证码</span
@@ -64,26 +90,24 @@
                 skin="primary"
                 name="remember"
                 label="7天免登录"
-              >
-              </lay-checkbox>
+              />
               <lay-checkbox
                 v-model="agreement"
                 skin="primary"
                 name="agreement"
                 label="我已阅读并同意"
-              >
-              </lay-checkbox>
+              />
             </div>
 
             <div class="link-section">
               <div>
                 <router-link to="/service">忘记密码</router-link>
-                <lay-line direction="vertical" theme="black"></lay-line>
+                <lay-line direction="vertical" theme="black" />
                 <router-link to="/register">注册账号</router-link>
               </div>
               <div>
                 <router-link to="/service">服务协议</router-link>
-                <lay-line direction="vertical" theme="black"></lay-line>
+                <lay-line direction="vertical" theme="black" />
                 <router-link to="/privacy">隐私协议</router-link>
               </div>
             </div>
@@ -94,8 +118,8 @@
               <button
                 class="login-btn"
                 :class="{ 'opacity-75 cursor-not-allowed': loginLoading }"
-                @click="handleLogin"
                 :disabled="loginLoading || !agreement"
+                @click="handleLogin"
               >
                 {{ loginLoading ? '登录中...' : '登录' }}
               </button>
@@ -110,14 +134,8 @@
           </lay-line>
 
           <div class="login-logo-section">
-            <lay-icon
-              class="login-logo-item"
-              type="layui-icon-login-wechat"
-            ></lay-icon>
-            <lay-icon
-              class="login-logo-item"
-              type="layui-icon-login-qq"
-            ></lay-icon>
+            <lay-icon class="login-logo-item" type="layui-icon-login-wechat" />
+            <lay-icon class="login-logo-item" type="layui-icon-login-qq" />
           </div>
         </div>
       </div>
@@ -143,17 +161,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { layer } from '@layui/layui-vue';
 
 import loginbjt from '@assets/image/default/loginbjt.png';
 import QRCode from '@assets/image/default/QRcode.png';
 import customer_service_QR from '@assets/image/default/customer_service_QR.jpg';
 
-import loginApi from '@/api/login/loginApi.js';
+import loginApi from '@/api/login/loginApi';
+import notify from '@/utils/notify.js';
 
 // 表单数据
-const form = ref({
+const form = reactive({
   username: '',
   password: '',
   captcha: '',
@@ -163,6 +182,9 @@ const form = ref({
 const usernameFocus = ref(false);
 const passwordFocus = ref(false);
 const captchaFocus = ref(false);
+// 输入框标签宽度
+const labelWidth = 70;
+
 const loginLoading = ref(false);
 const rememberMe = ref(false);
 const agreement = ref(false);
@@ -177,11 +199,7 @@ const getCaptcha = async () => {
     captchaUrl.value = await loginApi.getCaptcha();
   } catch (err) {
     console.error('获取验证码失败:', err);
-    layer.notify({
-      title: '获取验证码失败',
-      content: '获取验证码失败，请稍后重试',
-      icon: 2,
-    });
+    notify.error('获取验证码失败', '获取验证码失败，请稍后重试');
   }
 };
 
@@ -198,37 +216,20 @@ const refreshCaptcha = async () => {
     oldUrl = newUrl;
   } catch (err) {
     console.error('刷新验证码失败:', err);
-    layer.notify({
-      title: '刷新验证码失败',
-      content: '刷新验证码失败，请稍后重试',
-      icon: 2,
-    });
+    notify.error('刷新验证码失败', '刷新验证码失败，请稍后重试');
   }
 };
 
 // 登录处理函数
 const handleLogin = async () => {
-  // 表单验证
-  if (!form.value.username.trim()) {
-    layer.msg('请输入用户名');
-    return;
-  }
-  if (!form.value.password.trim()) {
-    layer.msg('请输入密码');
-    return;
-  }
-  if (!form.value.captcha.trim()) {
-    layer.msg('请输入验证码');
-    return;
-  }
   if (!agreement.value) {
-    layer.msg('请阅读并同意服务协议和隐私政策');
+    notify.warn('请阅读并同意服务协议和隐私政策');
     return;
   }
 
-  // 模拟登录加载状态
   loginLoading.value = true;
   try {
+    console.log(form);
     // 实际项目中替换为真实接口调用
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
