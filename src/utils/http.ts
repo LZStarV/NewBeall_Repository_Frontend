@@ -48,7 +48,7 @@ class HttpClient {
         }
         // 处理 JSON 响应
         const { code, data, message } = response.data;
-        if (code === 200) {
+        if (code == 200 || code == 0) {
           return {
             ...response,
             data, // 此时 data 为 T 类型
@@ -73,8 +73,12 @@ class HttpClient {
     return this.instance.get(url, { params });
   }
 
-  post<T extends object | any[]>(url: string, data?: any): Promise<T> {
-    return this.instance.post(url, data);
+  post<T extends object | any[]>(
+    url: string,
+    data?: any,
+    params?: any,
+  ): Promise<T> {
+    return this.instance.post(url, data, { params });
   }
 
   delete<T extends object | any[]>(url: string): Promise<T> {
