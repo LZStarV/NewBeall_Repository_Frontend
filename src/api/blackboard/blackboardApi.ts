@@ -12,31 +12,30 @@ export default {
   // 获取最近六月份订单数量
   getLastSixMonthsOrdeNotice() {
     return http.get<GetLastSixMonthsOrdeNoticeRes>(
-      '/api/blackboard/getLastSixMonthsOrdeNotice',
+      '/blackboard/getLastSixMonthsOrdeNotice',
     );
   },
 
   // 获取最近六月份报价单数量
   getLastSixMonthsOrders() {
     return http.get<GetLastSixMonthsOrdersRes>(
-      '/api/blackboard/getLastSixMonthsOrders',
+      '/blackboard/getLastSixMonthsOrders',
     );
   },
 
   // 获取报价单类型占比
   getOrdersType() {
-    return http.get<GetOrdersTypeRes>('/api/blackboard/getOrdersType');
+    return http.get<GetOrdersTypeRes>('/blackboard/getOrdersType');
   },
 
   // 获取自己报价比例
   getOurselfOrderNum() {
-    return http.get<GetOurselfOrderNumRes>(
-      '/api/blackboard/getOurselfOrderNum',
-    );
+    return http.get<GetOurselfOrderNumRes>('/blackboard/getOurselfOrderNum');
   },
 
   // 获取自己报价 公司报价比例
   getWholeOrderNum() {
-    return http.get<GetWholeOrderNumRes>('/api/blackboard/getWholeOrderNum');
+    return http.get<GetWholeOrderNumRes>('/blackboard/getWholeOrderNum');
   },
 };
+
