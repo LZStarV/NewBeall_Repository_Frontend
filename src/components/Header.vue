@@ -1,6 +1,6 @@
 <template>
     <div class="header">
-        <!-- 左侧折叠按钮 -->
+        <!-- 左侧区域 -->
         <div class="header-left">
             <div class="collapse-btn" @click="toggleSidebar">
                 <lay-icon :type="sidebarCollapsed ? 'layui-icon-spread-left' : 'layui-icon-shrink-right'" />
@@ -10,22 +10,42 @@
                 <lay-icon type="layui-icon-refresh" />
             </div>
         </div>
+
         <!-- 右侧工具栏 -->
         <div class="header-right">
             <div class="toolbar">
+                <!-- 邀请好友 -->
+                <lay-tooltip content="邀请好友">
+                    <lay-button class="toolbar-btn" @click="inviteFriends">
+                        <lay-icon type="layui-icon-user" />
+                    </lay-button>
+                </lay-tooltip>
 
+                <!-- 用户建议 -->
+                <lay-tooltip content="用户建议">
+                    <lay-button class="toolbar-btn" @click="userSuggestion">
+                        <lay-icon type="layui-icon-survey" />
+                    </lay-button>
+                </lay-tooltip>
 
-                <!-- 全屏按钮 -->
-                <lay-tooltip content="全屏">
-                    <lay-button class="toolbar-btn" @click="toggleFullscreen">
-                        <lay-icon type="layui-icon-screen-full" />
+                <!-- 微信公众号 -->
+                <lay-tooltip content="微信公众号">
+                    <lay-button class="toolbar-btn" @click="wechatPublic">
+                        <lay-icon type="layui-icon-cellphone" />
+                    </lay-button>
+                </lay-tooltip>
+
+                <!-- 便签 -->
+                <lay-tooltip content="便签">
+                    <lay-button class="toolbar-btn" @click="notepad">
+                        <lay-icon type="layui-icon-note" />
                     </lay-button>
                 </lay-tooltip>
 
                 <!-- 消息通知 -->
                 <lay-dropdown>
                     <lay-button class="toolbar-btn">
-                        <lay-badge :count="5">
+                        <lay-badge :count="messageCount" dot>
                             <lay-icon type="layui-icon-notice" />
                         </lay-badge>
                     </lay-button>
@@ -37,6 +57,20 @@
                         </lay-dropdown-menu>
                     </template>
                 </lay-dropdown>
+
+                <!-- 主题切换 -->
+                <lay-tooltip content="主题">
+                    <lay-button class="toolbar-btn" @click="toggleTheme">
+                        <lay-icon :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'" />
+                    </lay-button>
+                </lay-tooltip>
+
+                <!-- 全屏按钮 -->
+                <lay-tooltip content="全屏">
+                    <lay-button class="toolbar-btn" @click="toggleFullscreen">
+                        <lay-icon type="layui-icon-screen-full" />
+                    </lay-button>
+                </lay-tooltip>
 
                 <!-- 用户头像和菜单 -->
                 <lay-dropdown>
@@ -73,6 +107,10 @@ const emit = defineEmits<{
 
 // 添加侧边栏折叠状态
 const sidebarCollapsed = ref(false);
+// 消息数量
+const messageCount = ref(5);
+// 主题状态
+const isDarkTheme = ref(false);
 
 // 切换侧边栏
 const toggleSidebar = () => {
@@ -83,6 +121,37 @@ const toggleSidebar = () => {
 // 刷新页面
 const refreshPage = () => {
     window.location.reload();
+};
+
+// 邀请好友
+const inviteFriends = () => {
+    console.log('邀请好友');
+    // 这里可以打开邀请好友的对话框或页面
+};
+
+// 用户建议
+const userSuggestion = () => {
+    console.log('用户建议');
+    // 这里可以打开用户建议表单
+};
+
+// 微信公众号
+const wechatPublic = () => {
+    console.log('微信公众号');
+    // 这里可以显示二维码或跳转到公众号
+};
+
+// 便签
+const notepad = () => {
+    console.log('便签');
+    // 这里可以打开便签功能
+};
+
+// 主题切换
+const toggleTheme = () => {
+    isDarkTheme.value = !isDarkTheme.value;
+    console.log('切换主题:', isDarkTheme.value ? '深色' : '浅色');
+    // 这里可以实现主题切换逻辑
 };
 
 // 全屏切换
@@ -122,9 +191,11 @@ const logout = () => {
     padding: 0 20px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 
+
     .header-left {
         display: flex;
         align-items: center;
+        gap: 16px;
 
         .collapse-btn {
             display: flex;
@@ -135,11 +206,11 @@ const logout = () => {
             cursor: pointer;
             border-radius: 6px;
             transition: all 0.3s ease;
-            color: #666;
+            color: rgba(255, 255, 255, 0.8);
 
             &:hover {
-                background-color: #f5f7fa;
-                color: #409eff;
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
             }
 
             .layui-icon {
@@ -156,7 +227,7 @@ const logout = () => {
     .toolbar {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
 
         .toolbar-btn {
             width: 36px;
@@ -165,10 +236,19 @@ const logout = () => {
             align-items: center;
             justify-content: center;
             border-radius: 6px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
 
             &:hover {
-                background-color: #f5f7fa;
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                transform: translateY(-1px);
+            }
+
+            .layui-icon {
+                font-size: 16px;
             }
         }
 
@@ -179,21 +259,64 @@ const logout = () => {
             padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9);
 
             &:hover {
-                background-color: #f5f7fa;
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
             }
 
             .username {
                 font-size: 14px;
-                color: #333;
                 font-weight: 500;
             }
 
             .layui-icon {
                 font-size: 12px;
-                color: #999;
+                opacity: 0.7;
+            }
+        }
+    }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+    .header {
+        padding: 0 10px;
+
+        .header-left {
+            gap: 8px;
+
+            .header-title {
+                .title-text {
+                    font-size: 16px;
+                }
+
+                .subtitle {
+                    font-size: 10px;
+                }
+            }
+        }
+
+        .toolbar {
+            gap: 8px;
+
+            .toolbar-btn {
+                width: 32px;
+                height: 32px;
+
+                .layui-icon {
+                    font-size: 14px;
+                }
+            }
+
+            .user-info {
+                padding: 4px 8px;
+
+                .username {
+                    font-size: 12px;
+                }
             }
         }
     }
