@@ -7,7 +7,8 @@ import staticRoutes from './staticRoutes';
 import type { Component } from 'vue';
 import { addRouteRecursive } from './utils';
 import { hasToken, removeToken } from '../stores/auth';
-import { validateToken } from '../api/auth';
+// import { validateToken } from '../';
+import { addRouteMetaInfo } from '@/utils/routeUtils';
 
 // 导入所有布局组件
 const layouts = import.meta.glob('../layouts/*.vue', { eager: true }) as Record<
@@ -65,6 +66,9 @@ for (const path in filteredPages) {
   // 将所有页面路由嵌套到 MainLayout 的 children
   addRouteRecursive(segments, component, mainLayoutRoute.children!);
 }
+
+// 为路由添加meta信息
+mainLayoutRoute.children = addRouteMetaInfo(mainLayoutRoute.children!);
 
 // 移除与静态路由重复的页面路由
 const staticPaths = new Set(staticRoutes.map((route) => route.path.slice(1))); // 裁切掉第一个'/'

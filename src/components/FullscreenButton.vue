@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useFullscreen } from '@/composables/useFullscreen'; // 引入你的Composable
+import { useFullscreen } from '@/composables/useFullscreen';
 
 const { isFullscreen, isSupported, toggleFullscreen } = useFullscreen();
 
@@ -18,8 +18,8 @@ const buttonText = computed(() => {
 });
 
 const titleText = computed(() => {
-  return isSupported ? buttonText.value : '此浏览器不支持全屏'
-})
+  return isSupported ? buttonText.value : '此浏览器不支持全屏';
+});
 </script>
 
 <style lang="scss" scoped>

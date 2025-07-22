@@ -40,7 +40,10 @@ export function useFormatDate() {
     } else if (date.isSame(startOfYesterday, 'day')) {
       return '昨天';
     } else {
-      return date.format('YYYY-MM-DD');
+      // 如果是今年，只显示 MM-DD，否则显示完整日期
+      return date.year() === now.year()
+        ? date.format('MM-DD')
+        : date.format('YYYY-MM-DD');
     }
   }
 
@@ -51,10 +54,8 @@ export function useFormatDate() {
    * @returns a < b 返回负数，a == b 返回 0，a > b 返回正数
    */
   function compareDateTime(a: string | number, b: string | number): number {
-    const dateA =
-      typeof a === 'number' ? dayjs(a) : dayjs(a, 'YYYY-MM-DD HH:mm:ss');
-    const dateB =
-      typeof b === 'number' ? dayjs(b) : dayjs(b, 'YYYY-MM-DD HH:mm:ss');
+    const dateA = dayjs(typeof a === 'number' || /^\d+$/.test(a) ? +a : a);
+    const dateB = dayjs(typeof b === 'number' || /^\d+$/.test(b) ? +b : b);
 
     if (!dateA.isValid() && !dateB.isValid()) return 0;
     if (!dateA.isValid()) return -1;
