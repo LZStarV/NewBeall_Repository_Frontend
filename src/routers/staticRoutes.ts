@@ -17,6 +17,11 @@ const staticRoutes: RouteRecordRaw[] = [
     component: () => import('@/pages/register/index.vue'),
     meta: { title: 'register' },
   },
+  {
+    path: '/chat',
+    component: () => import('@/pages/chat/index.vue'),
+    meta: { title: 'chat' },
+  },
 ];
 
 export default staticRoutes;
