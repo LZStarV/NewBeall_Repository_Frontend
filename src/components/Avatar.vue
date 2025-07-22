@@ -31,15 +31,14 @@ const {
   radius?: boolean; // 是否圆形
 }>();
 
-const updateAvatar = (newUrl: string) => {
-  if (newUrl.length > 0) avatarUrl.value = prefix + url;
+const updateAvatar = (newUrl: string, newPrefix: string) => {
+  if (newUrl.length > 0) avatarUrl.value = newPrefix + newUrl;
   else avatarUrl.value = defaultImgUrl;
 };
 
-watch(
-  () => url,
-  (newVal) => updateAvatar(newVal),
+watch([() => url, () => prefix], ([newUrl, newPrefix]) =>
+  updateAvatar(newUrl, newPrefix),
 );
 
-onMounted(() => updateAvatar(url));
+onMounted(() => updateAvatar(url, prefix));
 </script>
