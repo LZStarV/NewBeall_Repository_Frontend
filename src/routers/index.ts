@@ -103,6 +103,10 @@ const router = createRouter({
 
 // 全局前置守卫
 router.beforeEach(async (to, _from, next) => {
+  if (to.path === '/') {
+    next('/dashboard');
+    return;
+  }
   // // 定义不需要token验证的路由
   // const publicRoutes = ['/default', '/login'];
 
