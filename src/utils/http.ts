@@ -14,7 +14,7 @@ class HttpClient {
   constructor(baseURL: string) {
     this.instance = axios.create({
       baseURL,
-      timeout: 10000,
+      timeout: env.getRequestTimeout(),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -42,28 +42,33 @@ class HttpClient {
       <T extends object | any[]>(
         response: AxiosResponse<ApiResponse<T> | Blob>,
       ): AxiosResponse<T | Blob> => {
-        // 如果是 Blob 类型（如图片），直接返回，不解析结构
+        // 1. 处理 Blob 类型响应(直接响应)
         if (response.data instanceof Blob) {
           return response as AxiosResponse<Blob>;
         }
-        // 处理 JSON 响应
-        const { code, data, message } = response.data;
-        if (code == 200 || code == 0) {
-          return {
-            ...response,
-            data, // 此时 data 为 T 类型
-          } as AxiosResponse<T>;
-        } else {
-          throw new Error(message || '请求响应失败！');
+
+        // 2. 处理 JSON 类型响应
+        const { code, data, message } = response.data as ApiResponse<T>;
+        if (code == 0 || code == 200) {
+          return { ...response, data } as AxiosResponse<T>;
         }
+
+        throw new Error(message);
       },
       (error) => {
-        if (error.response?.status === 401) {
-          const authStore = useAuthStore();
-          authStore.clearToken();
-          window.location.href = '/login';
+        // 3. 处理 HTTP 错误
+        if (error.response) {
+          const { code, msg } = error.response.data;
+          throw new Error(`${msg || `请求失败(${code})`}`);
         }
-        return Promise.reject(error);
+
+        // 无响应（网络错误）
+        if (error.request) {
+          throw new Error('网络连接失败，请检查网络');
+        }
+
+        // 请求配置错误
+        throw new Error('请求配置错误');
       },
     );
   }

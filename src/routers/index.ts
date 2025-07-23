@@ -85,7 +85,6 @@ const routes: RouteRecordRaw[] = [
   ...otherRoutes,
   ...staticRoutes,
 ];
-console.log('Final routes:', routes);
 
 const router = createRouter({
   history: createWebHistory(), // HTML5模式

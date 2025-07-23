@@ -10,6 +10,7 @@ export interface EnvConfig {
   DEBUG: boolean;
   PAD_LAYOUT_BREAKPOINT: number;
   DESKTOP_LAYOUT_BREAKPOINT: number;
+  REQUEST_TIMEOUT: number;
 }
 
 class Environment {
@@ -17,18 +18,15 @@ class Environment {
 
   constructor() {
     this.config = {
-      API_BASE_URL:
-        import.meta.env.VITE_API_BASE_URL || '',
+      API_BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
       APP_TITLE: import.meta.env.VITE_APP_TITLE || 'NewBeall Repository',
       APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
       APP_ENV: import.meta.env.VITE_APP_ENV || 'development',
       DEBUG: import.meta.env.VITE_DEBUG === 'true' || false,
-      PAD_LAYOUT_BREAKPOINT: import.meta.env.VITE_PAD_LAYOUT_BREAKPOINT
-        ? Number(import.meta.env.VITE_PAD_LAYOUT_BREAKPOINT)
-        : 768,
-      DESKTOP_LAYOUT_BREAKPOINT: import.meta.env.VITE_DESKTOP_LAYOUT_BREAKPOINT
-        ? Number(import.meta.env.VITE_DESKTOP_LAYOUT_BREAKPOINT)
-        : 1024,
+      PAD_LAYOUT_BREAKPOINT: import.meta.env.VITE_PAD_LAYOUT_BREAKPOINT || 768,
+      DESKTOP_LAYOUT_BREAKPOINT:
+        import.meta.env.VITE_DESKTOP_LAYOUT_BREAKPOINT || 1024,
+      REQUEST_TIMEOUT: import.meta.env.VITE_REQUEST_TIMEOUT || 10000,
     };
   }
 
@@ -101,8 +99,14 @@ class Environment {
   getDesktopLayoutBreakpoint(): number {
     return this.config.DESKTOP_LAYOUT_BREAKPOINT;
   }
-}
 
+  /**
+   * 获取请求超时时间
+   */
+  getRequestTimeout(): number {
+    return this.config.REQUEST_TIMEOUT;
+  }
+}
 const env = new Environment();
 
 export default env;
