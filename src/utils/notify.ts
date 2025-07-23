@@ -87,7 +87,7 @@ export default class Notify {
   }
 
   /**
-   * 信息通知（蓝色信息图标）
+   * 信息通知（灰色信息图标）
    * @param {string | NotifyOptions} options - 通知内容或完整配置项
    * @example
    * Notify.info({

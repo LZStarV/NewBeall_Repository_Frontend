@@ -18,6 +18,11 @@ const staticRoutes: RouteRecordRaw[] = [
     meta: { title: 'register' },
   },
   {
+    path: '/forget',
+    component: () => import('@/pages/forget/index.vue'),
+    meta: { title: 'forget' },
+  },
+  {
     path: '/chat',
     component: () => import('@/pages/chat/index.vue'),
     meta: { title: 'chat' },

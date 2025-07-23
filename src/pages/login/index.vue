@@ -3,6 +3,14 @@
     <template #content>
       <div class="login-page">
         <section class="login-card">
+          <lay-button
+            v-if="wechatLogin"
+            size="sm"
+            class="back"
+            @click="wechatLogin = false"
+          >
+            <lay-icon type="layui-icon-left" />
+          </lay-button>
           <div class="login-left">
             <img :src="loginbjt" alt="企业数字化管理背景" class="loginbjt" />
           </div>
@@ -10,112 +18,118 @@
           <div class="login-right">
             <p class="welcome-text">欢迎登录</p>
 
-            <lay-form
-              required
-              class="login-form"
-              :model="form"
-              isLabelTooltip
-              @submit.prevent="handleLogin"
-            >
-              <lay-form-item
-                label="用户名"
-                prop="username"
-                :label-width="labelWidth"
-                required
-                required-error-message="请输入用户名"
-                class="form-group"
+            <section v-if="!wechatLogin" class="login-section">
+              <!-- 登录表单 -->
+              <lay-form
+                ref="loginFormRef"
+                class="login-form"
+                :model="form"
+                :rules="rules"
+                is-label-tooltip
+                @submit.prevent="handleLogin"
               >
-                <lay-input
-                  v-model="form.username"
-                  placeholder="请输入用户名"
-                  :class="{ 'input-focus': usernameFocus }"
-                  @focus="usernameFocus = true"
-                  @blur="usernameFocus = false"
-                  @keydown.enter="handleLogin"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="密码"
-                prop="password"
-                :label-width="labelWidth"
-                required
-                required-error-message="请输入密码"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  :class="{ 'input-focus': passwordFocus }"
-                  @focus="passwordFocus = true"
-                  @blur="passwordFocus = false"
-                  @keydown.enter="handleLogin"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="验证码"
-                prop="captcha"
-                :label-width="labelWidth"
-                required
-                required-error-message="请输入验证码"
-                class="form-group"
-              >
-                <div class="captcha">
+                <lay-form-item
+                  label="用户名"
+                  prop="username"
+                  :label-width="labelWidth"
+                  required
+                  required-error-message="请输入用户名"
+                  class="form-group"
+                >
                   <lay-input
-                    v-model="form.captcha"
-                    placeholder="请输入验证码"
-                    :class="{ 'input-focus': captchaFocus }"
-                    @focus="captchaFocus = true"
-                    @blur="captchaFocus = false"
+                    v-model="form.username"
+                    placeholder="请输入用户名"
+                    :class="{ 'input-focus': usernameFocus }"
+                    @focus="usernameFocus = true"
+                    @blur="usernameFocus = false"
                     @keydown.enter="handleLogin"
                   />
-                  <img
-                    v-if="captchaUrl"
-                    :src="captchaUrl"
-                    alt="验证码图片"
-                    class="captcha-item"
-                    @click="refreshCaptcha"
-                  />
-                  <span v-else class="captcha-item" @click="refreshCaptcha"
-                    >点击获取验证码</span
-                  >
-                </div>
-              </lay-form-item>
+                </lay-form-item>
 
-              <!-- 记住密码和协议选项 -->
-              <div class="down-check">
-                <div class="remember-me">
-                  <lay-checkbox
-                    v-model="rememberMe"
-                    skin="primary"
-                    name="remember"
-                    label="7天免登录"
+                <lay-form-item
+                  label="密码"
+                  prop="password"
+                  :label-width="labelWidth"
+                  required
+                  required-error-message="请输入密码"
+                  class="form-group"
+                >
+                  <lay-input
+                    v-model="form.password"
+                    type="password"
+                    placeholder="请输入密码"
+                    :class="{ 'input-focus': passwordFocus }"
+                    @focus="passwordFocus = true"
+                    @blur="passwordFocus = false"
+                    @keydown.enter="handleLogin"
                   />
-                  <lay-checkbox
-                    v-model="agreement"
-                    skin="primary"
-                    name="agreement"
-                    label="我已阅读并同意"
-                  />
-                </div>
+                </lay-form-item>
 
-                <div class="link-section">
-                  <div>
-                    <router-link to="/service">忘记密码</router-link>
-                    <lay-line direction="vertical" theme="black" />
-                    <router-link to="/register">注册账号</router-link>
+                <lay-form-item
+                  label="验证码"
+                  prop="kaptcha"
+                  :label-width="labelWidth"
+                  required
+                  required-error-message="请输入验证码"
+                  class="form-group"
+                >
+                  <div class="captcha">
+                    <lay-input
+                      v-model="form.kaptcha"
+                      placeholder="请输入验证码"
+                      :class="{ 'input-focus': captchaFocus }"
+                      @focus="captchaFocus = true"
+                      @blur="captchaFocus = false"
+                      @keydown.enter="handleLogin"
+                    />
+                    <img
+                      v-if="captchaUrl"
+                      ref="captchaImg"
+                      :src="captchaUrl"
+                      alt="验证码图片"
+                      class="captcha-item"
+                      @click="refreshCaptcha"
+                    />
+                    <span v-else class="captcha-item" @click="refreshCaptcha"
+                      >点击获取验证码</span
+                    >
                   </div>
-                  <div>
-                    <a href="https://newbeall.com/serviceAgreement">服务协议</a>
-                    <lay-line direction="vertical" theme="black" />
-                    <a href="https://newbeall.com/privacyPolicy">隐私协议</a>
-                  </div>
-                </div>
-              </div>
+                </lay-form-item>
 
-              <lay-form-item>
+                <!-- 记住密码和协议选项 -->
+                <section class="down-check">
+                  <div class="remember-me">
+                    <lay-checkbox
+                      v-model="rememberMe"
+                      skin="primary"
+                      name="remember"
+                      label="7天免登录"
+                    />
+                    <lay-checkbox
+                      v-model="agreement"
+                      skin="primary"
+                      name="agreement"
+                      label="我已阅读并同意"
+                    />
+                  </div>
+
+                  <div class="link-section">
+                    <div>
+                      <router-link to="/forget">忘记密码</router-link>
+                      <lay-line direction="vertical" theme="black" />
+                      <router-link to="/register">注册账号</router-link>
+                    </div>
+                    <div>
+                      <a href="https://newbeall.com/serviceAgreement"
+                        >服务协议</a
+                      >
+                      <lay-line direction="vertical" theme="black" />
+                      <a href="https://newbeall.com/privacyPolicy">隐私协议</a>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 登录按钮 -->
                 <lay-ripple class="login-ripple">
                   <button
                     class="login-btn"
@@ -126,8 +140,13 @@
                     {{ loginLoading ? '登录中...' : '登录' }}
                   </button>
                 </lay-ripple>
-              </lay-form-item>
-            </lay-form>
+              </lay-form>
+            </section>
+
+            <section v-else class="login-section">
+              <img :src="wechatSrc" alt="微信登录" class="wechat-login-image" />
+              <p>扫码关注微信公众号登陆注册</p>
+            </section>
 
             <!-- 其他登录方式 -->
             <div class="other-login-section">
@@ -139,25 +158,25 @@
                 <lay-icon
                   class="login-logo-item"
                   type="layui-icon-login-wechat"
+                  @click="handleWechatLogin"
                 />
                 <lay-icon class="login-logo-item" type="layui-icon-login-qq" />
               </div>
             </div>
           </div>
 
-          <!-- 右下角二维码区域 -->
+          <!-- 右下角客服二维码区域 -->
           <div class="qrcode-container">
             <lay-tooltip trigger="hover">
               <template #content>
                 <img
                   :src="customer_service_QR"
-                  alt="扫码登录"
+                  alt="扫码咨询客服"
                   class="qrcode-icon"
                 />
               </template>
               <div class="qrcode-popup">
-                <img :src="QRCode" alt="登录二维码" class="full-qrcode" />
-                <p class="qrcode-desc">扫码登录更快捷</p>
+                <img :src="QRCode" alt="客服二维码" class="full-qrcode" />
               </div>
             </lay-tooltip>
           </div>
@@ -167,9 +186,9 @@
   </cover-layout>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, reactive } from 'vue';
-import { layer } from '@layui/layui-vue';
+import { useRouter } from 'vue-router';
 
 import loginbjt from '@assets/image/default/loginbjt.png';
 import QRCode from '@assets/image/default/QRcode.png';
@@ -177,14 +196,48 @@ import customer_service_QR from '@assets/image/default/customer_service_QR.jpg';
 import CoverLayout from '@/layouts/CoverLayout.vue';
 
 import loginApi from '@/api/login/loginApi';
+import { setToken, useAuthStore } from '@store/auth.js';
+import type { loginData } from '@/types/Login';
 import notify from '@/utils/notify.js';
 
+const router = useRouter();
+const authStore = useAuthStore();
+
 // 表单数据
-const form = reactive({
+const form = reactive<loginData>({
+  agreed: 'on' | 'off',
+  kaptcha: '',
   username: '',
   password: '',
-  captcha: '',
+  remember: 'on' | 'off',
 });
+
+// 表单校验规则
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    {
+      min: 3,
+      max: 20,
+      message: '用户名长度在 3 到 20 个字符之间',
+      trigger: 'blur',
+    },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    {
+      min: 6,
+      max: 20,
+      message: '密码长度在 6 到 20 个字符之间',
+      trigger: 'blur',
+    },
+  ],
+  kaptcha: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { len: 4, message: '验证码必须为4位', trigger: 'blur' },
+  ],
+};
+const loginFormRef = ref();
 
 // 状态管理
 const usernameFocus = ref(false);
@@ -192,12 +245,22 @@ const passwordFocus = ref(false);
 const captchaFocus = ref(false);
 // 输入框标签宽度
 const labelWidth = 70;
-
+// 是否加载登录动画
 const loginLoading = ref(false);
+// 是否勾选7天免登录
 const rememberMe = ref(false);
+// 是否勾选同意协议
 const agreement = ref(false);
+// 是否选择微信登录
+const wechatLogin = ref(false);
+// 是否正在加载微信登录二维码
+const isWechatLoading = ref(false);
+// 微信登录二维码url
+const wechatSrc = ref('');
 // 验证码url
 const captchaUrl = ref();
+// 验证码图片引用DOM元素
+const captchaImg = ref();
 // 旧的验证码url，用于刷新时对比
 let oldUrl = '';
 
@@ -214,6 +277,10 @@ const getCaptcha = async () => {
 // 刷新验证码
 const refreshCaptcha = async () => {
   // 释放旧 URL
+  if (captchaImg.value) {
+    console.log(captchaImg.value);
+    captchaImg.value.src = '';
+  }
   if (oldUrl) {
     URL.revokeObjectURL(oldUrl);
   }
@@ -228,51 +295,83 @@ const refreshCaptcha = async () => {
   }
 };
 
+// 处理微信登录
+const handleWechatLogin = async () => {
+  try {
+    isWechatLoading.value = true;
+    wechatSrc.value = await loginApi.getWechatLoginUrl();
+    setTimeout(() => {}, 1000);
+    wechatLogin.value = true;
+    isWechatLoading.value = false;
+  } catch (err) {
+    console.error('获取微信登录二维码失败:', err);
+    notify.error('获取微信登录二维码失败', '请稍后重试');
+  }
+};
+
+// 预加载图片函数
+const preloadImages = () => {
+  // 定义需要预加载的图片列表
+  const imagesToPreload = [customer_service_QR];
+
+  // 遍历列表，通过 new Image() 加载
+  imagesToPreload.forEach((imgUrl) => {
+    const img = new Image();
+    img.src = imgUrl;
+    // 监听加载失败
+    img.onerror = () => {
+      console.warn(`图片预加载失败: ${imgUrl}`);
+    };
+  });
+};
+
 // 登录处理函数
 const handleLogin = async () => {
   if (!agreement.value) {
+    form.agreed = 'off';
     notify.warn('请阅读并同意服务协议和隐私政策');
+    return;
+  } else {
+    form.agreed = 'on';
+  }
+
+  form.remember = rememberMe.value ? 'on' : 'off';
+
+  try {
+    await loginFormRef.value.validate();
+  } catch {
+    notify.error({
+      title: '表单验证失败',
+      content: '请检查表单填写是否正确',
+    });
     return;
   }
 
   loginLoading.value = true;
   try {
-    console.log(form);
-    // 实际项目中替换为真实接口调用
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const jsonData = JSON.stringify(form);
+    const res = await loginApi.login(jsonData);
+    notify.success('登录成功!');
+    const shiroCookie = res.data;
+    setToken(shiroCookie);
+    console.log(authStore.token);
 
-    // 登录成功处理
-    layer.msg('登录成功，正在跳转...');
-    console.log('登录参数:', form.value);
-
-    // 存储记住密码状态
-    if (rememberMe.value) {
-      localStorage.setItem('rememberMe', 'true');
-      localStorage.setItem('username', form.value.username);
-    } else {
-      localStorage.removeItem('rememberMe');
-      localStorage.removeItem('username');
-    }
-
-    // 登录成功后跳转到首页或指定页面
-    // router.push('/dashboard');
+    await router.push({ path: '/' });
   } catch (error) {
-    layer.msg('登录失败，请重试');
-    console.error('登录错误:', error);
-    // 刷新验证码
-    refreshCaptcha();
+    notify.error({
+      title: '登录失败',
+      content: `${error}`,
+    });
+    console.error(error);
+    await refreshCaptcha();
   } finally {
     loginLoading.value = false;
   }
 };
 
-// 页面加载时检查是否记住密码
 onMounted(() => {
   getCaptcha();
-  if (localStorage.getItem('rememberMe') === 'true') {
-    rememberMe.value = true;
-    form.value.username = localStorage.getItem('username') || '';
-  }
+  preloadImages();
 });
 </script>
 
@@ -301,6 +400,13 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
+
+    .back {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+    }
 
     .loginbjt {
       width: 20rem;
@@ -314,10 +420,23 @@ onMounted(() => {
         font-weight: 600;
         letter-spacing: 1px;
         color: $primary-color;
-        margin: 2rem;
+        margin-top: 2rem;
+      }
+
+      .login-section {
+        width: 22rem;
+        height: auto;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
 
       .login-form {
+        margin-top: 2rem;
+        width: 100%;
+
         .form-group {
           :deep(.layui-input) {
             padding: 0 0.5rem;
@@ -355,11 +474,13 @@ onMounted(() => {
             }
           }
         }
+
+        // 新增：调整表单内的复选框区域样式
         .down-check {
           display: flex;
           align-items: center;
-          justify-content: space-around;
-          margin-top: 0.5rem;
+          justify-content: space-between;
+          margin: 1rem 0; // 添加上下间距
 
           .remember-me {
             display: flex;
@@ -421,34 +542,39 @@ onMounted(() => {
         }
       }
 
-      .other-login-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        .divider-text {
-          color: $text-secondary;
-          font-size: 0.8rem;
-        }
-
-        .login-logo-section {
-          width: 50%;
-          display: flex;
-          justify-content: space-around;
-        }
-
-        .login-logo-item {
-          font-size: 2rem;
-          color: $primary-color;
-          cursor: pointer;
-          transition: all 0.3s ease;
-
-          &:hover {
-            color: darken($primary-color, 10%);
-            transform: scale(1.1);
-          }
-        }
+      .wechat-login-image {
+        width: 14rem;
       }
+    }
+  }
+}
+
+.other-login-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1.5rem;
+
+  .divider-text {
+    color: $text-secondary;
+    font-size: 0.8rem;
+  }
+
+  .login-logo-section {
+    width: 50%;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .login-logo-item {
+    font-size: 2rem;
+    color: $primary-color;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: darken($primary-color, 10%);
+      transform: scale(1.1);
     }
   }
 }
@@ -461,6 +587,7 @@ onMounted(() => {
   transition: transform 0.3s ease;
 
   &:hover {
+    cursor: pointer;
     transform: translate(30%, 50%);
   }
 }
@@ -501,28 +628,24 @@ onMounted(() => {
     padding: 20px !important;
   }
 
-  .brand-title {
-    font-size: 22px !important;
+  .login-section {
+    width: 80%;
   }
 
-  .brand-desc {
-    font-size: 13px !important;
-  }
-
-  .form-group {
-    margin-bottom: 15px !important;
+  .welcome-text {
+    font-size: 1.25rem !important;
   }
 
   .login-form {
+    margin-top: 1rem;
+
     .form-group {
-      .form-label {
-        font-size: 13px;
-      }
+      margin-bottom: 1rem;
     }
   }
 
-  .wechat-login-section {
-    margin-top: 20px;
+  .other-login-section {
+    margin-top: 1.5rem;
   }
 }
 </style>
