@@ -18,6 +18,7 @@ dist-ssr
 !.vscode/settings.json
 !.vscode/vue-template.code-snippets
 .idea
+.trae
 .DS_Store
 *.suo
 *.ntvs*

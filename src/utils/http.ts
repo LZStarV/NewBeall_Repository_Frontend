@@ -1,12 +1,13 @@
 import axios from 'axios';
 import type {
   AxiosInstance,
-  AxiosResponse,
   InternalAxiosRequestConfig,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
 } from 'axios';
-import type { ApiResponse } from '@/types/Api';
+
 import env from './env';
-import { useAuthStore } from '@/stores/auth';
 
 class HttpClient {
   private instance: AxiosInstance;
@@ -23,13 +24,13 @@ class HttpClient {
     // 请求拦截器
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        const authStore = useAuthStore();
-        const token = authStore.token;
-
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
+        // GET请求添加时间戳防缓存
+        if (config.method?.toUpperCase() === 'GET') {
+          config.params = {
+            ...config.params,
+            _t: Date.now(),
+          };
         }
-
         return config;
       },
       (error) => {
@@ -39,69 +40,115 @@ class HttpClient {
 
     // 响应拦截器
     this.instance.interceptors.response.use(
-      <T extends object | any[]>(
-        response: AxiosResponse<ApiResponse<T> | Blob>,
-      ): AxiosResponse<T | Blob> => {
-        // 1. 处理 Blob 类型响应(直接响应)
-        if (response.data instanceof Blob) {
-          return response as AxiosResponse<Blob>;
-        }
-
-        // 2. 处理 JSON 类型响应
-        const { code, data, message } = response.data as ApiResponse<T>;
-        if (code == 0 || code == 200) {
-          return { ...response, data } as AxiosResponse<T>;
-        }
-
-        throw new Error(message);
-      },
-      (error) => {
-        // 3. 处理 HTTP 错误
-        if (error.response) {
-          const { code, msg } = error.response.data;
-          throw new Error(`${msg || `请求失败(${code})`}`);
-        }
-
-        // 无响应（网络错误）
-        if (error.request) {
-          throw new Error('网络连接失败，请检查网络');
-        }
-
-        // 请求配置错误
-        throw new Error('请求配置错误');
+      (response) => response,
+      (error: AxiosError) => {
+        const responseData: unknown | string =
+          error.response?.data || `未知错误，请联系管理员:\n${error}`;
+        return Promise.reject(responseData);
       },
     );
   }
 
   // 封装请求方法
-  get<T extends object | any[]>(url: string, params?: any): Promise<T> {
-    return this.instance.get(url, { params });
-  }
 
-  post<T extends object | any[]>(
+  /**
+   * 发送GET请求
+   * @template T - 响应数据的类型
+   * @param {string} url - 请求地址
+   * @param {Record<string, any>} [params] - 查询参数，会合并到config.params中
+   * @param {AxiosRequestConfig} [config] - Axios请求配置对象，若提供params参数将与其合并
+   * @returns {Promise<AxiosResponse<T>>} - 返回包含响应数据的Promise对象
+   * @example
+   * // 基础用法
+   * http.get<User>('/user').then(response => {
+   *   console.log(response.data);
+   * });
+   * // 带请求配置
+   * http.get<Article[]>('/articles', { page: 1, limit: 10 }, {
+   *   responseType: 'blob',
+   * });
+   */
+  get<T = any>(
     url: string,
-    data?: any,
-    params?: any,
-  ): Promise<T> {
-    return this.instance.post(url, data, { params });
+    params?: Record<string, any>,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
+    const requestConfig = {
+      ...config,
+      params: { ...config?.params, ...params },
+    };
+    return this.instance.get(url, requestConfig);
   }
 
-  delete<T extends object | any[]>(url: string): Promise<T> {
-    return this.instance.delete(url);
+  /**
+   * 发送POST请求
+   * @template D - 请求数据的类型
+   * @template T - 响应数据的类型
+   * @param {string} url - 请求地址
+   * @param {D} [data] - 要发送的数据
+   * @param {AxiosRequestConfig} [config] - Axios请求配置对象
+   * @returns {Promise<AxiosResponse<T>>} - 返回包含响应数据的Promise对象
+   * @example
+   * // 提交表单数据
+   * http.post<User>('/login', {
+   *   username: 'admin',
+   *   password: 'password'
+   * }).then(response => {
+   *   console.log('登录成功', response.data);
+   * });
+   */
+  post<D = any, T = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
+    return this.instance.post(url, data, config);
   }
 
-  put<T extends object | any[]>(url: string, data?: any): Promise<T> {
-    return this.instance.put(url, data);
+  /**
+   * 发送DELETE请求
+   * @template T - 响应数据的类型
+   * @param {string} url - 请求地址
+   * @param {AxiosRequestConfig} [config] - Axios请求配置对象
+   * @returns {Promise<AxiosResponse<T>>} - 返回包含响应数据的Promise对象
+   * @example
+   * // 删除资源
+   * http.delete<{ success: boolean }>('/users/1').then(response => {
+   *   if (response.data.success) {
+   *     console.log('删除成功');
+   *   }
+   * });
+   */
+  delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
+    return this.instance.delete(url, config);
   }
 
-  // 新增：获取二进制数据（如图片）的方法，不解析为 ApiResponse
-  getBlob(url: string, params?: any): Promise<Blob> {
-    return this.instance
-      .get(url, {
-        params,
-        responseType: 'blob',
-      })
-      .then((response) => response.data);
+  /**
+   * 发送PUT请求
+   * @template D - 请求数据的类型
+   * @template T - 响应数据的类型
+   * @param {string} url - 请求地址
+   * @param {D} [data] - 要发送的数据
+   * @param {AxiosRequestConfig} [config] - Axios请求配置对象
+   * @returns {Promise<AxiosResponse<T>>} - 返回包含响应数据的Promise对象
+   * @example
+   * // 更新用户信息
+   * http.put<User>('/users/1', {
+   *   name: 'New Name',
+   *   email: 'new@example.com'
+   * }).then(response => {
+   *   console.log('更新成功', response.data);
+   * });
+   */
+  put<D = any, T = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
+    return this.instance.put(url, data, config);
   }
 }
 
