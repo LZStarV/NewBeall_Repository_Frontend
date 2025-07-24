@@ -5,7 +5,7 @@ import type { VideoData } from './videoApi.type';
 export default {
   // 帮助页查询列表
   getVideoHelpList() {
-    return http.get<{ data: VideoData[] }>('/operationVideo/helpList');
+    return http.get<VideoData[]>('/operationVideo/helpList');
   },
 
   // 首页查询列表
