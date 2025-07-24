@@ -40,10 +40,9 @@ class HttpClient {
 
     // 响应拦截器
     this.instance.interceptors.response.use(
-      (response) => response,
+      (response: AxiosResponse) => response.data || response,
       (error: AxiosError) => {
-        const responseData: unknown | string =
-          error.response?.data || `未知错误，请联系管理员:\n${error}`;
+        const responseData: unknown | string = error.response?.data || error;
         return Promise.reject(responseData);
       },
     );

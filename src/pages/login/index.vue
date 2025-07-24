@@ -32,7 +32,7 @@
                   prop="username"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入用户名"
+                  required-error-message="用户名不能为空"
                   class="form-group"
                 >
                   <lay-input
@@ -50,7 +50,7 @@
                   prop="password"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入密码"
+                  required-error-message="密码不能为空"
                   class="form-group"
                 >
                   <lay-input
@@ -69,7 +69,7 @@
                   prop="kaptcha"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入验证码"
+                  required-error-message="验证码不能为空"
                   class="form-group"
                 >
                   <div class="captcha">
