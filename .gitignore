@@ -19,6 +19,7 @@ dist-ssr
 !.vscode/vue-template.code-snippets
 .idea
 .trae
+.vercel
 .DS_Store
 *.suo
 *.ntvs*
