@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isVisible && companyData" class="company-modal" @click.stop>
+  <div v-if="isVisible && companyData" class="company-modal">
     <!-- Header -->
     <div class="modal-header">
       <div class="tab-container">
@@ -18,7 +18,7 @@
           主营业务
         </button>
       </div>
-      <button class="close-button" @click="isVisible = false">
+      <button class="close-button" @click="chatStore.setCompanyInfoVisiable(false)">
         <SvgIcon name="cancel" />
       </button>
     </div>
@@ -117,23 +117,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import { getCompanyInfo } from '@/api/chat/chatApi';
 import type { CompanyBusiness, CompanyData } from './Chat.type';
-import type { Ref } from 'vue';
 import Avatar from '@/components/Avatar.vue';
-
-// Props
-const isVisible = ref(false);
+import { useChatStore } from '@/stores/chat';
 
 // Reactive data
 const activeTab = ref<'company' | 'business'>('company');
 
 const companyData = ref<CompanyData>();
 const companyBusinessList = ref<CompanyBusiness[]>();
-
-const chatInfoToKey = inject<Ref<string>>('chat-info-tokey');
 
 // 获取公司类型
 const getCompanyType = (data: CompanyData): string => {
@@ -166,17 +161,23 @@ const getCompnayAptitudeList = (data: CompanyData): string[] => {
   return aptitudeList;
 };
 
+const chatStore = useChatStore();
+
+const isVisible = computed(() => {
+  return chatStore.isCompanyInfoShow;
+});
+
 watch(
-  () => chatInfoToKey?.value,
+  () => chatStore.chatInfo,
   async (newValue) => {
-    if (newValue?.slice(0, 2) === 'PY' || newValue?.slice(0, 3) === 'PRO') {
-      const res = await getCompanyInfo(newValue); // 获取公司信息
+    if (newValue?.toKey?.slice(0, 2) === 'PY' || newValue?.toKey?.slice(0, 3) === 'PRO') {
+      const res = await getCompanyInfo(newValue.toKey); // 获取公司信息
       companyData.value = res.data.companyData;
       companyBusinessList.value = res.data.companyBusinessData;
-      isVisible.value = true;
+      chatStore.setCompanyInfoVisiable(true);
     } else {
       // 隐藏组件
-      isVisible.value = false;
+      chatStore.setCompanyInfoVisiable(false);
     }
   },
   { immediate: true },
@@ -190,10 +191,10 @@ watch(
   border-radius: 16px;
   border: 1px solid #ededed;
   box-shadow: $box-shadow-base;
-  max-height: 800px;
+  max-height: 900px;
   min-width: 350px;
   max-width: 400px;
-  height: 80%;
+  height: 90%;
   margin-left: 1rem;
   overflow: hidden;
 }
@@ -249,7 +250,7 @@ watch(
 
 .modal-content {
   padding: 1rem;
-  height: calc(80vh - 75px);
+  height: calc(90vh - 75px);
   overflow-y: auto;
 }
 
@@ -349,6 +350,7 @@ watch(
 .business-content {
   height: 100%;
   overflow-y: auto;
+  padding-top: 2px;
 
   .business-list {
     display: flex;

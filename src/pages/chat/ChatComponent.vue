@@ -2,21 +2,12 @@
   <div class="chat-box">
     <div class="column" :style="{ width: `${leftWidth}%` }">
       <!-- 侧边导航栏 -->
-      <ChatNavbar
-        :user-info="userInfo!"
-        :new-item-url="contactListUrl"
-        @update-contact-list="contactListUrl = $event"
-        @nav-items-list-loaded="navItemsList = $event"
-      />
+      <ChatNavbar @nav-items-list-loaded="navItemsList = $event" />
 
       <!-- 联系人列表 -->
       <ChatContactList
         :style="{ width: `calc(${100}% - 65px)` }"
-        :contact-url="contactListUrl"
-        :user-info="userInfo!"
         :nav-items-list="navItemsList!"
-        @click-item="selectedChatInfo = $event"
-        @update-contact-list="contactListUrl = $event"
       />
     </div>
 
@@ -29,52 +20,20 @@
 
     <!-- 聊天区域 -->
     <div class="column" :style="{ width: `${rightWidth}%` }">
-      <ChatMessageBox
-        :chat-info="selectedChatInfo!"
-        :user-info="userInfo!"
-        :show-company-info="showCompanyInfo"
-        @toggle-company-info="showCompanyInfo = !showCompanyInfo"
-      />
+      <ChatMessageBox />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getMe } from '@/api/chat/chatApi';
-import type { UserInfo, ChatInfo, ContactGroup } from './Chat.type';
+import type { ContactGroup } from './Chat.type';
 import ChatContactList from './components/ChatContactList.vue';
 import ChatMessageBox from './components/ChatMessageBox.vue';
 import ChatNavbar from './components/ChatNavbar.vue';
-import { ref, onUnmounted, computed, onMounted, watch } from 'vue';
-
-const emit = defineEmits<{
-  'update-active-id': [id: string];
-}>();
+import { ref, onUnmounted, computed } from 'vue';
 
 // 组件之间传递数据的中间变量
-const selectedChatInfo = ref<ChatInfo>();
-const userInfo = ref<UserInfo>();
-const contactListUrl = ref('temp');
 const navItemsList = ref<ContactGroup[]>();
-
-// 控制公司信息显示
-const showCompanyInfo = ref(false);
-
-// 监听 selectedChatInfo 的变化，发送 activeItemId 给父组件
-watch(
-  () => selectedChatInfo.value?.toKey,
-  (newToKey) => {
-    if (newToKey) {
-      emit('update-active-id', newToKey);
-    }
-  },
-);
-
-onMounted(async () => {
-  // todo: get user info api
-  const res = await getMe();
-  userInfo.value = res.data;
-});
 
 interface ResizeState {
   isResizing: boolean;
@@ -154,9 +113,9 @@ onUnmounted(() => {
   width: 100%;
   max-width: 1000px;
   min-width: 1000px;
-  max-height: 800px;
+  max-height: 900px;
   margin: 20rem 0;
-  height: 80%;
+  height: 90%;
   background: white;
   border-radius: 16px;
   border: 1px solid #ededed;

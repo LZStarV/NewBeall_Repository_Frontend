@@ -62,20 +62,23 @@
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
-import { onMounted, ref, watch, nextTick } from 'vue';
-import type { ChatInfo, ContactInfo } from '../Chat.type';
+import { onMounted, ref, watch, nextTick, computed } from 'vue';
+import type { ChatInfo, ContactInfo, UserInfo } from '../Chat.type';
 import {
   getAnyMessageList,
   getTempWindow,
   saveTempWindow,
 } from '@/api/chat/chatApi';
 import Avatar from '@/components/Avatar.vue';
+import { useChatStore } from '@/stores/chat';
 
 const { formatDateTime, compareDateTime } = useFormatDate();
 
 const contactList = ref<ChatInfo[] | ContactInfo[]>();
 const originalContactList = ref<ChatInfo[] | ContactInfo[]>(); // 保存原始列表
 const searchKeyword = ref(''); // 搜索关键词
+
+const chatStore = useChatStore();
 
 const handleSearch = () => {
   if (!searchKeyword.value) {
@@ -113,11 +116,6 @@ const activeItemId = ref('');
 
 const toKey = ref(''); // 用来自动选中
 
-const emit = defineEmits<{
-  (event: 'click-item', chatInfo: ChatInfo): void;
-  (event: 'update-contact-list', contactUrl: string): void;
-}>();
-
 function isChatInfo(item: unknown): item is ChatInfo {
   return (
     !!item && typeof item === 'object' && 'toKey' in item && 'chatName' in item
@@ -133,26 +131,27 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
   }
   activeItemId.value = id;
 
-  if (contactUrl === 'temp') {
+  if (contactUrl.value === 'temp') {
     // 传出点击item的chatInfo，供聊天框使用
     if (isChatInfo(chatInfo)) {
-      emit('click-item', chatInfo);
+      chatStore.setChatInfo(chatInfo);
     }
     return;
   }
 
-  // 组装formData对象
+  // 如果不是临时聊天
+  // 组装params对象
   let prefix = '';
   if (navItemsList && navItemsList.length > 0) {
     // contactUrl就是url字段
-    const found = navItemsList.find((item) => item.url === contactUrl);
+    const found = navItemsList.find((item) => item.url === contactUrl.value);
     if (found) prefix = found.prefix;
   }
   const toId = isChatInfo(chatInfo)
     ? chatInfo.toKey
     : String((chatInfo as ContactInfo).id);
-  const fromId = userInfo.id ? String(userInfo.id) : '';
-  const formData = {
+  const fromId = userInfo.value?.id ? String(userInfo.value.id) : '';
+  const params = {
     prefix,
     toId,
     fromId,
@@ -166,27 +165,36 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
       ? chatInfo.avatar
       : (chatInfo as ContactInfo).avatar,
   };
-  await saveTempWindow(formData);
-  // 通知父组件/ChatNavbar切换到临时聊天
+  await saveTempWindow(params);
+  // 切换到临时聊天
   if (prefix == 'PY') toKey.value = `${toId}`;
   else
     toKey.value =
       toId.slice(0, prefix.length) == prefix ? toId : `${prefix}-${toId}`;
-  emit('update-contact-list', 'temp');
+  chatStore.setActiveNavItem('temp');
 };
 
-const { contactUrl, userInfo, navItemsList } = defineProps<{
-  contactUrl: string;
-  userInfo: import('../Chat.type').UserInfo;
+const contactUrl = computed(() => {
+  return chatStore.activeNavItem;
+});
+
+const { navItemsList } = defineProps<{
   navItemsList: import('../Chat.type').ContactGroup[];
 }>();
 
+const userInfo = ref<UserInfo>();
+
+onMounted(async () => {
+  await chatStore.setUserInfo();
+  userInfo.value = chatStore.userInfoData!;
+});
+
 const getContactList = async () => {
   let res: { data: ChatInfo[] | ContactInfo[] };
-  if (contactUrl == 'temp') {
+  if (contactUrl.value == 'temp') {
     res = await getTempWindow();
-  } else if (contactUrl.length >= 0) {
-    res = await getAnyMessageList(contactUrl);
+  } else if (contactUrl.value.length >= 0) {
+    res = await getAnyMessageList(contactUrl.value);
   } else {
     return;
   }
@@ -241,7 +249,7 @@ const getContactList = async () => {
 
 // 当切换contactUrl时，清空搜索框
 watch(
-  () => contactUrl,
+  contactUrl,
   () => {
     searchKeyword.value = '';
     getContactList();
