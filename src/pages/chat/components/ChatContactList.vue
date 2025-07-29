@@ -80,6 +80,11 @@ const searchKeyword = ref(''); // 搜索关键词
 
 const chatStore = useChatStore();
 
+// Emits
+const emit = defineEmits<{
+  (e: 'contact-selected'): void;
+}>();
+
 const handleSearch = () => {
   if (!searchKeyword.value) {
     // 搜索框为空，恢复原始列表
@@ -130,6 +135,9 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
     id = String(chatInfo.id);
   }
   activeItemId.value = id;
+
+  // 触发联系人选择事件，用于移动端视图切换
+  emit('contact-selected');
 
   if (contactUrl.value === 'temp') {
     // 传出点击item的chatInfo，供聊天框使用

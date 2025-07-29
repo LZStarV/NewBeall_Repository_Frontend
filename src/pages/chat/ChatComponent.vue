@@ -1,6 +1,10 @@
 <template>
-  <div class="chat-box">
-    <div class="column" :style="{ width: `${leftWidth}%` }">
+  <div class="chat-box" :class="{ 'mobile-view': isMobileView }">
+    <div
+      class="column left-column"
+      :style="{ width: `${leftWidth}%` }"
+      :class="{ 'mobile-full': isMobileView && !showMessageBox }"
+    >
       <!-- 侧边导航栏 -->
       <ChatNavbar @nav-items-list-loaded="navItemsList = $event" />
 
@@ -8,19 +12,25 @@
       <ChatContactList
         :style="{ width: `calc(${100}% - 65px)` }"
         :nav-items-list="navItemsList!"
+        @contact-selected="handleContactSelected"
       />
     </div>
 
     <!-- 分割符 -->
     <div
+      v-if="!isMobileView"
       class="resizer"
       :class="{ resizing: isResizing }"
       @mousedown="startResize($event)"
     ></div>
 
     <!-- 聊天区域 -->
-    <div class="column" :style="{ width: `${rightWidth}%` }">
-      <ChatMessageBox />
+    <div
+      class="column right-column"
+      :style="{ width: isMobileView ? '100%' : `${rightWidth}%` }"
+      :class="{ 'mobile-show': isMobileView && showMessageBox }"
+    >
+      <ChatMessageBox :show-back-button="isMobileView" @back-clicked="showMessageBox = false" />
     </div>
   </div>
 </template>
@@ -30,7 +40,8 @@ import type { ContactGroup } from './Chat.type';
 import ChatContactList from './components/ChatContactList.vue';
 import ChatMessageBox from './components/ChatMessageBox.vue';
 import ChatNavbar from './components/ChatNavbar.vue';
-import { ref, onUnmounted, computed } from 'vue';
+import { ref, onUnmounted, computed, onMounted, watch } from 'vue';
+import { useChatStore } from '@/stores/chat';
 
 // 组件之间传递数据的中间变量
 const navItemsList = ref<ContactGroup[]>();
@@ -43,6 +54,9 @@ interface ResizeState {
 
 const leftWidth = ref<number>(40);
 const isResizing = ref<boolean>(false);
+const isMobileView = ref<boolean>(false);
+const showMessageBox = ref<boolean>(false);
+const chatStore = useChatStore();
 
 // 计算右列宽度
 const rightWidth = computed<number>(() => 100 - leftWidth.value);
@@ -100,9 +114,37 @@ const stopResize = (): void => {
   document.body.style.userSelect = '';
 };
 
+// 检查窗口大小并设置响应式状态
+const checkWindowSize = () => {
+  isMobileView.value = window.innerWidth <= 768;
+};
+
+// 处理联系人选择
+const handleContactSelected = () => {
+  if (isMobileView.value) {
+    showMessageBox.value = true;
+  }
+};
+
+// 监听聊天信息变化，在移动端自动显示消息框
+watch(
+  () => chatStore.chatInfo,
+  (newVal) => {
+    if (newVal && isMobileView.value) {
+      showMessageBox.value = true;
+    }
+  }
+);
+
+onMounted(() => {
+  checkWindowSize();
+  window.addEventListener('resize', checkWindowSize);
+});
+
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleResize);
   document.removeEventListener('mouseup', stopResize);
+  window.removeEventListener('resize', checkWindowSize);
   document.body.style.cursor = '';
   document.body.style.userSelect = '';
 });
@@ -117,10 +159,12 @@ onUnmounted(() => {
   margin: 20rem 0;
   height: 90%;
   background: white;
-  border-radius: 16px;
+  border-radius: $border-radius-extra-large;
   border: 1px solid #ededed;
   display: flex;
   box-shadow: $box-shadow-base;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .column {
@@ -179,6 +223,48 @@ onUnmounted(() => {
   &:hover::after,
   &.resizing::after {
     opacity: 1;
+  }
+}
+
+/* 平板模式 */
+@media (max-width: $desktop_layout_breakpoint) {
+  .chat-box {
+    min-width: auto;
+    width: 100%;
+    margin: 0;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+/* 手机模式 */
+@media (max-width: $pad_layout_breakpoint) {
+  .chat-box {
+    &.mobile-view {
+      .left-column {
+        width: 100% !important;
+
+        &.mobile-full {
+          display: flex;
+        }
+      }
+
+      .right-column {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100%;
+        z-index: 100;
+        background: white;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+
+        &.mobile-show {
+          transform: translateX(0);
+        }
+      }
+    }
   }
 }
 </style>

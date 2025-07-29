@@ -3,6 +3,9 @@
     <!-- 顶部栏 -->
     <header class="header">
       <div class="left">
+        <button v-if="showBackButton" class="back-button" @click="handleBackClick">
+          <SvgIcon name="to_the_left" width="1.25rem" height="1.25rem" />
+        </button>
         <Avatar :url="chatboxInfo?.avatar" radius size="3rem" />
         <strong>{{ chatboxInfo?.chatName }}</strong>
       </div>
@@ -224,6 +227,21 @@ import {
   type EmojiCategory,
 } from '@/utils/chat/emoji-config';
 import { useChatStore } from '@/stores/chat';
+
+// Props
+defineProps<{
+  showBackButton?: boolean;
+}>();
+
+// Emits
+const emit = defineEmits<{
+  (e: 'back-clicked'): void;
+}>();
+
+// 处理返回按钮点击
+const handleBackClick = () => {
+  emit('back-clicked');
+};
 
 const { formatDateTime } = useFormatDate();
 
@@ -552,6 +570,20 @@ onUnmounted(() => {
     border-bottom: 1px solid #ededed;
 
     .left {
+      display: flex;
+      align-items: center;
+
+      .back-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        margin-right: 0.5rem;
+        color: #2b5bb2;
+      }
+
       .layui-avatar {
         width: 3rem;
         height: 3rem;
@@ -770,7 +802,7 @@ onUnmounted(() => {
   .date-text {
     background-color: #f0f2f5;
     padding: 4px 12px;
-    border-radius: 16px;
+    border-radius: $border-radius-extra-large;
     font-size: 12px;
     color: #666;
   }
@@ -863,6 +895,33 @@ onUnmounted(() => {
         cursor: not-allowed;
       }
     }
+  }
+}
+
+/* 移动端样式调整 */
+@media (max-width: 768px) {
+  .emoji-panel {
+    width: 300px !important;
+
+    .emoji-grid {
+      grid-template-columns: repeat(6, 1fr) !important;
+    }
+  }
+
+  .member-panel {
+    width: 250px !important;
+  }
+
+  .input-box {
+    height: 180px !important;
+
+    .input-area textarea {
+      height: 80px !important;
+    }
+  }
+
+  .tips-bar {
+    display: none;
   }
 }
 </style>
