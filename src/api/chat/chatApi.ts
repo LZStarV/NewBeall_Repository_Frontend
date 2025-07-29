@@ -14,6 +14,24 @@ export const getMe = async () => {
   return res.data;
 };
 
+// 获取管理员信息
+export const getAdminInfo = async () => {
+  const res = await http.get<{ data: UserInfo }>('/mgr/getAdmin');
+  return res.data;
+};
+
+// 获取可以新建群聊的用户列表
+export const getCanCreateGroupUserList = async (roleOutMe: boolean) => {
+  const formData = new FormData();
+  formData.append('roleOutMe', roleOutMe ? 'true' : 'false');
+  const res = await http.post<FormData>('/mgr/users', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return res.data;
+};
+
 // 获取消息列表通用接口
 export const getAnyMessageList = async (url: string) => {
   const res = await http.post<{ data: ChatInfo[] | ContactInfo[] }>(url);
@@ -151,5 +169,12 @@ export const deleteChat = async (toKey: string) => {
 // 获取聊天联系分组
 export const getContactGroup = async () => {
   const res = await http.get<{ data: ContactGroup[] }>('/chatContactModel');
+  return res.data;
+};
+
+
+// 提交意见
+export const submitFeedback = async (feedback: string, phone: string) => {
+  const res = await http.get('/suggest/add', { sugtext: feedback, phone });
   return res.data;
 };

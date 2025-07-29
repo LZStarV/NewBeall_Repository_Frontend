@@ -33,7 +33,7 @@
           <!-- Company Header -->
           <div class="company-header">
             <div class="company-logo">
-              <Avatar :url="companyData.logoUrl" size="5rem" />
+              <img :src="`https://yx.newbeall.com/softLink/${companyData.logoUrl}`" />
             </div>
             <div class="company-info">
               <h2 class="company-name">
@@ -126,7 +126,6 @@ import { ref, watch, computed } from 'vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import { getCompanyInfo } from '@/api/chat/chatApi';
 import type { CompanyBusiness, CompanyData } from './Chat.type';
-import Avatar from '@/components/Avatar.vue';
 import { useChatStore } from '@/stores/chat';
 
 // Reactive data
@@ -226,7 +225,7 @@ const isMobileView = computed(() => {
   box-shadow: $box-shadow-base;
   max-height: 900px;
   min-width: 350px;
-  max-width: 400px;
+  max-width: 350px;
   height: 90%;
   margin-left: 1rem;
   overflow: hidden;
@@ -291,9 +290,12 @@ const isMobileView = computed(() => {
     margin-bottom: $spacing-extra-large;
 
     .company-logo {
-      .layui-avatar {
-        width: 4.5rem;
-        height: 4.5rem;
+      width: 4.5rem;
+      height: 4.5rem;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
       }
     }
 
