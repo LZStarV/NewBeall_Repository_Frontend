@@ -1,0 +1,22 @@
+{
+  "name": "websocket-proxy-server",
+  "version": "1.0.0",
+  "description": "WebSocket代理服务器，支持Cookie转发和Origin修改",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17"
+  }
+}

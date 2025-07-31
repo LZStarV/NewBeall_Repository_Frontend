@@ -28,6 +28,9 @@ export const useChatStore = defineStore('chat', () => {
   };
   // 设置当前用户信息
   const setUserInfo = async () => {
+    if (userInfoData.value) {
+      return;
+    }
     const res = await getMe();
     if (res.data) {
       userInfoData.value = res.data;

@@ -253,8 +253,6 @@ import dayjs from 'dayjs';
 import {
   EMOJI_CATEGORIES,
   EMOJI_RESOURCE_CONFIG,
-  emojiRegex,
-  getEmojiInfo,
   type EmojiCategory,
 } from '@/utils/chat/emoji-config';
 import { useChatStore } from '@/stores/chat';
@@ -375,46 +373,6 @@ const insertEmoji = (emoji: string) => {
 
   showEmojiPanel.value = false;
 };
-
-// 渲染输入框内容（包含表情）
-const renderInputContent = computed(() => {
-  if (!inputContent.value.includes('[')) return inputContent.value;
-
-  const parts: (
-    | string
-    | { isEmoji: true; fileName: string; categoryId: string }
-  )[] = [];
-  let lastIndex = 0;
-
-  inputContent.value.replace(emojiRegex, (match, code, offset) => {
-    // 添加表情前的文本
-    if (offset > lastIndex) {
-      parts.push(inputContent.value.slice(lastIndex, offset));
-    }
-
-    // 查找表情信息
-    const emojiInfo = getEmojiInfo(`[${code}]`);
-    if (emojiInfo) {
-      parts.push({
-        isEmoji: true,
-        fileName: emojiInfo.fileName,
-        categoryId: emojiInfo.categoryId,
-      });
-    } else {
-      parts.push(match); // 如果找不到表情，保留原文本
-    }
-
-    lastIndex = offset + match.length;
-    return match;
-  });
-
-  // 添加剩余的文本
-  if (lastIndex < inputContent.value.length) {
-    parts.push(inputContent.value.slice(lastIndex));
-  }
-
-  return parts;
-});
 
 // 按天对消息进行分组
 const groupedMessages = computed(() => {
