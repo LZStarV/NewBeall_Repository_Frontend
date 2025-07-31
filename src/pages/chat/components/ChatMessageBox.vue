@@ -3,6 +3,9 @@
     <!-- 顶部栏 -->
     <header class="header">
       <div class="left">
+        <button v-if="showBackButton" class="back-button" @click="handleBackClick">
+          <SvgIcon name="to_the_left" width="1.25rem" height="1.25rem" />
+        </button>
         <Avatar :url="chatboxInfo?.avatar" radius size="3rem" />
         <strong>{{ chatboxInfo?.chatName }}</strong>
       </div>
@@ -14,8 +17,8 @@
             chatboxInfo?.toKey?.startsWith('PRO')
           "
           class="tool-btn"
-          :class="{ active: showCompanyInfo }"
-          @click="$emit('toggle-company-info')"
+          :class="{ active: chatStore.isCompanyInfoShow }"
+          @click="chatStore.setCompanyInfoVisiable(!chatStore.isCompanyInfoShow)"
         >
           <SvgIcon name="company_information" />
         </button>
@@ -111,7 +114,50 @@
         content="您好！壹新Newbeall设计报价管理云平台欢迎您的咨询与提出宝贵意见！"
         :is-my-message="false"
       />
+      <button class="feedback-btn" @click="showFeedbackPanel = true">
+        <SvgIcon name="consult" />
+        提交意见
+      </button>
     </div>
+
+    <!-- 意见反馈面板 -->
+    <div v-if="showFeedbackPanel" class="feedback-panel-overlay" @click.self="closeFeedbackPanel">
+      <div class="feedback-panel">
+        <h3>提交建议给壹新</h3>
+        <div class="form-group">
+          <label for="feedbackContent">建议内容 (5-200字):</label>
+          <textarea
+            id="feedbackContent"
+            v-model="feedbackContent"
+            @input="validateFeedback"
+            :class="{ 'input-error': feedbackError }"
+            placeholder="请输入您的建议"
+          ></textarea>
+          <p v-if="feedbackError" class="error-message">{{ feedbackError }}</p>
+        </div>
+        <div class="form-group">
+          <label for="phoneNumber">电话号码:</label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            v-model="phoneNumber"
+            @input="validatePhone"
+            :class="{ 'input-error': phoneError }"
+            placeholder="请输入您的手机号码"
+          />
+          <p v-if="phoneError" class="error-message">{{ phoneError }}</p>
+        </div>
+        <div class="panel-actions">
+          <button class="cancel-btn" @click="closeFeedbackPanel">取消</button>
+          <button
+            class="submit-btn"
+            :disabled="!feedbackContent || !phoneNumber || feedbackError.length > 0 || phoneError.length > 0"
+            @click="handleSubmitFeedback"
+          >提交</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 聊天内容 -->
     <main ref="msgAreaRef" class="msg-area">
       <template v-for="[date, messages] in groupedMessages" :key="date">
@@ -125,7 +171,7 @@
           :user-name="msg.sendName!"
           :time="msg.sendTime"
           :content="msg.content"
-          :is-my-message="userInfo.id == msg.fromId"
+          :is-my-message="userInfo!.id == msg.fromId"
           :unread-users="parseJsonSafely(msg.unread)"
           :read-users="parseJsonSafely(msg.read)"
           :is-group-chat="chatboxInfo?.type || false"
@@ -146,7 +192,7 @@
                 v-for="category in EMOJI_CATEGORIES"
                 :key="category.id"
                 class="category-item"
-                :class="{ active: currentCategoryId === category.id }"
+                :class="{ active: Boolean(currentCategoryId === category.id) }"
                 @click="currentCategoryId = category.id"
               >
                 {{ category.name }}
@@ -173,19 +219,6 @@
         </div>
       </div>
       <div class="input-area">
-        <div class="preview-area">
-          <template v-for="(part, index) in renderInputContent" :key="index">
-            <template v-if="typeof part === 'string'">{{ part }}</template>
-            <Avatar
-              v-else
-              :prefix="getEmojiPrefix(part.categoryId)"
-              :url="part.fileName"
-              size="1.25rem"
-              :radius="false"
-              style="display: inline-block; vertical-align: middle"
-            />
-          </template>
-        </div>
         <textarea
           ref="textareaRef"
           v-model="inputContent"
@@ -202,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, computed } from 'vue';
+import { nextTick, onMounted, ref, watch, computed, onUnmounted } from 'vue';
 import type { ChatInfo, ChatMessage, UserInfo } from '../Chat.type';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ChatMessageItem from './ChatMessageItem.vue';
@@ -212,6 +245,7 @@ import {
   getGroupMembers,
   getNotJoinMember,
   joinGroup,
+  submitFeedback, // 导入 submitFeedback API
 } from '@/api/chat/chatApi';
 import Avatar from '@/components/Avatar.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
@@ -219,15 +253,81 @@ import dayjs from 'dayjs';
 import {
   EMOJI_CATEGORIES,
   EMOJI_RESOURCE_CONFIG,
-  emojiRegex,
-  getEmojiInfo,
   type EmojiCategory,
 } from '@/utils/chat/emoji-config';
+import { useChatStore } from '@/stores/chat';
+
+// Props
+defineProps<{
+  showBackButton?: boolean;
+}>();
+
+// Emits
+const emit = defineEmits<{
+  (e: 'back-clicked'): void;
+}>();
+
+// 处理返回按钮点击
+const handleBackClick = () => {
+  emit('back-clicked');
+};
 
 const { formatDateTime } = useFormatDate();
 
 const showEmojiPanel = ref(false);
 const currentCategoryId = ref('default');
+
+// 意见反馈相关
+const showFeedbackPanel = ref(false);
+const feedbackContent = ref('');
+const phoneNumber = ref('');
+const feedbackError = ref('');
+const phoneError = ref('');
+
+const validateFeedback = () => {
+  if (feedbackContent.value.length < 5 || feedbackContent.value.length > 200) {
+    feedbackError.value = '建议内容长度需在5-200字之间';
+    return false;
+  }
+  feedbackError.value = '';
+  return true;
+};
+
+const validatePhone = () => {
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  if (!phoneRegex.test(phoneNumber.value)) {
+    phoneError.value = '请输入正确的11位手机号码';
+    return false;
+  }
+  phoneError.value = '';
+  return true;
+};
+
+const handleSubmitFeedback = async () => {
+  const isFeedbackValid = validateFeedback();
+  const isPhoneValid = validatePhone();
+
+  if (isFeedbackValid && isPhoneValid) {
+    try {
+      await submitFeedback(feedbackContent.value, phoneNumber.value);
+      alert('意见提交成功！感谢您的宝贵建议。');
+      showFeedbackPanel.value = false;
+      feedbackContent.value = '';
+      phoneNumber.value = '';
+    } catch (error) {
+      console.error('提交意见失败:', error);
+      alert('提交意见失败，请稍后再试。');
+    }
+  }
+};
+
+const closeFeedbackPanel = () => {
+  showFeedbackPanel.value = false;
+  feedbackContent.value = '';
+  phoneNumber.value = '';
+  feedbackError.value = '';
+  phoneError.value = '';
+};
 
 // 获取当前分类的表情
 const currentEmojis = computed(() => {
@@ -272,52 +372,6 @@ const insertEmoji = (emoji: string) => {
   });
 
   showEmojiPanel.value = false;
-};
-
-// 渲染输入框内容（包含表情）
-const renderInputContent = computed(() => {
-  if (!inputContent.value.includes('[')) return inputContent.value;
-
-  const parts: (
-    | string
-    | { isEmoji: true; fileName: string; categoryId: string }
-  )[] = [];
-  let lastIndex = 0;
-
-  inputContent.value.replace(emojiRegex, (match, code, offset) => {
-    // 添加表情前的文本
-    if (offset > lastIndex) {
-      parts.push(inputContent.value.slice(lastIndex, offset));
-    }
-
-    // 查找表情信息
-    const emojiInfo = getEmojiInfo(`[${code}]`);
-    if (emojiInfo) {
-      parts.push({
-        isEmoji: true,
-        fileName: emojiInfo.fileName,
-        categoryId: emojiInfo.categoryId,
-      });
-    } else {
-      parts.push(match); // 如果找不到表情，保留原文本
-    }
-
-    lastIndex = offset + match.length;
-    return match;
-  });
-
-  // 添加剩余的文本
-  if (lastIndex < inputContent.value.length) {
-    parts.push(inputContent.value.slice(lastIndex));
-  }
-
-  return parts;
-});
-
-// 获取表情资源路径
-const getEmojiPrefix = (categoryId: string) => {
-  const key = categoryId.toUpperCase() as keyof typeof EMOJI_RESOURCE_CONFIG;
-  return EMOJI_RESOURCE_CONFIG[key] || EMOJI_RESOURCE_CONFIG.DEFAULT;
 };
 
 // 按天对消息进行分组
@@ -368,7 +422,7 @@ const handleSendMessage = async () => {
     const chatMsg: ChatMessage = {
       chatName: chatboxInfo.value.chatName,
       content: inputContent.value,
-      fromId: props.userInfo.id,
+      fromId: userInfo.value!.id,
       sendTime: String(Date.now()),
       toId: chatboxInfo.value.toKey,
       type: chatboxInfo.value.type,
@@ -417,30 +471,26 @@ const parseJsonSafely = (jsonString: string | undefined | null): number[] => {
   }
 };
 
-const props = defineProps<{
-  chatInfo: ChatInfo;
-  userInfo: UserInfo;
-  showCompanyInfo?: boolean;
-}>();
+const chatStore = useChatStore();
 
-// Emits
-defineEmits<{
-  'toggle-company-info': [];
-  'view-group-members': [];
-  'add-group-member': [];
-}>();
+const userInfo = ref<UserInfo>();
+
+onMounted(async () => {
+  await chatStore.setUserInfo();
+  userInfo.value = chatStore.userInfoData!;
+});
 
 const getMessageList = async () => {
-  const res = await getMessages(props.chatInfo.toKey);
+  const res = await getMessages(chatStore.chatInfo!.toKey);
   chatMessages.value = res.data.sort((a: ChatMessage, b: ChatMessage) => {
     return Number(a.sendTime) - Number(b.sendTime);
   });
 };
 
 watch(
-  () => props.chatInfo,
+  () => chatStore.chatInfo,
   async (newVal) => {
-    chatboxInfo.value = newVal;
+    chatboxInfo.value = newVal!;
     // 重新调用api
     await getMessageList();
     if (textareaRef.value) textareaRef.value.focus();
@@ -457,10 +507,6 @@ const scrollToBottom = () => {
     el.scrollTop = el.scrollHeight;
   }
 };
-
-onMounted(() => {
-  chatboxInfo.value = props.chatInfo;
-});
 
 // 群成员相关
 const showMemberPanel = ref(false);
@@ -523,16 +569,26 @@ const handleConfirmAdd = async () => {
   }
 };
 
+// 关闭成员、表情面板
+const closePanel = () => {
+  showMemberPanel.value = false;
+  showAddMemberPanel.value = false;
+  showEmojiPanel.value = false;
+};
+
 // 点击其他地方关闭面板
 onMounted(() => {
-  document.addEventListener('click', () => {
-    showMemberPanel.value = false;
-    showAddMemberPanel.value = false;
-  });
+  document.addEventListener('click', closePanel);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closePanel);
 });
 </script>
 
 <style scoped lang="scss">
+@use "sass:color";
+
 .chat-msg-box {
   width: 100%;
   display: flex;
@@ -549,6 +605,25 @@ onMounted(() => {
     border-bottom: 1px solid #ededed;
 
     .left {
+      display: flex;
+      align-items: center;
+
+      .back-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        margin-right: 0.5rem;
+        color: #2b5bb2;
+        border-radius: $border-radius-base;
+
+        &:hover {
+          background-color: #f5f5f5;
+        }
+      }
+
       .layui-avatar {
         width: 3rem;
         height: 3rem;
@@ -582,6 +657,23 @@ onMounted(() => {
     padding: 1rem;
     width: 100%;
     align-items: center;
+
+    .feedback-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 2rem auto;
+      padding: 0.5rem 1rem;
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      border-radius: $border-radius-base;
+      cursor: pointer;
+
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: -5%);
+      }
+    }
   }
 
   .msg-area {
@@ -683,6 +775,10 @@ onMounted(() => {
       position: absolute;
       right: 1rem;
       bottom: 1rem;
+
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: -5%);
+      }
     }
   }
 }
@@ -767,7 +863,7 @@ onMounted(() => {
   .date-text {
     background-color: #f0f2f5;
     padding: 4px 12px;
-    border-radius: 16px;
+    border-radius: $border-radius-extra-large;
     font-size: 12px;
     color: #666;
   }
@@ -852,7 +948,7 @@ onMounted(() => {
       font-size: 0.9rem;
 
       &:hover {
-        background-color: darken($primary-color, 5%);
+        background-color: color.adjust($primary-color, $lightness: -5%);
       }
 
       &:disabled {
@@ -860,6 +956,142 @@ onMounted(() => {
         cursor: not-allowed;
       }
     }
+  }
+}
+
+/* 意见反馈面板样式 */
+.feedback-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.feedback-panel {
+  background-color: white;
+  padding: 2rem;
+  border-radius: $border-radius-large;
+  box-shadow: $box-shadow-base;
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: $font-size-large;
+    color: $text-primary;
+    text-align: center;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: $font-size-base;
+      color: $text-regular;
+    }
+
+    textarea,
+    input[type="tel"] {
+      padding: 0.75rem;
+      border: 1px solid $border-color-base;
+      border-radius: $border-radius-base;
+      font-size: $font-size-base;
+      resize: vertical;
+      min-height: 20px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      }
+
+      &.input-error {
+        border-color: $danger-color;
+      }
+    }
+
+    .error-message {
+      color: $danger-color;
+      font-size: $font-size-small;
+      margin-top: 0.25rem;
+      margin-bottom: 0;
+    }
+  }
+
+  .panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+
+    button {
+      padding: 0.5rem 1.5rem;
+      border-radius: $border-radius-middle;
+      cursor: pointer;
+      font-size: $font-size-base;
+      transition: background-color 0.2s ease;
+
+      &.cancel-btn {
+        background-color: #e0e0e0;
+        color: #333;
+        border: none;
+
+        &:hover {
+          background-color: #c0c0c0;
+        }
+      }
+
+      &.submit-btn {
+        background-color: $primary-color;
+        color: white;
+        border: none;
+
+        &:hover {
+          background-color: color.adjust($primary-color, $lightness: -5%);
+        }
+
+
+      }
+    }
+  }
+}
+
+/* 移动端样式调整 */
+@media (max-width: 768px) {
+  .emoji-panel {
+    width: 300px !important;
+
+    .emoji-grid {
+      grid-template-columns: repeat(6, 1fr) !important;
+    }
+  }
+
+  .member-panel {
+    width: 250px !important;
+  }
+
+  .input-box {
+    height: 180px !important;
+
+    .input-area textarea {
+      height: 80px !important;
+    }
+  }
+
+  .tips-bar {
+    display: none;
   }
 }
 </style>

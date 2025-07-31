@@ -163,7 +163,6 @@ const unreadUsersList = ref<UserInfo[]>();
 const handleShowReadStatus = async () => {
   try {
     const response = await getUnreadUserList(readUsers, unreadUsers);
-    console.log('resdata:', response.data);
     readUsersList.value = response.data.read;
     unreadUsersList.value = response.data.unRead;
     showReadStatusDialog.value = true;
@@ -315,6 +314,7 @@ const getEmojiPrefix = (categoryId: string) => {
   align-self: flex-end;
   margin-right: 0.25rem;
   cursor: pointer;
+  text-wrap: nowrap;
   &:hover {
     text-decoration: underline;
   }

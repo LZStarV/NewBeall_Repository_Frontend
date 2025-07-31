@@ -22,8 +22,19 @@
       >
         <SvgIcon :name="item.icon" width="1.25rem" height="1.25rem" />
       </div>
-      <div class="nav-item" title="微信客服">
+      <div class="nav-item" title="微信客服" @click="showQRCode = true">
         <SvgIcon name="wechat" width="1.25rem" height="1.25rem" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 微信客服二维码弹窗 -->
+  <div v-if="showQRCode" class="qr-code-modal">
+    <div class="qr-code-content">
+      <div class="close-btn" @click="showQRCode = false">×</div>
+      <h3>微信扫一扫，添加微信客服</h3>
+      <div class="qr-code-img">
+        <img src="@/assets/image/default/customer_service_QR.jpg" alt="微信客服二维码" />
       </div>
     </div>
   </div>
@@ -34,32 +45,42 @@ import { onMounted, ref, watch } from 'vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import type { ContactGroup, UserInfo } from '../Chat.type';
 import { getContactGroup } from '@/api/chat/chatApi';
+import { useChatStore } from '@/stores/chat';
 import Avatar from '@/components/Avatar.vue';
 
 const navItemsList = ref<ContactGroup[]>();
 
 const activeNavItem = ref('临时聊天');
+const showQRCode = ref(false);
+
+const chatStore = useChatStore();
 
 const setNavItem = (navItemName: string) => {
   activeNavItem.value = navItemName;
   if (navItemName == '临时聊天') {
-    emit('update-contact-list', 'temp');
+    chatStore.setActiveNavItem('temp');
   }
   const url = navItemsList.value?.find(
     (item) => item.groupName === navItemName,
   )?.url;
-  if (url) emit('update-contact-list', url);
+  if (url) {
+    chatStore.setActiveNavItem(url);
+  }
 };
 
-const props = defineProps<{ userInfo: UserInfo; newItemUrl: string }>();
+const userInfo = ref<UserInfo>();
+
+onMounted(async () => {
+  await chatStore.setUserInfo();
+  userInfo.value = chatStore.userInfoData!;
+});
 
 const emit = defineEmits<{
-  (event: 'update-contact-list', contactListUrl: string): void;
   (event: 'nav-items-list-loaded', navItemsList: ContactGroup[]): void;
 }>();
 
 watch(
-  () => props.newItemUrl,
+  () => chatStore.activeNavItem,
   (val) => {
     if (val === 'temp') {
       setNavItem('临时聊天');
@@ -77,7 +98,7 @@ const iconSvgMap: Record<string, string> = {
 };
 
 onMounted(async () => {
-  const res: { data: ContactGroup[] } = await getContactGroup();
+  const res = await getContactGroup();
   res.data.forEach((element) => {
     element.icon = iconSvgMap[element.icon];
   });
@@ -122,6 +143,54 @@ onMounted(async () => {
       &.active {
         background-color: #deedff;
         color: #2b5bb2;
+      }
+    }
+  }
+}
+
+.qr-code-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .qr-code-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    position: relative;
+    text-align: center;
+    max-width: 300px;
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+
+      &:hover {
+        color: #333;
+      }
+    }
+
+    h3 {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .qr-code-img {
+      img {
+        max-width: 100%;
+        height: auto;
       }
     }
   }

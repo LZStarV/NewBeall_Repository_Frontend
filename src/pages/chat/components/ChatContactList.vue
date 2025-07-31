@@ -12,11 +12,11 @@
         />
       </div>
       <div class="tool">
-        <button class="tool-btn">
-          <SvgIcon name="groups" />
-        </button>
-        <button class="tool-btn">
+        <button class="tool-btn" title="客服" @click="connectWithAdmin">
           <SvgIcon name="user_management" />
+        </button>
+        <button class="tool-btn" title="创建群聊" @click="openCreateGroupDialog">
+          <SvgIcon name="groups" />
         </button>
       </div>
     </header>
@@ -56,26 +56,96 @@
         </div>
       </div>
     </div>
+
+    <!-- 创建群聊对话框 -->
+    <div v-if="showCreateGroupDialog" class="create-group-dialog">
+      <div class="dialog-content">
+        <div class="dialog-header">
+          <h3>创建群聊</h3>
+          <button class="close-btn" @click="closeCreateGroupDialog">
+            <SvgIcon name="cancel" />
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="group-name-input">
+            <label for="groupName">群聊名称</label>
+            <input
+              id="groupName"
+              v-model="groupChatName"
+              type="text"
+              placeholder="请输入群聊名称"
+            />
+          </div>
+          <div class="user-selection">
+            <h4>选择群聊成员</h4>
+            <div class="user-list">
+              <div
+                v-for="user in userList"
+                :key="user.id"
+                class="user-item"
+                :class="{ selected: selectedUsers.includes(user.id) }"
+                @click="toggleUserSelection(user)"
+              >
+                <div class="user-avatar">
+                  <Avatar :url="user.avatar" radius size="2rem" />
+                </div>
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-checkbox">
+                  <input
+                    type="checkbox"
+                    :checked="selectedUsers.includes(user.id)"
+                    @change="toggleUserSelection(user)"
+                    @click.stop
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="closeCreateGroupDialog">取消</button>
+          <button
+            class="create-btn"
+            @click="handleCreateGroup"
+            :disabled="!groupChatName || selectedUsers.length === 0"
+          >
+            创建群聊
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-overlay" v-if="showCreateGroupDialog" @click="closeCreateGroupDialog"></div>
   </section>
 </template>
 
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
-import { onMounted, ref, watch, nextTick } from 'vue';
-import type { ChatInfo, ContactInfo } from '../Chat.type';
+import { onMounted, ref, watch, nextTick, computed } from 'vue';
+import type { ChatInfo, ContactInfo, UserInfo } from '../Chat.type';
 import {
   getAnyMessageList,
   getTempWindow,
   saveTempWindow,
+  getCanCreateGroupUserList,
+  createGroup,
+  getAdminInfo,
 } from '@/api/chat/chatApi';
 import Avatar from '@/components/Avatar.vue';
+import { useChatStore } from '@/stores/chat';
 
 const { formatDateTime, compareDateTime } = useFormatDate();
 
 const contactList = ref<ChatInfo[] | ContactInfo[]>();
 const originalContactList = ref<ChatInfo[] | ContactInfo[]>(); // 保存原始列表
 const searchKeyword = ref(''); // 搜索关键词
+
+const chatStore = useChatStore();
+
+// Emits
+const emit = defineEmits<{
+  (e: 'contact-selected'): void;
+}>();
 
 const handleSearch = () => {
   if (!searchKeyword.value) {
@@ -113,11 +183,6 @@ const activeItemId = ref('');
 
 const toKey = ref(''); // 用来自动选中
 
-const emit = defineEmits<{
-  (event: 'click-item', chatInfo: ChatInfo): void;
-  (event: 'update-contact-list', contactUrl: string): void;
-}>();
-
 function isChatInfo(item: unknown): item is ChatInfo {
   return (
     !!item && typeof item === 'object' && 'toKey' in item && 'chatName' in item
@@ -133,26 +198,30 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
   }
   activeItemId.value = id;
 
-  if (contactUrl === 'temp') {
+  // 触发联系人选择事件，用于移动端视图切换
+  emit('contact-selected');
+
+  if (contactUrl.value === 'temp') {
     // 传出点击item的chatInfo，供聊天框使用
     if (isChatInfo(chatInfo)) {
-      emit('click-item', chatInfo);
+      chatStore.setChatInfo(chatInfo);
     }
     return;
   }
 
-  // 组装formData对象
+  // 如果不是临时聊天
+  // 组装params对象
   let prefix = '';
   if (navItemsList && navItemsList.length > 0) {
     // contactUrl就是url字段
-    const found = navItemsList.find((item) => item.url === contactUrl);
+    const found = navItemsList.find((item) => item.url === contactUrl.value);
     if (found) prefix = found.prefix;
   }
   const toId = isChatInfo(chatInfo)
     ? chatInfo.toKey
     : String((chatInfo as ContactInfo).id);
-  const fromId = userInfo.id ? String(userInfo.id) : '';
-  const formData = {
+  const fromId = userInfo.value?.id ? String(userInfo.value.id) : '';
+  const params = {
     prefix,
     toId,
     fromId,
@@ -166,27 +235,36 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
       ? chatInfo.avatar
       : (chatInfo as ContactInfo).avatar,
   };
-  await saveTempWindow(formData);
-  // 通知父组件/ChatNavbar切换到临时聊天
+  await saveTempWindow(params);
+  // 切换到临时聊天
   if (prefix == 'PY') toKey.value = `${toId}`;
   else
     toKey.value =
       toId.slice(0, prefix.length) == prefix ? toId : `${prefix}-${toId}`;
-  emit('update-contact-list', 'temp');
+  chatStore.setActiveNavItem('temp');
 };
 
-const { contactUrl, userInfo, navItemsList } = defineProps<{
-  contactUrl: string;
-  userInfo: import('../Chat.type').UserInfo;
+const contactUrl = computed(() => {
+  return chatStore.activeNavItem;
+});
+
+const { navItemsList } = defineProps<{
   navItemsList: import('../Chat.type').ContactGroup[];
 }>();
 
+const userInfo = ref<UserInfo>();
+
+onMounted(async () => {
+  await chatStore.setUserInfo();
+  userInfo.value = chatStore.userInfoData!;
+});
+
 const getContactList = async () => {
   let res: { data: ChatInfo[] | ContactInfo[] };
-  if (contactUrl == 'temp') {
+  if (contactUrl.value == 'temp') {
     res = await getTempWindow();
-  } else if (contactUrl.length >= 0) {
-    res = await getAnyMessageList(contactUrl);
+  } else if (contactUrl.value.length >= 0) {
+    res = await getAnyMessageList(contactUrl.value);
   } else {
     return;
   }
@@ -241,7 +319,7 @@ const getContactList = async () => {
 
 // 当切换contactUrl时，清空搜索框
 watch(
-  () => contactUrl,
+  contactUrl,
   () => {
     searchKeyword.value = '';
     getContactList();
@@ -249,6 +327,99 @@ watch(
 );
 
 onMounted(() => getContactList());
+
+// 创建群聊相关
+const showCreateGroupDialog = ref(false);
+const userList = ref<UserInfo[]>([]);
+const selectedUsers = ref<number[]>([]);
+const groupChatName = ref('');
+
+// 打开创建群聊对话框
+const openCreateGroupDialog = async () => {
+  showCreateGroupDialog.value = true;
+  // 获取可以创建群聊的用户列表
+  try {
+    const response = await getCanCreateGroupUserList(true);
+    userList.value = response.data;
+  } catch (error) {
+    console.error('获取用户列表失败', error);
+  }
+};
+
+// 关闭创建群聊对话框
+const closeCreateGroupDialog = () => {
+  showCreateGroupDialog.value = false;
+  selectedUsers.value = [];
+  groupChatName.value = '';
+};
+
+// 切换用户选择状态
+const toggleUserSelection = (user: UserInfo) => {
+  if (!user.id) return;
+
+  const index = selectedUsers.value.indexOf(user.id);
+  if (index === -1) {
+    selectedUsers.value.push(user.id);
+  } else {
+    selectedUsers.value.splice(index, 1);
+  }
+};
+
+// 创建群聊
+const handleCreateGroup = async () => {
+  if (!groupChatName.value || selectedUsers.value.length === 0) {
+    return;
+  }
+
+  try {
+    await createGroup(groupChatName.value, selectedUsers.value);
+    // 创建成功后，重新获取临时聊天列表
+    await getContactList();
+    closeCreateGroupDialog();
+  } catch (error) {
+    console.error('创建群聊失败', error);
+  }
+};
+
+// 连接客服
+const connectWithAdmin = async () => {
+  try {
+    // 获取管理员信息
+    const response = await getAdminInfo();
+    const admin = response.data;
+
+    if (!admin || !admin.id) {
+      console.error('获取管理员信息失败');
+      return;
+    }
+
+    // 准备参数
+    const prefix = 'PY'; // 假设管理员使用个人聊天前缀
+    const toId = String(admin.id);
+    const fromId = userInfo.value?.id ? String(userInfo.value.id) : '';
+
+    const params = {
+      prefix,
+      toId,
+      fromId,
+      chatName: admin.name || '客服',
+      described: admin.profession || '客户服务', // 使用profession代替describe
+      avatar: admin.avatar || '',
+    };
+
+    // 保存临时聊天窗口
+    await saveTempWindow(params);
+
+    // 切换到临时聊天
+    chatStore.setActiveNavItem('temp');
+    toKey.value = 'PY-'+fromId+'-'+toId;
+
+    // 重新获取临时聊天列表
+    await getContactList();
+  } catch (error) {
+    console.error('连接客服失败', error);
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -381,6 +552,170 @@ onMounted(() => getContactList());
         }
       }
     }
+  }
+
+  // 创建群聊对话框样式
+  .create-group-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    width: 450px;
+    max-width: 90vw;
+    z-index: 1001;
+
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #ededed;
+
+        h3 {
+          margin: 0;
+          font-size: 1.2rem;
+          color: #333;
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: #999;
+
+          &:hover {
+            color: #333;
+          }
+        }
+      }
+
+      .dialog-body {
+        padding: 1rem;
+        max-height: 60vh;
+        overflow-y: auto;
+
+        .group-name-input {
+          margin-bottom: 1rem;
+
+          label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+          }
+
+          input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+
+            &:focus {
+              outline: none;
+              border-color: $primary-color;
+            }
+          }
+        }
+
+        .user-selection {
+          h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+          }
+
+          .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+
+            .user-item {
+              display: flex;
+              align-items: center;
+              padding: 0.5rem;
+              border-radius: 4px;
+              margin-bottom: 0.5rem;
+              cursor: pointer;
+
+              &:hover {
+                background-color: #f5f5f5;
+              }
+
+              &.selected {
+                background-color: rgba($primary-color, 0.1);
+              }
+
+              .user-avatar {
+                margin-right: 0.5rem;
+              }
+
+              .user-name {
+                flex: 1;
+              }
+
+              .user-checkbox {
+                input {
+                  cursor: pointer;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .dialog-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 1px solid #ededed;
+        gap: 0.5rem;
+
+        button {
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &.cancel-btn {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+
+            &:hover {
+              background-color: #e5e5e5;
+            }
+          }
+
+          &.create-btn {
+            background-color: $primary-color;
+            color: white;
+            border: none;
+
+            &:hover {
+              background-color: darken($primary-color, 5%);
+            }
+
+            &:disabled {
+              background-color: #cccccc;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
   }
 }
 </style>

@@ -11,6 +11,10 @@ export interface EnvConfig {
   PAD_LAYOUT_BREAKPOINT: number;
   DESKTOP_LAYOUT_BREAKPOINT: number;
   REQUEST_TIMEOUT: number;
+  // WebSocket相关配置
+  WS_BASE_URL: string;
+  WS_PROXY_URL: string;
+  WS_TARGET_ORIGIN: string;
 }
 
 class Environment {
@@ -27,6 +31,10 @@ class Environment {
       DESKTOP_LAYOUT_BREAKPOINT:
         import.meta.env.VITE_DESKTOP_LAYOUT_BREAKPOINT || 1024,
       REQUEST_TIMEOUT: import.meta.env.VITE_REQUEST_TIMEOUT || 10000,
+      // WebSocket配置
+      WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || '',
+      WS_PROXY_URL: import.meta.env.VITE_WS_PROXY_URL || '',
+      WS_TARGET_ORIGIN: import.meta.env.VITE_WS_TARGET_ORIGIN || '',
     };
   }
 
@@ -105,6 +113,27 @@ class Environment {
    */
   getRequestTimeout(): number {
     return this.config.REQUEST_TIMEOUT;
+  }
+
+  /**
+   * 获取WebSocket基础URL（生产环境）
+   */
+  getWsBaseUrl(): string {
+    return this.config.WS_BASE_URL;
+  }
+
+  /**
+   * 获取WebSocket代理URL（开发环境）
+   */
+  getWsProxyUrl(): string {
+    return this.config.WS_PROXY_URL;
+  }
+
+  /**
+   * 获取WebSocket目标Origin（开发环境代理目标）
+   */
+  getWsTargetOrigin(): string {
+    return this.config.WS_TARGET_ORIGIN;
   }
 }
 const env = new Environment();

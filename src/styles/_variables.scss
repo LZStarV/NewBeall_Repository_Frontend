@@ -47,6 +47,7 @@ $border-radius-base: 4px;
 $border-radius-small: 2px;
 $border-radius-middle: 6px;
 $border-radius-large: 8px;
+$border-radius-extra-large: 16px;
 $border-radius-circle: 50%;
 
 // 间距
@@ -115,5 +116,6 @@ $card-header-text-color: $text-primary; // 卡片文字颜色
 $card-border-color-active: $primary-color-light; // 卡片激活边框颜色
 
 // 设备断点
+$phone_layout_breakpoint: 480px; // 手机布局断点
 $pad_layout_breakpoint: 768px; // 平板布局断点
 $desktop_layout_breakpoint: 1024px; // 桌面布局断点
