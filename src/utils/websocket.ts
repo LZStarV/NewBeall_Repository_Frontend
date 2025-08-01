@@ -4,10 +4,11 @@ import env from './env';
 // 默认配置常量
 export const DEFAULT_RECONNECT_ATTEMPTS = 5; // 默认重连尝试次数
 export const DEFAULT_RECONNECT_INTERVAL = 2000; // 默认重连间隔时间（毫秒）
-export const DEFAULT_HEARTBEAT_INTERVAL = 20000; // 默认心跳间隔时间（毫秒）- 60秒
-export const DEFAULT_HEARTBEAT_TIMEOUT = 10000; // 默认心跳超时时间（毫秒）- 15秒
+export const DEFAULT_HEARTBEAT_INTERVAL = 36000; // 默认心跳间隔时间（毫秒）- 36秒
+export const DEFAULT_HEARTBEAT_TIMEOUT = 5000; // 默认心跳超时时间（毫秒）- 5秒
 // export const DEFAULT_PING_MESSAGE = JSON.stringify({ type: 'ping' }); // 默认心跳消息
 export const DEFAULT_PING_MESSAGE = 'ping'; // 默认心跳消息
+export const DEFAULT_PONG_MESSAGE = 'ping'; // 默认心跳回复消息
 
 // WebSocket 关闭状态码
 export const WEBSOCKET_NORMAL_CLOSE_CODE = 1000; // 正常关闭
@@ -26,8 +27,6 @@ export interface WebSocketOptions {
   heartbeatInterval?: number; // 心跳间隔时间（毫秒）
   heartbeatTimeout?: number; // 心跳超时时间（毫秒）
   pingMessage?: string; // 心跳消息内容
-  // 自动管理配置
-  autoManage?: boolean; // 是否自动管理连接（页面关闭时自动断开）
   // 事件回调
   onOpen?: (event: Event) => void; // 连接成功时的回调
   onMessage?: (event: MessageEvent) => void; // 收到消息时的回调函数
@@ -71,10 +70,7 @@ export class WebSocketClient {
   private targetPath: string;
   private isDevelopment: boolean;
 
-  // 自动管理相关
-  private autoManage: boolean;
   private isDestroyed = false;
-  private eventListeners: Array<() => void> = [];
 
   private onOpenCallback?: (event: Event) => void;
   private onMessageCallback?: (event: MessageEvent) => void;
@@ -86,7 +82,6 @@ export class WebSocketClient {
     this.targetPath = options.targetPath;
     this.protocols = options.protocols;
     this.isDevelopment = env.isDevelopment();
-    this.autoManage = options.autoManage ?? true; // 默认启用自动管理
 
     // 构建WebSocket URL
     this.url = this.buildWebSocketUrl();
@@ -108,12 +103,6 @@ export class WebSocketClient {
     console.log(`🌍 当前环境: ${env.getAppEnv()}`);
     console.log(`🔌 WebSocket模式: ${this.isDevelopment ? '开发代理模式' : '生产直连模式'}`);
     console.log(`🔗 WebSocket URL: ${this.url}`);
-
-    // 如果启用自动管理，设置页面事件监听器
-    if (this.autoManage) {
-      this.setupAutoDisconnectListeners();
-      console.log('🎛️ 已启用WebSocket自动管理模式');
-    }
 
     // 监听网络状态变化
     this.setupNetworkListeners();
@@ -274,12 +263,6 @@ export class WebSocketClient {
       this.socket = null;
     }
 
-    // 如果启用了自动管理，移除所有事件监听器
-    if (this.autoManage) {
-      this.eventListeners.forEach(cleanup => cleanup());
-      this.eventListeners = [];
-    }
-
     // 重置状态
     this.isConnected.value = false;
     this.isConnecting.value = false;
@@ -338,16 +321,14 @@ export class WebSocketClient {
     // 更新最后心跳时间
     this.lastHeartbeatTime = Date.now();
 
-    // 检查是否是pong消息
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type === 'pong') {
-        console.log('✅ 收到心跳回复pong！连接正常');
-        return; // 不传递pong消息给业务回调
-      }
-    } catch {
-      // 不是JSON格式，也更新心跳时间（任何消息都表示连接活跃）
-      console.log('收到非JSON格式消息，连接活跃');
+    // 检查是否是服务器回复的心跳ping消息
+    const data = event.data;
+    if (data === DEFAULT_PONG_MESSAGE) {
+      console.log(`✅ 收到心跳回复${DEFAULT_PONG_MESSAGE} 连接正常`);
+      return; // 不传递心跳回复消息给业务回调
+    } else {
+      // 不是心跳回复消息，也更新心跳时间（任何消息都表示连接活跃）
+      console.log('收到其他消息，连接活跃');
     }
 
     if (this.onMessageCallback) {
@@ -441,7 +422,7 @@ export class WebSocketClient {
       if (this.isConnected.value && this.socket) {
         // 发送心跳消息
         const pingResult = this.send(this.pingMessage);
-        console.log('发送心跳消息', pingResult ? '成功' : '失败');
+        console.log(`发送心跳消息 ${this.pingMessage} `, pingResult ? '成功' : '失败');
 
         // 设置心跳超时检测
         this.heartbeatTimeoutTimer = window.setTimeout(() => {
@@ -476,42 +457,6 @@ export class WebSocketClient {
   }
 
   /**
-   * 设置自动断开连接的事件监听器
-   */
-  private setupAutoDisconnectListeners(): void {
-    if (typeof window === 'undefined') return;
-
-    // const handleBeforeUnload = () => {
-    //   console.log('🚨 检测到页面即将关闭，自动断开WebSocket连接');
-    //   this.disconnect();
-    // };
-
-    const handleUnload = () => {
-      console.log('🚨 页面正在卸载，强制断开WebSocket连接');
-      this.disconnect();
-    };
-
-    // const handleVisibilityChange = () => {
-    //   if (document.visibilityState === 'hidden') {
-    //     console.log('🚨 页面变为不可见，自动断开WebSocket连接');
-    //     this.disconnect();
-    //   }
-    // };
-
-    // 添加事件监听器
-    // window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('unload', handleUnload);
-    // document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // 保存清理函数
-    this.eventListeners.push(
-      // () => window.removeEventListener('beforeunload', handleBeforeUnload),
-      () => window.removeEventListener('unload', handleUnload),
-      // () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-    );
-  }
-
-  /**
    * 设置网络状态监听器。
    * 在网络恢复时自动尝试重连。
    */
@@ -531,16 +476,7 @@ export class WebSocketClient {
       });
     }
   }
-
-  /**
-   * 检查客户端是否已销毁
-   */
-  public get destroyed(): boolean {
-    return this.isDestroyed;
-  }
 }
-
-
 
 /**
  * 创建通用WebSocket连接 - 完全自定义配置
@@ -550,43 +486,3 @@ export function createWebSocket(options: Omit<WebSocketOptions, 'url'>): WebSock
   return new WebSocketClient(options);
 }
 
-
-
-
-// 示例用法:
-/*
-// 通用WebSocket客户端使用方式
-import { WebSocketClient, createWebSocket } from '@/utils/websocket';
-
-// 方式1：使用工厂函数（推荐）
-const wsClient = createWebSocket({
-  targetPath: '/your-websocket-path',
-  autoManage: true, // 启用自动管理
-  onOpen: () => console.log('连接成功'),
-  onMessage: (event) => console.log('收到消息:', event.data),
-});
-
-// 方式2：直接使用类
-const wsClient = new WebSocketClient({
-  targetPath: '/your-custom-path',
-  autoManage: true, // 启用自动管理
-  customOrigin: 'http://your-dev-server.com',     // 仅开发环境
-  productionWSUrl: 'wss://your-prod-domain.com',  // 仅生产环境
-  cookies: { token: 'abc123' },                   // 额外cookies
-  heartbeatInterval: 30000,
-  heartbeatTimeout: 15000,
-  // 事件回调...
-});
-
-wsClient.connect();
-
-特性：
-1. 🌍 环境自动检测：开发环境使用代理，生产环境直连
-2. 🍪 HttpOnly Cookie支持：开发环境自动转发cookies
-3. 💓 智能心跳：自动检测连接状态并重连
-4. 🧹 自动清理：autoManage模式自动处理资源清理
-5. 📊 详细日志：清晰的连接状态和错误信息
-6. ⚙️ 灵活配置：支持完全自定义配置
-
-注意：聊天相关功能请使用 @/websocket/chat 模块
-*/

@@ -24,9 +24,7 @@ onMounted(async () => {
   if (userId.value.length > 0) {
     console.log('🚀 初始化聊天页面WebSocket连接...');
     // 创建聊天WebSocket实例，传入用户ID
-    wsClient = createChatWebSocket({
-      userId: userId.value
-    });
+    wsClient = createChatWebSocket(userId.value);
     // 启动WebSocket连接
     wsClient.connect();
     console.log('✅ 聊天WebSocket实例已创建并启动');

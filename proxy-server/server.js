@@ -224,19 +224,7 @@ wss.on('connection', (clientWs, req) => {
           messageToSend = JSON.stringify(data);
         } catch {
           console.log('[WebSocket] 服务器消息不是JSON格式，作为文本发送:', messageStr.substring(0, 100) + '...');
-          // 如果不是JSON，尝试包装成JSON格式
-          try {
-            const wrappedMessage = {
-              type: 'text',
-              content: messageStr,
-              timestamp: Date.now()
-            };
-            messageToSend = JSON.stringify(wrappedMessage);
-            console.log('[WebSocket] 已将文本消息包装为JSON格式');
-          } catch {
-            // 如果包装失败，直接发送文本
-            messageToSend = messageStr;
-          }
+          messageToSend = messageStr;
         }
 
         // 确保发送给客户端的是JSON格式
