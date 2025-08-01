@@ -5,15 +5,13 @@
 import { WebSocketClient } from '@/utils/websocket';
 
 /**
- * 创建聊天WebSocket连接 - 基础工厂函数
- * 自动根据环境选择代理或直连模式，启用自动管理
+ * 创建聊天WebSocket连接
+ * @param userId 用户ID
+ * @returns WebSocketClient
  */
-export function createChatWebSocket(options: {
-  userId: string | number;
-}): WebSocketClient {
+export function createChatWebSocket(userId: string | number): WebSocketClient {
   return new WebSocketClient({
-    targetPath: `/chatServe/${options.userId}`,
-    autoManage: false, // 启用自动管理，页面关闭时自动断开
+    targetPath: `/chatServe/${userId}`,
     onOpen: (() => {
       console.log('🎉 聊天连接已建立，可以开始聊天了!');
     }),
