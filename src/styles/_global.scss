@@ -2,41 +2,89 @@
 @use './variables' as *;
 
 // 全局基础样式
+
 body {
-    font-family: $font-family;
-    font-size: $font-size-base;
-    // 动态获取变量值
-    color: var(--text-primary);
-    background-color: var(--background-color-base);
-    margin: 0;
-    padding: 0;
-    transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  padding: 0;
+  // 动态获取变量值
+  color: var(--text-primary);
+  font-size: $font-size-base;
+  font-family: $font-family;
+  background-color: var(--background-color-base);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 // 亮色主题（默认）
-:root {
-    // 覆盖Layui-Vue组件库变量
-    --global-primary-color: #{$primary-color};
-    --global-checked-color: #{color.adjust($primary-color, $lightness: 10%)};
-    --global-normal-color: #{$info-color};
-    --global-warm-color: #{$warning-color};
-    --global-danger-color: #{$danger-color};
-    --global-border-radius: #{$border-radius-middle};
 
-    // 自定义主题变量
-    --background-color-base: #{$background-color-base};
-    --background-color-page: #{$background-color-page};
-    --light-blue-background-color: #{$light-blue-background-color};
-    --text-primary: #{$text-primary};
-    --text-regular: #{$text-regular};
-    --text-secondary: #{$text-secondary};
-    --text-placeholder: #{$text-placeholder};
-    --border-color-base: #{$border-color-base};
-    --border-color-light: #{$border-color-light};
-    --border-color-lighter: #{$border-color-lighter};
+:root {
+  // 覆盖Layui-Vue组件库变量
+  --global-primary-color: #{$primary-color};
+  --global-checked-color: #{color.adjust($primary-color, $lightness: 10%)};
+  --global-normal-color: #{$info-color};
+  --global-warm-color: #{$warning-color};
+  --global-danger-color: #{$danger-color};
+  --global-border-radius: #{$border-radius-middle};
+
+  // 自定义主题变量
+  --background-color-base: #{$background-color-base};
+  --background-color-page: #{$background-color-page};
+  --light-blue-background-color: #{$light-blue-background-color};
+  --text-primary: #{$text-primary};
+  --text-regular: #{$text-regular};
+  --text-secondary: #{$text-secondary};
+  --text-placeholder: #{$text-placeholder};
+  --border-color-base: #{$border-color-base};
+  --border-color-light: #{$border-color-light};
+  --border-color-lighter: #{$border-color-lighter};
+
+  // 覆盖阴影：
+  --bs-box-shadow: #{$box-shadow-base} !important;
+  // 覆盖卡片
+  --card-border-radius: 10px;
 }
 
 // 平滑过渡效果
+
 * {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+// Layui-Vue 组件样式覆盖
+
+.layui-select-content {
+  margin-bottom: 0 !important;
+  padding: 5px !important;
+
+  .layui-select-option {
+    margin: 0;
+    border-radius: $border-radius-base;
+  }
+}
+
+.layui-collapse h2 {
+  margin-bottom: 0 !important;
+}
+
+.layui-layer {
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.layui-layer-btn a {
+  text-decoration: none;
+}
+
+// 覆盖折叠框的标题栏
+
+.layui-colla-title {
+  background-color: #fff;
+}
+
+.layui-form-pane .layui-form-label {
+  background-color: #fff;
 }
