@@ -11,6 +11,7 @@ export interface EnvConfig {
   PAD_LAYOUT_BREAKPOINT: number;
   DESKTOP_LAYOUT_BREAKPOINT: number;
   REQUEST_TIMEOUT: number;
+  BASE_STATIC_URL: string;
   // WebSocket相关配置
   WS_BASE_URL: string;
   WS_PROXY_URL: string;
@@ -31,6 +32,7 @@ class Environment {
       DESKTOP_LAYOUT_BREAKPOINT:
         import.meta.env.VITE_DESKTOP_LAYOUT_BREAKPOINT || 1024,
       REQUEST_TIMEOUT: import.meta.env.VITE_REQUEST_TIMEOUT || 10000,
+      BASE_STATIC_URL: import.meta.env.VITE_BASE_STATIC_URL || '',
       // WebSocket配置
       WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || '',
       WS_PROXY_URL: import.meta.env.VITE_WS_PROXY_URL || '',
@@ -43,6 +45,13 @@ class Environment {
    */
   getApiBaseUrl(): string {
     return this.config.API_BASE_URL;
+  }
+
+  /**
+   * 获取静态资源基础 URL
+   */
+  getBaseStaticUrl(): string {
+    return this.config.BASE_STATIC_URL;
   }
 
   /**
