@@ -53,38 +53,3 @@ body {
     border-color 0.3s ease,
     color 0.3s ease;
 }
-
-// Layui-Vue 组件样式覆盖
-
-.layui-select-content {
-  margin-bottom: 0 !important;
-  padding: 5px !important;
-
-  .layui-select-option {
-    margin: 0;
-    border-radius: $border-radius-base;
-  }
-}
-
-.layui-collapse h2 {
-  margin-bottom: 0 !important;
-}
-
-.layui-layer {
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.layui-layer-btn a {
-  text-decoration: none;
-}
-
-// 覆盖折叠框的标题栏
-
-.layui-colla-title {
-  background-color: #fff;
-}
-
-.layui-form-pane .layui-form-label {
-  background-color: #fff;
-}

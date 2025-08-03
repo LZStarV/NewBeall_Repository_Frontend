@@ -69,6 +69,13 @@
         <div class="edit-section">
           <div class="section-header">
             <h3>编辑方案</h3>
+            <lay-button
+              type="primary"
+              size="xs"
+              @click="generateCustomInstruction"
+            >
+              自定义
+            </lay-button>
           </div>
           <div class="drop-zones">
             <!-- 一级目录感应区 -->
@@ -270,11 +277,93 @@
       </div>
     </div>
   </ModalWindow>
+
+  <!-- 自定义文案输入对话框 -->
+  <ModalWindow
+    :visible="showCustomInstructionDialog"
+    title="自定义文案"
+    :btn="[
+      {
+        text: isGeneratingAI ? '生成中...' : 'AI生成文案',
+        disabled:
+          !customInstructionForm.title.trim() ||
+          !customInstructionForm.content.trim() ||
+          isGeneratingAI,
+        callback: generateAIContent,
+      },
+      {
+        text: '提交',
+        disabled:
+          !customInstructionForm.title.trim() ||
+          !customInstructionForm.content.trim(),
+        callback: () => submitCustomInstruction(false),
+      },
+      {
+        text: '取消',
+        callback: closeCustomInstructionDialog,
+      },
+    ]"
+    @close="closeCustomInstructionDialog"
+  >
+    <div class="custom-instruction-form">
+      <div class="form-item">
+        <label class="form-label">标题 <span class="required">*</span></label>
+        <lay-input
+          v-model="customInstructionForm.title"
+          placeholder="请输入文案标题"
+          class="form-input"
+        />
+      </div>
+      <div class="form-item">
+        <label class="form-label"
+          >内容/提示词 <span class="required">*</span></label
+        >
+        <lay-textarea
+          v-model="customInstructionForm.content"
+          placeholder="请输入文案内容或AI生成提示词"
+          class="form-textarea"
+          :rows="6"
+        />
+      </div>
+    </div>
+  </ModalWindow>
+
+  <!-- AI生成文案预览对话框 -->
+  <ModalWindow
+    :visible="showAIPreviewDialog"
+    title="AI生成文案预览"
+    :btn="[
+      {
+        text: '提交',
+        disabled: !aiGeneratedContent.trim(),
+        callback: () => submitCustomInstruction(true),
+      },
+      {
+        text: '取消',
+        callback: closeAIPreviewDialog,
+      },
+    ]"
+    @close="closeAIPreviewDialog"
+  >
+    <div class="ai-preview-content">
+      <div class="preview-header">
+        <h4>{{ customInstructionForm.title }}</h4>
+        <p class="preview-tip">您可以编辑下方的AI生成内容</p>
+      </div>
+      <div class="preview-body">
+        <lay-textarea
+          v-model="aiGeneratedContent"
+          placeholder="AI生成的内容将显示在这里"
+          class="preview-textarea"
+          :rows="8"
+        />
+      </div>
+    </div>
+  </ModalWindow>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue';
-// @ts-expect-error vuedraggable
 import draggable from 'vuedraggable';
 import ModalWindow from '@/components/ModalWindow.vue';
 import SvgIcon from '@/components/SvgIcon.vue';
@@ -283,6 +372,7 @@ import type {
   ExportProductDetailed,
 } from '@/api/orders/orderApi.type';
 import ordersApi from '@/api/orders/ordersApi';
+import aiApi from '@/api/ai/aiApi';
 import env from '@/utils/env';
 import notify from '@/utils/notify';
 import { layer } from '@layui/layui-vue';
@@ -297,6 +387,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'export', catalogData: CatalogItem[]): void;
+  (e: 'refresh'): void; // 刷新文案列表
 }>();
 
 // 目录项类型
@@ -330,6 +421,16 @@ const searchKeyword = ref<string>('');
 const selectedTagId = ref<string>('');
 const exportProjectName = ref<string>('');
 const isMobileView = ref(false);
+
+// 自定义文案相关状态
+const customInstructionForm = ref({
+  title: '',
+  content: '',
+});
+const isGeneratingAI = ref(false);
+const aiGeneratedContent = ref('');
+const showCustomInstructionDialog = ref(false);
+const showAIPreviewDialog = ref(false);
 
 // 底部按钮
 const btn = ref([
@@ -702,6 +803,12 @@ const clearDialogContent = () => {
   selectedCatalogId.value = '';
   operationHistory.value = [];
   currentHistoryIndex.value = -1;
+
+  // 清理自定义文案相关状态
+  showCustomInstructionDialog.value = false;
+  showAIPreviewDialog.value = false;
+  resetCustomInstructionForm();
+
   initializeHistory();
 };
 
@@ -753,6 +860,110 @@ const downloadFile = (filename: string) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+// 重置自定义文案表单
+const resetCustomInstructionForm = () => {
+  customInstructionForm.value = {
+    title: '',
+    content: '',
+  };
+  aiGeneratedContent.value = '';
+  isGeneratingAI.value = false;
+};
+
+// 显示自定义文案对话框
+const generateCustomInstruction = () => {
+  resetCustomInstructionForm();
+  showCustomInstructionDialog.value = true;
+};
+
+// 关闭自定义文案对话框
+const closeCustomInstructionDialog = () => {
+  showCustomInstructionDialog.value = false;
+  resetCustomInstructionForm();
+};
+
+// AI生成文案
+const generateAIContent = async () => {
+  if (!customInstructionForm.value.title.trim()) {
+    notify.warn('请先输入标题');
+    return;
+  }
+  if (!customInstructionForm.value.content.trim()) {
+    notify.warn('请先输入提示词');
+    return;
+  }
+
+  try {
+    isGeneratingAI.value = true;
+    const response = await aiApi.getAiChat({
+      title: customInstructionForm.value.title,
+      context: customInstructionForm.value.content,
+    });
+
+    if (response && response.data) {
+      aiGeneratedContent.value = response.data;
+      showCustomInstructionDialog.value = false;
+      showAIPreviewDialog.value = true;
+    } else {
+      notify.error('AI生成失败，请重试');
+    }
+  } catch (error) {
+    console.error('AI生成文案失败:', error);
+    notify.error('AI生成失败，请稍后重试');
+  } finally {
+    isGeneratingAI.value = false;
+  }
+};
+
+// 关闭AI预览对话框
+const closeAIPreviewDialog = () => {
+  showAIPreviewDialog.value = false;
+  aiGeneratedContent.value = '';
+};
+
+// 提交自定义文案（直接提交或AI生成后提交）
+const submitCustomInstruction = async (useAIContent = false) => {
+  const title = customInstructionForm.value.title.trim();
+  const content = useAIContent
+    ? aiGeneratedContent.value.trim()
+    : customInstructionForm.value.content.trim();
+
+  if (!title) {
+    notify.warn('请输入标题');
+    return;
+  }
+  if (!content) {
+    notify.warn(useAIContent ? '预览内容不能为空' : '请输入内容');
+    return;
+  }
+
+  try {
+    const instructionData: Instruction = {
+      id: '',
+      insTitle: title,
+      insContent: content,
+      tagIds: '[]',
+      insImgs: [],
+    };
+
+    await ordersApi.addInstruction(instructionData);
+    notify.success('文案添加成功');
+
+    // 关闭所有相关对话框
+    if (useAIContent) {
+      closeAIPreviewDialog();
+    } else {
+      closeCustomInstructionDialog();
+    }
+
+    // 触发父组件重新获取文案列表
+    emit('refresh');
+  } catch (error) {
+    console.error('添加文案失败:', error);
+    notify.error('添加文案失败，请稍后重试');
+  }
 };
 
 // 导出文案
@@ -1435,6 +1646,67 @@ onUnmounted(() => {
           }
         }
       }
+    }
+  }
+}
+
+// ==================== 自定义文案对话框样式 ====================
+.custom-instruction-form {
+  padding: 20px;
+
+  .form-item {
+    margin-bottom: 16px;
+
+    .form-label {
+      @include flex-layout(row, flex-start, center);
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+
+      .required {
+        color: #ff4d4f;
+        margin-left: 2px;
+      }
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+  }
+}
+
+.ai-preview-content {
+  padding: 20px;
+
+  .preview-header {
+    margin-bottom: 16px;
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .preview-tip {
+      margin: 0;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  .preview-body {
+    .preview-textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 160px;
     }
   }
 }
