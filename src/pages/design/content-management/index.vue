@@ -118,6 +118,7 @@
       :instruction-list="instructionList"
       @close="handleCloseExportDialog"
       @export="handleExportCatalog"
+      @refresh="handleRefreshInstructionList"
     />
   </div>
 </template>
@@ -290,6 +291,11 @@ const handleEditSuccess = async () => {
 // 关闭导出对话框
 const handleCloseExportDialog = () => {
   exportDialogVisible.value = false;
+};
+
+// 刷新文案列表（用于自定义文案提交后）
+const handleRefreshInstructionList = () => {
+  loadInstructionList();
 };
 
 // 目录项类型接口
