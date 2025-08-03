@@ -27,6 +27,12 @@ const staticRoutes: RouteRecordRaw[] = [
     component: () => import('@/pages/chat/index.vue'),
     meta: { title: 'chat' },
   },
+  // 添加独立的会员续费路由，不使用MainLayout
+  {
+    path: '/member-standalone',
+    component: () => import('@/pages/member/renewal/index.vue'),
+    meta: { title: '会员续费' },
+  },
 ];
 
 export default staticRoutes;

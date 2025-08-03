@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 export interface TabItem {
   path: string;
   title: string;
-  icon?: string;
 }
 
 export const useTabsStore = defineStore('tabs', {
@@ -12,7 +11,6 @@ export const useTabsStore = defineStore('tabs', {
       {
         path: '/dashboard',
         title: '工作台',
-        icon: 'layui-icon-home',
       },
     ] as TabItem[],
     activeTab: '/dashboard',
@@ -64,7 +62,6 @@ export const useTabsStore = defineStore('tabs', {
         {
           path: '/dashboard',
           title: '工作台',
-          icon: 'layui-icon-home',
         },
       ];
       this.activeTab = '/dashboard';
