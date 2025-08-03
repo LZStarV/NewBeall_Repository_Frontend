@@ -6,7 +6,6 @@
                 <div v-for="tab in tabs" :key="tab.path" class="tab-item" :class="{ active: activeTab === tab.path }"
                     @click="switchTab(tab.path)">
                     <div class="tab-content">
-                        <lay-icon :type="tab.icon" class="tab-icon" v-if="tab.icon" />
                         <span class="tab-title">{{ tab.title }}</span>
                         <lay-icon v-if="tab.path !== '/dashboard'" type="layui-icon-close" class="tab-close"
                             @click.stop="closeTab(tab.path)" />
@@ -71,7 +70,7 @@ watch(
 
 // 切换标签页
 const switchTab = (path: string) => {
-    tabsStore.setActiveTab(path)
+    tabsStore.setActiveTab(path);
     router.push(path);
 };
 
