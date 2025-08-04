@@ -27,7 +27,7 @@ export default defineConfig({
       '@com': path.resolve(__dirname, './src/components'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@assets': path.resolve(__dirname, './src/assets'),
-      '@store': path.resolve(__dirname, './src/stores'),
+      '@stores': path.resolve(__dirname, './src/stores'),
       '@styles': path.resolve(__dirname, './src/styles'),
     },
   },
@@ -47,7 +47,7 @@ export default defineConfig({
       // 使用css modules时，需要用驼峰式来访问类名，如style.buttonColor而不是style['button-color']
     },
   },
-  // 服务器配置(解决跨域问题)
+  // 服务器配置 - 使用第三方代理服务器
   server: {
     host: '0.0.0.0', // 允许外部访问
     proxy: {
@@ -55,6 +55,13 @@ export default defineConfig({
         target: 'http://120.78.76.80:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      // 通过本地自建第三方代理服务器代理WebSocket连接
+      '/ws': {
+        target: 'ws://localhost:3001', // 指向代理服务器
+        ws: true,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ws/, ''),
       },
     },
   },

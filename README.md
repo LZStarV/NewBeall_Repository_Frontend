@@ -16,6 +16,19 @@ npm i
 npm run dev
 ```
 
+如需使用WebSocket代理，请一并启动WebSocket代理服务器
+
+安装
+```bash
+cd proxy-server
+npm i
+```
+
+启动
+```bash
+npm run dev
+```
+
 ### 3. 打包项目
 
 ```bash

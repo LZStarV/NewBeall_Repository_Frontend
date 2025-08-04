@@ -35,7 +35,9 @@
                         <div v-if="!menuItem.hasSubmenu" class="menu-item"
                             :class="{ active: selectedKey === menuItem.key }"
                             @click="navigateTo(getRouteConfig(menuItem.key).path)">
-                            <lay-icon :type="getRouteConfig(menuItem.key).icon" class="menu-icon" />
+                            <!-- 只在折叠状态下显示图标 -->
+                            <lay-icon v-if="collapsed && getRouteConfig(menuItem.key).icon"
+                                :type="getRouteConfig(menuItem.key).icon" class="menu-icon" />
                             <span v-show="!collapsed" class="menu-text">{{ getRouteConfig(menuItem.key).title }}</span>
                             <!-- 新订单提示（仅订单审批记录显示） -->
                             <div v-show="!collapsed && menuItem.key === 'order-approval' && hasNewOrders"
@@ -45,7 +47,9 @@
                         <!-- 多级菜单 -->
                         <div v-else class="menu-group">
                             <div class="menu-item submenu-title" @click="toggleSubmenu(menuItem.key)">
-                                <lay-icon :type="getRouteConfig(menuItem.key).icon" class="menu-icon" />
+                                <!-- 只在折叠状态下显示图标 -->
+                                <lay-icon v-if="collapsed && getRouteConfig(menuItem.key).icon"
+                                    :type="getRouteConfig(menuItem.key).icon" class="menu-icon" />
                                 <span v-show="!collapsed" class="menu-text">{{ getRouteConfig(menuItem.key).title
                                     }}</span>
                                 <!-- 新订单提示（仅订单审批记录显示） -->
@@ -58,7 +62,6 @@
                                 <div v-for="subItemKey in menuItem.submenuItems" :key="subItemKey"
                                     class="menu-item submenu-item" :class="{ active: selectedKey === subItemKey }"
                                     @click="navigateTo(getRouteConfig(subItemKey).path)">
-                                    <lay-icon :type="getRouteConfig(subItemKey).icon" class="menu-icon" />
                                     <span class="menu-text">{{ getRouteConfig(subItemKey).title }}</span>
                                 </div>
                             </div>
@@ -109,7 +112,7 @@ const submenuKeyMap: Record<string, string> = {
 };
 
 // 子菜单展开状态 - 添加缺少的状态
-const submenuOpen = reactive({
+const submenuOpen = reactive<Record<string, boolean>>({
     cloudSpace: false,
     demandManagement: false,
     supplyChain: false,
@@ -119,22 +122,7 @@ const submenuOpen = reactive({
     systemSettings: false
 });
 
-// 页面加载时确保默认添加第一个标签
-onMounted(() => {
-    // 默认选择云空间或第一个可用的菜单项
-    const defaultConfig = ROUTE_CONFIG_MAP['cloud-space'] || ROUTE_CONFIG_MAP[Object.keys(ROUTE_CONFIG_MAP)[0]];
-    const existingTab = tabsStore.tabs.find(tab => tab.path === defaultConfig.path);
-    if (!existingTab) {
-        tabsStore.addTab({
-            path: defaultConfig.path,
-            title: defaultConfig.title,
-            icon: defaultConfig.icon,
-        });
-    }
 
-    // 设置默认选中状态
-    tabsStore.setActiveTab(defaultConfig.path);
-});
 
 // 获取路由配置
 const getRouteConfig = (key: string): RouteConfig => {
@@ -169,6 +157,11 @@ const toggleSubmenu = (menuKey: string) => {
 
 // 导航到指定路由
 const navigateTo = (path: string) => {
+    // 特殊处理会员续费，在新标签页打开
+    if (path === '/member/renewal') {
+        window.open('/member-standalone', '_blank');
+        return;
+    }
     routeNavigator.navigateTo(path);
 };
 </script>

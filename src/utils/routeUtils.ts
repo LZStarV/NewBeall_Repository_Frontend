@@ -32,7 +32,6 @@ export class RouteNavigator {
     this.tabsStore.addTab({
       path: config.path,
       title: config.title,
-      icon: config.icon,
     });
 
     // 路由跳转
@@ -58,7 +57,6 @@ export const addRouteMetaInfo = (routes: any[]): any[] => {
       route.meta = {
         ...route.meta,
         title: config.title,
-        icon: config.icon,
       };
     }
 

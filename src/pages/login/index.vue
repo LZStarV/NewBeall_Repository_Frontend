@@ -26,14 +26,13 @@
                 :model="form"
                 :rules="rules"
                 is-label-tooltip
-                @submit.prevent="handleLogin"
               >
                 <lay-form-item
                   label="用户名"
                   prop="username"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入用户名"
+                  required-error-message="用户名不能为空"
                   class="form-group"
                 >
                   <lay-input
@@ -51,7 +50,7 @@
                   prop="password"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入密码"
+                  required-error-message="密码不能为空"
                   class="form-group"
                 >
                   <lay-input
@@ -70,7 +69,7 @@
                   prop="kaptcha"
                   :label-width="labelWidth"
                   required
-                  required-error-message="请输入验证码"
+                  required-error-message="验证码不能为空"
                   class="form-group"
                 >
                   <div class="captcha">
@@ -104,12 +103,14 @@
                       skin="primary"
                       name="remember"
                       label="7天免登录"
+                      value="true"
                     />
                     <lay-checkbox
                       v-model="agreement"
                       skin="primary"
                       name="agreement"
                       label="我已阅读并同意"
+                      value="true"
                     />
                   </div>
 
@@ -195,21 +196,21 @@ import QRCode from '@assets/image/default/QRcode.png';
 import customer_service_QR from '@assets/image/default/customer_service_QR.jpg';
 import CoverLayout from '@/layouts/CoverLayout.vue';
 
+import preloadImages from '@/utils/preloadImages.ts';
 import loginApi from '@/api/login/loginApi';
-import { setToken, useAuthStore } from '@store/auth.js';
+import { setToken } from '@stores/auth.ts';
 import type { loginData } from '@/types/Login';
 import notify from '@/utils/notify.js';
 
 const router = useRouter();
-const authStore = useAuthStore();
 
 // 表单数据
 const form = reactive<loginData>({
-  agreed: 'on' | 'off',
+  agreed: 'off',
   kaptcha: '',
   username: '',
   password: '',
-  remember: 'on' | 'off',
+  remember: 'off',
 });
 
 // 表单校验规则
@@ -270,7 +271,7 @@ const getCaptcha = async () => {
     captchaUrl.value = await loginApi.getCaptcha();
   } catch (err) {
     console.error('获取验证码失败:', err);
-    notify.error('获取验证码失败', '获取验证码失败，请稍后重试');
+    notify.error('获取验证码失败，请稍后重试');
   }
 };
 
@@ -278,7 +279,6 @@ const getCaptcha = async () => {
 const refreshCaptcha = async () => {
   // 释放旧 URL
   if (captchaImg.value) {
-    console.log(captchaImg.value);
     captchaImg.value.src = '';
   }
   if (oldUrl) {
@@ -291,7 +291,7 @@ const refreshCaptcha = async () => {
     oldUrl = newUrl;
   } catch (err) {
     console.error('刷新验证码失败:', err);
-    notify.error('刷新验证码失败', '刷新验证码失败，请稍后重试');
+    notify.error('刷新验证码失败，请稍后重试');
   }
 };
 
@@ -305,62 +305,40 @@ const handleWechatLogin = async () => {
     isWechatLoading.value = false;
   } catch (err) {
     console.error('获取微信登录二维码失败:', err);
-    notify.error('获取微信登录二维码失败', '请稍后重试');
+    notify.error('获取微信登录二维码失败，请稍后重试');
   }
-};
-
-// 预加载图片函数
-const preloadImages = () => {
-  // 定义需要预加载的图片列表
-  const imagesToPreload = [customer_service_QR];
-
-  // 遍历列表，通过 new Image() 加载
-  imagesToPreload.forEach((imgUrl) => {
-    const img = new Image();
-    img.src = imgUrl;
-    // 监听加载失败
-    img.onerror = () => {
-      console.warn(`图片预加载失败: ${imgUrl}`);
-    };
-  });
 };
 
 // 登录处理函数
 const handleLogin = async () => {
-  if (!agreement.value) {
-    form.agreed = 'off';
-    notify.warn('请阅读并同意服务协议和隐私政策');
-    return;
-  } else {
-    form.agreed = 'on';
-  }
-
-  form.remember = rememberMe.value ? 'on' : 'off';
-
-  try {
-    await loginFormRef.value.validate();
-  } catch {
-    notify.error({
-      title: '表单验证失败',
-      content: '请检查表单填写是否正确',
+  // 表单校验
+  const isValidate = await new Promise((resolve) => {
+    loginFormRef.value.validate((isValid: boolean) => {
+      resolve(isValid);
     });
+  });
+
+  if (!isValidate) {
+    notify.error('请检查表单输入是否正确');
     return;
   }
 
+  form.agreed = agreement.value ? 'on' : 'off';
+  form.remember = rememberMe.value ? 'on' : 'off';
   loginLoading.value = true;
+  // 登录
   try {
-    const jsonData = JSON.stringify(form);
-    const res = await loginApi.login(jsonData);
-    notify.success('登录成功!');
-    const shiroCookie = res.data;
-    setToken(shiroCookie);
-    console.log(authStore.token);
-
-    await router.push({ path: '/' });
+    const jsonForm = JSON.stringify(form);
+    const res = await loginApi.login(jsonForm);
+    if (res.code == 200) {
+      notify.success('登录成功！');
+      setToken(res.data);
+      router.push({ path: '/' });
+    } else throw new Error(res.msg);
   } catch (error) {
     notify.error({
       title: '登录失败',
-      content: `${error}`,
+      content: error.msg ? error.msg : error,
     });
     console.error(error);
     await refreshCaptcha();
@@ -371,7 +349,7 @@ const handleLogin = async () => {
 
 onMounted(() => {
   getCaptcha();
-  preloadImages();
+  preloadImages([customer_service_QR]);
 });
 </script>
 
