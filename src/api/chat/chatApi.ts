@@ -2,11 +2,12 @@ import http from '@/utils/http';
 import type {
   ChatInfo,
   ChatMessage,
-  CompanyInfo,
   ContactGroup,
   ContactInfo,
   UserInfo,
 } from '@/pages/chat/Chat.type';
+
+import type { CompanyInfo } from '@/api/company/companyApi.type';
 
 // 获取当前用户
 export const getMe = async () => {
@@ -37,16 +38,18 @@ export const getAnyMessageList = async (url: string) => {
 
 // 获取未读用户列表
 export const getUnreadUserList = async (read: number[], unread: number[]) => {
-  return await http.post<{read: number[], unread: number[]} ,{ read: UserInfo[]; unRead: UserInfo[] }>(
-    '/mgr/msgReadPersons',
-    { read, unread },
-  );
+  return await http.post<
+    { read: number[]; unread: number[] },
+    { read: UserInfo[]; unRead: UserInfo[] }
+  >('/mgr/msgReadPersons', { read, unread });
 };
 
 // 消息发送控制器
 // 发送消息
 export const sendMessage = async (chatMsg: ChatMessage) => {
-  return await http.post<null, ChatMessage>('/chatMessage', null, { params: chatMsg});
+  return await http.post<null, ChatMessage>('/chatMessage', null, {
+    params: chatMsg,
+  });
 };
 
 // 获取临时聊天框;
@@ -74,14 +77,18 @@ export const saveTempWindow = async (params: {
   avatar: string;
 }) => {
   const formData = new FormData();
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     formData.append(key, params[key as keyof typeof params]);
   });
-  const res = await http.post<FormData>('/chatMessage/saveTempWindow', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
+  const res = await http.post<FormData>(
+    '/chatMessage/saveTempWindow',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     },
-  });
+  );
   return res;
 };
 
@@ -151,7 +158,6 @@ export const deleteChat = async (toKey: string) => {
 export const getContactGroup = async () => {
   return await http.get<ContactGroup[]>('/chatContactModel');
 };
-
 
 // 提交意见
 export const submitFeedback = async (feedback: string, phone: string) => {

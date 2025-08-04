@@ -59,3 +59,57 @@ export interface ExportProductDetailed {
   }[];
   trait?: string;
 }
+
+// 结算单类型
+export interface Settle {
+  id: number;
+  method: string;
+}
+
+// 报价单价格类型
+export interface OrderPrice {
+  orderId: string;
+  priceSum: number;
+  purchasepriceSum: number;
+}
+
+// 报价单列表行类型
+export interface OrderListRow {
+  chargePerson: number;
+  chargePersonInfo: string;
+  clientId: number;
+  contacts: string;
+  coopUser: string;
+  coopUserId: string;
+  createDate: string;
+  deliveryTime: string;
+  important: number;
+  isAudit: number;
+  isSeal: string;
+  isXJ: string;
+  lockMark: string;
+  lockOwner: string;
+  lockOwnerName: string;
+  menuIcon: string;
+  method: string;
+  money: string;
+  name: string;
+  ordersId: string;
+  ordersIntegration: number;
+  ordersType1: string;
+  ordersType2: string;
+  ordersType3: string;
+  overruleMsg: string;
+  parentId: string;
+  priceSum: string;
+  projectName: string;
+  projectRemark: string;
+  purchase: number;
+  purchasepriceSum: string;
+  shareName: string;
+  shareOrders: number;
+  type: number;
+  uid: number;
+  updateDate: string;
+  updateUser: string;
+}
