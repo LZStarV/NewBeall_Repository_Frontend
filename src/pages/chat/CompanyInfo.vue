@@ -1,7 +1,11 @@
 <template>
   <div v-if="isVisible && companyData">
     <!-- 移动端遮罩层 -->
-    <div v-if="isMobileView" class="modal-overlay" @click="chatStore.setCompanyInfoVisiable(false)"></div>
+    <div
+      v-if="isMobileView"
+      class="modal-overlay"
+      @click="chatStore.setCompanyInfoVisiable(false)"
+    ></div>
 
     <div class="company-modal" :class="{ 'slide-in': isVisible }">
       <!-- Header -->
@@ -22,7 +26,10 @@
             主营业务
           </button>
         </div>
-        <button class="close-button" @click="chatStore.setCompanyInfoVisiable(false)">
+        <button
+          class="close-button"
+          @click="chatStore.setCompanyInfoVisiable(false)"
+        >
           <SvgIcon name="cancel" />
         </button>
       </div>
@@ -33,7 +40,9 @@
           <!-- Company Header -->
           <div class="company-header">
             <div class="company-logo">
-              <img :src="`https://yx.newbeall.com/softLink/${companyData.logoUrl}`" />
+              <img
+                :src="`https://yx.newbeall.com/softLink/${companyData.logoUrl}`"
+              />
             </div>
             <div class="company-info">
               <h2 class="company-name">
@@ -61,7 +70,9 @@
               </div>
               <div class="info-item">
                 <span class="info-label">公司类型：</span>
-                <span class="info-value">{{ getCompanyType(companyData) }}</span>
+                <span class="info-value">{{
+                  getCompanyType(companyData)
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">联系人：</span>
@@ -125,7 +136,10 @@
 import { ref, watch, computed } from 'vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import { getCompanyInfo } from '@/api/chat/chatApi';
-import type { CompanyBusiness, CompanyData } from './Chat.type';
+import type {
+  CompanyBusiness,
+  CompanyData,
+} from '@/api/company/companyApi.type';
 import { useChatStore } from '@/stores/chat';
 
 // Reactive data
@@ -174,7 +188,10 @@ const isVisible = computed(() => {
 watch(
   () => chatStore.chatInfo,
   async (newValue) => {
-    if (newValue?.toKey?.slice(0, 2) === 'PY' || newValue?.toKey?.slice(0, 3) === 'PRO') {
+    if (
+      newValue?.toKey?.slice(0, 2) === 'PY' ||
+      newValue?.toKey?.slice(0, 3) === 'PRO'
+    ) {
       const res = await getCompanyInfo(newValue.toKey); // 获取公司信息
       companyData.value = res.data.companyData;
       companyBusinessList.value = res.data.companyBusinessData;
@@ -196,7 +213,7 @@ const isMobileView = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
+@use 'sass:color';
 
 @mixin button-base {
   border: none;

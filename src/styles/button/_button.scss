@@ -80,11 +80,3 @@ $btn-background-color-plain: #dcdcdc; // 灰色按钮背景色
   background-color: $btn-background-color-plain;
   border: none;
 }
-
-// 覆盖按钮span样式
-
-.layui-btn span {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
