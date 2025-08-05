@@ -7,6 +7,10 @@ import type {
   Settle,
   OrderPrice,
   OrderListRow,
+  Quotation,
+  QuotationListResponse,
+  OrderModuleListResponse,
+  OrderChargePerson,
 } from './orderApi.type';
 import type { Product } from '../product/productApi.type';
 // import { getExpiredAuth } from '@/api/auth/authApi';
@@ -37,9 +41,11 @@ export default {
     return http.post('/orders/exportInstruction', exportProductDetailedOV);
   },
 
-  // 报价单属性 category: 1 | 2 | 3
-  getOrderType(category: number) {
-    return http.get(`/ordersType/getOrderType?category=${category}`);
+  // 报价单属性 category: 1 | 2 | 3 | 4 | 5 | 6 | 7
+  getOrderType(category: number, ordersId?: string) {
+    return http.get(
+      `/ordersType/getOrderType?category=${category}${ordersId ? `&ordersId=${ordersId}` : ''}`,
+    );
   },
 
   // 获取报价单结算方式
@@ -47,13 +53,28 @@ export default {
     return http.get<Settle[]>('/orders/GetOrdersSettle');
   },
 
-  // 获取报价单列表
-  getOrdersList(order: string, offset: number, limit: number) {
+  // 获取报价单列表（历史报价）
+  getOrdersList(
+    order: string,
+    offset: number,
+    limit: number,
+    type?: number,
+    pageNumber?: number,
+  ) {
     const formData = new FormData();
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    return http.get<FormData>(`/orders/list`, formData, {
+    if (type !== undefined) {
+      formData.append('type', type.toString());
+    }
+    if (pageNumber !== undefined) {
+      formData.append('pageNumber', pageNumber.toString());
+    }
+    return http.post<
+      FormData,
+      { rows: QuotationListResponse[]; total: number }
+    >(`/orders/list`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -62,8 +83,8 @@ export default {
 
   // 获取报价单价格
   getPriceByOrderId(orderId: string[]) {
-    return http.post<string[], OrderPrice[]>(
-      `/orders/getPriceByOrderId`,
+    return http.post<string[], Record<string, OrderPrice>>(
+      '/orders/getPriceByOrdersId',
       orderId,
     );
   },
@@ -102,8 +123,68 @@ export default {
     });
   },
 
+  // 获取报价单详情
+  getOrderDetail(orderId: string) {
+    return http.get<QuotationListResponse>('/orders/getOrderDetail', {
+      params: { orderId },
+    });
+  },
+
   // 获取报价产品信息列表
   getOrderProductList(orderId: string, page: number, limit: number) {
     return http.get<Product[]>('/orders/findProlist', { orderId, page, limit });
+  },
+
+  // 获取查看方案云列表
+  getOrderShareList(page: number, limit: number) {
+    return http.get('ordersShare/list', { page, limit });
+  },
+
+  // 获取全部项目负责人列表
+  getOrdersChargePerson() {
+    return http.get<OrderChargePerson[]>('/orders/OrdersChargePerson');
+  },
+
+  // 获取全部制单人列表
+  getOrdersCreateUserList() {
+    return http.get<string[]>('/orders/GetOrdersCreateUserList');
+  },
+
+  // 写入临时报价单
+  writeQuotation(quotation: Quotation) {
+    return http.post<Quotation>('/orders/writeQuotation', quotation);
+  },
+
+  // 获取临时报价列表
+  getQuotationList(order: string = 'desc', offset: number, limit: number) {
+    const formData = new FormData();
+    formData.append('order', order);
+    formData.append('offset', offset.toString());
+    formData.append('limit', limit.toString());
+    return http.post<FormData, QuotationListResponse[]>(
+      '/orders/Templist',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  },
+
+  // 获取报价模块
+  getOrderModuleList(
+    order: string = 'desc',
+    offset: number = 0,
+    limit: number = 50,
+  ) {
+    const formData = new FormData();
+    formData.append('order', order);
+    formData.append('offset', offset.toString());
+    formData.append('limit', limit.toString());
+    return http.post<
+      FormData,
+      { rows: OrderModuleListResponse[]; total: number }
+    >('/orderModule/moduleList', formData);
   },
 };

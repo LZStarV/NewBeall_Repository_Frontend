@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, defineProps, defineEmits } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 interface SelectorOption {
   [key: string]: string | number | boolean | null | undefined;
@@ -269,4 +269,3 @@ watch(
   }
 }
 </style>
-

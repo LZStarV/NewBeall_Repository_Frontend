@@ -29,6 +29,7 @@ interface QuoteTypeState {
 interface Props {
   modelValue?: number | string;
   category: number;
+  ordersId?: string;
   placeholder?: string;
 }
 
@@ -39,6 +40,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   placeholder: '请选择',
+  ordersId: '',
 });
 
 const emit = defineEmits<Emits>();
@@ -53,7 +55,10 @@ const state = ref<QuoteTypeState>({
 const getQuoteTypeData = async () => {
   try {
     state.value.loading = true;
-    const response = await ordersApi.getOrderType(props.category);
+    const response = await ordersApi.getOrderType(
+      props.category,
+      props.ordersId,
+    );
 
     if (response.data && Array.isArray(response.data)) {
       state.value.options = response.data;

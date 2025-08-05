@@ -17,7 +17,7 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">客户单位</label>
-                <lay-select v-model="customerInfo.unit" placeholder="请选择">
+                <lay-select v-model="customerInfo.name" placeholder="请选择">
                   <lay-select-option value="option1" label="选项1" />
                 </lay-select>
                 <lay-button type="normal" size="md" class="info-button">
@@ -79,7 +79,12 @@
               <div class="form-row">
                 <label class="form-head-label required">项目负责人</label>
                 <lay-select v-model="projectInfo.manager" placeholder="请选择">
-                  <lay-select-option value="option1" label="选项1" />
+                  <lay-select-option
+                    v-for="item in projectManagerList"
+                    :key="item.id"
+                    :value="item.id"
+                    :label="item.name"
+                  />
                 </lay-select>
               </div>
               <div class="form-row">
@@ -240,8 +245,53 @@
       </lay-row>
     </div>
     <div v-else>
-      * 模块名
-      <!-- TODO: 显示简单的报价单信息 -->
+      <!-- 显示简单的报价单信息 -->
+      <lay-row v-if="showCustomerInfo" :gutter="20">
+        <lay-col :xs="24" :md="12">
+          <!-- 客户信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <label class="form-head-label required">模块名</label>
+                <lay-input v-model="modelInfo.name" />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">供应商信息</label>
+                <lay-select v-model="modelInfo.gyClient" placeholder="请选择">
+                  <lay-select-option value="option1" label="选项1" />
+                </lay-select>
+                <lay-button type="normal" size="md" class="info-button">
+                  供应商
+                </lay-button>
+                <lay-button type="normal" size="md" class="info-button">
+                  详情
+                </lay-button>
+              </div>
+            </div>
+          </div>
+        </lay-col>
+        <lay-col :xs="24" :md="12">
+          <!-- 客户信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <QuoteTypeSelect
+                  v-model="modelInfo.ordersType1"
+                  :category="1"
+                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId"
+                  placeholder="请选择"
+                />
+                <QuoteTypeSelect
+                  v-model="modelInfo.ordersType3"
+                  :category="3"
+                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId"
+                  placeholder="请选择"
+                />
+              </div>
+            </div>
+          </div>
+        </lay-col>
+      </lay-row>
     </div>
     <lay-row :gutter="20">
       <div class="module-card">
@@ -263,7 +313,7 @@
           <!-- 表格区域 -->
           <AdvancedTable
             :columns="quotationColumns"
-            :data-source="quotationData"
+            :data-source="quotationData as Record<string, unknown>[]"
             :enable-drag="true"
             :pagination="false"
             :show-toolbar="false"
@@ -307,56 +357,29 @@ import EditableCell from '@/components/table-cells/EditableCell.vue';
 import ImageCell from '@/components/table-cells/ImageCell.vue';
 import ButtonCell from '@/components/table-cells/ButtonCell.vue';
 import { onMounted, ref, markRaw } from 'vue';
-import type { Settle } from '@/api/orders/orderApi.type';
+import type {
+  OrderModuleListResponse,
+  QuotationListResponse,
+  Settle,
+  Quotation,
+  OrderChargePerson,
+  OrderDetail,
+} from '@/api/orders/orderApi.type';
+import {
+  orderDetailsToQuotationItems,
+  quotationItemsToOrderDetails,
+  type QuotationItem,
+} from '@/utils/orderUtils';
+import { getAreaNames, getQuoteTypeName } from '@/utils/areaUtils';
 import ordersApi from '@/api/orders/ordersApi';
 import SideToolbar from './SideToolbar.vue';
 import type { CompanyData } from '@/api/company/companyApi.type';
 import companyApi from '@/api/company/companyApi';
+import { layer } from '@layui/layui-vue';
+import notify from '@/utils/notify';
+import type { ClientType } from '@/api/client/clinetApi.type';
 
-// 报价条目数据类型
-interface QuotationItem {
-  id: number;
-  name: Array<{
-    label: string;
-    type: string;
-    size: string;
-    action: string;
-    customClass?: string;
-  }>;
-  brand: string;
-  model: string;
-  feature: Array<{
-    label: string;
-    type: string;
-    size: string;
-    action: string;
-    customClass?: string;
-  }>;
-  unit: string;
-  quantity: number;
-  cost: number;
-  costTotal: number;
-  price: number;
-  priceTotal: number;
-  pic: string;
-  company: string;
-  operation: Array<{
-    label: string;
-    type: string;
-    size: string;
-    action: string;
-    customStyle?: {
-      backgroundColor?: string;
-      color?: string;
-      borderColor?: string;
-      borderRadius?: string;
-      padding?: string;
-      fontSize?: string;
-      fontWeight?: string;
-    };
-    customClass?: string;
-  }>;
-}
+// 使用从 orderUtils 导入的 QuotationItem 类型
 
 // 报价目录菜单配置
 interface ButtonAction {
@@ -371,7 +394,7 @@ const showCompanyBankInfo = ref(false); // 显示我司账户信息
 
 // 客户信息数据
 const customerInfo = ref({
-  unit: '',
+  name: '',
   address: '',
   contact: '',
   phone: '',
@@ -409,9 +432,9 @@ const tradeInfo = ref({
   deliveryMethod: '',
   deliveryTime: '',
   area: {
-    province: undefined,
-    city: undefined,
-    area: undefined,
+    province: undefined as number | undefined,
+    city: undefined as number | undefined,
+    area: undefined as number | undefined,
   },
   address: '',
   paymentMethod: '',
@@ -508,188 +531,16 @@ const quotationColumns = ref([
     filterable: true,
   },
 ]); // 列配置
-const quotationData = ref<QuotationItem[]>([
-  {
-    id: 1,
-    name: [
-      {
-        label: '高精度传感器',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    brand: 'Siemens',
-    model: 'XTR-2000',
-    feature: [
-      {
-        label: '参数特性',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    unit: '个',
-    quantity: 5,
-    cost: 1200.0,
-    costTotal: 6000.0,
-    price: 1500.0,
-    priceTotal: 7500.0,
-    pic: '/images/sensor.jpg',
-    company: '西门子',
-    operation: [
-      {
-        label: '编辑',
-        type: 'primary',
-        size: 'xs',
-        action: 'edit',
-      },
-      {
-        label: '更多',
-        type: 'default',
-        size: 'xs',
-        action: 'delete',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: [
-      {
-        label: '控制器模块',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    brand: 'ABB',
-    model: 'AC800M',
-    feature: [
-      {
-        label: '参数特性',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    unit: '套',
-    quantity: 2,
-    cost: 8500.0,
-    costTotal: 17000.0,
-    price: 12000.0,
-    priceTotal: 24000.0,
-    pic: '/images/controller.jpg',
-    company: 'ABB集团',
-    operation: [
-      {
-        label: '编辑',
-        type: 'primary',
-        size: 'xs',
-        action: 'edit',
-      },
-      {
-        label: '删除',
-        type: 'danger',
-        size: 'xs',
-        action: 'delete',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: [
-      {
-        label: '工业显示屏',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    brand: '研华',
-    model: 'TPC-1251H',
-    feature: [
-      {
-        label: '参数特性',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    unit: '台',
-    quantity: 3,
-    cost: 2800.0,
-    costTotal: 8400.0,
-    price: 3500.0,
-    priceTotal: 10500.0,
-    pic: '/images/display.jpg',
-    company: '研华科技',
-    operation: [
-      {
-        label: '编辑',
-        type: 'primary',
-        size: 'xs',
-        action: 'edit',
-      },
-      {
-        label: '删除',
-        type: 'danger',
-        size: 'xs',
-        action: 'delete',
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: [
-      {
-        label: '电源模块',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    brand: 'Phoenix',
-    model: 'QUINT4-PS',
-    feature: [
-      {
-        label: '参数特性',
-        type: 'custom',
-        size: 'xs',
-        action: 'custom-action',
-        customClass: 'my-custom-button',
-      },
-    ],
-    unit: '个',
-    quantity: 8,
-    cost: 650.0,
-    costTotal: 5200.0,
-    price: 900.0,
-    priceTotal: 7200.0,
-    pic: '/images/power.jpg',
-    company: '菲尼克斯',
-    operation: [
-      {
-        label: '编辑',
-        type: 'primary',
-        size: 'xs',
-        action: 'edit',
-      },
-      {
-        label: '删除',
-        type: 'danger',
-        size: 'xs',
-        action: 'delete',
-      },
-    ],
-  },
-]); // 数据
+
+const quotationData = ref<QuotationItem[]>([]); // 数据
+
+// 报价单模块数据
+const modelInfo = ref({
+  name: '',
+  gyClient: '',
+  ordersType1: '',
+  ordersType3: '',
+});
 
 // 表格事件处理
 const handleQuotationDataUpdate = (data: Record<string, unknown>[]) => {
@@ -706,12 +557,13 @@ const handleCellUpdate = (
 
   // 如果是数量、成本或售价更新，重新计算小计
   if (['quantity', 'cost', 'price'].includes(columnKey)) {
-    const row = quotationData.value[rowIndex];
+    if (!quotationData.value) return; // 空表不计
+    const row = quotationData.value[rowIndex] as Record<string, unknown>;
     if (columnKey === 'quantity' || columnKey === 'cost') {
-      row.costTotal = row.quantity * row.cost;
+      row.costTotal = (row.quantity as number) * (row.cost as number);
     }
     if (columnKey === 'quantity' || columnKey === 'price') {
-      row.priceTotal = row.quantity * row.price;
+      row.priceTotal = (row.quantity as number) * (row.price as number);
     }
     updateCostStatistics();
   }
@@ -738,26 +590,59 @@ const handleButtonClick = (
 
   switch (action) {
     case 'edit':
-      console.log('编辑产品:', data);
+      console.log('产品修改详情:', data);
       // 这里可以打开编辑对话框或跳转到编辑页面
       break;
     case 'delete':
-      console.log('删除产品:', data);
-      // 这里可以显示确认对话框，然后删除数据
-      if (confirm(`确定要删除产品 "${data.name}" 吗？`)) {
-        const newData = quotationData.value.filter((_, i) => i !== index);
-        quotationData.value = newData;
-        updateCostStatistics();
+      {
+        const typedData = data as Record<string, unknown>;
+        if (Array.isArray(typedData.name) && typedData.name.length > 0) {
+          // 显示确认对话框，然后删除数据
+          layer.confirm(
+            `确定要删除产品 "${(typedData.name as Array<{ label: string }>)[0].label}" 吗？`,
+            {
+              btn: [
+                {
+                  text: '确定',
+                  callback: async (id) => {
+                    if (!quotationData.value) return;
+                    const newData = quotationData.value.filter(
+                      (_, i) => i !== index,
+                    );
+                    quotationData.value = newData;
+                    updateCostStatistics();
+                    layer.close(id);
+                    notify.success('删除产品成功');
+                  },
+                },
+                {
+                  text: '取消',
+                  callback: (id) => {
+                    layer.close(id);
+                  },
+                },
+              ],
+            },
+          );
+        }
       }
       break;
     case 'view':
-      console.log('查看产品详情:', data);
-      // 这里可以打开产品详情对话框
+      console.log('查看产品参数特征:', data);
+      // 打开产品参数特征侧边栏
+      layer.drawer({
+        title: '参数特征',
+        content: {},
+        offset: 'r',
+      });
       break;
     case 'custom-action':
-      console.log('自定义按钮操作:', data);
-      // 自定义按钮的处理逻辑
-      alert(`执行自定义操作: ${data.name}`);
+      {
+        console.log('自定义按钮操作:', data);
+        // 自定义按钮的处理逻辑
+        const typedData = data as Record<string, unknown>;
+        alert(`执行自定义操作: ${typedData.name}`);
+      }
       break;
     default:
       console.log('未知操作:', action);
@@ -780,14 +665,20 @@ const {
   showCustomerInfoDefault = true,
   enableCustomerInfo = true,
   quotationMenuConfig = [],
-  customerData = [],
-  tableListData = [],
+  customerData = {} as ClientType,
+  orderData = {} as QuotationListResponse,
+  modelData = {} as OrderModuleListResponse,
+  tableListData = [] as OrderDetail[],
+  isNewQuotation = false,
 } = defineProps<{
   showCustomerInfoDefault?: boolean; // 默认展示顶部客户信息与否，true就默认显示
   enableCustomerInfo?: boolean; // 是否启用顶部客户信息，true就启用，false就显示简单的报价单信息(新建报价模块使用)
-  quotationMenuConfig: ButtonAction[]; // 报价目录菜单配置
-  customerData?: []; // CustomerData客户信息数据
-  tableListData?: []; // 报价目录表单展示
+  quotationMenuConfig?: ButtonAction[]; // 报价目录菜单配置
+  customerData?: ClientType; // CustomerInfo客户信息数据,enableCustomerInfo为true使用
+  orderData?: QuotationListResponse; // ProjectInfo项目信息数据及tradeInfo交易信息数据,enableCustomerInfo为false使用
+  modelData?: OrderModuleListResponse; // 报价目录表单展示,enableCustomerInfo为false使用
+  tableListData?: OrderDetail[]; // 报价目录表单展示
+  isNewQuotation?: boolean; // 是否为新建报价，true为新建报价，false为编辑报价
 }>();
 
 // 是否显示客户信息面板
@@ -796,6 +687,10 @@ const showCustomerInfo = ref(showCustomerInfoDefault);
 // 我司信息
 const myCompanyInfo = ref<CompanyData>();
 
+// 项目负责人数据列表
+const projectManagerList = ref<OrderChargePerson[]>();
+
+// 获取我司信息
 const getMyCompanyInfo = async () => {
   const res = await companyApi.getMyCompanyDetailed();
   myCompanyInfo.value = res.data.company;
@@ -811,8 +706,172 @@ const getMyCompanyInfo = async () => {
   };
 };
 
+// 获取项目负责人列表
+const getProjectManagerList = async () => {
+  const res = await ordersApi.getOrdersChargePerson();
+  console.log(res.data);
+
+  projectManagerList.value = res.data;
+};
+
+// 转换客户信息、项目信息、交易信息与报价目录表格数据(如果是模块编辑，就转换模块信息与报价目录表格数据)
+const transformCustomerData = () => {
+  if (enableCustomerInfo && customerData) {
+    customerInfo.value = {
+      name: customerData?.contacts,
+      address: customerData.address,
+      contact: customerData.contactUser,
+      phone: customerData.tel,
+      email: customerData.email,
+      bankAccount: '',
+      bankName: '',
+      taxNumber: '',
+    };
+  }
+  if (enableCustomerInfo && orderData) {
+    projectInfo.value = {
+      name: orderData.projectName,
+      manager: orderData.name,
+      quoteType1: orderData.ordersType1,
+      quoteType2: orderData.ordersType2,
+      quoteType3: orderData.ordersType3,
+      nature: orderData.ordersCharacter, // 报价单性质
+      remark: orderData.projectRemark, // 工程项目备注
+    };
+    tradeInfo.value = {
+      deliveryMethod: orderData.method,
+      deliveryTime: orderData.deliveryTime,
+      area: {
+        province: undefined,
+        city: undefined,
+        area: undefined,
+      },
+      address: orderData.deliveryAddress,
+      paymentMethod: orderData.method,
+    };
+  }
+  if (!enableCustomerInfo && modelData) {
+    modelInfo.value = {
+      name: modelData.projectName,
+      gyClient: modelData.contacts,
+      ordersType1: modelData.ordersType1,
+      ordersType3: modelData.ordersType3,
+    };
+  }
+  if (tableListData && tableListData.length > 0) {
+    quotationData.value = orderDetailsToQuotationItems(tableListData);
+  }
+};
+
+// Emit 事件定义
+const emit = defineEmits<{
+  'data-submit': [data: Quotation];
+  'temp-save': [data: Quotation];
+}>();
+
+// 通过type获取param类型
+const getFormParam = () => {
+  // if 新建设计报价 return 'orderCreatSave'
+  if (orderData.type === 0) return 'orderModify';
+  else return 'orderTemModify';
+};
+
+// 收集所有表单数据
+const collectFormData = async (): Promise<Quotation> => {
+  // 获取地区名称
+  const areaNames = await getAreaNames(
+    tradeInfo.value.area.province,
+    tradeInfo.value.area.city,
+    tradeInfo.value.area.area,
+  );
+
+  // 获取报价类型名称 - 分别获取不同分类的报价类型
+  const [quoteType1Name, quoteType2Name, quoteType3Name] = await Promise.all([
+    projectInfo.value.quoteType1
+      ? getQuoteTypeName(parseInt(projectInfo.value.quoteType1), 1)
+      : Promise.resolve(''),
+    projectInfo.value.quoteType2
+      ? getQuoteTypeName(parseInt(projectInfo.value.quoteType2), 2)
+      : Promise.resolve(''),
+    projectInfo.value.quoteType3
+      ? getQuoteTypeName(parseInt(projectInfo.value.quoteType3), 3)
+      : Promise.resolve(''),
+  ]);
+
+  // 基础数据对象
+  const baseData = {
+    DeliveryAddress: tradeInfo.value.address,
+    DeliveryTime: tradeInfo.value.deliveryTime,
+    area: areaNames.area, // 使用获取到的区县名称
+    chargePerson: parseInt(projectInfo.value.manager),
+    chargePersonInfo:
+      projectManagerList.value?.find(
+        (item) => item.id === parseInt(projectInfo.value.manager),
+      )?.name || '',
+    city: areaNames.city, // 使用获取到的城市名称
+    clientBankAccount: customerInfo.value.bankAccount || null,
+    clientBankName: customerInfo.value.bankName || null,
+    clientId: customerData.id,
+    clientTexId: customerInfo.value.taxNumber || null,
+    companyAddres: companyInfo.value.address,
+    companyName: companyInfo.value.name,
+    contactPhone: companyInfo.value.phone,
+    contacts: companyInfo.value.contact,
+    deliveryMethod: tradeInfo.value.deliveryMethod,
+    explanation: null,
+    orderdetailsList: quotationItemsToOrderDetails(quotationData.value),
+    ordersCharacter: projectInfo.value.nature?.toString(),
+    orderstype1: quoteType1Name, // 使用获取到的报价类型名称
+    orderstype2: quoteType2Name,
+    orderstype3: quoteType3Name,
+    param: getFormParam(),
+    projectName: projectInfo.value.name,
+    projectRemark: projectInfo.value.remark,
+    province: areaNames.province, // 使用获取到的省份名称
+    selfBank: companyInfo.value.bankName || '',
+    selfId: myCompanyInfo.value?.id || 0, // myCompanyId
+    settleMethod: tradeInfo.value.paymentMethod // 结算方式id
+      ? parseInt(tradeInfo.value.paymentMethod)
+      : 0,
+  };
+
+  // 如果不是新建报价，添加编辑报价特有的字段
+  if (!isNewQuotation && orderData) {
+    return {
+      ...baseData,
+      ordersId: orderData.ordersId,
+      shareOrders: orderData.shareOrders,
+      type: orderData.type,
+      version: orderData.version,
+    };
+  }
+
+  // 新建报价只返回基础数据
+  return baseData;
+};
+
+// 暴露给父组件的方法
+const triggerSubmit = async () => {
+  const formData = await collectFormData();
+  emit('data-submit', formData);
+};
+
+const triggerTempSave = async () => {
+  const formData = await collectFormData();
+  emit('temp-save', formData);
+};
+
+// 暴露方法给父组件
+defineExpose({
+  triggerSubmit,
+  triggerTempSave,
+  collectFormData,
+});
+
 onMounted(() => {
   getMyCompanyInfo();
+  getProjectManagerList();
+  transformCustomerData();
 });
 </script>
 
@@ -848,25 +907,11 @@ onMounted(() => {
   }
 }
 
-@mixin button-style {
-  background-color: transparent;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: color 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    color: $primary-color;
-  }
-}
-
 .quotation-edit-card {
   position: relative;
 
   .show-customer-info-btn {
-    @include button-style;
+    @include button-style($primary-color);
     color: #949494;
     position: absolute;
     top: 20px;
@@ -884,7 +929,7 @@ onMounted(() => {
 .module-header {
   margin-bottom: 20px;
   display: flex;
-  gap: 10px;
+  gap: 16px;
   align-items: center;
 
   h5 {
@@ -893,11 +938,11 @@ onMounted(() => {
 
   .module-header-toolbar {
     display: flex;
-    gap: 10px;
+    gap: 16px;
     align-items: center;
 
     .toolbar-btn {
-      @include button-style;
+      @include button-style($primary-color);
     }
   }
 }
