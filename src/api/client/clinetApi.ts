@@ -3,6 +3,7 @@ import type {
   ClientQueryListType,
   ClientType,
   UserTreeType,
+  GyClientQueryListType,
 } from './clinetApi.type';
 
 // 客户控制器 Client Controller
@@ -48,8 +49,21 @@ export default {
     }),
 
   // 获取客户列表
-  clientList: (params: ClientQueryListType) =>
-    http.post<null, { rows: ClientType[] }>('/client/list', null, { params }),
+  clientList: (params: ClientQueryListType) => {
+    const formData = new FormData();
+    Object.entries(params).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    return http.post<FormData, { rows: ClientType[] }>(
+      '/client/list',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  },
 
   // 获取重复客户列表
   clientDuplicateList: (params: ClientQueryListType) =>
@@ -63,4 +77,21 @@ export default {
 
   // 客户与产品供应商界面所用的用户树
   userTree: () => http.post<null, UserTreeType>('/client/userTree'),
+
+  // 获取供应商客户列表
+  gyClientList: (params: GyClientQueryListType) => {
+    const formData = new FormData();
+    Object.entries(params).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    return http.post<FormData, { rows: ClientType[] }>(
+      '/client/gyClientList',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  },
 };
