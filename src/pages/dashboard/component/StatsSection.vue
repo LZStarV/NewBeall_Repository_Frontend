@@ -28,10 +28,12 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useDashboardStore } from '@/stores/dashboard';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const dashboardStore = useDashboardStore();
 
 // 定义统计卡片的类型接口
 interface StatsCard {
@@ -50,10 +52,10 @@ interface StatsCard {
 }
 
 // 统计卡片数据
-const statsCards = ref<StatsCard[]>([
+const statsCards = computed<StatsCard[]>(() => [
   {
     id: 1,
-    number: 0,
+    number: dashboardStore.approNum,
     label: '报价审批',
     icon: 'layui-icon-edit',
     colorClass: 'card-blue',
@@ -61,7 +63,7 @@ const statsCards = ref<StatsCard[]>([
   },
   {
     id: 2,
-    number: 0,
+    number: dashboardStore.unReadNum,
     label: '即时通讯',
     icon: 'layui-icon-reply-fill',
     colorClass: 'card-purple',
@@ -69,7 +71,7 @@ const statsCards = ref<StatsCard[]>([
   },
   {
     id: 3,
-    number: 0,
+    number: dashboardStore.delApproNum,
     label: '删除审批',
     icon: 'layui-icon-delete',
     colorClass: 'card-pink',
@@ -77,7 +79,7 @@ const statsCards = ref<StatsCard[]>([
   },
   {
     id: 4,
-    number: 1,
+    number: dashboardStore.unReadNoticeNum,
     label: '未读订单',
     icon: 'layui-icon-form',
     colorClass: 'card-orange',
@@ -85,7 +87,7 @@ const statsCards = ref<StatsCard[]>([
   },
   {
     id: 5,
-    number: 0,
+    number: dashboardStore.discountNum,
     label: '折率审批',
     icon: 'layui-icon-read',
     colorClass: 'card-green',
@@ -93,7 +95,7 @@ const statsCards = ref<StatsCard[]>([
   },
   {
     id: 6,
-    number: 0,
+    number: dashboardStore.inventoryOrdersNum,
     label: '未处理订单',
     icon: 'layui-icon-survey',
     colorClass: 'card-lime',
@@ -107,14 +109,6 @@ const handleCardClick = (card: StatsCard) => {
     router.push(card.route);
   }
 };
-
-// 更新统计数据
-// const updateStatsFromAPI = (data: GetLastSixMonthsOrdeNoticeRes) => {
-//   if (Array.isArray(data) && data.length > 0) {
-//     //更新未读订单数量
-//     statsCards.value[3].number = data.length;
-//   }
-// };
 </script>
 
 <style lang="scss" scoped>
