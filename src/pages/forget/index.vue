@@ -56,8 +56,9 @@
                   type="normal"
                   class="captcha-button"
                   @click="getMessageCaptcha"
+                  :disabled="isCaptchaDisabled"
                 >
-                  获取验证码
+                  {{ captchaButtonText }}
                 </lay-button>
               </div>
             </lay-form-item>
@@ -160,6 +161,10 @@ const rules = {
 };
 const loginFormRef = ref();
 
+// 验证码按钮状态
+const isCaptchaDisabled = ref(false);
+const captchaButtonText = ref('获取验证码');
+
 // 状态管理
 const phoneFocus = ref(false);
 const captchaFocus = ref(false);
@@ -182,7 +187,21 @@ const getMessageCaptcha = async () => {
     if (res.code == 200) {
       notify.success('已发送验证码，请注意查收！');
     } else throw new Error(res.msg || '获取验证码失败，请稍后重试！');
-    // TODO: 增加60秒缓冲时间
+    // 60秒倒计时逻辑
+    let countdown = 60;
+    isCaptchaDisabled.value = true;
+    captchaButtonText.value = `${countdown}秒后重新获取`;
+
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        isCaptchaDisabled.value = false;
+        captchaButtonText.value = '获取验证码';
+      } else {
+        captchaButtonText.value = `${countdown}秒后重新获取`;
+      }
+    }, 1000);
   } catch (error) {
     notify.error({
       title: '获取验证码失败',
@@ -210,8 +229,6 @@ const submit = async () => {
   notify.success('成功提交！');
   console.log(form);
 };
-
-// TODO：需要添加响应式配置
 </script>
 
 <style lang="scss" scoped>

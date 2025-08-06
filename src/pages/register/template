@@ -1,0 +1,403 @@
+<div id="card-item-1-1">
+<div class="layui-tab-item layui-show">
+<div class="login-box f-mt0 f-pb0">
+
+    <div class="main bgf" id="corporateInformation">
+        <div class="reg-box-pan display-inline">
+            <div class="step">
+                <ul>
+                    <li class="col-xs-4 on">
+                        <span class="num"><em class="f-r5"></em><i>1</i></span>
+                        <span class="line_bg lbg-r"></span>
+                        <p class="lbg-txt">填写账户信息</p>
+                    </li>
+                    <li class="col-xs-4 on">
+                        <span class="num"><em class="f-r5"></em><i>2</i></span>
+                        <span class="line_bg lbg-l"></span>
+                        <span class="line_bg lbg-r"></span>
+                        <p class="lbg-txt">填写公司信息</p>
+                    </li>
+                    <li class="col-xs-4">
+                        <span class="num"><em class="f-r5"></em><i>3</i></span>
+                        <span class="line_bg lbg-l"></span>
+                        <p class="lbg-txt">注册成功</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main bgf" id="corporateInformation1" style="display:none">
+        <div class="reg-box-pan display-inline">
+            <div class="step">
+                <ul>
+                    <li class="col-xs-6 on">
+                        <span class="num"><em class="f-r5"></em><i>1</i></span>
+                        <span class="line_bg lbg-r"></span>
+                        <p class="lbg-txt">填写账户信息</p>
+                    </li>
+                    <li class="col-xs-6">
+                        <span class="num"><em class="f-r5"></em><i>2</i></span>
+                        <span class="line_bg lbg-l"></span>
+                        <p class="lbg-txt">注册成功</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="register_box">
+
+    <form id="commentForm" method="post">
+
+        <div class="login-box f-mt0 f-pb50">
+            <div class="main bgf">
+                <div class="reg-box-pan display-inline" style="padding-left: 130px;padding-bottom:50px;">
+                    <div class="reg-box" id="verifyCheck" style="margin-top:20px;">
+                        <div class="part1" style="display: none;">
+                            <div class="item col-xs-12" id="hint" style="display: none;">
+                                <div style="margin-left: 68px;background-color: antiquewhite;width:350px;padding: 4px 0px 0px 7px;">
+                                    <i class="layui-icon layui-icon-face-smile" style="margin-right: 10px"></i>填写的用户信息会自动设置为管理员账号信息
+                                <i class="layui-icon layui-icon-close" style="float: right;cursor: pointer"></i>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>用户名：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="20" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:3-20||isUname||existUname" data-error="用户名不能为空||用户名长度3-20位||只能输入字母、数字、下划线、减号，且以字母开头||用户名已被占用" id="adminNo">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide"><span>请输入字母、数字、下划线、减号，以字母开头、3-20位</span></label>
+                                    <label class="focus valid error"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>密码：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="password" id="password" maxlength="20" class="txt03 f-r3 required" tabindex="3" style="ime-mode:disabled;" onpaste="return  false" autocomplete="off" data-valid="isNonEmpty||between:6-20||level:2" data-error="密码不能为空||密码长度6-20位||该密码太简单，有被盗风险，建议字母+数字的组合">
+                                    <span class="ie8 icon-close close hide" style="right:55px"></span>
+                                    <span class="showpwd" data-eye="password"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide">6-20位英文（区分大小写）、数字、字符的组合</label>
+                                    <label class="focus valid error"></label>
+                                    <span class="clearfix"></span>
+                                    <label class="strength" style="display: block;">
+                                        <span class="f-fl f-size12">安全程度：</span>
+                                        <b><i class="on">弱</i><i class="on">中</i><i>强</i></b>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>确认密码：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="password" maxlength="20" class="txt03 f-r3 required" tabindex="4" style="ime-mode:disabled;" onpaste="return  false" autocomplete="off" data-valid="isNonEmpty||between:6-16||isRepeat:password" data-error="密码不能为空||密码长度6-16位||两次密码输入不一致" id="rePassword">
+                                    <span class="ie8 icon-close close hide" style="right:55px"></span>
+                                    <span class="showpwd" data-eye="rePassword"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide">请再输入一遍上面的密码</label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>真实姓名：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="10" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:2-10||isZh" data-error="真实姓名不能为空||真实姓名长度2-10位||只能输入中文" id="name" placeholder="请填写管理人员真实姓名">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide">2-10位，中文真实姓名</label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>性别：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="radio" id="sex1" name="sex" value="1" style="width: 20px;height: 20px;vertical-align:middle" checked="">男
+                                    <input type="radio" id="sex2" name="sex" value="2" style="width: 20px;height: 20px;vertical-align:middle">女
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>手机号：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" class="txt03 f-r3 required" keycodes="tel" tabindex="2" data-valid="isNonEmpty||isPhone||existPhone" data-error="手机号码不能为空||手机号码格式不正确||手机号码格式错误或已被占用" maxlength="11" id="phone" placeholder="请填写管理人员有效手机号">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide">请填写11位有效的手机号码</label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>验证码：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="6" id="verifyNo" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" data-valid="isNonEmpty||isInt||isCorrect" data-error="验证码不能为空||请输入6位数字验证码||手机验证码不正确或已失效">
+                                    <span class="btn btn-gray f-r3 f-ml5 f-size13" id="time_box" disabled="" style="width: 97px; display: none;">10 s后可重发</span>
+                                    <span class="btn btn-gray f-r3 f-ml5 f-size13" id="verifyYz" style="width: 97px; display: inline-block;">发送验证码</span>
+                                    <span class="ie8 icon-close close hide" style="right:130px"></span>
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus hide"><span>请查收手机短信，并填写短信中的验证码（此验证码15分钟内有效）</span></label>
+                                    <label class="focus valid error"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl">邀请码：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="6" id="inviteCode" class="txt03 f-r3 f-fl required" tabindex="4" data-valid="existCode" data-error="邀请码不存在" value="">
+                                    <label class="icon-sucessfill blank"></label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12" style="left: 110px;height: 40px;">
+                                <p class="f-size14 required" data-valid="isChecked" data-error="请先同意条款">
+                                    <input type="checkbox" checked=""><a href="javascript:dd();" class="f-ml5">我已阅读并同意条款</a>
+                                </p>
+                                <label class="focus valid"></label>
+                            </div>
+                            <div class="item col-xs-12" id="nextStep">
+                                <span class="intelligent-label f-fl">&nbsp;</span>
+                                <div class="f-fl item-ifo">
+                                    <a href="javascript:;" class="btn btn-blue f-r3" id="btn_part1">下一步</a>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12" id="nextStep1" style="display:none">
+                                <span class="intelligent-label f-fl">&nbsp;</span>
+                                <div class="f-fl item-ifo">
+                                    <a href="javascript:;" class="btn btn-blue f-r3" id="btn_part">下一步</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="part2" style="">
+                            <div class="item col-xs-12">
+                                <span class="intelligent-labelui f-fl">企业信息：</span>
+                                <div class="ui-step-line">-</div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>公司名称：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="99" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:3-99||existCompany" data-error="公司名称不能为空||最少输入3个字符||公司名称已被占用，如被抢注，请与广州壹新联系" id="companyName">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank hide"></label>
+                                    <label class="focus"><span>请输入公司全称</span></label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>公司简称：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="99" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:2-6||isSpecial||existAbbreviation" data-error="公司简称不能为空||请输入2~6个字符||无法输入特殊符号||公司简称已被占用，如被抢注，请与广州壹新联系" id="abbreviation">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank hide"></label>
+                                    <label class="focus"><span>请输入公司简称</span></label>
+                                    <label class="focus valid"></label>
+
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>角色：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="radio" value="gy" name="role" style="width: 20px;height: 20px;vertical-align:middle" checked="">产品供应商
+                                    <input type="radio" value="cg" name="role" style="width: 20px;height: 20px;vertical-align:middle">工程集成商
+                                    <label class="focus"><span>一个公司可以注册两个不同的角色账号哦！</span></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>所在地区：</span>
+                                <div class="col-xs-9 ShrinkInside" style="width: 584px;">
+                                    <div class="col-xs-3" style="padding: 0">
+                                        <input type="hidden" value="" id="h_province_code">
+                                        <select class="form-control required" id="province_code" name="province_code" data-valid="isNotRegion" data-error="所选地区为必选项" onchange="getCity()" style="width: 85%;">
+                                            <option value="0">-请选择省-</option>
+                                        <option value="110000">北京</option><option value="120000">天津</option><option value="130000">河北省</option><option value="140000">山西省</option><option value="150000">内蒙古自治区</option><option value="210000">辽宁省</option><option value="220000">吉林省</option><option value="230000">黑龙江省</option><option value="310000">上海</option><option value="320000">江苏省</option><option value="330000">浙江省</option><option value="340000">安徽省</option><option value="350000">福建省</option><option value="360000">江西省</option><option value="370000">山东省</option><option value="410000">河南省</option><option value="420000">湖北省</option><option value="430000">湖南省</option><option value="440000">广东省</option><option value="450000">广西壮族自治区</option><option value="460000">海南省</option><option value="500000">重庆</option><option value="510000">四川省</option><option value="520000">贵州省</option><option value="530000">云南省</option><option value="540000">西藏自治区</option><option value="610000">陕西省</option><option value="620000">甘肃省</option><option value="630000">青海省</option><option value="640000">宁夏回族自治区</option><option value="650000">新疆维吾尔自治区</option><option value="710000">台湾</option><option value="810000">香港特别行政区</option><option value="820000">澳门特别行政区</option></select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <input type="hidden" value="" id="h_city_code">
+                                        <select class="form-control required" id="city_code" name="city_code" data-valid="isNotRegion" data-error="所选地区为必选项" onchange="getArea()" style="width: 85%;"><option value="0">-请选择市-</option></select>
+                                    </div>
+                                    <div class="col-xs-3" style="padding: 0">
+                                        <input type="hidden" value="" id="h_area_code">
+                                        <select class="form-control" id="area_code" name="area_code" style="width: 85%;"><option value="0">-请选择区-</option></select>
+                                    </div>
+                                    <br>
+                                </div>
+                                <label id="regionError" class="focus valid notDisplay" style="color: red;font-size:12px">所在地区为必选项</label>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl"><b class="ftx04">*</b>详细地址：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="90" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:3-99" data-error="详细地址不能为空||最少输入3个字符" id="companyAddress">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="icon-sucessfill blank hide"></label>
+                                    <label class="focus"><span>请输入公司详细地址</span></label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl">法人代表：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="20" class="txt03 f-r3 required" tabindex="1" data-valid="between:2-10||isZhDaib" data-error="法人代表长度2-10位||只能输入中文" id="companylegalperson">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="focus"><span>2-10位，中文法人代表</span></label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl">税务登记号：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="text" maxlength="18" class="txt03 f-r3 required" tabindex="1" data-valid="isTax||existTax" data-error="请输入15位或者18位的英文字母和数字||税务登记号已被占用" id="taxId">
+                                    <span class="ie8 icon-close close hide"></span>
+                                    <label class="focus"><span>15位或者18位的英文字母和数字</span></label>
+                                    <label class="focus valid"></label>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-labelui f-fl">企业证件：</span>
+                                <div class="ui-step-line">-</div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <div class="form-group">
+                                    <span class="intelligent-label f-fl"><b class="ftx04">*</b>营业执照：</span>
+                                    <div class="col-xs-4">
+                                        <input type="text" class="form-control" id="companyfile02" name="companyfile02" style="width: 270px" value="" readonly="true" placeholder="请上传jpg、png格式图片">
+                                    </div>
+                                    <div class="col-xs-5" style="padding-left: 20px;">
+                                        <button type="button" data-valid="isfile02" class="layui-btn required" id="upload02">
+                                            上传
+                                        </button><input class="layui-upload-file" type="file" accept="" name="file">
+                                        <a href="javascript:;" data-valid="isfile02" target="_blank" class="layui-btn required" id="file02">预览</a>
+                                    </div>
+                                </div>
+                                <label id="fileError02" class="focus valid notDisplay" style="padding-top: 28px;margin-left: -174px;">请上传营业执照</label>
+                            </div>
+                            <div class="item col-xs-12">
+                                <div class="form-group">
+                                    <span class="intelligent-label f-fl">施工资质：</span>
+                                    <div class="col-xs-4">
+                                        <input type="text" class="form-control" id="companyfile01" name="companyfile01" style="width: 270px" value="" readonly="true" placeholder="请上传jpg、png格式图片">
+                                    </div>
+                                    <div class="col-xs-5" style="padding-left: 20px;">
+                                        <button type="button" data-valid="isfile01" class="layui-btn" id="upload01">
+                                            上传
+                                        </button><input class="layui-upload-file" type="file" accept="" name="file">
+                                        <a href="javascript:;" data-valid="isfile01" target="_blank" class="layui-btn" id="file01">预览</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <div class="form-group">
+                                    <span class="intelligent-label f-fl">合同业绩：</span>
+                                    <div class="col-xs-4">
+                                        <input type="text" class="form-control" id="companyfile03" name="companyfile03" style="width: 270px" value="" readonly="true" placeholder="请上传jpg、png格式图片">
+                                    </div>
+                                    <div class="col-xs-5" style="padding-left: 20px;">
+                                        <button type="button" data-valid="isfile03" class="layui-btn" id="upload03">
+                                            上传
+                                        </button><input class="layui-upload-file" type="file" accept="" name="file">
+                                        <a href="javascript:;" data-valid="isfile03" target="_blank" class="layui-btn" id="file03">预览</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item col-xs-12">
+                                <div class="form-group">
+                                    <span class="intelligent-label f-fl">代理证书：</span>
+                                    <div class="col-xs-4">
+                                        <input type="text" class="form-control" id="agencyfile" name="agencyfile" style="width: 270px" value="" readonly="true" placeholder="请上传jpg、png格式图片">
+                                    </div>
+                                    <div class="col-xs-5" style="padding-left: 20px;">
+                                        <button type="button" data-valid="isfile04" class="layui-btn" id="uploadAgencyfile">上传
+                                        </button><input class="layui-upload-file" type="file" accept="" name="file">
+                                        <a href="javascript:;" data-valid="isfile04" target="_blank" class="layui-btn" id="checkAagencyfile">预览</a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="item col-xs-12">
+                                <span class="intelligent-labelui f-fl">覆盖范围：</span>
+                                <div class="ui-step-line">-</div>
+                            </div>
+                            <div class="item col-xs-12" style="height: 360px;margin-left: 30px;">
+                                <div class="form-group">
+                                    <h4 style="margin-left: 130px;height: 35px;">请选择业务范围覆盖的地区</h4>
+                                    <div class="layui-transfer layui-form layui-border-box" style="float: left;margin-right: 20px">
+                                        <div id="provinceCheck" class="layui-transfer-box" data-index="0" style="width: 180px; height: 280px;">
+                                            <div class="layui-transfer-header">
+                                                <div class="layui-unselect layui-form-checkbox" lay-skin="primary">
+                                                    <span>选择省</span></div>
+                                            </div>
+                                            <ul class="layui-transfer-data" style="height: 240px;">
+                                             <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="全国" value="0"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>全国</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="东北" value="1"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>东北</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="华南" value="2"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>华南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="华北" value="3"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>华北</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="华东" value="4"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>华东</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="华中" value="5"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>华中</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="西北" value="6"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>西北</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="西南" value="7"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>西南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="北京" value="8"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>北京</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="天津" value="9"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>天津</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="河北" value="10"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>河北</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="山西" value="11"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>山西</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="内蒙古" value="12"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>内蒙古</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="辽宁" value="13"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>辽宁</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="吉林" value="14"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>吉林</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="黑龙江" value="15"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>黑龙江</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="上海" value="16"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>上海</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="江苏" value="17"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>江苏</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="浙江" value="18"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>浙江</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="安徽" value="19"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>安徽</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="福建" value="20"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>福建</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="江西" value="21"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>江西</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="山东" value="22"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>山东</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="河南" value="23"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>河南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="湖北" value="24"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>湖北</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="湖南" value="25"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>湖南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="广东" value="26"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>广东</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="广西" value="27"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>广西</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="海南" value="28"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>海南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="重庆" value="29"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>重庆</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="四川" value="30"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>四川</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="贵州" value="31"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>贵州</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="云南" value="32"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>云南</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="西藏" value="33"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>西藏</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="陕西" value="34"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>陕西</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="甘肃" value="35"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>甘肃</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="青海" value="36"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>青海</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="宁夏" value="37"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>宁夏</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="新疆" value="38"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>新疆</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="台湾" value="39"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>台湾</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="香港" value="40"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>香港</span><i class="layui-icon layui-icon-ok"></i></div> </li> <li><input type="checkbox" name="provinceCheck" lay-skin="primary" lay-filter="layTransferCheckbox" title="澳门" value="41"><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><span>澳门</span><i class="layui-icon layui-icon-ok"></i></div> </li></ul>
+                                        </div>
+                                    </div>
+                                    <div id="citys" class="demo-transfer" style="float: left">
+                                        <div class="layui-transfer layui-form layui-border-box" lay-filter="LAY-transfer-1">
+                                            <div class="layui-transfer-box" data-index="0" style="width: 180px; height: 280px;">
+                                                <div class="layui-transfer-header"><input type="checkbox" name="layTransferLeftCheckAll" lay-filter="layTransferCheckbox" lay-type="all" lay-skin="primary" title="选择市">
+                                                    <div class="layui-unselect layui-form-checkbox" lay-skin="primary">
+                                                        <span>选择市</span><i class="layui-icon layui-icon-ok"></i></div>
+                                                </div>
+                                                <ul class="layui-transfer-data" style="height: 240px;">
+                                                    <p class="layui-none">未选择城市</p>
+                                                </ul>
+                                            </div>
+                                            <div class="layui-transfer-active">
+                                                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-btn-disabled" data-index="0"><i class="layui-icon layui-icon-next"></i>
+                                                </button>
+                                                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-btn-disabled" data-index="1"><i class="layui-icon layui-icon-prev"></i>
+                                                </button>
+                                            </div>
+                                            <div class="layui-transfer-box" data-index="1" style="width: 180px; height: 280px;">
+                                                <div class="layui-transfer-header"><input type="checkbox" name="layTransferRightCheckAll" lay-filter="layTransferCheckbox" lay-type="all" lay-skin="primary" title="已选择区域">
+                                                    <div class="layui-unselect layui-form-checkbox" lay-skin="primary">
+                                                        <span>已选区域</span><i class="layui-icon layui-icon-ok"></i></div>
+                                                </div>
+                                                <ul class="layui-transfer-data" style="height: 240px;"><p class="layui-none">未选择城市</p></ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="errorMsgDiv" class="">
+                                <label id="errorMsg" class="focus valid notDisplay" style="margin-left:-175px;">错误</label>
+                            </div>
+                            <div class="item col-xs-12">
+                                <span class="intelligent-label f-fl">&nbsp;</span>
+                                <div class="f-fl item-ifo" style="width: 130px;">
+                                    <a href="javascript:;" class="btn btn-blue f-r3" id="btn_part2_part1" style="width: 130px;background-color: white;color: black;">上一步</a>
+                                </div>
+                                <div class="f-fl item-ifo" style="width: 130px;padding-left: 10px;">
+                                    <a href="javascript:;" class="btn btn-blue f-r3" id="btn_part2" style="width: 130px;">下一步</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="part3 text-center" style="display:none">
+                            <div class="item col-xs-12" style="margin-left:-128px; height: 400px">
+<!--                                <h3 class="part4">贵司账号注册成功，您可以在系统内继续完善公司资料;您有一周的试用时间！</h3>-->
+                                <h3 class="part4">贵司账号注册成功，您可以在系统内继续完善公司资料</h3>
+                                <h3 class="part5" style="display:none">您的账号注册成功，您可以在系统内继续完善您的资料;请尽快前往微信公众号绑定您的账号</h3>
+                                <div class="wx-main">
+                                    <div class="wx-content">
+                                        <img class="wx-img" src="" alt="获取失败">
+                                        <div class="error-img-fail" style="display: none;height: 180px;">
+                                            <img class="error-img" style="margin: 30px 8px 15px 10px;" src="/static/img/access-failure.png">
+                                            <p>获取二维码失败</p>
+                                        </div>
+                                    </div>
+                                    <p class="wx-info">
+                                        <img src="/static/img/wechat-ioc.png" style="vertical-align: top;border: 0;">
+                                        微信扫码
+                                    </p>
+                                    <p class="wx-main-text">扫码关注公众号快捷登录</p>
+                                </div>
+                                <p class="c-666 f-mt30 f-mb50">返回登录界面请点击
+                                    <a href="http://newbeall.com/login" class="c-blue">登录</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+</div>
+    </div>
