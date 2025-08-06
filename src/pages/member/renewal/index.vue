@@ -475,21 +475,21 @@ const finalAmount = computed(() => {
     return finalPrice.toFixed(2);
 });
 
-// // 权限接口函数
-// const ExpiredAuthApi = async () => {
-//     try {
-//         const response = await http.get('auth/expiredAuth');
-//         return response;
-//     } catch {
-//         Notify.error({
-//             title: 'Session超时',
-//             content: '页面session超时，请重新登录',
-//             time: 2000
-//         });
-//         router.push('/login');
-//         return;
-//     }
-// };
+// 权限接口函数
+const ExpiredAuthApi = async () => {
+    try {
+        const response = await http.get('auth/expiredAuth');
+        return response;
+    } catch {
+        Notify.error({
+            title: 'Session超时',
+            content: '页面session超时，请重新登录',
+            time: 2000
+        });
+        router.push('/login');
+        return;
+    }
+};
 
 onMounted(
     async () => {

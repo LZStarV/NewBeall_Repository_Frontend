@@ -26,12 +26,12 @@ class HttpClient {
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // GET请求添加时间戳防缓存
-        if (config.method?.toUpperCase() === 'GET') {
-          config.params = {
-            ...config.params,
-            _t: Date.now(),
-          };
-        }
+        // if (config.method?.toUpperCase() === 'GET') {
+        //   config.params = {
+        //     ...config.params,
+        //     _t: Date.now(),
+        //   };
+        // }
         return config;
       },
       (error) => {

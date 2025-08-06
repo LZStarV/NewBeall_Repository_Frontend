@@ -1,914 +1,902 @@
 <template>
     <div class="user-management-page">
-        <div class="page-header">
-            <h1>用户管理</h1>
-            <p>管理系统用户账号、角色权限和基本信息</p>
-        </div>
-
-        <div class="content-area">
-            <!-- 统计概览 -->
-            <lay-row :space="16" class="stats-section">
-                <lay-col :md="6">
-                    <lay-card class="stat-card">
-                        <div class="stat-content">
-                            <lay-icon type="layui-icon-username" class="stat-icon" />
-                            <div class="stat-info">
-                                <h3>总用户数</h3>
-                                <span class="stat-number">128</span>
-                                <span class="stat-trend up">+8</span>
+        <div class="layout-container">
+            <!-- 左侧组织结构 -->
+            <div class="sidebar">
+                <lay-card title="组织机构">
+                    <div class="org-tree">
+                        <div class="tree-node" :class="{ active: selectedNode === 'company' }"
+                            @click="selectNode('company')">
+                            <lay-icon type="layui-icon-home" />
+                            <span>总公司</span>
+                        </div>
+                        <div class="tree-children">
+                            <div class="tree-node" :class="{ active: selectedNode === 'admin' }"
+                                @click="selectNode('admin')">
+                                <lay-icon type="layui-icon-user" />
+                                <span>销售部门</span>
                             </div>
                         </div>
-                    </lay-card>
-                </lay-col>
-                <lay-col :md="6">
-                    <lay-card class="stat-card">
-                        <div class="stat-content">
-                            <lay-icon type="layui-icon-face-smile" class="stat-icon active" />
-                            <div class="stat-info">
-                                <h3>活跃用户</h3>
-                                <span class="stat-number">95</span>
-                                <span class="stat-trend up">+12</span>
-                            </div>
-                        </div>
-                    </lay-card>
-                </lay-col>
-                <lay-col :md="6">
-                    <lay-card class="stat-card">
-                        <div class="stat-content">
-                            <lay-icon type="layui-icon-face-cry" class="stat-icon inactive" />
-                            <div class="stat-info">
-                                <h3>禁用用户</h3>
-                                <span class="stat-number">8</span>
-                                <span class="stat-trend down">-2</span>
-                            </div>
-                        </div>
-                    </lay-card>
-                </lay-col>
-                <lay-col :md="6">
-                    <lay-card class="stat-card">
-                        <div class="stat-content">
-                            <lay-icon type="layui-icon-user" class="stat-icon new" />
-                            <div class="stat-info">
-                                <h3>新增用户</h3>
-                                <span class="stat-number">25</span>
-                                <span class="stat-trend">本月</span>
-                            </div>
-                        </div>
-                    </lay-card>
-                </lay-col>
-            </lay-row>
-
-            <!-- 操作栏 -->
-            <lay-card class="toolbar-card">
-                <div class="toolbar">
-                    <div class="toolbar-left">
-                        <lay-button type="primary" @click="showAddUserModal">
-                            <lay-icon type="layui-icon-add-1" />
-                            新增用户
-                        </lay-button>
-                        <lay-button @click="batchEnable" :disabled="selectedUsers.length === 0">
-                            <lay-icon type="layui-icon-ok" />
-                            批量启用
-                        </lay-button>
-                        <lay-button @click="batchDisable" :disabled="selectedUsers.length === 0">
-                            <lay-icon type="layui-icon-close" />
-                            批量禁用
-                        </lay-button>
-                        <lay-button @click="exportUsers">
-                            <lay-icon type="layui-icon-export" />
-                            导出用户
-                        </lay-button>
                     </div>
-                    <div class="toolbar-right">
-                        <lay-input v-model="searchKeyword" placeholder="搜索用户名、姓名或邮箱" :suffix-icon="'layui-icon-search'"
-                            @keyup.enter="searchUsers" style="width: 250px;" />
-                        <lay-button @click="searchUsers">搜索</lay-button>
-                    </div>
-                </div>
-            </lay-card>
-
-            <!-- 筛选器 -->
-            <lay-card class="filter-card">
-                <lay-form :model="filterForm" layout="inline">
-                    <lay-form-item label="用户状态">
-                        <lay-select v-model="filterForm.status" placeholder="选择状态">
-                            <lay-select-option value="">全部状态</lay-select-option>
-                            <lay-select-option value="active">激活</lay-select-option>
-                            <lay-select-option value="inactive">禁用</lay-select-option>
-                            <lay-select-option value="pending">待激活</lay-select-option>
-                        </lay-select>
-                    </lay-form-item>
-                    <lay-form-item label="用户角色">
-                        <lay-select v-model="filterForm.role" placeholder="选择角色">
-                            <lay-select-option value="">全部角色</lay-select-option>
-                            <lay-select-option value="admin">超级管理员</lay-select-option>
-                            <lay-select-option value="manager">部门经理</lay-select-option>
-                            <lay-select-option value="sales">销售人员</lay-select-option>
-                            <lay-select-option value="designer">设计师</lay-select-option>
-                            <lay-select-option value="user">普通用户</lay-select-option>
-                        </lay-select>
-                    </lay-form-item>
-                    <lay-form-item label="所属部门">
-                        <lay-select v-model="filterForm.department" placeholder="选择部门">
-                            <lay-select-option value="">全部部门</lay-select-option>
-                            <lay-select-option value="sales">销售部</lay-select-option>
-                            <lay-select-option value="design">设计部</lay-select-option>
-                            <lay-select-option value="tech">技术部</lay-select-option>
-                            <lay-select-option value="admin">行政部</lay-select-option>
-                        </lay-select>
-                    </lay-form-item>
-                    <lay-form-item label="注册时间">
-                        <lay-date-picker v-model="filterForm.startDate" placeholder="开始日期" />
-                        <span style="margin: 0 8px;">至</span>
-                        <lay-date-picker v-model="filterForm.endDate" placeholder="结束日期" />
-                    </lay-form-item>
-                    <lay-form-item>
-                        <lay-button type="primary" @click="applyFilter">筛选</lay-button>
-                        <lay-button @click="resetFilter">重置</lay-button>
-                    </lay-form-item>
-                </lay-form>
-            </lay-card>
-
-            <!-- 用户列表 -->
-            <lay-card title="用户列表">
-                <lay-table :columns="userColumns" :data-source="userList" :pagination="pagination"
-                    v-model:selectedKeys="selectedUsers" :default-toolbar="true" :even="true">
-                    <template #avatar="{ row }">
-                        <div class="user-avatar">
-                            <img v-if="row.avatar" :src="row.avatar" :alt="row.realName" />
-                            <div v-else class="avatar-placeholder">
-                                {{ row.realName ? row.realName.charAt(0) : row.username.charAt(0) }}
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #userInfo="{ row }">
-                        <div class="user-info">
-                            <div class="user-name">
-                                <span class="real-name">{{ row.realName }}</span>
-                                <span class="username">@{{ row.username }}</span>
-                            </div>
-                            <div class="user-contact">
-                                <span v-if="row.email" class="email">{{ row.email }}</span>
-                                <span v-if="row.phone" class="phone">{{ row.phone }}</span>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #role="{ row }">
-                        <lay-tag :type="getRoleTagType(row.role)">{{ getRoleName(row.role) }}</lay-tag>
-                    </template>
-
-                    <template #department="{ row }">
-                        <div class="department-info">
-                            <lay-icon type="layui-icon-group" />
-                            <span>{{ getDepartmentName(row.department) }}</span>
-                        </div>
-                    </template>
-
-                    <template #status="{ row }">
-                        <lay-tag :type="getStatusTagType(row.status)">{{ getStatusName(row.status) }}</lay-tag>
-                    </template>
-
-                    <template #lastLogin="{ row }">
-                        <div class="login-info">
-                            <div class="login-time">{{ row.lastLoginTime || '从未登录' }}</div>
-                            <div v-if="row.lastLoginIp" class="login-ip">{{ row.lastLoginIp }}</div>
-                        </div>
-                    </template>
-
-                    <template #action="{ row }">
-                        <div class="action-buttons">
-                            <lay-button size="sm" @click="viewUser(row)">
-                                <lay-icon type="layui-icon-about" />
-                                详情
-                            </lay-button>
-                            <lay-button size="sm" @click="editUser(row)">
-                                <lay-icon type="layui-icon-edit" />
-                                编辑
-                            </lay-button>
-                            <lay-button size="sm" :type="row.status === 'active' ? 'warm' : 'normal'"
-                                @click="toggleUserStatus(row)">
-                                <lay-icon :type="row.status === 'active' ? 'layui-icon-pause' : 'layui-icon-play'" />
-                                {{ row.status === 'active' ? '禁用' : '启用' }}
-                            </lay-button>
-                            <lay-button size="sm" @click="resetPassword(row)">
-                                <lay-icon type="layui-icon-password" />
-                                重置密码
-                            </lay-button>
-                            <lay-button size="sm" type="danger" @click="deleteUser(row)">
-                                <lay-icon type="layui-icon-delete" />
-                                删除
-                            </lay-button>
-                        </div>
-                    </template>
-                </lay-table>
-            </lay-card>
-        </div>
-
-        <!-- 新增/编辑用户弹窗 -->
-        <lay-layer v-model="showUserModal" :title="userModalTitle" :area="['800px', '600px']">
-            <div class="user-modal-content">
-                <lay-form :model="userForm" ref="userFormRef" label-width="120px">
-                    <lay-row :space="16">
-                        <lay-col :md="12">
-                            <lay-form-item label="用户名" prop="username" required>
-                                <lay-input v-model="userForm.username" placeholder="请输入用户名" :disabled="isEditMode" />
-                            </lay-form-item>
-                        </lay-col>
-                        <lay-col :md="12">
-                            <lay-form-item label="真实姓名" prop="realName" required>
-                                <lay-input v-model="userForm.realName" placeholder="请输入真实姓名" />
-                            </lay-form-item>
-                        </lay-col>
-                    </lay-row>
-
-                    <lay-row :space="16">
-                        <lay-col :md="12">
-                            <lay-form-item label="邮箱" prop="email" required>
-                                <lay-input v-model="userForm.email" placeholder="请输入邮箱地址" type="email" />
-                            </lay-form-item>
-                        </lay-col>
-                        <lay-col :md="12">
-                            <lay-form-item label="手机号" prop="phone">
-                                <lay-input v-model="userForm.phone" placeholder="请输入手机号码" />
-                            </lay-form-item>
-                        </lay-col>
-                    </lay-row>
-
-                    <lay-row :space="16" v-if="!isEditMode">
-                        <lay-col :md="12">
-                            <lay-form-item label="密码" prop="password" required>
-                                <lay-input v-model="userForm.password" placeholder="请输入密码" type="password"
-                                    show-password />
-                            </lay-form-item>
-                        </lay-col>
-                        <lay-col :md="12">
-                            <lay-form-item label="确认密码" prop="confirmPassword" required>
-                                <lay-input v-model="userForm.confirmPassword" placeholder="请再次输入密码" type="password"
-                                    show-password />
-                            </lay-form-item>
-                        </lay-col>
-                    </lay-row>
-
-                    <lay-row :space="16">
-                        <lay-col :md="12">
-                            <lay-form-item label="用户角色" prop="role" required>
-                                <lay-select v-model="userForm.role" placeholder="选择用户角色">
-                                    <lay-select-option value="admin">超级管理员</lay-select-option>
-                                    <lay-select-option value="manager">部门经理</lay-select-option>
-                                    <lay-select-option value="sales">销售人员</lay-select-option>
-                                    <lay-select-option value="designer">设计师</lay-select-option>
-                                    <lay-select-option value="user">普通用户</lay-select-option>
-                                </lay-select>
-                            </lay-form-item>
-                        </lay-col>
-                        <lay-col :md="12">
-                            <lay-form-item label="所属部门" prop="department" required>
-                                <lay-select v-model="userForm.department" placeholder="选择所属部门">
-                                    <lay-select-option value="sales">销售部</lay-select-option>
-                                    <lay-select-option value="design">设计部</lay-select-option>
-                                    <lay-select-option value="tech">技术部</lay-select-option>
-                                    <lay-select-option value="admin">行政部</lay-select-option>
-                                </lay-select>
-                            </lay-form-item>
-                        </lay-col>
-                    </lay-row>
-
-                    <lay-form-item label="用户状态" prop="status">
-                        <lay-radio-group v-model="userForm.status">
-                            <lay-radio value="active">激活</lay-radio>
-                            <lay-radio value="inactive">禁用</lay-radio>
-                            <lay-radio value="pending">待激活</lay-radio>
-                        </lay-radio-group>
-                    </lay-form-item>
-
-                    <lay-form-item label="备注">
-                        <lay-textarea v-model="userForm.remark" placeholder="请输入备注信息" :rows="3" />
-                    </lay-form-item>
-                </lay-form>
-
-                <div class="modal-actions">
-                    <lay-button type="primary" @click="saveUser">
-                        <lay-icon type="layui-icon-ok" />
-                        保存
-                    </lay-button>
-                    <lay-button @click="closeUserModal">
-                        <lay-icon type="layui-icon-close" />
-                        取消
-                    </lay-button>
-                </div>
+                </lay-card>
             </div>
-        </lay-layer>
 
-        <!-- 用户详情弹窗 -->
-        <lay-layer v-model="showUserDetailModal" title="用户详情" :area="['700px', '500px']">
-            <div class="user-detail-content" v-if="selectedUser">
-                <div class="user-profile">
-                    <div class="profile-avatar">
-                        <img v-if="selectedUser.avatar" :src="selectedUser.avatar" :alt="selectedUser.realName" />
-                        <div v-else class="avatar-placeholder large">
-                            {{ selectedUser.realName ? selectedUser.realName.charAt(0) : selectedUser.username.charAt(0)
-                            }}
-                        </div>
-                    </div>
-                    <div class="profile-info">
-                        <h3>{{ selectedUser.realName }}</h3>
-                        <p>@{{ selectedUser.username }}</p>
-                        <lay-tag :type="getRoleTagType(selectedUser.role)">{{ getRoleName(selectedUser.role)
-                            }}</lay-tag>
-                    </div>
-                </div>
-
-                <div class="detail-sections">
-                    <div class="detail-section">
-                        <h4>基本信息</h4>
-                        <lay-form label-width="100px">
-                            <lay-row :space="16">
-                                <lay-col :md="12">
-                                    <lay-form-item label="邮箱">
-                                        <span>{{ selectedUser.email }}</span>
-                                    </lay-form-item>
-                                </lay-col>
-                                <lay-col :md="12">
-                                    <lay-form-item label="手机号">
-                                        <span>{{ selectedUser.phone || '未设置' }}</span>
-                                    </lay-form-item>
-                                </lay-col>
-                            </lay-row>
-                            <lay-row :space="16">
-                                <lay-col :md="12">
-                                    <lay-form-item label="所属部门">
-                                        <span>{{ getDepartmentName(selectedUser.department) }}</span>
-                                    </lay-form-item>
-                                </lay-col>
-                                <lay-col :md="12">
-                                    <lay-form-item label="用户状态">
-                                        <lay-tag :type="getStatusTagType(selectedUser.status)">{{
-                                            getStatusName(selectedUser.status) }}</lay-tag>
-                                    </lay-form-item>
-                                </lay-col>
-                            </lay-row>
-                        </lay-form>
-                    </div>
-
-                    <div class="detail-section">
-                        <h4>账户信息</h4>
-                        <lay-form label-width="100px">
-                            <lay-row :space="16">
-                                <lay-col :md="12">
-                                    <lay-form-item label="注册时间">
-                                        <span>{{ selectedUser.createTime }}</span>
-                                    </lay-form-item>
-                                </lay-col>
-                                <lay-col :md="12">
-                                    <lay-form-item label="最后登录">
-                                        <span>{{ selectedUser.lastLoginTime || '从未登录' }}</span>
-                                    </lay-form-item>
-                                </lay-col>
-                            </lay-row>
-                            <lay-form-item label="登录IP">
-                                <span>{{ selectedUser.lastLoginIp || '无' }}</span>
+            <!-- 右侧内容区域 -->
+            <div class="main-content">
+                <!-- 搜索过滤区域 -->
+                <lay-card class="filter-card">
+                    <div class="filter-section">
+                        <lay-form :model="filterForm" layout="inline">
+                            <lay-form-item label="用户名称">
+                                <lay-input v-model="filterForm.userName" placeholder="账号/姓名/手机号" style="width: 180px" />
                             </lay-form-item>
-                            <lay-form-item label="备注">
-                                <span>{{ selectedUser.remark || '无' }}</span>
+                            <lay-form-item label="注册开始日期">
+                                <lay-date-picker v-model="filterForm.registerStartDate" placeholder="注册开始日期"
+                                    style="width: 150px" />
+                            </lay-form-item>
+                            <lay-form-item label="注册结束日期">
+                                <lay-date-picker v-model="filterForm.registerEndDate" placeholder="注册结束日期"
+                                    style="width: 150px" />
+                            </lay-form-item>
+                            <lay-form-item>
+                                <lay-button type="primary" @click="handleSearch">
+                                    <lay-icon type="layui-icon-search" />
+                                </lay-button>
                             </lay-form-item>
                         </lay-form>
                     </div>
-                </div>
+                </lay-card>
 
-                <div class="modal-actions">
-                    <lay-button @click="closeUserDetailModal">关闭</lay-button>
-                </div>
+                <!-- 表格区域 -->
+                <lay-card class="table-card">
+                    <!-- 工具栏区域 -->
+                    <div class="fixed-table-toolbar">
+                        <span data-title="添加" @click="handleAdd" class="btnIcon invite-but">
+                            <lay-icon type="layui-icon-add-circle" />
+                        </span>
+                        <span data-title="冻结" @click="handleFreeze" class="btnIcon invite-but">
+                            <lay-icon type="layui-icon-pause" />
+                        </span>
+                        <span data-title="解除冻结" @click="handleUnfreeze" class="btnIcon invite-but">
+                            <lay-icon type="layui-icon-play" />
+                        </span>
+                        <span data-title="个人权限" @click="handlePersonalPermission" class="btnIcon invite-but">
+                            <lay-icon type="layui-icon-user" />
+                        </span>
+                        <span data-title="报价查阅权限" @click="handleQuotePermission" class="btnIcon invite-but">
+                            <lay-icon type="layui-icon-chart-screen" />
+                        </span>
+
+                        <button class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh"
+                            title="刷新" @click="handleRefresh">
+                            <lay-icon type="layui-icon-refresh" />
+                        </button>
+
+                        <div class="dropdown-container">
+                            <button type="button" aria-label="columns"
+                                class="btn btn-default btn-outline dropdown-toggle" @click="toggleColumnsDropdown">
+                                <lay-icon type="layui-icon-shrink-right" />
+                            </button>
+                            <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.account"
+                                            @change="updateVisibleColumns" /> 账号
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.name"
+                                            @change="updateVisibleColumns" /> 姓名
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.profession"
+                                            @change="updateVisibleColumns" /> 职务
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.sex"
+                                            @change="updateVisibleColumns" /> 性别
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.deptName"
+                                            @change="updateVisibleColumns" /> 部门
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.roleName"
+                                            @change="updateVisibleColumns" /> 角色
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.email"
+                                            @change="updateVisibleColumns" /> 邮箱
+                                    </label>
+                                </li>
+                                <li role="menuitem">
+                                    <label>
+                                        <input type="checkbox" v-model="columnVisibility.phone"
+                                            @change="updateVisibleColumns" /> 电话
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 用户管理列表表格 -->
+                    <div class="table-container">
+                        <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
+                            @change="handleTableChange">
+                            <!-- 选择框列 -->
+                            <template #checkbox="{ row }">
+                                <div class="custom-checkbox" @click="toggleRowCheck(row)">
+                                    <div class="checkbox-square" :class="{ checked: row.checked }">
+                                        <lay-icon v-if="row.checked" type="layui-icon-ok" />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- 性别列 -->
+                            <template #sex="{ row }">
+                                <span class="sex-text">
+                                    {{ getSexName(row.sex) }}
+                                </span>
+                            </template>
+
+                            <!-- 邮箱列 -->
+                            <template #email="{ row }">
+                                <span class="email-text" :title="row.email">
+                                    {{ row.email }}
+                                </span>
+                            </template>
+
+                            <!-- 状态列 -->
+                            <template #status="{ row }">
+                                <span class="status-text" :class="getStatusClass(row.statusName)">
+                                    {{ row.statusName }}
+                                </span>
+                            </template>
+
+                            <!-- 操作列 -->
+                            <template #actions="{ row }">
+                                <div class="action-buttons">
+                                    <span class="action-btn modify" @click="handleModify(row)">修改</span>
+                                    <span class="action-btn delete" @click="handleUserDelete(row)">删除</span>
+                                    <span class="action-btn permission" @click="handleSetPermission(row)">查看权限</span>
+                                </div>
+                            </template>
+                        </lay-table>
+                    </div>
+                </lay-card>
             </div>
-        </lay-layer>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
+import http from '@/utils/http';
+import Notify from '@/utils/notify';
 
-// 响应式数据
-const searchKeyword = ref('');
-const selectedUsers = ref([]);
-const showUserModal = ref(false);
-const showUserDetailModal = ref(false);
-const isEditMode = ref(false);
-const selectedUser = ref(null);
-const userFormRef = ref();
+// 用户管理接口类型定义
+interface UserManagement {
+    checked?: boolean;              // 前端添加的选中状态
+    profession: string;             // 职务
+    deptName: string;              // 部门名称
+    createtime: string;            // 创建时间
+    roleid: string;                // 角色ID
+    sex: number;                   // 性别(数字)
+    deptid: number;                // 部门ID
+    avatar: string;                // 头像
+    companyId: number;             // 公司ID
+    times: number;                 // 登录次数
+    phone: string;                 // 电话
+    sexName: number;               // 性别名称(数字)
+    name: string;                  // 姓名
+    roleName: string;              // 角色名称
+    statusName: string;            // 状态名称
+    id: number;                    // 用户ID
+    userRole: number;              // 用户角色
+    account: string;               // 账号
+    email: string;                 // 邮箱
+    status: number;                // 状态(数字)
+    birthday?: string;             // 生日(可选)
+}
 
-// 筛选表单
+// 工具栏状态
+const showColumnsDropdown = ref(false);
+const selectedNode = ref('company');
+
+// 列显示控制
+const columnVisibility = reactive({
+    account: true,
+    name: true,
+    profession: true,
+    sex: true,
+    deptName: true,
+    roleName: true,
+    email: true,
+    phone: true,
+    statusName: true,
+    actions: true
+});
+
+// 过滤表单
 const filterForm = reactive({
-    status: '',
-    role: '',
-    department: '',
-    startDate: '',
-    endDate: ''
+    userName: '',
+    registerStartDate: '',
+    registerEndDate: ''
 });
 
-// 用户表单
-const userForm = reactive({
-    id: '',
-    username: '',
-    realName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    role: '',
-    department: '',
-    status: 'active',
-    remark: ''
-});
-
-// 表格列配置
-const userColumns = [
-    { type: 'checkbox', width: 50, fixed: 'left' },
-    { title: '头像', key: 'avatar', width: 80, customSlot: 'avatar' },
-    { title: '用户信息', key: 'userInfo', width: 200, customSlot: 'userInfo' },
-    { title: '角色', key: 'role', width: 120, customSlot: 'role' },
-    { title: '部门', key: 'department', width: 120, customSlot: 'department' },
-    { title: '状态', key: 'status', width: 100, customSlot: 'status' },
-    { title: '注册时间', key: 'createTime', width: 150 },
-    { title: '最后登录', key: 'lastLogin', width: 150, customSlot: 'lastLogin' },
-    { title: '操作', key: 'action', width: 300, fixed: 'right', customSlot: 'action' }
+// 所有可用的列配置
+const allColumns = [
+    { title: '', key: 'checkbox', width: '50px', customSlot: 'checkbox', type: 'custom' },
+    { title: '账号', key: 'account', width: '120px', type: 'text' },
+    { title: '姓名', key: 'name', width: '100px', type: 'text' },
+    { title: '职务', key: 'profession', width: '120px', type: 'text' },
+    { title: '性别', key: 'sex', width: '60px', customSlot: 'sex', type: 'custom' },
+    { title: '部门', key: 'deptName', width: '120px', type: 'text' },
+    { title: '角色', key: 'roleName', width: '120px', type: 'text' },
+    { title: '邮箱', key: 'email', width: '200px', customSlot: 'email', type: 'custom' },
+    { title: '电话', key: 'phone', width: '130px', type: 'text' },
+    { title: '状态', key: 'statusName', width: '80px', customSlot: 'status', type: 'custom' },
+    { title: '操作', key: 'actions', width: '200px', customSlot: 'actions', type: 'custom' }
 ];
 
-// 用户数据
-const userList = ref([
-    {
-        id: 1,
-        username: 'admin',
-        realName: '系统管理员',
-        email: 'admin@newbeall.com',
-        phone: '13800138000',
-        role: 'admin',
-        department: 'admin',
-        status: 'active',
-        avatar: '',
-        createTime: '2024-01-01 10:00:00',
-        lastLoginTime: '2024-01-20 14:30:25',
-        lastLoginIp: '192.168.1.100',
-        remark: '系统超级管理员账户'
-    },
-    {
-        id: 2,
-        username: 'zhangsan',
-        realName: '张三',
-        email: 'zhangsan@newbeall.com',
-        phone: '13800138001',
-        role: 'sales',
-        department: 'sales',
-        status: 'active',
-        avatar: '',
-        createTime: '2024-01-05 09:15:00',
-        lastLoginTime: '2024-01-20 13:45:18',
-        lastLoginIp: '192.168.1.101',
-        remark: '销售部主管'
-    },
-    {
-        id: 3,
-        username: 'lisi',
-        realName: '李四',
-        email: 'lisi@newbeall.com',
-        phone: '13800138002',
-        role: 'designer',
-        department: 'design',
-        status: 'active',
-        avatar: '',
-        createTime: '2024-01-08 14:20:00',
-        lastLoginTime: '2024-01-19 16:22:33',
-        lastLoginIp: '192.168.1.102',
-        remark: '资深设计师'
-    },
-    {
-        id: 4,
-        username: 'wangwu',
-        realName: '王五',
-        email: 'wangwu@newbeall.com',
-        phone: '',
-        role: 'user',
-        department: 'sales',
-        status: 'inactive',
-        avatar: '',
-        createTime: '2024-01-10 11:30:00',
-        lastLoginTime: null,
-        lastLoginIp: null,
-        remark: '临时账户，已停用'
+// 动态计算可见的列
+const visibleColumns = computed(() => {
+    const baseColumns = [allColumns[0]]; // 始终显示选择框列
+    const visibleDataColumns = allColumns.slice(1).filter(column =>
+        columnVisibility[column.key as keyof typeof columnVisibility]
+    );
+    return [...baseColumns, ...visibleDataColumns];
+});
+// 获取用户列表
+const fetchUserList = async () => {
+    try {
+        // 使用FormData格式发送表单数据
+        const formData = new FormData();
+        formData.append('order', 'desc');
+        formData.append('offset', ((pagination.current - 1) * pagination.limit).toString());
+        formData.append('limit', pagination.limit.toString());
+
+        const response = await http.post('/mgr/list', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        console.log(response);
+        // 处理返回的数据
+        if (response && Array.isArray(response)) {
+            tableData.value = response.map((item: UserManagement) => ({
+                ...item,
+                checked: false
+            }));
+            pagination.total = response.length;
+        }
+    } catch {
+        Notify.error({
+            title: '获取数据失败',
+            content: '无法获取用户数据，请稍后重试',
+            time: 3000
+        });
     }
-]);
+};
+// 表格数据 - 初始化为空数组，数据从API获取
+const tableData = ref<UserManagement[]>([]);
 
 // 分页配置
 const pagination = reactive({
     current: 1,
-    pageSize: 20,
-    total: userList.value.length
+    limit: 10,
+    total: 0
 });
 
-// 计算属性
-const userModalTitle = computed(() => {
-    return isEditMode.value ? '编辑用户' : '新增用户';
+// 获取状态样式
+const getStatusClass = (status: string) => {
+    return status === '启用' ? 'status-enabled' : 'status-disabled';
+};
+
+// 性别转换函数
+const getSexName = (sex: number) => {
+    return sex === 1 ? '男' : '女';
+};
+
+// 选择组织节点
+const selectNode = (node: string) => {
+    selectedNode.value = node;
+    console.log('选择组织节点:', node);
+    // 根据选择的节点加载用户数据
+};
+
+// 更新可见列
+const updateVisibleColumns = () => {
+    console.log('当前可见列:', Object.keys(columnVisibility).filter(key => columnVisibility[key as keyof typeof columnVisibility]));
+};
+
+// 切换行复选框状态
+const toggleRowCheck = (row: UserManagement) => {
+    row.checked = !row.checked;
+    console.log('选中行:', row);
+};
+
+// 表格变化处理
+const handleTableChange = (pageData: { current: number; limit: number }) => {
+    pagination.current = pageData.current;
+    pagination.limit = pageData.limit;
+    console.log('页面变化:', pageData);
+};
+
+// 搜索处理
+const handleSearch = () => {
+    pagination.current = 1;
+    console.log('搜索条件:', filterForm);
+};
+
+// 添加用户
+const handleAdd = () => {
+    console.log('添加用户');
+};
+
+// 冻结用户
+const handleFreeze = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要冻结的用户');
+        return;
+    }
+    console.log('冻结用户:', selectedRows);
+};
+
+// 解除冻结
+const handleUnfreeze = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要解除冻结的用户');
+        return;
+    }
+    console.log('解除冻结用户:', selectedRows);
+};
+
+// 个人权限
+const handlePersonalPermission = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要设置权限的用户');
+        return;
+    }
+    console.log('设置个人权限:', selectedRows);
+};
+
+// 报价查阅权限
+const handleQuotePermission = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要设置报价权限的用户');
+        return;
+    }
+    console.log('设置报价查阅权限:', selectedRows);
+};
+
+// 修改用户
+const handleModify = (row: UserManagement) => {
+    console.log('修改用户:', row);
+};
+
+// 删除用户
+const handleUserDelete = (row: UserManagement) => {
+    console.log('删除用户:', row);
+};
+
+// 查看权限
+const handleSetPermission = (row: UserManagement) => {
+    console.log('查看用户权限:', row);
+};
+
+// 刷新
+const handleRefresh = () => {
+    console.log('刷新数据');
+    handleSearch();
+};
+
+// 切换列显示下拉菜单
+const toggleColumnsDropdown = () => {
+    showColumnsDropdown.value = !showColumnsDropdown.value;
+};
+onMounted(() => {
+    fetchUserList();
 });
-
-// 辅助方法
-const getRoleTagType = (role: string) => {
-    const typeMap: Record<string, string> = {
-        'admin': 'danger',
-        'manager': 'warm',
-        'sales': 'normal',
-        'designer': 'primary',
-        'user': 'success'
-    };
-    return typeMap[role] || 'normal';
-};
-
-const getRoleName = (role: string) => {
-    const nameMap: Record<string, string> = {
-        'admin': '超级管理员',
-        'manager': '部门经理',
-        'sales': '销售人员',
-        'designer': '设计师',
-        'user': '普通用户'
-    };
-    return nameMap[role] || role;
-};
-
-const getStatusTagType = (status: string) => {
-    const typeMap: Record<string, string> = {
-        'active': 'normal',
-        'inactive': 'danger',
-        'pending': 'warm'
-    };
-    return typeMap[status] || 'normal';
-};
-
-const getStatusName = (status: string) => {
-    const nameMap: Record<string, string> = {
-        'active': '激活',
-        'inactive': '禁用',
-        'pending': '待激活'
-    };
-    return nameMap[status] || status;
-};
-
-const getDepartmentName = (department: string) => {
-    const nameMap: Record<string, string> = {
-        'sales': '销售部',
-        'design': '设计部',
-        'tech': '技术部',
-        'admin': '行政部'
-    };
-    return nameMap[department] || department;
-};
-
-// 方法实现
-const searchUsers = () => {
-    console.log('搜索用户:', searchKeyword.value);
-};
-
-const applyFilter = () => {
-    console.log('应用筛选:', filterForm);
-};
-
-const resetFilter = () => {
-    Object.keys(filterForm).forEach(key => {
-        filterForm[key as keyof typeof filterForm] = '';
-    });
-};
-
-const showAddUserModal = () => {
-    isEditMode.value = false;
-    resetUserForm();
-    showUserModal.value = true;
-};
-
-const resetUserForm = () => {
-    Object.keys(userForm).forEach(key => {
-        if (key === 'status') {
-            userForm[key as keyof typeof userForm] = 'active';
-        } else {
-            userForm[key as keyof typeof userForm] = '';
-        }
-    });
-};
-
-const closeUserModal = () => {
-    showUserModal.value = false;
-    resetUserForm();
-};
-
-const saveUser = () => {
-    console.log('保存用户:', userForm);
-    closeUserModal();
-};
-
-const viewUser = (user: any) => {
-    selectedUser.value = user;
-    showUserDetailModal.value = true;
-};
-
-const closeUserDetailModal = () => {
-    showUserDetailModal.value = false;
-    selectedUser.value = null;
-};
-
-const editUser = (user: any) => {
-    isEditMode.value = true;
-    Object.keys(userForm).forEach(key => {
-        if (key !== 'password' && key !== 'confirmPassword') {
-            userForm[key as keyof typeof userForm] = user[key] || '';
-        }
-    });
-    showUserModal.value = true;
-};
-
-const toggleUserStatus = (user: any) => {
-    const newStatus = user.status === 'active' ? 'inactive' : 'active';
-    console.log(`将用户 ${user.username} 状态改为: ${newStatus}`);
-};
-
-const resetPassword = (user: any) => {
-    console.log('重置用户密码:', user.username);
-};
-
-const deleteUser = (user: any) => {
-    console.log('删除用户:', user.username);
-};
-
-const batchEnable = () => {
-    console.log('批量启用用户:', selectedUsers.value);
-};
-
-const batchDisable = () => {
-    console.log('批量禁用用户:', selectedUsers.value);
-};
-
-const exportUsers = () => {
-    console.log('导出用户数据');
-};
 </script>
 
 <style scoped lang="scss">
+// 用户管理页面样式
 .user-management-page {
     padding: 24px;
+    min-height: 100vh;
 }
 
-.page-header {
-    margin-bottom: 32px;
-
-    h1 {
-        margin: 0;
-        color: #333;
-        font-size: 28px;
-        font-weight: 600;
-    }
-
-    p {
-        margin: 8px 0 0 0;
-        color: #666;
-        font-size: 16px;
-    }
+.layout-container {
+    display: flex;
+    gap: 24px;
+    height: calc(100vh - 48px);
 }
 
-.stats-section {
-    margin-bottom: 24px;
-}
+// 左侧组织结构
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
 
-.stat-card {
-    .stat-content {
-        display: flex;
-        align-items: center;
-        padding: 20px;
+    .org-tree {
+        .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
 
-        .stat-icon {
-            font-size: 48px;
-            margin-right: 16px;
-            color: #409eff;
+            &:hover {
+                background: #f5f5f5;
+            }
 
             &.active {
-                color: #67c23a;
+                background: #e6f7ff;
+                color: #1890ff;
             }
 
-            &.inactive {
-                color: #f56c6c;
+            .layui-icon {
+                font-size: 16px;
             }
 
-            &.new {
-                color: #e6a23c;
-            }
-        }
-
-        .stat-info {
-            flex: 1;
-
-            h3 {
-                margin: 0 0 8px 0;
-                color: #666;
+            span {
                 font-size: 14px;
-                font-weight: normal;
+            }
+        }
+
+        .tree-children {
+            margin-left: 20px;
+        }
+    }
+}
+
+// 右侧主内容
+.main-content {
+    flex: 1;
+    min-width: 0;
+
+    .content-area {
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 0;
+
+        :deep(.layui-table) {
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            overflow: hidden;
+
+            .layui-table-header {
+                background: #fafafa;
             }
 
-            .stat-number {
-                display: block;
-                font-size: 32px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 4px;
-            }
-
-            .stat-trend {
+            .layui-table-body {
                 font-size: 12px;
-                color: #999;
 
-                &.up {
-                    color: #67c23a;
-
-                    &::before {
-                        content: '↗ ';
-                    }
+                tr:nth-child(even) {
+                    background-color: #fafafa;
                 }
 
-                &.down {
-                    color: #f56c6c;
-
-                    &::before {
-                        content: '↘ ';
-                    }
+                tr:hover {
+                    background-color: #f5f5f5;
                 }
+            }
+
+            th,
+            td {
+                border-color: #e8e8e8;
+                text-align: center;
+                padding: 8px 6px;
+            }
+
+            .layui-table-cell-content {
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
         }
     }
 }
 
-.toolbar-card,
-.filter-card {
-    margin-bottom: 24px;
-}
+.filter-section {
+    background: white;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 
-.toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .toolbar-left,
-    .toolbar-right {
+    :deep(.layui-form) {
         display: flex;
+        flex-wrap: nowrap;
         align-items: center;
-        gap: 8px;
-    }
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        gap: 0 6px;
+        margin: 0;
     }
 
-    .avatar-placeholder {
-        width: 100%;
-        height: 100%;
-        background: #409eff;
-        color: white;
+    :deep(.layui-form-item) {
+        margin: 0 12px 8px 0;
+        flex-shrink: 0;
+        display: flex;
+        align-items: stretch;
+        position: relative;
+    }
+
+    :deep(.layui-form-label) {
+        font-size: 12px;
+        font-weight: 500;
+        color: #333;
+        background: #fafafa;
+        border: 1px solid #d9d9d9;
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        padding: 0 8px;
+        margin: 0;
+        white-space: nowrap;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        font-size: 16px;
+        height: 32px;
+        line-height: 1;
+        min-width: 100px;
 
-        &.large {
-            width: 80px;
-            height: 80px;
-            font-size: 24px;
-        }
-    }
-}
-
-.user-info {
-    .user-name {
-        margin-bottom: 4px;
-
-        .real-name {
-            font-weight: 600;
-            color: #333;
-            margin-right: 8px;
-        }
-
-        .username {
-            color: #999;
-            font-size: 12px;
+        &::after {
+            display: none;
         }
     }
 
-    .user-contact {
+    :deep(.layui-input) {
+        height: 32px;
         font-size: 12px;
-        color: #666;
+        border: 1px solid #d9d9d9;
+        border-left: none;
+        border-radius: 0 4px 4px 0;
+        padding: 0 12px;
+        margin: 0;
+        transition: all 0.2s ease;
 
-        .email,
-        .phone {
-            margin-right: 12px;
+        &:hover {
+            border-color: #40a9ff;
+        }
+
+        &:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+            outline: none;
+        }
+
+        &::placeholder {
+            color: #bfbfbf;
+            font-size: 11px;
+        }
+    }
+
+    :deep(.layui-date-picker) {
+        .layui-input {
+            height: 32px;
+            font-size: 12px;
+            border: 1px solid #d9d9d9;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+            padding: 0 12px;
+            margin: 0;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: #40a9ff;
+            }
+
+            &:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+            }
+        }
+    }
+
+    :deep(.layui-btn) {
+        height: 32px;
+        padding: 0 12px;
+        font-size: 12px;
+        border-radius: 4px;
+        margin-right: 8px;
+        min-width: 36px;
+        line-height: 20px;
+        transition: all 0.2s ease;
+
+        .layui-icon {
+            font-size: 12px;
+            line-height: 1;
+            width: auto;
+            height: auto;
         }
     }
 }
 
-.department-info {
+// 工具栏样式
+.fixed-table-toolbar {
+    padding: 15px 0;
+    border-bottom: 1px solid #fff;
+    margin-bottom: 0;
+    background: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    .btnIcon,
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #495057;
+
+        &:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .layui-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+    }
+
+    .invite-but {
+        position: relative;
+
+        &:hover::after {
+            content: attr(data-title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        &:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 2px;
+            border: 4px solid transparent;
+            border-top-color: #333;
+            z-index: 1001;
+        }
+    }
+
+    .dropdown-container {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        display: none;
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 12px;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+
+        &.show {
+            display: block;
+        }
+
+        li {
+            &:hover {
+                background-color: #f5f5f5;
+            }
+
+            label {
+                display: block;
+                padding: 8px 15px;
+                font-weight: normal;
+                line-height: 1.4;
+                color: #333;
+                white-space: nowrap;
+                cursor: pointer;
+                margin: 0;
+
+                input[type="checkbox"] {
+                    margin-right: 8px;
+                }
+            }
+        }
+    }
+}
+
+// 表格容器居中样式
+.table-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    :deep(.layui-table) {
+        margin: 0 auto;
+    }
+}
+
+// 复选框样式
+.custom-checkbox {
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+}
+
+.checkbox-square {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 
     .layui-icon {
-        color: #666;
-        font-size: 14px;
+        font-size: 10px;
+        line-height: 1;
+    }
+
+    &.checked {
+        background-color: #5FB878;
+        border-color: #5FB878;
+        color: white;
     }
 }
 
-.login-info {
-    .login-time {
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 2px;
+// 邮箱文本样式
+.email-text {
+    font-size: 12px;
+    color: #333;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+}
+
+// 性别文本样式
+.sex-text {
+    font-size: 12px;
+    color: #333;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+}
+
+// 状态样式
+.status-text {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+
+    &.status-enabled {
+        background: #f6ffed;
+        color: #52c41a;
+        border: 1px solid #b7eb8f;
     }
 
-    .login-ip {
-        font-size: 12px;
-        color: #999;
+    &.status-disabled {
+        background: #fff1f0;
+        color: #f5222d;
+        border: 1px solid #ffa39e;
     }
 }
 
+// 操作按钮样式
 .action-buttons {
     display: flex;
-    flex-wrap: wrap;
     gap: 4px;
-
-    .lay-btn {
-        margin: 0;
-    }
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.user-modal-content,
-.user-detail-content {
-    padding: 20px;
-}
+.action-btn {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid;
 
-.user-profile {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    &.modify {
+        background: #e6f7ff;
+        color: #1890ff;
+        border-color: #91d5ff;
 
-    .profile-avatar {
-        margin-right: 20px;
-    }
-
-    .profile-info {
-        flex: 1;
-
-        h3 {
-            margin: 0 0 8px 0;
-            color: #333;
-            font-size: 20px;
-        }
-
-        p {
-            margin: 0 0 12px 0;
-            color: #666;
-            font-size: 14px;
+        &:hover {
+            background: #bae7ff;
         }
     }
+
+    &.delete {
+        background: #fff1f0;
+        color: #f5222d;
+        border-color: #ffa39e;
+
+        &:hover {
+            background: #ffccc7;
+        }
+    }
+
+    &.permission {
+        background: #f6ffed;
+        color: #52c41a;
+        border-color: #b7eb8f;
+
+        &:hover {
+            background: #d9f7be;
+        }
+    }
 }
 
-.detail-sections {
-    .detail-section {
+// 响应式设计
+@media (max-width: 1200px) {
+    .layout-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
         margin-bottom: 24px;
-
-        h4 {
-            margin: 0 0 16px 0;
-            color: #333;
-            font-size: 16px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 8px;
-        }
     }
-}
 
-.modal-actions {
-    text-align: right;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
+    .filter-section {
+        :deep(.layui-form) {
+            flex-wrap: wrap;
+        }
 
-    .lay-btn+.lay-btn {
-        margin-left: 8px;
+        :deep(.layui-form-item) {
+            margin-bottom: 12px;
+        }
     }
 }
 </style>
