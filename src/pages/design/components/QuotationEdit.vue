@@ -17,8 +17,8 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">客户单位</label>
-                <lay-select v-model="customerInfo.name" placeholder="请选择">
-                  <lay-select-option value="option1" label="选项1" />
+                <lay-select v-model="customerInfo.name" placeholder="请选择" @change="handleClientChange">
+                  <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client" :label="client.contacts" />
                 </lay-select>
                 <lay-button type="normal" size="md" class="info-button">
                   <SvgIcon name="group_chat" width="16" height="16" />
@@ -30,7 +30,7 @@
                 <lay-input v-model="customerInfo.address" disabled />
               </div>
               <div class="form-row">
-                <label class="form-head-label">客户地址</label>
+                <label class="form-head-label">联系人员</label>
                 <lay-input v-model="customerInfo.contact" disabled />
               </div>
               <div class="form-row">
@@ -200,12 +200,12 @@
                   placeholder="请选择"
                 >
                   <lay-select-option value="">请选择</lay-select-option>
-                  <lay-select-option value="货到付款"
-                    >货到付款</lay-select-option
-                  >
-                  <lay-select-option value="款到发货"
-                    >款到发货</lay-select-option
-                  >
+                  <lay-select-option value="货到付款">
+                    货到付款
+                  </lay-select-option>
+                  <lay-select-option value="款到发货">
+                    款到发货
+                  </lay-select-option>
                   <lay-select-option value="其它">其它</lay-select-option>
                 </lay-select>
               </div>
@@ -346,6 +346,18 @@
     </lay-row>
   </lay-card>
   <SideToolbar />
+
+  <!-- 新建子项目 drawer -->
+  <SubProjectDrawer
+    v-model:visible="showSubProjectDrawer"
+    @submit="handleSubProjectSubmit"
+  />
+
+  <!-- 产品利率输入弹窗 -->
+  <ProductInterestRateDialog
+    v-model:visible="showProductInterestRateDialog"
+    @confirm="handleProductInterestRateConfirm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -356,6 +368,9 @@ import AdvancedTable from '@/components/AdvancedTable.vue';
 import EditableCell from '@/components/table-cells/EditableCell.vue';
 import ImageCell from '@/components/table-cells/ImageCell.vue';
 import ButtonCell from '@/components/table-cells/ButtonCell.vue';
+import SubProjectAddCell from '@/components/table-cells/SubProjectAddCell.vue';
+import SubProjectDrawer from './SubProjectDrawer.vue';
+import ProductInterestRateDialog from './ProductInterestRateDialog.vue';
 import { onMounted, ref, markRaw } from 'vue';
 import type {
   OrderModuleListResponse,
@@ -378,6 +393,7 @@ import companyApi from '@/api/company/companyApi';
 import { layer } from '@layui/layui-vue';
 import notify from '@/utils/notify';
 import type { ClientType } from '@/api/client/clinetApi.type';
+import clientApi from '@/api/client/clinetApi';
 
 // 使用从 orderUtils 导入的 QuotationItem 类型
 
@@ -391,6 +407,7 @@ interface ButtonAction {
 // 响应式数据
 const showCustomerBankInfo = ref(false); // 显示客户账户信息
 const showCompanyBankInfo = ref(false); // 显示我司账户信息
+const hasSubItemStatusSet = ref(false); // 是否设置子项目状态
 
 // 客户信息数据
 const customerInfo = ref({
@@ -449,6 +466,7 @@ const quotationColumns = ref([
     title: '编号',
     width: 80,
     key: 'id',
+    customRender: markRaw(SubProjectAddCell), // 使用子项目新增按钮单元格
   },
   {
     title: '名称',
@@ -534,6 +552,19 @@ const quotationColumns = ref([
 
 const quotationData = ref<QuotationItem[]>([]); // 数据
 
+// 子项目相关状态
+const showSubProjectDrawer = ref(false);
+// const subProjects = ref<
+//   Array<{
+//     id: string;
+//     name: string;
+//     level: string;
+//     color: string;
+//     parentId?: string;
+//   }>
+// >([]);
+const showProductInterestRateDialog = ref(false);
+
 // 报价单模块数据
 const modelInfo = ref({
   name: '',
@@ -589,6 +620,12 @@ const handleButtonClick = (
   console.log('按钮操作:', { action, data, index });
 
   switch (action) {
+    case 'add-sub-project':
+      handleSubProjectAdd();
+      break;
+    case 'delete-sub-project':
+      handleDeleteSubProject(data, index);
+      break;
     case 'edit':
       console.log('产品修改详情:', data);
       // 这里可以打开编辑对话框或跳转到编辑页面
@@ -655,9 +692,156 @@ const updateCostStatistics = () => {
   console.log('更新成本统计');
 };
 
+// 处理子项目新增按钮点击
+const handleSubProjectAdd = () => {
+  if (hasSubItemStatusSet.value) {
+    // 直接打开输入预设产品利率窗口
+    showProductInterestRateDialog.value = true;
+    return;
+  }
+  hasSubItemStatusSet.value = true;
+  layer.confirm('本次报价是否需要新建子项目？', {
+    btn: [
+      {
+        text: '是',
+        callback: async (id) => {
+          layer.close(id);
+          showSubProjectDrawer.value = true;
+        },
+      },
+      {
+        text: '否',
+        callback: (id) => {
+          layer.close(id);
+          // 打开输入预设产品利率窗口
+          showProductInterestRateDialog.value = true;
+        },
+      },
+    ],
+  });
+};
+
+// 处理子项目提交
+const handleSubProjectSubmit = (subProjectData: {
+  name: string;
+  level: string;
+  color: string;
+  parentId?: string;
+}) => {
+  // 添加子项目到表格
+  const subProjectRow = {
+    id: `sub_${Date.now()}`,
+    name: subProjectData.name,
+    brand: '',
+    model: '',
+    feature: '',
+    unit: '',
+    quantity: 1,
+    cost: 0,
+    costTotal: 0,
+    price: 0,
+    priceTotal: 0,
+    pic: '',
+    company: '',
+    isSubProject: true,
+    subProjectData: subProjectData,
+    backgroundColor: subProjectData.color, // 用于背景色显示
+  };
+
+  quotationData.value.push(subProjectRow as unknown as QuotationItem);
+  showSubProjectDrawer.value = false;
+  notify.success('子项目创建成功');
+};
+
+// 删除子项目
+const handleDeleteSubProject = (
+  data: Record<string, unknown>,
+  index: number,
+) => {
+  layer.confirm(`确定要删除子项目 "${data.name}" 吗？`, {
+    btn: [
+      {
+        text: '确定',
+        callback: async (id) => {
+          if (!quotationData.value) return;
+          quotationData.value.splice(index, 1);
+          updateCostStatistics();
+          layer.close(id);
+          notify.success('子项目删除成功');
+        },
+      },
+      {
+        text: '取消',
+        callback: (id) => {
+          layer.close(id);
+        },
+      },
+    ],
+  });
+};
+
+// 处理产品利率确认
+const handleProductInterestRateConfirm = (data: {
+  interestRate?: number;
+  useDefaultPrice: boolean;
+}) => {
+  console.log('产品利率确认:', data);
+
+  if (data.useDefaultPrice) {
+    notify.success('已选择使用默认市场指导价');
+  } else {
+    notify.success(`已设置产品利率为 ${data.interestRate}%`);
+  }
+
+  // TODO: 这里应该打开产品选择窗口
+  // 预留函数，稍后实现产品选择窗口
+  openProductSelectionWindow(data);
+};
+
+// 打开产品选择窗口（预留函数）
+const openProductSelectionWindow = (interestRateData: {
+  interestRate?: number;
+  useDefaultPrice: boolean;
+}) => {
+  console.log('打开产品选择窗口:', interestRateData);
+  // TODO: 实现产品选择窗口
+  // 这里可以：
+  // 1. 打开一个新的弹窗或抽屉
+  // 2. 根据利率数据过滤产品
+  // 3. 让用户选择产品
+  notify.info('产品选择窗口功能待实现');
+};
+
+// 初始化空白行
+const initEmptyRow = () => {
+  const emptyRow = {
+    id: '',
+    name: '未选产品',
+    brand: '',
+    model: '',
+    feature: '',
+    unit: '',
+    quantity: undefined,
+    cost: undefined,
+    costTotal: undefined,
+    price: undefined,
+    priceTotal: undefined,
+    pic: undefined,
+    company: '',
+    isSubProject: true, // 设置为子项目行，这样编号列会显示新增按钮
+  };
+  return emptyRow as unknown as QuotationItem;
+};
+
 onMounted(async () => {
   const res = await ordersApi.getOrdersSettle();
   settleList.value = res.data;
+
+  // 初始化时添加一个空白的子项目行
+  if (quotationData.value.length === 0) {
+    quotationData.value.push(initEmptyRow());
+  }
+
   updateCostStatistics();
 });
 
@@ -689,6 +873,34 @@ const myCompanyInfo = ref<CompanyData>();
 
 // 项目负责人数据列表
 const projectManagerList = ref<OrderChargePerson[]>();
+
+// 客户信息列表
+const clientInfoList = ref<ClientType[]>();
+
+// 处理客户信息选择切换
+const handleClientChange = ((value: ClientType) => {
+  customerInfo.value = {
+    name: value.contacts,
+    address : value.address,
+    contact : value.contactUser,
+    phone : value.tel,
+    email : value.email,
+    bankAccount: '', // 预留
+    bankName: '',    // 预留
+    taxNumber: '',   // 预留
+  };
+  showCustomerBankInfo.value = false; // 收起账户信息面板
+}) as ((value: string | number | object) => void);
+
+// 获取客户单位信息列表
+const getClientInfoList = async () => {
+  const res = await clientApi.clientList({
+    limit: 50, offset: 0, order: 'desc', contacts: '', contactUser: '',
+    clientStatus: '', clientSource: '', categoryName: '',
+  }) as unknown as { rows: ClientType[] };
+  clientInfoList.value = res.rows;
+  console.log(clientInfoList.value);
+};
 
 // 获取我司信息
 const getMyCompanyInfo = async () => {
@@ -869,6 +1081,7 @@ defineExpose({
 });
 
 onMounted(() => {
+  getClientInfoList();
   getMyCompanyInfo();
   getProjectManagerList();
   transformCustomerData();

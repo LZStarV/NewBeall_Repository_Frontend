@@ -44,7 +44,7 @@ export interface ClientQueryListType {
   // 公司名称(可为空，查询时使用)
   contacts?: string;
   // 每页数量
-  limit: string;
+  limit: number;
   // 目前浏览的总数
   offset: number;
   // 排序（可为空，asc或desc）

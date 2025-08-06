@@ -225,6 +225,7 @@ export interface QuotationListResponse extends Quotation {
   chargePerson: number;
   chargePersonInfo: string;
   clientId: number;
+  companyEmail: string;
   contacts: string;
   coopUser: string;
   coopUserId: string;

@@ -4,24 +4,42 @@
     <div class="video-tabs">
       <div class="tab-list">
         <div
-v-for="(item, index) in videoList" :key="index" class="tab-item" :class="{ active: openCategories[index] }"
-          @click="toggleCategory(index)">
+          v-for="(item, index) in videoList"
+          :key="index"
+          class="tab-item"
+          :class="{ active: openCategories[index] }"
+          @click="toggleCategory(index)"
+        >
           <SvgIcon :name="`${iconSvgMap[item.icon]}`" class="icon" />
           {{ item.name }}
         </div>
       </div>
 
-      <div v-if="currentCategory && currentCategory.child" class="sub-tabs-wrapper">
+      <div
+        v-if="currentCategory && currentCategory.child"
+        class="sub-tabs-wrapper"
+      >
         <!-- 移动端当前选中项展示 -->
         <div class="mobile-selected" @click="toggleSubMenu">
-          <span>{{ selectedVideo?.name || currentCategory.child[0].name }}</span>
-          <SvgIcon :name="isSubMenuOpen ? 'expand_light_reverse' : 'expand_light'" class="toggle-icon" width="0.75rem" height="0.75rem" />
+          <span>{{
+            selectedVideo?.name || currentCategory.child[0].name
+          }}</span>
+          <SvgIcon
+            :name="isSubMenuOpen ? 'expand_light_reverse' : 'expand_light'"
+            class="toggle-icon"
+            width="0.75rem"
+            height="0.75rem"
+          />
         </div>
         <!-- 子菜单列表 -->
         <div class="sub-tabs" :class="{ 'sub-tabs-open': isSubMenuOpen }">
           <div
-v-for="(subItem, subIndex) in currentCategory.child" :key="subIndex" class="sub-tab-item"
-            :class="{ active: selectedVideo?.url === subItem.url }" @click="selectVideo(subItem)">
+            v-for="(subItem, subIndex) in currentCategory.child"
+            :key="subIndex"
+            class="sub-tab-item"
+            :class="{ active: selectedVideo?.url === subItem.url }"
+            @click="selectVideo(subItem)"
+          >
             {{ subItem.name }}
           </div>
         </div>
@@ -32,8 +50,11 @@ v-for="(subItem, subIndex) in currentCategory.child" :key="subIndex" class="sub-
     <div v-if="selectedVideo" class="video-player">
       <div class="video-title">{{ selectedVideo.name }}-指引视频</div>
       <video
-controls :poster="`${env.getApiBaseUrl()}/static/img/helpImg/video.gif`"
-        :src="`https://yx.newbeall.com/softLink/${selectedVideo.url}`" class="player">
+        controls
+        :poster="`${env.getApiBaseUrl()}/static/img/helpImg/video.gif`"
+        :src="`${env.getBaseStaticUrl()}${selectedVideo.url}`"
+        class="player"
+      >
         你的浏览器不支持此视频播放
       </video>
       <!-- 视频描述 -->
@@ -50,6 +71,7 @@ import videoApi from '@/api/video/videoApi';
 import type { VideoData } from '@/api/video/videoApi.type';
 import env from '@/utils/env';
 import SvgIcon from '@/components/SvgIcon.vue';
+import notify from '@/utils/notify';
 
 const videoList = ref<VideoData[]>([]);
 const openCategories = ref<boolean[]>([]);
@@ -63,25 +85,26 @@ const iconSvgMap: Record<string, string> = {
   'glyphicon glyphicon-user': 'groups',
   'glyphicon glyphicon-list-alt': 'historical_quotation',
   'glyphicon glyphicon-list': 'order_large',
-  'glyphicon glyphicon-search': 'approval'
+  'glyphicon glyphicon-search': 'approval',
 };
 
 const currentCategory = computed(() => {
-  const activeIndex = openCategories.value.findIndex(isOpen => isOpen);
+  const activeIndex = openCategories.value.findIndex((isOpen) => isOpen);
   return activeIndex !== -1 ? videoList.value[activeIndex] : null;
 });
 
 const getVideoList = async () => {
   try {
-    const response = await videoApi.getVideoHelpList();
-    videoList.value = response.data;
-    openCategories.value = new Array(response.data.length).fill(false);
+    const response =
+      (await videoApi.getVideoHelpList()) as unknown as VideoData[];
+    videoList.value = response;
+    openCategories.value = new Array(response.length).fill(false);
     // 默认选中第一个标签
-    if (response.data.length > 0) {
+    if (response.length > 0) {
       toggleCategory(0);
     }
-  } catch (error) {
-    console.error('Failed to fetch video list:', error);
+  } catch {
+    notify.error('网络请求失败，请重试');
   }
 };
 
@@ -115,8 +138,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1.5rem;
-  background: #f8fafc;
+  padding: 24px;
   border-radius: 12px;
 
   @media (max-width: 768px) {

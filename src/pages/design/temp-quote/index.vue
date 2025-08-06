@@ -9,67 +9,49 @@
           :label-width="80"
           class="toolbar-form-items"
         >
-          <lay-form-item class="form-item-search">
-            <template #label>
-              <lay-select v-model="typeFilter">
-                <lay-select-option value="projectName">
-                  工程项目名
-                </lay-select-option>
-                <lay-select-option value="contacts">客户单位</lay-select-option>
-                <lay-select-option value="orderstype">
-                  报价类型
-                </lay-select-option>
-              </lay-select>
-            </template>
+          <lay-form-item label="工程项目名">
             <lay-input
               v-model="quotationNameSearch"
-              placeholder="请输入方案名称进行搜索"
+              placeholder="请输入工程项目名"
               class="search-input"
               mode="block"
             />
           </lay-form-item>
 
-          <lay-form-item label="属性">
-            <lay-select placeholder="请输入">
-              <lay-select-option v-model="attribute" value="初步建议阶段">
-                初步建议阶段
-              </lay-select-option>
-            </lay-select>
+          <lay-form-item label="客户单位">
+            <lay-input
+              v-model="clientNameSearch"
+              placeholder="请输入客户单位"
+              class="search-input"
+              mode="block"
+            />
           </lay-form-item>
 
-          <lay-form-item label="负责人">
-            <lay-select v-model="chargePerson" placeholder="请选择">
-              <lay-select-option
-                v-for="item in ordersChargePersonList"
-                :key="item.id"
-                :value="item.id"
-              >
-                {{ item.name }}
-              </lay-select-option>
-            </lay-select>
-          </lay-form-item>
-
-          <lay-form-item label="制单人">
-            <lay-select v-model="createUser" placeholder="请选择">
-              <lay-select-option
-                v-for="item in ordersCreateUserList"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </lay-select-option>
-            </lay-select>
+          <lay-form-item label="报价类型">
+            <lay-input
+              v-model="quoteTypeSearch"
+              placeholder="请输入报价类型"
+              class="search-input"
+              mode="block"
+            />
           </lay-form-item>
 
           <lay-form-item label="制单日期">
             <lay-date-picker
               v-model="createDate"
-              placeholder="click me"
+              placeholder="请选择制单日期"
               allow-clear
             />
           </lay-form-item>
 
-          <div class="toolbar-btns"></div>
+          <div class="toolbar-btns">
+            <button title="搜索" @click="handleSearch">
+              <SvgIcon name="search" width="1.1rem" />
+            </button>
+            <button title="刷新" @click="handleRefresh">
+              <SvgIcon name="refresh" width="1.2rem" />
+            </button>
+          </div>
         </lay-form>
       </div>
     </lay-card>
@@ -85,32 +67,43 @@
         even
         @sort-change="sortChange"
       />
+      <div class="page-info">
+        <span>
+          显示第
+          {{ (pagination.current - 1) * pagination.pageSize + 1 }}
+          到第
+          {{ pagination.current * pagination.pageSize }}
+          条记录，总共 {{ pagination.total }} 条记录
+        </span>
+      </div>
     </lay-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import type {
-  OrderChargePerson,
-  QuotationListResponse,
-} from '@/api/orders/orderApi.type';
+import { ref, reactive, onMounted } from 'vue';
+import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import type {
   TableColumn,
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
+import SvgIcon from '@/components/SvgIcon.vue';
+import ordersApi from '@/api/orders/ordersApi';
 
 // 工具栏响应式数据
-const typeFilter = ref('projectName');
 const quotationNameSearch = ref<string>();
-const chargePerson = ref<number>();
-const createUser = ref<string>();
+const clientNameSearch = ref<string>();
+const quoteTypeSearch = ref<string>();
 const createDate = ref<string>();
-const attribute = ref<string>();
+
+interface TempQuotationListResponse extends QuotationListResponse {
+  status: string;
+  ordersType: string;
+}
 
 // 表格数据
 const loading = ref(false);
-const dataSource = ref<QuotationListResponse[]>([]);
+const dataSource = ref<TempQuotationListResponse[]>([]);
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
@@ -181,15 +174,8 @@ const columns = [
     title: '状态',
     width: '100px',
     key: 'status',
-    render: (row: QuotationListResponse) => {
-      return getStatus(row.isAudit);
-    },
   },
 ] as TableColumn[];
-
-// 外部获取响应式数据
-const ordersChargePersonList = ref<OrderChargePerson[]>();
-const ordersCreateUserList = ref<string[]>();
 
 // 分页参数
 const pagination = reactive({
@@ -240,6 +226,35 @@ const getStatus = (isAudit: number) => {
       return isAudit.toString();
   }
 };
+
+// 处理搜索
+const handleSearch = () => {
+  pagination.current = 1;
+};
+
+// 处理刷新
+const handleRefresh = () => {};
+
+const getTempQuoteList = async () => {
+  const res = (await ordersApi.getQuotationList(
+    'desc',
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.pageSize,
+  )) as unknown as { rows: QuotationListResponse[]; total: number };
+
+  pagination.total = res.total;
+  dataSource.value = res.rows.map((item) => ({
+    ...item,
+    status: getStatus(item.isAudit),
+    ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
+      .filter(Boolean)
+      .join('/'),
+  }));
+};
+
+onMounted(() => {
+  getTempQuoteList();
+});
 </script>
 
 <style scoped lang="scss">
@@ -276,6 +291,12 @@ const getStatus = (isAudit: number) => {
     button {
       @include button-style($primary-color);
     }
+  }
+
+  .page-info {
+    margin-top: 1rem;
+    font-size: 14px;
+    color: $text-regular;
   }
 
   :deep(.layui-tab) {

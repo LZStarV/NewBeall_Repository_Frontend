@@ -129,6 +129,10 @@
               :class="{
                 selected: isRowSelected(element),
                 clickable: clickable || rowSelection,
+                'sub-project-row': element.isSubProject,
+              }"
+              :style="{
+                '--sub-project-color': element.backgroundColor || '',
               }"
               @click="handleRowClick(element, index)"
             >
@@ -156,6 +160,27 @@
                   @button-click="handleButtonClick"
                 />
 
+                <!-- 名称列的特殊处理：子项目行显示删除按钮 -->
+                <template
+                  v-else-if="
+                    col.key === 'name' && element.isSubProject && element.name
+                  "
+                >
+                  <div class="sub-project-name">
+                    <span class="sub-project-title">{{
+                      getColumnValue(element, col.key)
+                    }}</span>
+                    <SvgIcon
+                      name="garbage"
+                      @click.stop="handleDeleteSubProject(element, index)"
+                      class="delete-sub-project-btn"
+                      title="删除子项目"
+                      width="14"
+                      height="14"
+                    />
+                  </div>
+                </template>
+
                 <!-- 默认文本渲染 -->
                 <span v-else>{{ getColumnValue(element, col.key) }}</span>
               </div>
@@ -172,6 +197,10 @@
             :class="{
               selected: isRowSelected(row),
               clickable: clickable || rowSelection,
+              'sub-project-row': row.isSubProject,
+            }"
+            :style="{
+              '--sub-project-color': row.backgroundColor || '',
             }"
             @click="handleRowClick(row, index)"
           >
@@ -198,6 +227,25 @@
                 @update:value="handleCellUpdate(index, col.key, $event)"
                 @button-click="handleButtonClick"
               />
+
+              <!-- 名称列的特殊处理：子项目行显示删除按钮 -->
+              <template
+                v-else-if="col.key === 'name' && row.isSubProject && row.name"
+              >
+                <div class="sub-project-name">
+                  <span class="sub-project-title">{{
+                    getColumnValue(row, col.key)
+                  }}</span>
+                  <SvgIcon
+                    name="garbage"
+                    @click.stop="handleDeleteSubProject(row, index)"
+                    class="delete-sub-project-btn"
+                    title="删除子项目"
+                    width="14"
+                    height="14"
+                  />
+                </div>
+              </template>
 
               <!-- 默认文本渲染 -->
               <span v-else>{{ getColumnValue(row, col.key) }}</span>
@@ -537,6 +585,21 @@ const handleButtonClick = (
   emit('button-click', action, data, actualIndex);
 };
 
+// 处理子项目删除
+const handleDeleteSubProject = (
+  data: Record<string, unknown>,
+  index: number,
+) => {
+  // 计算实际索引（考虑分页）
+  let actualIndex = index;
+  if (props.pagination) {
+    actualIndex = (currentPage.value - 1) * props.pageSize + index;
+  }
+
+  console.log('删除子项目:', { data, actualIndex });
+  emit('button-click', 'delete-sub-project', data, actualIndex);
+};
+
 const handleDragEnd = (event: { oldIndex: number; newIndex: number }) => {
   const { oldIndex, newIndex } = event;
 
@@ -610,6 +673,7 @@ watch(
 
 <style scoped lang="scss">
 @use '@/styles/table/tables' as *;
+@use 'sass:color';
 
 :deep(.column-settings) {
   min-width: 150px;
@@ -747,6 +811,52 @@ watch(
 
             &:hover {
               background: rgba($primary-color, 0.05) !important;
+            }
+          }
+
+          // 子项目行样式
+          &.sub-project-row {
+            border-left: 4px solid var(--sub-project-color, #{$primary-color});
+            background-color: var(
+              --sub-project-color,
+              #{color.adjust($primary-color, $lightness: 40%)}
+            );
+
+            &:hover {
+              background: rgba(64, 158, 255, 0.15) !important;
+              box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+            }
+
+            .sub-project-name {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              width: 100%;
+
+              .sub-project-title {
+                font-weight: 500;
+                color: #333;
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+
+              .delete-sub-project-btn {
+                cursor: pointer;
+                color: #ff4757;
+                margin-left: 8px;
+                padding: 2px;
+                border-radius: 2px;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+
+                &:hover {
+                  color: #ff3742;
+                  background-color: rgba(255, 71, 87, 0.1);
+                  transform: scale(1.1);
+                }
+              }
             }
           }
         }
@@ -947,5 +1057,16 @@ watch(
 :deep(.image-cell) {
   flex-shrink: 0;
   justify-content: center;
+}
+
+// 子项目名称单元格特殊处理
+:deep(.sub-project-name) {
+  width: 100%;
+
+  .sub-project-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 </style>

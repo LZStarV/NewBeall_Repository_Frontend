@@ -40,13 +40,13 @@ export default {
   getProductList(
     province: string = '',
     city: string = '',
-    name: string = '',
-    brand: string = '',
-    company: string = '',
-    model: string = '',
-    flag: number = 1,
-    checkProducts: number = 1,
-    provideCompany: string = '',
+    name: string = '', // 产品名称检索
+    brand: string = '', // 品牌筛选检索
+    company: string = '', // 公司筛选检索
+    model: string = '', // 型号筛选检索
+    flag: number = 1, // 自建库1 产品云2 闲置云3
+    checkProducts: number = 1, // 自建库1 产品云2 闲置云3
+    provideCompany: string = '', // 公司筛选检索
     order: string = 'desc',
     offset: number = 0,
     limit: number = 50,
@@ -64,7 +64,7 @@ export default {
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    return http.post<FormData>('product/list', formData, {
+    return http.post<FormData>('/product/list', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -72,7 +72,7 @@ export default {
   },
 
   // 获取品牌列表
-  getBrandList(name: string) {
+  getBrandList(name: string = '') {
     const formData = new FormData();
     formData.append('name', name);
     return http.post<FormData, string[]>('/product/getBrandS', formData, {
@@ -82,12 +82,24 @@ export default {
     });
   },
 
-  // 获取型号列表
+  // 获取产品类型列表
+  getModelList(name: string = '', brand: string = '') {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('brand', brand);
+    return http.post<FormData, string[]>('/product/getModelS', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 查询所有产品来源公司
   getQueryFieldValue(
-    name: string,
-    brand: string,
-    model: string,
-    queryField: string,
+    name: string = '',
+    brand: string = '',
+    model: string = '',
+    queryField: string = 'provideCompany', // 查询内容(provideCompany为查询产品来源公司（采购商），uname为查询产品创建人)
   ) {
     const formData = new FormData();
     formData.append('name', name);

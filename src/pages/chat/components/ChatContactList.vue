@@ -15,7 +15,11 @@
         <button class="tool-btn" title="客服" @click="connectWithAdmin">
           <SvgIcon name="user_management" />
         </button>
-        <button class="tool-btn" title="创建群聊" @click="openCreateGroupDialog">
+        <button
+          class="tool-btn"
+          title="创建群聊"
+          @click="openCreateGroupDialog"
+        >
           <SvgIcon name="groups" />
         </button>
       </div>
@@ -103,18 +107,24 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="cancel-btn" @click="closeCreateGroupDialog">取消</button>
+          <button class="cancel-btn" @click="closeCreateGroupDialog">
+            取消
+          </button>
           <button
             class="create-btn"
-            @click="handleCreateGroup"
             :disabled="!groupChatName || selectedUsers.length === 0"
+            @click="handleCreateGroup"
           >
             创建群聊
           </button>
         </div>
       </div>
     </div>
-    <div class="dialog-overlay" v-if="showCreateGroupDialog" @click="closeCreateGroupDialog"></div>
+    <div
+      v-if="showCreateGroupDialog"
+      class="dialog-overlay"
+      @click="closeCreateGroupDialog"
+    ></div>
   </section>
 </template>
 
@@ -318,13 +328,10 @@ const getContactList = async () => {
 };
 
 // 当切换contactUrl时，清空搜索框
-watch(
-  contactUrl,
-  () => {
-    searchKeyword.value = '';
-    getContactList();
-  },
-);
+watch(contactUrl, () => {
+  searchKeyword.value = '';
+  getContactList();
+});
 
 onMounted(() => getContactList());
 
@@ -412,7 +419,7 @@ const connectWithAdmin = async () => {
 
     // 切换到临时聊天
     chatStore.setActiveNavItem('temp');
-    toKey.value = 'PY-'+fromId+'-'+toId;
+    toKey.value = 'PY-' + fromId + '-' + toId;
 
     // 重新获取临时聊天列表
     await getContactList();
@@ -423,6 +430,8 @@ const connectWithAdmin = async () => {
 </script>
 
 <style scoped lang="scss">
+@use 'sass:color';
+
 .chat-contact-list {
   border-right: 1px solid #ededed;
   display: flex;
@@ -505,7 +514,7 @@ const connectWithAdmin = async () => {
       }
 
       &:hover {
-        background-color: lighten($primary-color, 5%);
+        background-color: color.adjust($primary-color, $lightness: 5%);
         strong,
         span {
           color: white !important; // 强制覆盖原来的深色
@@ -695,7 +704,7 @@ const connectWithAdmin = async () => {
             border: none;
 
             &:hover {
-              background-color: darken($primary-color, 5%);
+              background-color: color.adjust($primary-color, $lightness: -5%);
             }
 
             &:disabled {
