@@ -8,6 +8,7 @@ import type {
 } from 'axios';
 
 import env from './env';
+import notify from './notify';
 
 class HttpClient {
   private instance: AxiosInstance;
@@ -42,6 +43,20 @@ class HttpClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response.data || response,
       (error: AxiosError) => {
+        if (error.response?.status === 401) {
+          // 显示错误提示
+          notify.error({
+            title: '当前登录已失效',
+            content: '即将跳转登录',
+          });
+
+          // 使用原生方式跳转到登录页面
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+
+          return Promise.reject(new Error('认证失效'));
+        }
         const responseData: unknown | string = error.response?.data || error;
         return Promise.reject(responseData);
       },
