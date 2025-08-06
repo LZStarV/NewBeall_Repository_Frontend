@@ -129,21 +129,21 @@
           <textarea
             id="feedbackContent"
             v-model="feedbackContent"
-            @input="validateFeedback"
             :class="{ 'input-error': feedbackError }"
             placeholder="请输入您的建议"
+            @input="validateFeedback"
           ></textarea>
           <p v-if="feedbackError" class="error-message">{{ feedbackError }}</p>
         </div>
         <div class="form-group">
           <label for="phoneNumber">电话号码:</label>
           <input
-            type="tel"
             id="phoneNumber"
             v-model="phoneNumber"
-            @input="validatePhone"
+            type="tel"
             :class="{ 'input-error': phoneError }"
             placeholder="请输入您的手机号码"
+            @input="validatePhone"
           />
           <p v-if="phoneError" class="error-message">{{ phoneError }}</p>
         </div>
@@ -153,7 +153,9 @@
             class="submit-btn"
             :disabled="!feedbackContent || !phoneNumber || feedbackError.length > 0 || phoneError.length > 0"
             @click="handleSubmitFeedback"
-          >提交</button>
+          >
+提交
+</button>
         </div>
       </div>
     </div>

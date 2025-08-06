@@ -7,6 +7,12 @@
       @data-submit="handleDataSubmit"
       @temp-save="handleTempSave"
     />
+
+    <!-- 新建子项目 drawer -->
+    <SubProjectDrawer
+      v-model:visible="showSubProjectDrawer"
+      @submit="handleSubProjectSubmit"
+    />
   </div>
 </template>
 
@@ -14,6 +20,7 @@
 import { ref } from 'vue';
 import { layer } from '@layui/layui-vue';
 import QuotationEdit from '../components/QuotationEdit.vue';
+import SubProjectDrawer from '../components/SubProjectDrawer.vue';
 import ordersApi from '@/api/orders/ordersApi';
 import notify from '@/utils/notify';
 import type { Quotation } from '@/api/orders/orderApi.type';
@@ -21,20 +28,17 @@ import type { Quotation } from '@/api/orders/orderApi.type';
 // 报价说明文本
 const quotationExplanation = ref('');
 
+// 控制 drawer 显示
+const showSubProjectDrawer = ref(false);
+
 // 按钮配置
 const quotationMenuConfig = [
   {
     iconName: 'add_to',
     name: '新建子项目',
     btnAction: () => {
-      // 打开layui侧边栏目（预留功能，后续编写）
-      layer.drawer({
-        title: '新建子项目',
-        content:
-          '<div style="padding: 20px;">新建子项目功能正在开发中...</div>',
-        offset: 'r',
-        area: '400px',
-      });
+      // 打开新建子项目 drawer
+      showSubProjectDrawer.value = true;
     },
   },
   {
@@ -129,6 +133,18 @@ const quotationMenuConfig = [
 
 // QuotationEdit 组件引用
 const quotationEditRef = ref();
+
+// 处理子项目提交
+const handleSubProjectSubmit = (data: {
+  name: string;
+  level: string;
+  color: string;
+  parentId?: string;
+}) => {
+  console.log('新建子项目数据:', data);
+  // 这里可以处理子项目的创建逻辑
+  notify.success('子项目创建成功');
+};
 
 // 处理数据提交
 const handleDataSubmit = (data: Quotation) => {

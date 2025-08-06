@@ -1,21 +1,26 @@
 <template>
-  <div class="editable-cell" :class="[`align-${column.align || 'center'}`]">
+  <div
+    v-if="data.value !== undefined"
+    class="editable-cell"
+    :class="[`align-${column.align || 'center'}`]"
+  >
     <!-- 文本输入框 -->
     <lay-input
       v-if="isEditing && inputType === 'text'"
+      ref="inputRef"
       v-model="editValue"
       size="sm"
       :style="{ textAlign: column.align || 'center' }"
       @blur="handleSave"
       @keyup.enter="handleSave"
       @keyup.esc="handleCancel"
-      ref="inputRef"
     />
 
     <!-- 数字输入框 -->
     <lay-input-number
       v-else-if="isEditing && inputType === 'number'"
       v-model="editValue as unknown as number"
+      ref="inputRef"
       position="right"
       type="number"
       size="xs"
@@ -26,17 +31,16 @@
       @blur="handleSave"
       @keyup.enter="handleSave"
       @keyup.esc="handleCancel"
-      ref="inputRef"
     />
 
     <!-- 选择器 -->
     <lay-select
       v-else-if="isEditing && inputType === 'select'"
+      ref="inputRef"
       v-model="editValue"
       size="xs"
       @change="handleSave"
       @blur="handleCancel"
-      ref="inputRef"
     >
       <lay-select-option
         v-for="option in column.options"

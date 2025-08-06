@@ -131,56 +131,12 @@
     <!-- 详细信息弹窗 -->
     <ModalWindow
       :visible="detailModalVisible"
-      title="报价单详细信息"
+      title="详情"
       @close="detailModalVisible = false"
     >
-      <div v-if="selectedRow" class="detail-content">
-        <lay-descriptions :column="2" :bordered="true">
-          <lay-descriptions-item label="编号">
-            {{ selectedRow.ordersId }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="工程项目名称">
-            {{ selectedRow.projectName }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="客户单位">
-            {{ selectedRow.contacts }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="制单时间">
-            {{ selectedRow.createDate }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="报价类型">
-            {{
-              [
-                selectedRow.ordersType1,
-                selectedRow.ordersType2,
-                selectedRow.ordersType3,
-              ]
-                .filter(Boolean)
-                .join('/')
-            }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="总售价">
-            ¥{{ selectedRow.priceSum?.toLocaleString() || '0' }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="总成本">
-            ¥{{ selectedRow.purchasepriceSum?.toLocaleString() || '0' }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="交货时间">
-            {{ selectedRow.deliveryTime || '未设置' }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="项目负责人">
-            {{ selectedRow.chargePersonInfo }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="制单人">
-            {{ selectedRow.name }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="项目备注" :span="2">
-            {{ selectedRow.projectRemark || '无备注' }}
-          </lay-descriptions-item>
-          <lay-descriptions-item label="评论" :span="2">
-            {{ selectedRow.explanation || '无评论' }}
-          </lay-descriptions-item>
-        </lay-descriptions>
+      <QuotationInfo v-if="selectedRow" :selected-row="selectedRow" />
+      <div v-else>
+        <lay-empty />
       </div>
     </ModalWindow>
   </div>
@@ -200,6 +156,7 @@ import type {
   TableColumn,
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
+import QuotationInfo from '../components/QuotationInfo.vue';
 
 // 工具栏响应式数据
 const typeFilter = ref('projectName');
@@ -584,24 +541,6 @@ onMounted(() => {
     color: $primary-color;
     cursor: pointer;
     text-decoration: none;
-  }
-
-  // 详细信息内容样式
-  .detail-content {
-    padding: 20px;
-
-    :deep(.layui-descriptions) {
-      .layui-descriptions-item {
-        .layui-descriptions-item-label {
-          font-weight: 600;
-          color: #333;
-        }
-
-        .layui-descriptions-item-content {
-          color: #666;
-        }
-      }
-    }
   }
 
   @media (max-width: $desktop_layout_breakpoint) {

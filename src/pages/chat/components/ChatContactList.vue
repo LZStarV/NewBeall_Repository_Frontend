@@ -106,15 +106,15 @@
           <button class="cancel-btn" @click="closeCreateGroupDialog">取消</button>
           <button
             class="create-btn"
-            @click="handleCreateGroup"
             :disabled="!groupChatName || selectedUsers.length === 0"
+            @click="handleCreateGroup"
           >
             创建群聊
           </button>
         </div>
       </div>
     </div>
-    <div class="dialog-overlay" v-if="showCreateGroupDialog" @click="closeCreateGroupDialog"></div>
+    <div v-if="showCreateGroupDialog" class="dialog-overlay" @click="closeCreateGroupDialog"></div>
   </section>
 </template>
 

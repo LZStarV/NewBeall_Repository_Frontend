@@ -6,9 +6,6 @@
       shape="square"
       @click="handlePreview"
     />
-    <div v-else class="no-image">
-      <lay-icon type="layui-icon-picture" />
-    </div>
   </div>
 </template>
 
