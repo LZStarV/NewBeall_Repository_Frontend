@@ -41,7 +41,7 @@ export default {
     return http.post('/orders/exportInstruction', exportProductDetailedOV);
   },
 
-  // 报价单属性 category: 1 | 2 | 3 | 4 | 5 | 6 | 7
+  // 获取报价单类型列表 category: 1 | 2 | 3 | 4 | 5 | 6 | 7
   getOrderType(category: number, ordersId?: string) {
     return http.get(
       `/ordersType/getOrderType?category=${category}${ordersId ? `&ordersId=${ordersId}` : ''}`,
@@ -51,6 +51,11 @@ export default {
   // 获取报价单结算方式
   getOrdersSettle() {
     return http.get<Settle[]>('/orders/GetOrdersSettle');
+  },
+
+  // 获取全部报价单属性
+  getOrdersType() {
+    return http.get<{ id: number; name: string }[]>('/orders/GetOrdersType');
   },
 
   // 获取报价单列表（历史报价）
@@ -161,15 +166,14 @@ export default {
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    return http.post<FormData, QuotationListResponse[]>(
-      '/orders/Templist',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    return http.post<
+      FormData,
+      { rows: QuotationListResponse[]; total: number }
+    >('/orders/Templist', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       },
-    );
+    });
   },
 
   // 获取报价模块
@@ -185,6 +189,10 @@ export default {
     return http.post<
       FormData,
       { rows: OrderModuleListResponse[]; total: number }
-    >('/orderModule/moduleList', formData);
+    >('/orderModule/moduleList', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };

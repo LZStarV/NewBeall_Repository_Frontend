@@ -16,17 +16,18 @@ npm i
 npm run dev
 ```
 
-如需使用WebSocket代理，请一并启动WebSocket代理服务器
+**注意**：此命令会一并启动WebSocket代理服务器，如果只想单独启动其一，请使用下面命令：
 
-安装
+不启动WebSocket代理服务器：
+
 ```bash
-cd proxy-server
-npm i
+npm run dev:page
 ```
 
-启动
+单独启动WebSocket代理服务器：
+
 ```bash
-npm run dev
+npm run dev:proxy
 ```
 
 ### 3. 打包项目

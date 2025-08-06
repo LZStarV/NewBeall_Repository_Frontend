@@ -52,7 +52,7 @@
       <video
         controls
         :poster="`${env.getApiBaseUrl()}/static/img/helpImg/video.gif`"
-        :src="`${env.getBaseStaticUrl()}/${selectedVideo.url}`"
+        :src="`${env.getBaseStaticUrl()}${selectedVideo.url}`"
         class="player"
       >
         你的浏览器不支持此视频播放

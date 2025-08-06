@@ -138,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, defineProps, defineEmits } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import notify from '@/utils/notify';
 
 // 定义 props
@@ -314,26 +314,19 @@ const handleLevel3Change = (value: boolean) => {
 // 模拟获取一级子项目列表
 const getLevel1Projects = () => {
   // 这里应该调用实际的 API，现在使用模拟数据
-  level1Projects.value = [
-    { id: '1', name: '一级子项目1' },
-    { id: '2', name: '一级子项目2' },
-    { id: '3', name: '一级子项目3' },
-  ];
+  level1Projects.value = [{ id: '1', name: '选择一级子项目' }];
 };
 
 // 模拟获取二级子项目列表
 const getLevel2Projects = () => {
   // 这里应该调用实际的 API，现在使用模拟数据
-  level2Projects.value = [
-    { id: '1', name: '二级子项目1' },
-    { id: '2', name: '二级子项目2' },
-    { id: '3', name: '二级子项目3' },
-  ];
+  level2Projects.value = [{ id: '1', name: '选择二级子项目' }];
 };
 
 // 组件挂载时获取一级子项目
 onMounted(() => {
   getLevel1Projects();
+  getLevel2Projects();
 });
 
 // 当二级子项目父级改变时，获取二级子项目

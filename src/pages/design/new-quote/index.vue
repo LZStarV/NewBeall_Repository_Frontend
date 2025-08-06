@@ -49,7 +49,7 @@ const quotationMenuConfig = [
       layer.prompt({
         type: 1,
         title: '报价单说明',
-        formType: "textarea",
+        formType: 'textarea',
         area: ['500px', '300px'],
         btn: [
           {
@@ -84,10 +84,23 @@ const quotationMenuConfig = [
     btnAction: () => {
       // 弹出询问弹窗，确认后提交数据
       layer.confirm('确定要提交报价单吗？', {
-        yes: () => {
-          // 触发提交事件
-          quotationEditRef.value?.triggerSubmit();
-        },
+        title: '提交报价单',
+        btn: [
+          {
+            text: '确定',
+            callback: (index: string) => {
+              // 触发提交事件
+              quotationEditRef.value?.triggerSubmit();
+              layer.close(index);
+            },
+          },
+          {
+            text: '取消',
+            callback: (index: string) => {
+              layer.close(index);
+            },
+          },
+        ],
       });
     },
   },
@@ -98,9 +111,9 @@ const quotationMenuConfig = [
       // 打开ModalWindow组件（预留功能，后续编写）
       layer.open({
         type: 1,
-        title: '修改售价',
+        title: '修改价格',
         area: ['600px', '400px'],
-        content: '<div style="padding: 20px;">修改售价功能正在开发中...</div>',
+        content: '',
         btn: [
           {
             text: '确定',

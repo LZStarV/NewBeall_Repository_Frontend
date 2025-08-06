@@ -30,9 +30,13 @@
           </lay-form-item>
 
           <lay-form-item label="属性">
-            <lay-select placeholder="请输入">
-              <lay-select-option v-model="attribute" value="初步建议阶段">
-                初步建议阶段
+            <lay-select v-model="attribute" placeholder="请输入">
+              <lay-select-option
+                v-for="attr in orderAttributeList"
+                :key="attr.id"
+                :value="attr.id"
+              >
+                {{ attr.name }}
               </lay-select-option>
             </lay-select>
           </lay-form-item>
@@ -318,6 +322,7 @@ const columns = [
 ] as TableColumn[];
 
 // 外部获取响应式数据
+const orderAttributeList = ref<{ id: number; name: string }[]>();
 const ordersChargePersonList = ref<OrderChargePerson[]>();
 const ordersCreateUserList = ref<string[]>();
 
@@ -361,6 +366,16 @@ const sortChange = (key: string, sort: string) => {
       }
     },
   );
+};
+
+// 获取属性数据
+const getOrderAttributeList = async () => {
+  try {
+    const res = await ordersApi.getOrdersType();
+    orderAttributeList.value = res.data;
+  } catch (error) {
+    console.error('获取属性数据失败:', error);
+  }
 };
 
 // 获取报价单价格信息
@@ -481,6 +496,7 @@ const getOrdersChargePerson = async () => {
 };
 
 onMounted(() => {
+  getOrderAttributeList();
   getOrdersCreateUserList();
   getOrdersChargePerson();
   // 默认加载全部数据
