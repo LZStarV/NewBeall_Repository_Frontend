@@ -32,9 +32,7 @@ export default {
 
   // 获取客户信息
   clientDetail: (clientId: string | number) =>
-    http.post<null, ClientType>('/client/clientDetail', null, {
-      params: { clientId },
-    }),
+    http.post<null, ClientType>(`/client/detail/${clientId}`),
 
   // 刷新客户和供应商拼音
   flushPinyin: () => http.get('/client/flushPinyin'),
@@ -45,7 +43,7 @@ export default {
   // 获取客户详情
   getClientDetailed: (clientId: string | number) =>
     http.get<ClientType>('/client/getClientDetailed', {
-      params: { clientId },
+      clientId,
     }),
 
   // 获取客户列表

@@ -46,27 +46,16 @@ const quotationMenuConfig = [
     name: '报价单说明',
     btnAction: () => {
       // 打开layui textarea弹窗，收集用户输入的数据
-      layer.open({
+      layer.prompt({
         type: 1,
         title: '报价单说明',
+        formType: "textarea",
         area: ['500px', '300px'],
-        content: `
-          <div style="padding: 20px;">
-            <textarea
-              id="quotationExplanationInput"
-              placeholder="请输入报价单说明..."
-              style="width: 100%; height: 120px; resize: none; border: 1px solid #ddd; border-radius: 4px; padding: 8px;"
-            >${quotationExplanation.value}</textarea>
-          </div>
-        `,
         btn: [
           {
             text: '确定',
-            callback: (index: string) => {
-              const textarea = document.getElementById(
-                'quotationExplanationInput',
-              ) as HTMLTextAreaElement;
-              quotationExplanation.value = textarea?.value || '';
+            callback: (index: string, data) => {
+              quotationExplanation.value = data;
               layer.close(index);
               notify.success('报价单说明已保存');
             },

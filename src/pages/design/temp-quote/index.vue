@@ -9,32 +9,22 @@
           :label-width="80"
           class="toolbar-form-items"
         >
-          <lay-form-item class="form-item-search">
-            <template #label>
-              <lay-select v-model="typeFilter">
-                <lay-select-option value="projectName">
-                  工程项目名
-                </lay-select-option>
-                <lay-select-option value="contacts">客户单位</lay-select-option>
-                <lay-select-option value="orderstype">
-                  报价类型
-                </lay-select-option>
-              </lay-select>
-            </template>
+          <lay-form-item label="工程项目名">
             <lay-input
               v-model="quotationNameSearch"
-              placeholder="请输入方案名称进行搜索"
+              placeholder="请输入工程项目名"
               class="search-input"
               mode="block"
             />
           </lay-form-item>
 
-          <lay-form-item label="属性">
-            <lay-select placeholder="请输入">
-              <lay-select-option v-model="attribute" value="初步建议阶段">
-                初步建议阶段
-              </lay-select-option>
-            </lay-select>
+          <lay-form-item label="客户单位">
+            <lay-input
+              v-model="quotationNameSearch"
+              placeholder="请输入客户单位"
+              class="search-input"
+              mode="block"
+            />
           </lay-form-item>
 
           <lay-form-item label="负责人">

@@ -124,9 +124,9 @@ export default {
   },
 
   // 获取报价单详情
-  getOrderDetail(orderId: string) {
-    return http.get<QuotationListResponse>('/orders/getOrderDetail', {
-      params: { orderId },
+  getOrderDetail(ordersId: string) {
+    return http.get<QuotationListResponse>('/orders/GetOrdersDetailed', {
+      ordersId,
     });
   },
 
