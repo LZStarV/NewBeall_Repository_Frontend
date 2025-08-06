@@ -71,6 +71,8 @@ const handleHeaderToggle = (collapsed: boolean) => {
       flex: 1;
       padding: 16px;
       overflow-y: auto;
+      // 为右侧弹窗提供定位参考
+      position: relative;
     }
   }
 }
