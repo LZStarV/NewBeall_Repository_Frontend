@@ -1,159 +1,372 @@
 <template>
-    <div class="quote-template-page">
-        <div class="page-header">
-            <h1>报价模块</h1>
-            <p>管理报价模板和标准化模块</p>
-        </div>
+  <div class="quote-template-page">
+    <!-- 顶部工具栏 -->
+    <lay-card class="toolbar-card">
+      <div class="toolbar">
+        <lay-form
+          layout="inline"
+          :pane="true"
+          :label-width="80"
+          class="toolbar-form-items"
+        >
+          <lay-form-item label="模块名">
+            <lay-input
+              v-model="moduleNameSearch"
+              placeholder="请输入模块名"
+              class="search-input"
+              mode="block"
+            />
+          </lay-form-item>
 
-        <div class="content-area">
-            <lay-card title="模板管理">
-                <div class="toolbar">
-                    <lay-button type="primary">新建模板</lay-button>
-                    <lay-button>导入模板</lay-button>
-                    <lay-button>导出模板</lay-button>
-                </div>
+          <lay-form-item label="类别">
+            <lay-select v-model="categorySearch1" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+          <lay-form-item>
+            <lay-select v-model="categorySearch2" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
 
-                <div class="template-grid">
-                    <div v-for="template in templates" :key="template.id" class="template-item">
-                        <div class="template-preview">
-                            <lay-icon type="layui-icon-template-1" size="48" />
-                        </div>
-                        <div class="template-info">
-                            <h3>{{ template.name }}</h3>
-                            <p>{{ template.description }}</p>
-                            <div class="template-meta">
-                                <span>创建时间: {{ template.createTime }}</span>
-                                <span>使用次数: {{ template.useCount }}</span>
-                            </div>
-                        </div>
-                        <div class="template-actions">
-                            <lay-button size="sm" @click="useTemplate(template)">使用</lay-button>
-                            <lay-button size="sm" @click="editTemplate(template)">编辑</lay-button>
-                            <lay-button size="sm" type="danger" @click="deleteTemplate(template)">删除</lay-button>
-                        </div>
-                    </div>
-                </div>
-            </lay-card>
-        </div>
-    </div>
+          <lay-form-item label="面积">
+            <lay-select v-model="squareSearch" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+
+          <lay-form-item label="配置">
+            <lay-select v-model="configSearch" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+
+          <lay-form-item label="国别">
+            <lay-select v-model="countrySearch" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+
+          <lay-form-item label="点位数">
+            <lay-select v-model="pointNumberSearch" placeholder="请选择">
+              <lay-select-option value="1">类别1</lay-select-option>
+              <lay-select-option value="2">类别2</lay-select-option>
+              <lay-select-option value="3">类别3</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+
+          <div class="toolbar-btns">
+            <button title="搜索" @click="handleSearch">
+              <SvgIcon name="search" width="1.1rem" />
+            </button>
+            <button title="刷新" @click="handleRefresh">
+              <SvgIcon name="refresh" width="1.2rem" />
+            </button>
+          </div>
+        </lay-form>
+      </div>
+    </lay-card>
+
+    <!-- 底部列表区域 -->
+    <lay-card class="content-list-card">
+      <lay-table
+        :columns="columns"
+        :data-source="dataSource"
+        :default-toolbar="defaultToolbars"
+        :loading="loading"
+        :pagination="pagination"
+        even
+        @sort-change="sortChange"
+      >
+        <template #purchasepriceSum="{ row }">
+          <span style="color: red">{{ row.purchasepriceSum }}</span>
+        </template>
+      </lay-table>
+      <div class="page-info">
+        <span>
+          显示第
+          {{ (pagination.current - 1) * pagination.pageSize + 1 }}
+          到第
+          {{ pagination.current * pagination.pageSize }}
+          条记录，总共 {{ pagination.total }} 条记录
+        </span>
+      </div>
+    </lay-card>
+  </div>
 </template>
 
-<script lang="ts" setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import type {
+  OrderModuleListResponse,
+  OrderPrice,
+} from '@/api/orders/orderApi.type';
+import type {
+  TableColumn,
+  TableDefaultToolbar,
+} from '@layui/layui-vue/types/component/table/typing';
+import SvgIcon from '@/components/SvgIcon.vue';
+import ordersApi from '@/api/orders/ordersApi';
 
-const templates = ref([
-    {
-        id: 1,
-        name: '办公室装修标准模板',
-        description: '适用于一般办公室装修项目的标准报价模板',
-        createTime: '2024-01-10',
-        useCount: 15
+// 工具栏响应式数据
+const moduleNameSearch = ref<string>();
+const categorySearch1 = ref<string>();
+const categorySearch2 = ref<string>();
+const squareSearch = ref<string>(); // 面积
+const configSearch = ref<string>(); // 配置
+const countrySearch = ref<string>(); // 国别
+const pointNumberSearch = ref<string>(); // 点位数
+
+// 表格数据
+const loading = ref(false);
+const dataSource = ref<(OrderModuleListResponse & { ordersType: string })[]>();
+
+// 表头配置
+const defaultToolbars: TableDefaultToolbar[] = [
+  {
+    icon: 'layui-icon-refresh',
+    title: '刷新',
+    onClick: () => {},
+  },
+  'filter',
+];
+
+// 表格列配置
+const columns = [
+  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  {
+    title: '编号',
+    width: '180px',
+    key: 'ordersId',
+    ellipsisTooltip: true,
+    hide: true,
+  },
+  {
+    title: '模块名称',
+    width: '200px',
+    key: 'projectName',
+    ellipsisTooltip: true,
+  },
+  {
+    title: '报价类型',
+    width: '200px',
+    key: 'ordersType',
+    ellipsisTooltip: true,
+  },
+  {
+    title: '供应商单位',
+    width: '250px',
+    key: 'contacts',
+    ellipsisTooltip: true,
+  },
+  {
+    title: '总成本',
+    width: '120px',
+    key: 'purchasepriceSum',
+    sort: true,
+    customSlot: 'purchasepriceSum',
+  },
+  {
+    title: '利率（倍数）',
+    width: '120px',
+    key: 'rate',
+    sort: true,
+  },
+  {
+    title: '总售价',
+    width: '120px',
+    key: 'priceSum',
+    sort: true,
+  },
+  {
+    title: '模块来源',
+    width: '150px',
+    key: 'beFromCompany',
+    sort: true,
+  },
+  {
+    title: '创建时间',
+    width: '150px',
+    key: 'createDate',
+    hide: true,
+    sort: true,
+  },
+  {
+    title: '创建人',
+    width: '120px',
+    key: 'name',
+    hide: true,
+  },
+] as TableColumn[];
+
+// 分页参数
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0,
+});
+
+// 排序
+const sortChange = (key: string, sort: string) => {
+  if (!dataSource.value) return;
+
+  dataSource.value.sort(
+    (a: OrderModuleListResponse, b: OrderModuleListResponse) => {
+      if (sort === 'asc') {
+        switch (key) {
+          case 'createDate':
+            return (
+              new Date(a.createDate).getTime() -
+              new Date(b.createDate).getTime()
+            );
+          default:
+            return 0;
+        }
+      } else {
+        switch (key) {
+          case 'createDate':
+            return (
+              new Date(b.createDate).getTime() -
+              new Date(a.createDate).getTime()
+            );
+          default:
+            return 0;
+        }
+      }
     },
-    {
-        id: 2,
-        name: '商业空间设计模板',
-        description: '商场、店铺等商业空间的设计报价模板',
-        createTime: '2024-01-08',
-        useCount: 8
-    }
-]);
-
-const useTemplate = (template: any) => {
-    console.log('使用模板:', template);
+  );
 };
 
-const editTemplate = (template: any) => {
-    console.log('编辑模板:', template);
+// 处理搜索
+const handleSearch = () => {
+  pagination.current = 1;
 };
 
-const deleteTemplate = (template: any) => {
-    console.log('删除模板:', template);
+// 处理刷新
+const handleRefresh = () => {};
+
+const getSourceData = async () => {
+  const res = (await ordersApi.getOrderModuleList(
+    'desc',
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.pageSize,
+  )) as unknown as { rows: OrderModuleListResponse[]; total: number };
+  console.log(res.rows);
+
+  // 获取价格
+  const priceRes = (await ordersApi.getPriceByOrderId(
+    res.rows.map((item) => item.ordersId),
+  )) as unknown as Record<string, OrderPrice>;
+
+  console.log(priceRes);
+
+  pagination.total = res.total;
+  dataSource.value = res.rows.map((item) => ({
+    ...item,
+    beFromCompany: item.beFromCompany || '公司自建',
+    rate: item.rate || '0.00',
+    ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
+      .filter(Boolean)
+      .join('/'),
+    ...(priceRes[item.ordersId]
+      ? {
+          priceSum: priceRes[item.ordersId].priceSum?.toString() || '0.00',
+          purchasepriceSum:
+            priceRes[item.ordersId].purchasepriceSum?.toString() || '0.00',
+        }
+      : {}),
+  }));
 };
+
+onMounted(() => {
+  getSourceData();
+});
 </script>
 
 <style scoped lang="scss">
 .quote-template-page {
-    padding: 24px;
-}
+  padding: 24px;
 
-.page-header {
-    margin-bottom: 32px;
+  :deep(.layui-form-item) {
+    label {
+      width: 100px !important;
+    }
+  }
 
-    h1 {
-        margin: 0;
-        color: #333;
-        font-size: 28px;
+  .form-item-search {
+    display: flex;
+    flex-wrap: nowrap;
+
+    :deep(.layui-form-label) {
+      padding: 0;
     }
 
-    p {
-        margin: 8px 0 0 0;
-        color: #666;
-        font-size: 16px;
+    .layui-select {
+      width: 100%;
+      border-radius: 0;
     }
-}
+  }
 
-.toolbar {
-    margin-bottom: 24px;
+  .toolbar-btns {
     display: flex;
-    gap: 12px;
-}
-
-.template-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 24px;
-}
-
-.template-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    text-align: center;
-    transition: all 0.3s ease;
+    gap: 1rem;
+    margin-left: 0.5rem;
 
-    &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    button {
+      @include button-style($primary-color);
     }
-}
+  }
 
-.template-preview {
-    margin-bottom: 16px;
-    color: #666;
-}
+  .page-info {
+    margin-top: 1rem;
+    font-size: 14px;
+    color: $text-regular;
+  }
 
-.template-info {
-    flex: 1;
-    margin-bottom: 16px;
+  :deep(.layui-tab) {
+    margin: 0;
 
-    h3 {
-        margin: 0 0 8px 0;
-        color: #333;
-        font-size: 16px;
+    .layui-tab-title {
+      padding: 0;
     }
 
-    p {
-        margin: 0 0 12px 0;
-        color: #666;
-        font-size: 14px;
-        line-height: 1.5;
+    .layui-tab-content {
+      padding: 0;
+    }
+  }
+
+  @media (max-width: $desktop_layout_breakpoint) {
+    :deep(.layui-date-picker) {
+      width: 100%;
     }
 
-    .template-meta {
-        font-size: 12px;
-        color: #999;
-
-        span {
-            display: block;
-            margin-bottom: 4px;
-        }
+    .toolbar-btns {
+      margin-left: 0;
+      margin-bottom: 0.5rem;
     }
-}
+  }
 
-.template-actions {
-    display: flex;
-    gap: 8px;
+  @media (min-width: $desktop_layout_breakpoint) {
+    .toolbar-form-items {
+      display: flex;
+      gap: 10px;
+
+      :deep(.layui-form-item) {
+        margin-bottom: 0;
+      }
+    }
+  }
 }
 </style>

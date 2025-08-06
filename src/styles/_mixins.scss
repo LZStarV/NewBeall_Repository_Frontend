@@ -8,8 +8,8 @@
 @mixin flex($direction: row, $justify: flex-start, $align: stretch) {
   display: flex;
   flex-direction: $direction;
-  justify-content: $justify;
   align-items: $align;
+  justify-content: $justify;
 }
 
 // 居中布局
@@ -51,6 +51,7 @@
  */
 @mixin transition($properties...) {
   $transitions: ();
+
   @each $property in $properties {
     $transitions: append($transitions, $property 0.3s ease-in-out, comma);
   }
@@ -58,3 +59,17 @@
 }
 
 // 其他必要的 mixin
+// toolbar卡片的只有图标的按钮mixin
+@mixin button-style($btn-color) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $btn-color;
+  }
+}

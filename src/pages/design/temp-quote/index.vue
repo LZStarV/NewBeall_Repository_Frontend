@@ -1,144 +1,336 @@
 <template>
-    <div class="temp-quote-page">
-        <div class="page-header">
-            <h1>临时报价</h1>
-            <p>管理临时保存的报价草稿</p>
-        </div>
+  <div class="temp-quote-page">
+    <!-- 顶部工具栏 -->
+    <lay-card class="toolbar-card">
+      <div class="toolbar">
+        <lay-form
+          layout="inline"
+          :pane="true"
+          :label-width="80"
+          class="toolbar-form-items"
+        >
+          <lay-form-item label="工程项目名">
+            <lay-input
+              v-model="quotationNameSearch"
+              placeholder="请输入工程项目名"
+              class="search-input"
+              mode="block"
+            />
+          </lay-form-item>
 
-        <div class="content-area">
-            <lay-card title="临时报价列表">
-                <div class="toolbar">
-                    <lay-button type="primary">新建临时报价</lay-button>
-                    <lay-button>批量删除</lay-button>
-                </div>
+          <lay-form-item label="客户单位">
+            <lay-input
+              v-model="clientNameSearch"
+              placeholder="请输入客户单位"
+              class="search-input"
+              mode="block"
+            />
+          </lay-form-item>
 
-                <div class="temp-quote-grid">
-                    <div v-for="item in tempQuotes" :key="item.id" class="quote-item">
-                        <div class="quote-header">
-                            <h3>{{ item.projectName }}</h3>
-                            <span class="save-time">{{ item.saveTime }}</span>
-                        </div>
-                        <div class="quote-content">
-                            <p>{{ item.description }}</p>
-                        </div>
-                        <div class="quote-actions">
-                            <lay-button size="sm" @click="continueEdit(item)">继续编辑</lay-button>
-                            <lay-button size="sm" type="primary" @click="saveAsFormal(item)">转为正式报价</lay-button>
-                            <lay-button size="sm" type="danger" @click="deleteTemp(item)">删除</lay-button>
-                        </div>
-                    </div>
-                </div>
-            </lay-card>
-        </div>
-    </div>
+          <lay-form-item label="报价类型">
+            <lay-input
+              v-model="quoteTypeSearch"
+              placeholder="请输入报价类型"
+              class="search-input"
+              mode="block"
+            />
+          </lay-form-item>
+
+          <lay-form-item label="制单日期">
+            <lay-date-picker
+              v-model="createDate"
+              placeholder="请选择制单日期"
+              allow-clear
+            />
+          </lay-form-item>
+
+          <div class="toolbar-btns">
+            <button title="搜索" @click="handleSearch">
+              <SvgIcon name="search" width="1.1rem" />
+            </button>
+            <button title="刷新" @click="handleRefresh">
+              <SvgIcon name="refresh" width="1.2rem" />
+            </button>
+          </div>
+        </lay-form>
+      </div>
+    </lay-card>
+
+    <!-- 底部列表区域 -->
+    <lay-card class="content-list-card">
+      <lay-table
+        :columns="columns"
+        :data-source="dataSource"
+        :default-toolbar="defaultToolbars"
+        :loading="loading"
+        :pagination="pagination"
+        even
+        @sort-change="sortChange"
+      />
+      <div class="page-info">
+        <span>
+          显示第
+          {{ (pagination.current - 1) * pagination.pageSize + 1 }}
+          到第
+          {{ pagination.current * pagination.pageSize }}
+          条记录，总共 {{ pagination.total }} 条记录
+        </span>
+      </div>
+    </lay-card>
+  </div>
 </template>
 
-<script lang="ts" setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import type { QuotationListResponse } from '@/api/orders/orderApi.type';
+import type {
+  TableColumn,
+  TableDefaultToolbar,
+} from '@layui/layui-vue/types/component/table/typing';
+import SvgIcon from '@/components/SvgIcon.vue';
+import ordersApi from '@/api/orders/ordersApi';
 
-const tempQuotes = ref([
-    {
-        id: 1,
-        projectName: '商场装修设计',
-        description: '某购物中心的整体装修设计方案，包含空间规划、材料选择等...',
-        saveTime: '2024-01-20 14:30'
+// 工具栏响应式数据
+const quotationNameSearch = ref<string>();
+const clientNameSearch = ref<string>();
+const quoteTypeSearch = ref<string>();
+const createDate = ref<string>();
+
+interface TempQuotationListResponse extends QuotationListResponse {
+  status: string;
+  ordersType: string;
+}
+
+// 表格数据
+const loading = ref(false);
+const dataSource = ref<TempQuotationListResponse[]>([]);
+
+// 表头配置
+const defaultToolbars: TableDefaultToolbar[] = [
+  {
+    icon: 'layui-icon-refresh',
+    title: '刷新',
+    onClick: () => {},
+  },
+  'filter',
+];
+
+// 表格列配置
+const columns = [
+  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  {
+    title: '编号',
+    width: '180px',
+    key: 'ordersId',
+    ellipsisTooltip: true,
+    hide: true,
+  },
+  {
+    title: '工程项目名称',
+    width: '300px',
+    key: 'projectName',
+    ellipsisTooltip: true,
+  },
+  {
+    title: '客户单位',
+    width: '250px',
+    key: 'contacts',
+    ellipsisTooltip: true,
+  },
+  {
+    title: '制单时间',
+    width: '150px',
+    key: 'createDate',
+    sort: true,
+  },
+  {
+    title: '报价类型',
+    width: '300px',
+    key: 'ordersType', // 需要用/拼接三个ordersType
+    ellipsisTooltip: true,
+  },
+  {
+    title: '总售价',
+    width: '120px',
+    key: 'priceSum',
+  },
+  {
+    title: '总成本',
+    width: '120px',
+    key: 'purchasepriceSum',
+  },
+  {
+    title: '交货时间',
+    width: '150px',
+    key: 'deliveryTime',
+    hide: true,
+  },
+  {
+    title: '项目负责人',
+    width: '100px',
+    key: 'chargePersonInfo',
+  },
+  {
+    title: '状态',
+    width: '100px',
+    key: 'status',
+  },
+] as TableColumn[];
+
+// 分页参数
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0,
+});
+
+// 日期排序
+const sortChange = (key: string, sort: string) => {
+  dataSource.value.sort(
+    (a: QuotationListResponse, b: QuotationListResponse) => {
+      if (sort === 'asc') {
+        switch (key) {
+          case 'createDate':
+            return (
+              new Date(a.createDate).getTime() -
+              new Date(b.createDate).getTime()
+            );
+          default:
+            return 0;
+        }
+      } else {
+        switch (key) {
+          case 'createDate':
+            return (
+              new Date(b.createDate).getTime() -
+              new Date(a.createDate).getTime()
+            );
+          default:
+            return 0;
+        }
+      }
     },
-    {
-        id: 2,
-        projectName: '酒店大堂设计',
-        description: '五星级酒店大堂的装修设计，需要考虑奢华感和实用性...',
-        saveTime: '2024-01-19 16:45'
-    }
-]);
-
-const continueEdit = (item: any) => {
-    console.log('继续编辑:', item);
+  );
 };
 
-const saveAsFormal = (item: any) => {
-    console.log('转为正式报价:', item);
+// 获取状态数据
+const getStatus = (isAudit: number) => {
+  switch (isAudit) {
+    case 0:
+      return '待审核';
+    case 1:
+      return '驳回'; // 要把文字颜色设置为红色
+    case 3:
+      return '设计中';
+    default:
+      return isAudit.toString();
+  }
 };
 
-const deleteTemp = (item: any) => {
-    console.log('删除临时报价:', item);
+// 处理搜索
+const handleSearch = () => {
+  pagination.current = 1;
 };
+
+// 处理刷新
+const handleRefresh = () => {};
+
+const getTempQuoteList = async () => {
+  const res = (await ordersApi.getQuotationList(
+    'desc',
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.pageSize,
+  )) as unknown as { rows: QuotationListResponse[]; total: number };
+
+  pagination.total = res.total;
+  dataSource.value = res.rows.map((item) => ({
+    ...item,
+    status: getStatus(item.isAudit),
+    ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
+      .filter(Boolean)
+      .join('/'),
+  }));
+};
+
+onMounted(() => {
+  getTempQuoteList();
+});
 </script>
 
 <style scoped lang="scss">
 .temp-quote-page {
-    padding: 24px;
-}
+  padding: 24px;
 
-.page-header {
-    margin-bottom: 32px;
-
-    h1 {
-        margin: 0;
-        color: #333;
-        font-size: 28px;
+  :deep(.layui-form-item) {
+    label {
+      width: 100px !important;
     }
+  }
 
-    p {
-        margin: 8px 0 0 0;
-        color: #666;
-        font-size: 16px;
-    }
-}
-
-.toolbar {
-    margin-bottom: 24px;
+  .form-item-search {
     display: flex;
-    gap: 12px;
-}
+    flex-wrap: nowrap;
 
-.temp-quote-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 24px;
-}
-
-.quote-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    transition: all 0.3s ease;
-
-    &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    :deep(.layui-form-label) {
+      padding: 0;
     }
-}
 
-.quote-header {
+    .layui-select {
+      width: 100%;
+      border-radius: 0;
+    }
+  }
+
+  .toolbar-btns {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-left: 0.5rem;
 
-    h3 {
-        margin: 0;
-        color: #333;
-        font-size: 16px;
+    button {
+      @include button-style($primary-color);
+    }
+  }
+
+  .page-info {
+    margin-top: 1rem;
+    font-size: 14px;
+    color: $text-regular;
+  }
+
+  :deep(.layui-tab) {
+    margin: 0;
+
+    .layui-tab-title {
+      padding: 0;
     }
 
-    .save-time {
-        font-size: 12px;
-        color: #999;
+    .layui-tab-content {
+      padding: 0;
     }
-}
+  }
 
-.quote-content {
-    margin-bottom: 16px;
-
-    p {
-        margin: 0;
-        color: #666;
-        font-size: 14px;
-        line-height: 1.5;
+  @media (max-width: $desktop_layout_breakpoint) {
+    :deep(.layui-date-picker) {
+      width: 100%;
     }
-}
 
-.quote-actions {
-    display: flex;
-    gap: 8px;
+    .toolbar-btns {
+      margin-left: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  @media (min-width: $desktop_layout_breakpoint) {
+    .toolbar-form-items {
+      display: flex;
+      gap: 10px;
+
+      :deep(.layui-form-item) {
+        margin-bottom: 0;
+      }
+    }
+  }
 }
 </style>

@@ -3,6 +3,13 @@
     <!-- 顶部栏 -->
     <header class="header">
       <div class="left">
+        <button
+          v-if="showBackButton"
+          class="back-button"
+          @click="handleBackClick"
+        >
+          <SvgIcon name="to_the_left" width="1.25rem" height="1.25rem" />
+        </button>
         <Avatar :url="chatboxInfo?.avatar" radius size="3rem" />
         <strong>{{ chatboxInfo?.chatName }}</strong>
       </div>
@@ -14,8 +21,10 @@
             chatboxInfo?.toKey?.startsWith('PRO')
           "
           class="tool-btn"
-          :class="{ active: showCompanyInfo }"
-          @click="$emit('toggle-company-info')"
+          :class="{ active: chatStore.isCompanyInfoShow }"
+          @click="
+            chatStore.setCompanyInfoVisiable(!chatStore.isCompanyInfoShow)
+          "
         >
           <SvgIcon name="company_information" />
         </button>
@@ -111,7 +120,15 @@
         content="您好！壹新Newbeall设计报价管理云平台欢迎您的咨询与提出宝贵意见！"
         :is-my-message="false"
       />
+      <button class="feedback-btn" @click="showFeedbackPanel = true">
+        <SvgIcon name="consult" />
+        提交意见
+      </button>
     </div>
+
+    <!-- 意见反馈面板 -->
+    <FeedbackPanel v-model:visible="showFeedbackPanel" />
+
     <!-- 聊天内容 -->
     <main ref="msgAreaRef" class="msg-area">
       <template v-for="[date, messages] in groupedMessages" :key="date">
@@ -125,7 +142,7 @@
           :user-name="msg.sendName!"
           :time="msg.sendTime"
           :content="msg.content"
-          :is-my-message="userInfo.id == msg.fromId"
+          :is-my-message="userInfo!.id == msg.fromId"
           :unread-users="parseJsonSafely(msg.unread)"
           :read-users="parseJsonSafely(msg.read)"
           :is-group-chat="chatboxInfo?.type || false"
@@ -146,7 +163,7 @@
                 v-for="category in EMOJI_CATEGORIES"
                 :key="category.id"
                 class="category-item"
-                :class="{ active: currentCategoryId === category.id }"
+                :class="{ active: Boolean(currentCategoryId === category.id) }"
                 @click="currentCategoryId = category.id"
               >
                 {{ category.name }}
@@ -173,19 +190,6 @@
         </div>
       </div>
       <div class="input-area">
-        <div class="preview-area">
-          <template v-for="(part, index) in renderInputContent" :key="index">
-            <template v-if="typeof part === 'string'">{{ part }}</template>
-            <Avatar
-              v-else
-              :prefix="getEmojiPrefix(part.categoryId)"
-              :url="part.fileName"
-              size="1.25rem"
-              :radius="false"
-              style="display: inline-block; vertical-align: middle"
-            />
-          </template>
-        </div>
         <textarea
           ref="textareaRef"
           v-model="inputContent"
@@ -202,10 +206,11 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, computed } from 'vue';
+import { nextTick, onMounted, ref, watch, computed, onUnmounted } from 'vue';
 import type { ChatInfo, ChatMessage, UserInfo } from '../Chat.type';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ChatMessageItem from './ChatMessageItem.vue';
+import FeedbackPanel from '@/components/FeedbackPanel.vue';
 import {
   getMessages,
   sendMessage,
@@ -219,15 +224,32 @@ import dayjs from 'dayjs';
 import {
   EMOJI_CATEGORIES,
   EMOJI_RESOURCE_CONFIG,
-  emojiRegex,
-  getEmojiInfo,
   type EmojiCategory,
 } from '@/utils/chat/emoji-config';
+import { useChatStore } from '@/stores/chat';
+
+// Props
+defineProps<{
+  showBackButton?: boolean;
+}>();
+
+// Emits
+const emit = defineEmits<{
+  (e: 'back-clicked'): void;
+}>();
+
+// 处理返回按钮点击
+const handleBackClick = () => {
+  emit('back-clicked');
+};
 
 const { formatDateTime } = useFormatDate();
 
 const showEmojiPanel = ref(false);
 const currentCategoryId = ref('default');
+
+// 意见反馈相关
+const showFeedbackPanel = ref(false);
 
 // 获取当前分类的表情
 const currentEmojis = computed(() => {
@@ -272,52 +294,6 @@ const insertEmoji = (emoji: string) => {
   });
 
   showEmojiPanel.value = false;
-};
-
-// 渲染输入框内容（包含表情）
-const renderInputContent = computed(() => {
-  if (!inputContent.value.includes('[')) return inputContent.value;
-
-  const parts: (
-    | string
-    | { isEmoji: true; fileName: string; categoryId: string }
-  )[] = [];
-  let lastIndex = 0;
-
-  inputContent.value.replace(emojiRegex, (match, code, offset) => {
-    // 添加表情前的文本
-    if (offset > lastIndex) {
-      parts.push(inputContent.value.slice(lastIndex, offset));
-    }
-
-    // 查找表情信息
-    const emojiInfo = getEmojiInfo(`[${code}]`);
-    if (emojiInfo) {
-      parts.push({
-        isEmoji: true,
-        fileName: emojiInfo.fileName,
-        categoryId: emojiInfo.categoryId,
-      });
-    } else {
-      parts.push(match); // 如果找不到表情，保留原文本
-    }
-
-    lastIndex = offset + match.length;
-    return match;
-  });
-
-  // 添加剩余的文本
-  if (lastIndex < inputContent.value.length) {
-    parts.push(inputContent.value.slice(lastIndex));
-  }
-
-  return parts;
-});
-
-// 获取表情资源路径
-const getEmojiPrefix = (categoryId: string) => {
-  const key = categoryId.toUpperCase() as keyof typeof EMOJI_RESOURCE_CONFIG;
-  return EMOJI_RESOURCE_CONFIG[key] || EMOJI_RESOURCE_CONFIG.DEFAULT;
 };
 
 // 按天对消息进行分组
@@ -368,12 +344,14 @@ const handleSendMessage = async () => {
     const chatMsg: ChatMessage = {
       chatName: chatboxInfo.value.chatName,
       content: inputContent.value,
-      fromId: props.userInfo.id,
+      fromId: userInfo.value!.id,
       sendTime: String(Date.now()),
       toId: chatboxInfo.value.toKey,
       type: chatboxInfo.value.type,
     };
-    const res: ChatMessage | undefined = await sendMessage(chatMsg);
+    const res: ChatMessage | undefined = (await sendMessage(
+      chatMsg,
+    )) as unknown as ChatMessage;
     if (res) {
       inputContent.value = '';
       if (textareaRef.value) textareaRef.value.focus();
@@ -417,30 +395,26 @@ const parseJsonSafely = (jsonString: string | undefined | null): number[] => {
   }
 };
 
-const props = defineProps<{
-  chatInfo: ChatInfo;
-  userInfo: UserInfo;
-  showCompanyInfo?: boolean;
-}>();
+const chatStore = useChatStore();
 
-// Emits
-defineEmits<{
-  'toggle-company-info': [];
-  'view-group-members': [];
-  'add-group-member': [];
-}>();
+const userInfo = ref<UserInfo>();
+
+onMounted(async () => {
+  await chatStore.setUserInfo();
+  userInfo.value = chatStore.userInfoData!;
+});
 
 const getMessageList = async () => {
-  const res = await getMessages(props.chatInfo.toKey);
+  const res = await getMessages(chatStore.chatInfo!.toKey);
   chatMessages.value = res.data.sort((a: ChatMessage, b: ChatMessage) => {
     return Number(a.sendTime) - Number(b.sendTime);
   });
 };
 
 watch(
-  () => props.chatInfo,
+  () => chatStore.chatInfo,
   async (newVal) => {
-    chatboxInfo.value = newVal;
+    chatboxInfo.value = newVal!;
     // 重新调用api
     await getMessageList();
     if (textareaRef.value) textareaRef.value.focus();
@@ -457,10 +431,6 @@ const scrollToBottom = () => {
     el.scrollTop = el.scrollHeight;
   }
 };
-
-onMounted(() => {
-  chatboxInfo.value = props.chatInfo;
-});
 
 // 群成员相关
 const showMemberPanel = ref(false);
@@ -523,16 +493,26 @@ const handleConfirmAdd = async () => {
   }
 };
 
+// 关闭成员、表情面板
+const closePanel = () => {
+  showMemberPanel.value = false;
+  showAddMemberPanel.value = false;
+  showEmojiPanel.value = false;
+};
+
 // 点击其他地方关闭面板
 onMounted(() => {
-  document.addEventListener('click', () => {
-    showMemberPanel.value = false;
-    showAddMemberPanel.value = false;
-  });
+  document.addEventListener('click', closePanel);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closePanel);
 });
 </script>
 
 <style scoped lang="scss">
+@use 'sass:color';
+
 .chat-msg-box {
   width: 100%;
   display: flex;
@@ -549,6 +529,25 @@ onMounted(() => {
     border-bottom: 1px solid #ededed;
 
     .left {
+      display: flex;
+      align-items: center;
+
+      .back-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        margin-right: 0.5rem;
+        color: #2b5bb2;
+        border-radius: $border-radius-base;
+
+        &:hover {
+          background-color: #f5f5f5;
+        }
+      }
+
       .layui-avatar {
         width: 3rem;
         height: 3rem;
@@ -582,6 +581,23 @@ onMounted(() => {
     padding: 1rem;
     width: 100%;
     align-items: center;
+
+    .feedback-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 2rem auto;
+      padding: 0.5rem 1rem;
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      border-radius: $border-radius-base;
+      cursor: pointer;
+
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: -5%);
+      }
+    }
   }
 
   .msg-area {
@@ -683,6 +699,10 @@ onMounted(() => {
       position: absolute;
       right: 1rem;
       bottom: 1rem;
+
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: -5%);
+      }
     }
   }
 }
@@ -767,7 +787,7 @@ onMounted(() => {
   .date-text {
     background-color: #f0f2f5;
     padding: 4px 12px;
-    border-radius: 16px;
+    border-radius: $border-radius-extra-large;
     font-size: 12px;
     color: #666;
   }
@@ -852,7 +872,7 @@ onMounted(() => {
       font-size: 0.9rem;
 
       &:hover {
-        background-color: darken($primary-color, 5%);
+        background-color: color.adjust($primary-color, $lightness: -5%);
       }
 
       &:disabled {
@@ -860,6 +880,33 @@ onMounted(() => {
         cursor: not-allowed;
       }
     }
+  }
+}
+
+/* 移动端样式调整 */
+@media (max-width: 768px) {
+  .emoji-panel {
+    width: 300px !important;
+
+    .emoji-grid {
+      grid-template-columns: repeat(6, 1fr) !important;
+    }
+  }
+
+  .member-panel {
+    width: 250px !important;
+  }
+
+  .input-box {
+    height: 180px !important;
+
+    .input-area textarea {
+      height: 80px !important;
+    }
+  }
+
+  .tips-bar {
+    display: none;
   }
 }
 </style>

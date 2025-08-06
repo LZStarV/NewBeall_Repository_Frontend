@@ -29,7 +29,10 @@
     }
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run install:proxy && concurrently \"vite\" \"npm run dev:proxy\"",
+    "dev:page": "vite",
+    "dev:proxy": "cd proxy-server && npm run dev",
+    "install:proxy": "cd proxy-server && npm install",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",
@@ -44,6 +47,7 @@
     "@popperjs/core": "^2.11.8",
     "@types/node": "^22.14.1",
     "axios": "^1.8.4",
+    "chart.js": "^4.5.0",
     "commitizen": "^4.3.1",
     "commitlint-config-cz": "^0.13.3",
     "cz-conventional-changelog": "^3.3.0",
@@ -53,13 +57,16 @@
     "newbeall": "file:",
     "pinia": "^3.0.2",
     "postcss-scss": "^4.0.9",
+    "quill": "^2.0.3",
+    "resize-observer-polyfill": "^1.5.1",
     "screenfull": "^6.0.2",
     "stylelint-config-rational-order": "^0.1.2",
     "stylelint-declaration-block-no-ignored-properties": "^2.8.0",
     "stylelint-prettier": "^5.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -71,6 +78,7 @@
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
     "bootstrap": "^5.3.7",
+    "concurrently": "^9.2.0",
     "eslint": "^9.25.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-vue": "^10.1.0",

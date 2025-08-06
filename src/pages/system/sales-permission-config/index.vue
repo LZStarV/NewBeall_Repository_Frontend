@@ -1,511 +1,539 @@
 <template>
     <div class="sales-permission-config-page">
-        <div class="page-header">
-            <h1>销售权限配置</h1>
-            <p>配置销售人员的系统权限和数据访问范围</p>
-        </div>
-
         <div class="content-area">
-            <lay-row :space="24">
-                <!-- 权限组管理 -->
-                <lay-col :md="8">
-                    <lay-card title="权限组">
-                        <div class="toolbar">
-                            <lay-button type="primary" size="sm" @click="showAddGroupModal">
-                                <lay-icon type="layui-icon-add-1" />
-                                新建权限组
-                            </lay-button>
-                        </div>
+            <lay-card>
+                <!-- 工具栏区域 -->
+                <div class="fixed-table-toolbar">
+                    <span data-title="产品分配" @click="handleProductAssign" class="btnIcon invite-but">
+                        <lay-icon type="layui-icon-component" />
+                    </span>
+                    <span data-title="品牌分配" @click="handleBrandAssign" class="btnIcon invite-but">
+                        <lay-icon type="layui-icon-diamond" />
+                    </span>
+                    <span data-title="地区分配" @click="handleRegionAssign" class="btnIcon invite-but">
+                        <lay-icon type="layui-icon-location" />
+                    </span>
+                    <span data-title="客户分配" @click="handleCustomerAssign" class="btnIcon invite-but">
+                        <lay-icon type="layui-icon-group" />
+                    </span>
+                    <span data-title="打折权限" @click="handleDiscountPermission" class="btnIcon invite-but">
+                        <lay-icon type="layui-icon-dollar" />
+                    </span>
 
-                        <div class="permission-groups">
-                            <div v-for="group in permissionGroups" :key="group.id" class="group-item"
-                                :class="{ active: selectedGroup?.id === group.id }" @click="selectGroup(group)">
-                                <div class="group-header">
-                                    <span class="group-name">{{ group.name }}</span>
-                                    <span class="member-count">{{ group.memberCount }}人</span>
-                                </div>
-                                <div class="group-description">{{ group.description }}</div>
-                                <div class="group-actions">
-                                    <lay-button size="xs" @click.stop="editGroup(group)">编辑</lay-button>
-                                    <lay-button size="xs" type="danger" @click.stop="deleteGroup(group)">删除</lay-button>
-                                </div>
-                            </div>
-                        </div>
-                    </lay-card>
-                </lay-col>
+                    <button class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh"
+                        title="刷新" @click="handleRefresh">
+                        <lay-icon type="layui-icon-refresh" />
+                    </button>
 
-                <!-- 权限详情配置 -->
-                <lay-col :md="16">
-                    <lay-card title="权限配置" v-if="selectedGroup">
-                        <div class="permission-config">
-                            <div class="config-header">
-                                <h3>{{ selectedGroup.name }} - 权限配置</h3>
-                                <lay-button type="primary" @click="savePermissions">保存配置</lay-button>
-                            </div>
-
-                            <!-- 功能权限 -->
-                            <div class="permission-section">
-                                <h4>功能权限</h4>
-                                <div class="permission-grid">
-                                    <div v-for="func in functionalPermissions" :key="func.id" class="permission-item">
-                                        <div class="permission-header">
-                                            <lay-checkbox :model-value="func.enabled"
-                                                @change="toggleFunctionalPermission(func.id, $event)">
-                                                {{ func.name }}
-                                            </lay-checkbox>
-                                        </div>
-                                        <div class="permission-actions" v-if="func.enabled">
-                                            <lay-checkbox-group :model-value="func.actions"
-                                                @change="updateFunctionalActions(func.id, $event)">
-                                                <lay-checkbox value="read">查看</lay-checkbox>
-                                                <lay-checkbox value="create">创建</lay-checkbox>
-                                                <lay-checkbox value="update">编辑</lay-checkbox>
-                                                <lay-checkbox value="delete">删除</lay-checkbox>
-                                            </lay-checkbox-group>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 数据权限 -->
-                            <div class="permission-section">
-                                <h4>数据权限</h4>
-                                <div class="data-permission-config">
-                                    <lay-form label-width="120px">
-                                        <lay-form-item label="客户数据范围">
-                                            <lay-radio-group v-model="dataPermissions.customerScope">
-                                                <lay-radio value="all">全部客户</lay-radio>
-                                                <lay-radio value="own">仅自己的客户</lay-radio>
-                                                <lay-radio value="team">本团队客户</lay-radio>
-                                                <lay-radio value="department">本部门客户</lay-radio>
-                                            </lay-radio-group>
-                                        </lay-form-item>
-
-                                        <lay-form-item label="项目数据范围">
-                                            <lay-radio-group v-model="dataPermissions.projectScope">
-                                                <lay-radio value="all">全部项目</lay-radio>
-                                                <lay-radio value="own">仅自己的项目</lay-radio>
-                                                <lay-radio value="team">本团队项目</lay-radio>
-                                                <lay-radio value="department">本部门项目</lay-radio>
-                                            </lay-radio-group>
-                                        </lay-form-item>
-
-                                        <lay-form-item label="报价数据范围">
-                                            <lay-radio-group v-model="dataPermissions.quoteScope">
-                                                <lay-radio value="all">全部报价</lay-radio>
-                                                <lay-radio value="own">仅自己的报价</lay-radio>
-                                                <lay-radio value="team">本团队报价</lay-radio>
-                                                <lay-radio value="department">本部门报价</lay-radio>
-                                            </lay-radio-group>
-                                        </lay-form-item>
-
-                                        <lay-form-item label="财务数据权限">
-                                            <lay-checkbox-group v-model="dataPermissions.financialData">
-                                                <lay-checkbox value="revenue">收入数据</lay-checkbox>
-                                                <lay-checkbox value="cost">成本数据</lay-checkbox>
-                                                <lay-checkbox value="profit">利润数据</lay-checkbox>
-                                                <lay-checkbox value="commission">佣金数据</lay-checkbox>
-                                            </lay-checkbox-group>
-                                        </lay-form-item>
-                                    </lay-form>
-                                </div>
-                            </div>
-
-                            <!-- 时间限制 -->
-                            <div class="permission-section">
-                                <h4>时间限制</h4>
-                                <lay-form label-width="120px">
-                                    <lay-form-item label="登录时间限制">
-                                        <lay-checkbox
-                                            v-model="timeRestrictions.loginTimeEnabled">启用登录时间限制</lay-checkbox>
-                                    </lay-form-item>
-                                    <lay-form-item v-if="timeRestrictions.loginTimeEnabled" label="允许登录时间">
-                                        <lay-time-picker v-model="timeRestrictions.loginStartTime" placeholder="开始时间" />
-                                        <span style="margin: 0 8px;">至</span>
-                                        <lay-time-picker v-model="timeRestrictions.loginEndTime" placeholder="结束时间" />
-                                    </lay-form-item>
-
-                                    <lay-form-item label="IP地址限制">
-                                        <lay-checkbox
-                                            v-model="timeRestrictions.ipRestrictionEnabled">启用IP地址限制</lay-checkbox>
-                                    </lay-form-item>
-                                    <lay-form-item v-if="timeRestrictions.ipRestrictionEnabled" label="允许的IP地址">
-                                        <lay-textarea v-model="timeRestrictions.allowedIPs"
-                                            placeholder="请输入允许的IP地址，多个IP用换行分隔" :rows="3" />
-                                    </lay-form-item>
-                                </lay-form>
-                            </div>
-                        </div>
-                    </lay-card>
-
-                    <lay-card v-else>
-                        <div class="empty-state">
-                            <lay-icon type="layui-icon-vercode" size="64" />
-                            <p>请选择一个权限组进行配置</p>
-                        </div>
-                    </lay-card>
-                </lay-col>
-            </lay-row>
-        </div>
-
-        <!-- 添加/编辑权限组弹窗 -->
-        <lay-layer v-model="showGroupModal" title="权限组信息" :area="['500px', '400px']">
-            <div class="group-modal-content">
-                <lay-form :model="groupForm" ref="groupFormRef" label-width="80px">
-                    <lay-form-item label="组名称" prop="name" required>
-                        <lay-input v-model="groupForm.name" placeholder="请输入权限组名称" />
-                    </lay-form-item>
-
-                    <lay-form-item label="描述" prop="description">
-                        <lay-textarea v-model="groupForm.description" placeholder="请输入权限组描述" :rows="3" />
-                    </lay-form-item>
-
-                    <lay-form-item label="状态">
-                        <lay-radio-group v-model="groupForm.status">
-                            <lay-radio value="active">启用</lay-radio>
-                            <lay-radio value="inactive">禁用</lay-radio>
-                        </lay-radio-group>
-                    </lay-form-item>
-                </lay-form>
-
-                <div class="modal-actions">
-                    <lay-button type="primary" @click="saveGroup">保存</lay-button>
-                    <lay-button @click="closeGroupModal">取消</lay-button>
+                    <div class="dropdown-container">
+                        <button type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
+                            @click="toggleColumnsDropdown">
+                            <lay-icon type="layui-icon-shrink-right" />
+                        </button>
+                        <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.account"
+                                        @change="updateVisibleColumns" /> 账号
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.name"
+                                        @change="updateVisibleColumns" /> 姓名
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.sex"
+                                        @change="updateVisibleColumns" /> 性别
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.roleName"
+                                        @change="updateVisibleColumns" /> 角色
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.deptName"
+                                        @change="updateVisibleColumns" /> 部门
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.discount"
+                                        @change="updateVisibleColumns" /> 最低折扣(%)
+                                </label>
+                            </li>
+                            <li role="menuitem">
+                                <label>
+                                    <input type="checkbox" v-model="columnVisibility.phone"
+                                        @change="updateVisibleColumns" /> 电话
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </lay-layer>
+
+                <!-- 销售权限配置列表表格 -->
+                <div class="table-container">
+                    <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
+                        @change="handleTableChange">
+                        <!-- 选择框列 -->
+                        <template #checkbox="{ row }">
+                            <div class="custom-checkbox" @click="toggleRowCheck(row)">
+                                <div class="checkbox-square" :class="{ checked: row.checked }">
+                                    <lay-icon v-if="row.checked" type="layui-icon-ok" />
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 性别列 -->
+                        <template #sex="{ row }">
+                            <span>{{ getSexName(row.sex) }}</span>
+                        </template>
+
+                        <!-- 角色列 -->
+                        <template #role="{ row }">
+                            <span class="role-text">{{ row.roleName }}</span>
+                        </template>
+
+                        <!-- 折扣列 -->
+                        <template #discount="{ row }">
+                            <span class="discount-text">{{ row.discount }}%</span>
+                        </template>
+                    </lay-table>
+                </div>
+            </lay-card>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
+import http from '@/utils/http';
+import Notify from '@/utils/notify';
 
-const selectedGroup = ref<any>(null);
-const showGroupModal = ref(false);
-const groupFormRef = ref();
+// 销售权限配置接口类型定义 - 匹配用户管理API数据结构
+interface SalesPermissionConfig {
+    checked?: boolean;              // 前端添加的选中状态
+    profession?: string;            // 职务(可选)
+    deptName: string;              // 部门名称
+    createtime: string;            // 创建时间
+    roleid: string;                // 角色ID
+    sex: number;                   // 性别(数字)
+    deptid: number;                // 部门ID
+    discount: number;              // 折扣权限
+    avatar: string;                // 头像
+    companyId: number;             // 公司ID
+    times: number;                 // 登录次数
+    phone: string;                 // 电话
+    sexName: number;               // 性别名称(数字)
+    name: string;                  // 姓名
+    roleName: string;              // 角色名称
+    statusName: string;            // 状态名称
+    id: number;                    // 用户ID
+    userRole: number;              // 用户角色
+    account: string;               // 账号
+    email: string;                 // 邮箱
+    status: number;                // 状态(数字)
+    birthday?: string;             // 生日(可选)
+}
 
-const groupForm = reactive({
-    id: '',
-    name: '',
-    description: '',
-    status: 'active'
+// 列显示控制
+const columnVisibility = reactive({
+    account: true,
+    name: true,
+    sex: true,
+    roleName: true,
+    deptName: true,
+    discount: true,
+    phone: true
 });
 
-const permissionGroups = ref([
-    {
-        id: 1,
-        name: '高级销售',
-        description: '具有完整销售功能权限',
-        memberCount: 5,
-        status: 'active'
-    },
-    {
-        id: 2,
-        name: '初级销售',
-        description: '基础销售功能权限',
-        memberCount: 12,
-        status: 'active'
-    },
-    {
-        id: 3,
-        name: '销售主管',
-        description: '销售管理和审批权限',
-        memberCount: 3,
-        status: 'active'
-    }
-]);
+const showColumnsDropdown = ref(false);
 
-const functionalPermissions = ref([
-    {
-        id: 'customer',
-        name: '客户管理',
-        enabled: true,
-        actions: ['read', 'create', 'update']
-    },
-    {
-        id: 'quote',
-        name: '报价管理',
-        enabled: true,
-        actions: ['read', 'create', 'update']
-    },
-    {
-        id: 'order',
-        name: '订单管理',
-        enabled: true,
-        actions: ['read', 'create']
-    },
-    {
-        id: 'project',
-        name: '项目管理',
-        enabled: false,
-        actions: []
-    }
-]);
+// 所有列配置
+const allColumns = [
+    { title: '', key: 'checkbox', width: '50px', customSlot: 'checkbox', type: 'custom' },
+    { title: '账号', key: 'account', width: '120px', type: 'text' },
+    { title: '姓名', key: 'name', width: '100px', type: 'text' },
+    { title: '性别', key: 'sex', width: '80px', customSlot: 'sex', type: 'custom' },
+    { title: '角色', key: 'roleName', width: '120px', customSlot: 'role', type: 'custom' },
+    { title: '部门', key: 'deptName', width: '120px', type: 'text' },
+    { title: '最低折扣(%)', key: 'discount', width: '120px', customSlot: 'discount', type: 'custom' },
+    { title: '电话', key: 'phone', width: '150px', type: 'text' }
+];
 
-const dataPermissions = reactive({
-    customerScope: 'own',
-    projectScope: 'team',
-    quoteScope: 'own',
-    financialData: ['revenue']
+// 计算可见列
+const visibleColumns = computed(() => {
+    return allColumns.filter(column => {
+        if (column.key === 'checkbox') return true;
+        return columnVisibility[column.key as keyof typeof columnVisibility];
+    });
 });
 
-const timeRestrictions = reactive({
-    loginTimeEnabled: false,
-    loginStartTime: '',
-    loginEndTime: '',
-    ipRestrictionEnabled: false,
-    allowedIPs: ''
+// 表格数据 - 初始化为空数组，数据从API获取
+const tableData = ref<SalesPermissionConfig[]>([]);
+
+// 分页配置
+const pagination = reactive({
+    current: 1,
+    limit: 10,
+    total: 0
 });
 
-const selectGroup = (group: any) => {
-    selectedGroup.value = group;
-    // 加载该组的权限配置
-    loadGroupPermissions(group.id);
-};
+// 获取销售权限配置列表
+const getSalesPermissionList = async () => {
+    try {
+        // 使用FormData格式发送表单数据，参考用户管理页面的实现
+        const formData = new FormData();
+        formData.append('order', 'desc');
+        formData.append('offset', ((pagination.current - 1) * pagination.limit).toString());
+        formData.append('limit', pagination.limit.toString());
 
-const loadGroupPermissions = (groupId: number) => {
-    // 模拟加载权限配置
-    console.log('加载权限组配置:', groupId);
-};
-
-const toggleFunctionalPermission = (permissionId: string, enabled: boolean) => {
-    const permission = functionalPermissions.value.find(p => p.id === permissionId);
-    if (permission) {
-        permission.enabled = enabled;
-        if (!enabled) {
-            permission.actions = [];
+        const response = await http.post('/mgr/userList', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        console.log(response);
+        // 处理返回的数据
+        if (response && Array.isArray(response)) {
+            tableData.value = response.map((item: SalesPermissionConfig) => ({
+                ...item,
+                checked: false
+            }));
+            pagination.total = response.length;
         }
+    } catch {
+        Notify.error({
+            title: '获取数据失败',
+            content: '无法获取销售权限配置数据，请稍后重试',
+            time: 3000
+        });
     }
 };
 
-const updateFunctionalActions = (permissionId: string, actions: string[]) => {
-    const permission = functionalPermissions.value.find(p => p.id === permissionId);
-    if (permission) {
-        permission.actions = actions;
+// 更新可见列
+const updateVisibleColumns = () => {
+    // 列显示状态更新时的处理逻辑
+};
+
+// 切换列下拉菜单
+const toggleColumnsDropdown = () => {
+    showColumnsDropdown.value = !showColumnsDropdown.value;
+};
+
+// 切换行复选框状态
+const toggleRowCheck = (row: SalesPermissionConfig) => {
+    row.checked = !row.checked;
+    console.log('选中行:', row);
+};
+
+// 表格变化处理
+const handleTableChange = (pageData: { current: number; limit: number }) => {
+    pagination.current = pageData.current;
+    pagination.limit = pageData.limit;
+    getSalesPermissionList();
+};
+
+// 刷新
+const handleRefresh = () => {
+    console.log('刷新数据');
+    getSalesPermissionList();
+};
+
+// 产品分配
+const handleProductAssign = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要分配产品的用户');
+        return;
     }
+    console.log('产品分配:', selectedRows);
+    // 这里可以打开产品分配弹窗
 };
 
-const showAddGroupModal = () => {
-    resetGroupForm();
-    showGroupModal.value = true;
+// 品牌分配
+const handleBrandAssign = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要分配品牌的用户');
+        return;
+    }
+    console.log('品牌分配:', selectedRows);
+    // 这里可以打开品牌分配弹窗
 };
 
-const resetGroupForm = () => {
-    Object.keys(groupForm).forEach(key => {
-        if (key === 'status') {
-            groupForm[key as keyof typeof groupForm] = 'active';
-        } else {
-            groupForm[key as keyof typeof groupForm] = '';
-        }
-    });
+// 地区分配
+const handleRegionAssign = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要分配地区的用户');
+        return;
+    }
+    console.log('地区分配:', selectedRows);
+    // 这里可以打开地区分配弹窗
 };
 
-const closeGroupModal = () => {
-    showGroupModal.value = false;
-    resetGroupForm();
+// 客户分配
+const handleCustomerAssign = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要分配客户的用户');
+        return;
+    }
+    console.log('客户分配:', selectedRows);
+    // 这里可以打开客户分配弹窗
 };
 
-const saveGroup = () => {
-    console.log('保存权限组:', groupForm);
-    closeGroupModal();
+// 打折权限
+const handleDiscountPermission = () => {
+    const selectedRows = tableData.value.filter(row => row.checked);
+    if (selectedRows.length === 0) {
+        console.log('请选择要设置打折权限的用户');
+        return;
+    }
+    console.log('打折权限设置:', selectedRows);
+    // 这里可以打开打折权限设置弹窗
 };
 
-const editGroup = (group: any) => {
-    Object.keys(groupForm).forEach(key => {
-        groupForm[key as keyof typeof groupForm] = group[key] || '';
-    });
-    showGroupModal.value = true;
+// 性别转换函数
+const getSexName = (sex: number) => {
+    return sex === 1 ? '男' : '女';
 };
 
-const deleteGroup = (group: any) => {
-    console.log('删除权限组:', group);
-};
-
-const savePermissions = () => {
-    console.log('保存权限配置:', {
-        groupId: selectedGroup.value?.id,
-        functionalPermissions: functionalPermissions.value,
-        dataPermissions: dataPermissions,
-        timeRestrictions: timeRestrictions
-    });
-};
+onMounted(() => {
+    getSalesPermissionList();
+});
 </script>
 
 <style scoped lang="scss">
+// 销售权限配置页面样式
 .sales-permission-config-page {
     padding: 24px;
+    min-height: 100vh;
 }
 
-.page-header {
-    margin-bottom: 32px;
+.content-area {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 0;
 
-    h1 {
-        margin: 0;
-        color: #333;
-        font-size: 28px;
-    }
+    :deep(.layui-table) {
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        overflow: hidden;
 
-    p {
-        margin: 8px 0 0 0;
-        color: #666;
-        font-size: 16px;
-    }
-}
-
-.toolbar {
-    margin-bottom: 16px;
-}
-
-.permission-groups {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.group-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-        border-color: #409eff;
-        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
-    }
-
-    &.active {
-        border-color: #409eff;
-        background: #f0f9ff;
-    }
-
-    .group-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-
-        .group-name {
-            font-weight: 600;
-            color: #333;
+        .layui-table-header {
+            background: #fafafa;
         }
 
-        .member-count {
+        .layui-table-body {
             font-size: 12px;
-            color: #999;
-            background: #f0f0f0;
-            padding: 2px 8px;
-            border-radius: 12px;
+
+            tr:nth-child(even) {
+                background-color: #fafafa;
+            }
+
+            tr:hover {
+                background-color: #f5f5f5;
+            }
         }
-    }
 
-    .group-description {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 12px;
-    }
+        th,
+        td {
+            border-color: #e8e8e8;
+            text-align: center;
+            padding: 8px 6px;
+        }
 
-    .group-actions {
-        display: flex;
-        gap: 8px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    &:hover .group-actions {
-        opacity: 1;
+        .layui-table-cell-content {
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 }
 
-.permission-config {
-    .config-header {
-        display: flex;
-        justify-content: space-between;
+// 工具栏样式
+.fixed-table-toolbar {
+    padding: 15px 0;
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 0;
+    background: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    .btnIcon,
+    .btn {
+        display: inline-flex;
         align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #e0e0e0;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #495057;
 
-        h3 {
-            margin: 0;
-            color: #333;
+        &:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
         }
-    }
-}
 
-.permission-section {
-    margin-bottom: 32px;
-
-    h4 {
-        margin: 0 0 16px 0;
-        color: #333;
-        font-size: 16px;
-    }
-}
-
-.permission-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-}
-
-.permission-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 16px;
-
-    .permission-header {
-        margin-bottom: 12px;
-
-        .lay-checkbox {
-            font-weight: 500;
+        .layui-icon {
+            font-size: 18px;
+            line-height: 1;
         }
     }
 
-    .permission-actions {
-        padding-left: 24px;
+    .invite-but {
+        position: relative;
 
-        .lay-checkbox {
-            margin-right: 16px;
+        &:hover::after {
+            content: attr(data-title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
             margin-bottom: 8px;
+            padding: 6px 10px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        &:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 2px;
+            border: 4px solid transparent;
+            border-top-color: #333;
+            z-index: 1001;
+        }
+    }
+
+    .dropdown-container {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        display: none;
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 12px;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+
+        &.show {
+            display: block;
+        }
+
+        li {
+            &:hover {
+                background-color: #f5f5f5;
+            }
+
+            label {
+                display: block;
+                padding: 8px 15px;
+                font-weight: normal;
+                line-height: 1.4;
+                color: #333;
+                white-space: nowrap;
+                cursor: pointer;
+                margin: 0;
+
+                input[type="checkbox"] {
+                    margin-right: 8px;
+                }
+            }
         }
     }
 }
 
-.data-permission-config {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
+// 表格容器居中样式
+.table-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    :deep(.layui-table) {
+        margin: 0 auto;
+    }
 }
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
+// 复选框样式
+.custom-checkbox {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkbox-square {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 
     .layui-icon {
-        margin-bottom: 16px;
-        color: #ddd;
+        font-size: 10px;
+        line-height: 1;
     }
 
-    p {
-        margin: 0;
-        font-size: 14px;
+    &.checked {
+        background-color: #5FB878;
+        border-color: #5FB878;
+        color: white;
     }
 }
 
-.group-modal-content {
-    padding: 20px;
+// 角色文本样式
+.role-text {
+    font-size: 12px;
+    color: #333;
 }
 
-.modal-actions {
-    text-align: right;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
-
-    .lay-btn+.lay-btn {
-        margin-left: 8px;
-    }
+// 折扣文本样式
+.discount-text {
+    font-size: 12px;
+    color: #f5222d;
+    font-weight: 500;
+    padding: 2px 6px;
+    background: #fff1f0;
+    border-radius: 4px;
+    border: 1px solid #ffa39e;
 }
 </style>

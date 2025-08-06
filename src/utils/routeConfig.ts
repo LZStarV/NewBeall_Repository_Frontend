@@ -1,11 +1,11 @@
 /**
  * 路由配置映射
- * 统一管理路由路径、标题、图标的映射关系
+ * 统一管理路由路径、标题的映射关系
  */
 export interface RouteConfig {
   path: string;
   title: string;
-  icon: string;
+  icon?: string; // 可选的图标字段，主要用于父级菜单在折叠状态下显示
   parentPath?: string; // 父级路由路径，用于面包屑导航
 }
 
@@ -19,19 +19,16 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'kuozhi-cloud': {
     path: '/cloud/kuozhi',
     title: '阔置云',
-    icon: 'layui-icon-cloud',
     parentPath: '/cloud',
   },
   'scheme-cloud': {
     path: '/cloud/scheme',
     title: '方案云',
-    icon: 'layui-icon-template',
     parentPath: '/cloud',
   },
   'company-cloud-disk': {
     path: '/cloud/company-disk',
     title: '公司云盘',
-    icon: 'layui-icon-file',
     parentPath: '/cloud',
   },
 
@@ -51,13 +48,11 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'cloud-demand-list': {
     path: '/demand/cloud-list',
     title: '云端需求列表',
-    icon: 'layui-icon-list',
     parentPath: '/demand',
   },
   'connected-demand': {
     path: '/demand/connected',
     title: '已对接需求',
-    icon: 'layui-icon-link',
     parentPath: '/demand',
   },
 
@@ -70,19 +65,16 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'company-homepage': {
     path: '/supply/company-homepage',
     title: '公司主页',
-    icon: 'layui-icon-website',
     parentPath: '/supply',
   },
   'customer-management': {
     path: '/supply/customer-management',
     title: '客户管理',
-    icon: 'layui-icon-friends',
     parentPath: '/supply',
   },
   'supplier-management': {
     path: '/supply/supplier-management',
     title: '供应商管理',
-    icon: 'layui-icon-user',
     parentPath: '/supply',
   },
 
@@ -95,31 +87,26 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'new-quote': {
     path: '/design/new-quote',
     title: '新建报价',
-    icon: 'layui-icon-add-1',
     parentPath: '/design',
   },
   'history-quote': {
     path: '/design/history-quote',
     title: '历史报价',
-    icon: 'layui-icon-table',
     parentPath: '/design',
   },
   'temp-quote': {
     path: '/design/temp-quote',
     title: '临时报价',
-    icon: 'layui-icon-release',
     parentPath: '/design',
   },
   'quote-template': {
     path: '/design/quote-template',
     title: '报价模块',
-    icon: 'layui-icon-template-1',
     parentPath: '/design',
   },
   'content-management': {
     path: '/design/content-management',
     title: '文案管理',
-    icon: 'layui-icon-edit',
     parentPath: '/design',
   },
 
@@ -132,19 +119,16 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'order-receive-list': {
     path: '/order/receive-list',
     title: '订单接收列表',
-    icon: 'layui-icon-download-circle',
     parentPath: '/order',
   },
   'order-send-list': {
     path: '/order/send-list',
     title: '订单发送列表',
-    icon: 'layui-icon-upload-circle',
     parentPath: '/order',
   },
   'inquiry-receive-list': {
     path: '/order/inquiry-receive-list',
     title: '询价接收列表',
-    icon: 'layui-icon-survey',
     parentPath: '/order',
   },
 
@@ -157,19 +141,16 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'order-discount-application': {
     path: '/quote/order-discount-application',
     title: '订单折率申请',
-    icon: 'layui-icon-rate',
     parentPath: '/quote',
   },
   'delete-application': {
     path: '/quote/delete-application',
     title: '删除申请',
-    icon: 'layui-icon-delete',
     parentPath: '/quote',
   },
   'approval-record': {
     path: '/quote/approval-record',
     title: '审批记录',
-    icon: 'layui-icon-log',
     parentPath: '/quote',
   },
 
@@ -189,37 +170,31 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
   'department-management': {
     path: '/system/department-management',
     title: '部门管理',
-    icon: 'layui-icon-group',
     parentPath: '/system',
   },
   'user-management': {
     path: '/system/user-management',
     title: '用户管理',
-    icon: 'layui-icon-username',
     parentPath: '/system',
   },
   'sales-permission-config': {
     path: '/system/sales-permission-config',
     title: '销售权限匹配置',
-    icon: 'layui-icon-vercode',
     parentPath: '/system',
   },
   'login-log': {
     path: '/system/login-log',
     title: '登录日志',
-    icon: 'layui-icon-log',
     parentPath: '/system',
   },
   'custom-dynamic': {
     path: '/system/custom-dynamic',
     title: '自定义动态',
-    icon: 'layui-icon-slider',
     parentPath: '/system',
   },
   'business-log': {
     path: '/system/business-log',
     title: '业务日志',
-    icon: 'layui-icon-chart',
     parentPath: '/system',
   },
 
