@@ -1,558 +1,582 @@
 <template>
-  <cover-layout>
-    <template #content>
-      <div class="login-page">
-        <section class="login-card">
-          <lay-button
-            size="sm"
-            class="back"
-            prefix-icon="layui-icon-left"
-            @click="router.back()"
-          >
-            返回
-          </lay-button>
-
-          <p class="welcome-text">用户注册</p>
-          <lay-tab v-model="activeTab" type="brief" class="register-tabs">
-            <lay-tab-item id="personal" title="个人注册"></lay-tab-item>
-            <lay-tab-item id="enterprise" title="企业注册"></lay-tab-item>
-          </lay-tab>
-
-          <!-- Step component -->
-          <lay-step v-model="currentStep" :steps="steps" class="step-component"></lay-step>
-
-          <lay-form
-            class="login-form"
-              :model="form"
-              :rules="rules"
-              ref="registerFormRef"
-              isLabelTooltip
-            >
-              <!-- 个人注册表单 -->
-              <div v-if="activeTab === 'personal'">
-                <!-- 步骤内容区域 -->
-                <div v-if="currentStep === 0">
-              <lay-form-item
-                label="用户名"
-                prop="username"
-                :label-width="labelWidth"
-                required
-                required-error-message="用户名不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.username"
-                  :class="{ 'input-focus': usernameFocus }"
-                  placeholder="请输入字母、数字、下划线、减号，以字母开头、3-20位"
-                  @focus="usernameFocus = true"
-                  @blur="usernameFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="密码"
-                prop="password"
-                :label-width="labelWidth"
-                required
-                required-error-message="密码不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.password"
-                  :class="{ 'input-focus': passwordFocus }"
-                  type="password"
-                  placeholder="6-20位英文（区分大小写）、数字、字符的组合"
-                  @focus="passwordFocus = true"
-                  @blur="passwordFocus = false"
-                />
-                <div class="password-strength">
-                  安全程度：
-                  <span
-                    :class="['strength-indicator', getStrengthClass(0)]"
-                  ></span>
-                  <span
-                    :class="['strength-indicator', getStrengthClass(1)]"
-                  ></span>
-                  <span
-                    :class="['strength-indicator', getStrengthClass(2)]"
-                  ></span>
-                </div>
-              <!-- 注册成功步骤 -->
-              <div v-else-if="currentStep === 1 && activeTab === 'personal'">
-                <lay-result status="success" title="注册成功">
-                  <template #description>
-                    <p>恭喜您完成注册，请点击下方按钮返回登录页面</p>
-                  </template>
-                  <template #extra>
-                    <lay-button type="primary" @click="goToLogin">返回登录页</lay-button>
-                  </template>
-                </lay-result>
-              </div>
-              <div v-else-if="currentStep === 2 && activeTab === 'enterprise'">
-                <lay-result status="success" title="注册成功">
-                  <template #description>
-                    <p>恭喜您完成注册，请点击下方按钮返回登录页面</p>
-                  </template>
-                  <template #extra>
-                    <lay-button type="primary" @click="goToLogin">返回登录页</lay-button>
-                  </template>
-                </lay-result>
-              </div>
-              </lay-form-item>
-
-              <lay-form-item
-                label="确认密码"
-                prop="confirmPassword"
-                :label-width="labelWidth"
-                required
-                required-error-message="请再输入一遍上面的密码"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.confirmPassword"
-                  :class="{ 'input-focus': confirmPasswordFocus }"
-                  type="password"
-                  placeholder="请再输入一遍上面的密码"
-                  @focus="confirmPasswordFocus = true"
-                  @blur="confirmPasswordFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="真实姓名"
-                prop="realName"
-                :label-width="labelWidth"
-                required
-                required-error-message="真实姓名不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.realName"
-                  :class="{ 'input-focus': realNameFocus }"
-                  placeholder="2-10位，中文真实姓名"
-                  @focus="realNameFocus = true"
-                  @blur="realNameFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="性别"
-                prop="gender"
-                :label-width="labelWidth"
-                required
-                required-error-message="请选择性别"
-                class="form-group"
-              >
-                <div class="gender-options">
-                  <lay-radio v-model="form.gender" name="gender" value="male"
-                    >男</lay-radio
-                  >
-                  <lay-radio v-model="form.gender" name="gender" value="female"
-                    >女</lay-radio
-                  >
-                </div>
-              </lay-form-item>
-
-              <lay-form-item
-                label="手机号"
-                prop="phone"
-                :label-width="labelWidth"
-                required
-                required-error-message="手机号不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.phone"
-                  :class="{ 'input-focus': phoneFocus }"
-                  placeholder="请填写11位有效的手机号码"
-                  @focus="phoneFocus = true"
-                  @blur="phoneFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="所在地区"
-                prop="province"
-                :label-width="labelWidth"
-                required
-                required-error-message="请选择所在地区"
-                class="form-group"
-              >
-                <div class="col-xs-9 ShrinkInside">
-                  <div class="col-xs-3">
-                    <lay-select v-model="form.province" placeholder="请选择省" @change="handleProvinceChange">
-                      <lay-option v-for="province in provinces" :value="province.code" :label="province.name"></lay-option>
-                    </lay-select>
-                  </div>
-                  <div class="col-xs-3">
-                    <lay-select v-model="form.city" placeholder="请选择市" @change="handleCityChange">
-                      <lay-option v-for="city in cities" :value="city.code" :label="city.name"></lay-option>
-                    </lay-select>
-                  </div>
-                  <div class="col-xs-3">
-                    <lay-select v-model="form.district" placeholder="请选择区">
-                      <lay-option v-for="district in districts" :value="district.code" :label="district.name"></lay-option>
-                    </lay-select>
-                  </div>
-                </div>
-                      <div class="item col-xs-12">
-                        <span class="intelligent-label f-fl">法人代表：</span>
-                        <div class="f-fl item-ifo">
-                          <lay-input
-                            v-model="form.legalPerson"
-                            placeholder="请输入法人代表姓名"
-                          />
-                        </div>
-                      </div>
-              </lay-form-item>
-
-              <lay-form-item
-                label="验证码"
-                prop="captcha"
-                :label-width="labelWidth"
-                required
-                required-error-message="验证码不能为空"
-                class="form-group"
-              >
-                <div class="captcha">
-                  <lay-input
-                    v-model="form.captcha"
-                    :class="{ 'input-focus': captchaFocus }"
-                    placeholder="请查收手机短信，并填写短信中的验证码"
-                    @focus="captchaFocus = true"
-                    @blur="captchaFocus = false"
-                  />
-                  <lay-button
-                    type="normal"
-                    class="captcha-button"
-                    @click="sendCaptcha"
-                    :disabled="isCaptchaDisabled"
-                  >
-                    {{ captchaButtonText }}
-                  </lay-button>
-                </div>
-                <p class="captcha-tip">此验证码15分钟内有效</p>
-              </lay-form-item>
-
-              <lay-form-item
-                label="邀请码"
-                prop="invitationCode"
-                :label-width="labelWidth"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.invitationCode"
-                  :class="{ 'input-focus': invitationCodeFocus }"
-                  placeholder="选填"
-                  @focus="invitationCodeFocus = true"
-                  @blur="invitationCodeFocus = false"
-                />
-              </lay-form-item>
-
-              <div class="agreement">
-                <lay-checkbox
-                  v-model="form.agreed"
-                  skin="primary"
-                  name="agreed"
-                  required
-                  class="checkbox"
-                >
-                  我已阅读并同意<a
-                    href="https://newbeall.com/serviceAgreement"
-                    class="agreement-link"
-                    >服务协议</a
-                  >和<a
-                    href="https://newbeall.com/privacyPolicy"
-                    class="agreement-link"
-                    >隐私协议</a
-                  >
-                </lay-checkbox>
-              </div>
-
-              <lay-form-item style="text-align: center">
-                  <lay-button
-                    type="default"
-                    @click="prevStep"
-                    class="prev-btn"
-                  >
-                    上一步
-                  </lay-button>
-                  <lay-button
-                    class="submit-btn"
-                    type="primary"
-                    @click="handleSubmit"
-                  >
-                    下一步
-                  </lay-button>
-                </lay-form-item>
-              </div>
-              <!-- 注册成功步骤 -->
-              <div v-else-if="currentStep === 1">
-                <lay-result status="success" title="注册成功">
-                  <template #description>
-                    <p>恭喜您完成注册，请点击下方按钮返回登录页面</p>
-                  </template>
-                  <template #extra>
-                    <lay-button type="primary" @click="goToLogin">返回登录页</lay-button>
-                  </template>
-                </lay-result>
-              </div>
-
-            <!-- 企业注册表单 -->
-              <div v-if="activeTab === 'enterprise'">
-                <!-- 步骤内容区域 -->
-                <div v-if="currentStep === 0">
-              <lay-form-item
-                label="企业名称"
-                prop="enterpriseName"
-                :label-width="labelWidth"
-                required
-                required-error-message="企业名称不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.enterpriseName"
-                  :class="{ 'input-focus': enterpriseNameFocus }"
-                  placeholder="请输入企业名称"
-                  @focus="enterpriseNameFocus = true"
-                  @blur="enterpriseNameFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="用户名"
-                prop="username"
-                :label-width="labelWidth"
-                required
-                required-error-message="用户名不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.username"
-                  :class="{ 'input-focus': usernameFocus }"
-                  placeholder="请输入字母、数字、下划线、减号，以字母开头、3-20位"
-                  @focus="usernameFocus = true"
-                  @blur="usernameFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="密码"
-                prop="password"
-                :label-width="labelWidth"
-                required
-                required-error-message="密码不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.password"
-                  :class="{ 'input-focus': passwordFocus }"
-                  type="password"
-                  placeholder="6-20位英文（区分大小写）、数字、字符的组合"
-                  @focus="passwordFocus = true"
-                  @blur="passwordFocus = false"
-                />
-                <div class="password-strength">
-                  安全程度：
-                  <span
-                    :class="['strength-indicator', getStrengthClass(0)]"
-                  ></span>
-                  <span
-                    :class="['strength-indicator', getStrengthClass(1)]"
-                  ></span>
-                  <span
-                    :class="['strength-indicator', getStrengthClass(2)]"
-                  ></span>
-                </div>
-              </lay-form-item>
-
-              <lay-form-item
-                label="确认密码"
-                prop="confirmPassword"
-                :label-width="labelWidth"
-                required
-                required-error-message="请再输入一遍上面的密码"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.confirmPassword"
-                  :class="{ 'input-focus': confirmPasswordFocus }"
-                  type="password"
-                  placeholder="请再输入一遍上面的密码"
-                  @focus="confirmPasswordFocus = true"
-                  @blur="confirmPasswordFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="联系人姓名"
-                prop="contactName"
-                :label-width="labelWidth"
-                required
-                required-error-message="联系人姓名不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.contactName"
-                  :class="{ 'input-focus': contactNameFocus }"
-                  placeholder="请输入联系人姓名"
-                  @focus="contactNameFocus = true"
-                  @blur="contactNameFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="联系电话"
-                prop="contactPhone"
-                :label-width="labelWidth"
-                required
-                required-error-message="联系电话不能为空"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.contactPhone"
-                  :class="{ 'input-focus': contactPhoneFocus }"
-                  placeholder="请填写11位有效的手机号码"
-                  @focus="contactPhoneFocus = true"
-                  @blur="contactPhoneFocus = false"
-                />
-              </lay-form-item>
-
-              <lay-form-item
-                label="验证码"
-                prop="captcha"
-                :label-width="labelWidth"
-                required
-                required-error-message="验证码不能为空"
-                class="form-group"
-              >
-                <div class="captcha">
-                  <lay-input
-                    v-model="form.captcha"
-                    :class="{ 'input-focus': captchaFocus }"
-                    placeholder="请查收手机短信，并填写短信中的验证码"
-                    @focus="captchaFocus = true"
-                    @blur="captchaFocus = false"
-                  />
-                  <lay-button
-                    type="normal"
-                    class="captcha-button"
-                    @click="sendCaptcha"
-                    :disabled="isCaptchaDisabled"
-                  >
-                    {{ captchaButtonText }}
-                  </lay-button>
-                </div>
-                <p class="captcha-tip">此验证码15分钟内有效</p>
-              </lay-form-item>
-
-              <lay-form-item
-                label="邀请码"
-                prop="invitationCode"
-                :label-width="labelWidth"
-                class="form-group"
-              >
-                <lay-input
-                  v-model="form.invitationCode"
-                  :class="{ 'input-focus': invitationCodeFocus }"
-                  placeholder="选填"
-                  @focus="invitationCodeFocus = true"
-                  @blur="invitationCodeFocus = false"
-                />
-              </lay-form-item>
-
-              <div class="agreement">
-                <lay-checkbox
-                  value="agreed"
-                  v-model="form.agreed"
-                  skin="primary"
-                  name="agreed"
-                  required
-                >
-                  我已阅读并同意<a
-                    href="https://newbeall.com/serviceAgreement"
-                    class="agreement-link"
-                    >服务协议</a
-                  >和<a
-                    href="https://newbeall.com/privacyPolicy"
-                    class="agreement-link"
-                    >隐私协议</a
-                  >
-                </lay-checkbox>
-              </div>
-
-              <lay-form-item style="text-align: center">
-                <lay-button
-                  class="submit-btn"
-                  type="primary"
-                  @click="handleSubmit"
-                >
-                  下一步
-                </lay-button>
-              </lay-form-item>
-            </div>
-          </lay-form>
-        </section>
+  <div class="register-container">
+    <div class="register-card">
+      <!-- 标题 -->
+      <div class="register-title">
+        <h2>用户注册</h2>
       </div>
-    </template>
-  </cover-layout>
+
+      <!-- 注册类型切换 -->
+      <lay-tab v-model="activeTab" class="register-tabs">
+        <lay-tab-item label="个人注册" name="personal"></lay-tab-item>
+        <lay-tab-item label="企业注册" name="enterprise"></lay-tab-item>
+      </lay-tab>
+
+      <!-- 个人注册表单 -->
+      <div v-if="activeTab === 'personal'" class="register-form">
+        <!-- 步骤指示器 -->
+        <div class="steps">
+          <div class="step-item" :class="{ active: currentStep === 0 }"></div>
+          <div class="step-line" :class="{ active: currentStep >= 1 }"></div>
+          <div class="step-item" :class="{ active: currentStep === 1 }"></div>
+        </div>
+        <div class="step-titles">
+          <div :class="{ active: currentStep === 0 }">
+            <span>1</span> 填写账户信息
+          </div>
+          <div :class="{ active: currentStep === 1 }">
+            <span>2</span> 注册成功
+          </div>
+        </div>
+
+        <!-- 步骤内容 -->
+        <div v-if="currentStep === 0">
+          <lay-form
+            ref="personalFormRef"
+            :model="personalForm"
+            :rules="personalRules"
+          >
+            <lay-form-item
+              label="用户名"
+              prop="username"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="personalForm.username"
+                placeholder="请输入字母、数字、下划线、减号，以字母开头、3-20位"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="密码"
+              prop="password"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="personalForm.password"
+                type="password"
+                placeholder="6-20位英文（区分大小写）、数字、字符的组合"
+              />
+              <div class="password-strength">
+                安全程度：
+                <span
+                  :class="['strength-indicator', getStrengthClass(0)]"
+                ></span>
+                <span
+                  :class="['strength-indicator', getStrengthClass(1)]"
+                ></span>
+                <span
+                  :class="['strength-indicator', getStrengthClass(2)]"
+                ></span>
+              </div>
+            </lay-form-item>
+
+            <lay-form-item
+              label="确认密码"
+              prop="confirmPassword"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="personalForm.confirmPassword"
+                type="password"
+                placeholder="请再输入一遍上面的密码"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="真实姓名"
+              prop="realName"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="personalForm.realName"
+                placeholder="2-10位，中文真实姓名"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="性别"
+              prop="gender"
+              :label-width="labelWidth"
+              required
+            >
+              <div class="gender-radio">
+                <lay-radio v-model="personalForm.gender" name="gender" value="1"
+                  >男</lay-radio
+                >
+                <lay-radio v-model="personalForm.gender" name="gender" value="2"
+                  >女</lay-radio
+                >
+              </div>
+            </lay-form-item>
+
+            <lay-form-item
+              label="手机号"
+              prop="phone"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="personalForm.phone"
+                placeholder="请填写11位有效的手机号码"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="验证码"
+              prop="captcha"
+              :label-width="labelWidth"
+              required
+            >
+              <div class="captcha-container">
+                <lay-input
+                  v-model="personalForm.captcha"
+                  placeholder="请查收手机短信，并填写短信中的验证码"
+                />
+                <lay-button
+                  :disabled="isCaptchaDisabled"
+                  @click="sendPersonalCaptcha"
+                  >{{ captchaButtonText }}</lay-button
+                >
+              </div>
+              <p class="captcha-tip">此验证码15分钟内有效</p>
+            </lay-form-item>
+
+            <lay-form-item
+              label="邀请码"
+              prop="invitationCode"
+              :label-width="labelWidth"
+            >
+              <lay-input
+                v-model="personalForm.invitationCode"
+                placeholder="选填"
+              />
+            </lay-form-item>
+
+            <div class="agreement">
+              <lay-checkbox v-model="personalForm.agreed" required
+                >我已阅读并同意<a
+                  href="https://newbeall.com/serviceAgreement"
+                  class="agreement-link"
+                  >服务协议</a
+                >和<a
+                  href="https://newbeall.com/privacyPolicy"
+                  class="agreement-link"
+                  >隐私协议</a
+                ></lay-checkbox
+              >
+            </div>
+
+            <lay-form-item style="text-align: center">
+              <lay-button type="primary" @click="handlePersonalSubmit"
+                >下一步</lay-button
+              >
+            </lay-form-item>
+          </lay-form>
+        </div>
+
+        <!-- 注册成功页面 -->
+        <div v-else-if="currentStep === 1">
+          <lay-result status="success" title="注册成功">
+            <template #description>
+              <p>恭喜您完成注册，请点击下方按钮返回登录页面</p>
+            </template>
+            <template #extra>
+              <lay-button type="primary" @click="goToLogin"
+                >返回登录页</lay-button
+              >
+            </template>
+          </lay-result>
+        </div>
+      </div>
+
+      <!-- 企业注册表单 -->
+      <div v-else-if="activeTab === 'enterprise'" class="register-form">
+        <!-- 步骤指示器 -->
+        <div class="steps">
+          <div class="step-item" :class="{ active: currentStep === 0 }"></div>
+          <div class="step-line" :class="{ active: currentStep >= 1 }"></div>
+          <div class="step-item" :class="{ active: currentStep === 1 }"></div>
+          <div class="step-line" :class="{ active: currentStep >= 2 }"></div>
+          <div class="step-item" :class="{ active: currentStep === 2 }"></div>
+        </div>
+        <div class="step-titles">
+          <div :class="{ active: currentStep === 0 }">
+            <span>1</span> 填写账户信息
+          </div>
+          <div :class="{ active: currentStep === 1 }">
+            <span>2</span> 填写公司信息
+          </div>
+          <div :class="{ active: currentStep === 2 }">
+            <span>3</span> 注册成功
+          </div>
+        </div>
+
+        <!-- 步骤内容 -->
+        <div v-if="currentStep === 0">
+          <lay-form
+            ref="enterpriseFormRef"
+            :model="enterpriseForm"
+            :rules="enterpriseRules"
+          >
+            <lay-form-item
+              label="企业名称"
+              prop="enterpriseName"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.enterpriseName"
+                placeholder="请输入企业名称"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="用户名"
+              prop="username"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.username"
+                placeholder="请输入字母、数字、下划线、减号，以字母开头、3-20位"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="密码"
+              prop="password"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.password"
+                type="password"
+                placeholder="6-20位英文（区分大小写）、数字、字符的组合"
+              />
+              <div class="password-strength">
+                安全程度：
+                <span
+                  :class="['strength-indicator', getStrengthClass(0)]"
+                ></span>
+                <span
+                  :class="['strength-indicator', getStrengthClass(1)]"
+                ></span>
+                <span
+                  :class="['strength-indicator', getStrengthClass(2)]"
+                ></span>
+              </div>
+            </lay-form-item>
+
+            <lay-form-item
+              label="确认密码"
+              prop="confirmPassword"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.confirmPassword"
+                type="password"
+                placeholder="请再输入一遍上面的密码"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="联系人姓名"
+              prop="contactName"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.contactName"
+                placeholder="请输入联系人姓名"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="联系电话"
+              prop="contactPhone"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.contactPhone"
+                placeholder="请填写11位有效的手机号码"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="验证码"
+              prop="captcha"
+              :label-width="labelWidth"
+              required
+            >
+              <div class="captcha-container">
+                <lay-input
+                  v-model="enterpriseForm.captcha"
+                  placeholder="请查收手机短信，并填写短信中的验证码"
+                />
+                <lay-button
+                  :disabled="isCaptchaDisabled"
+                  @click="sendEnterpriseCaptcha"
+                  >{{ captchaButtonText }}</lay-button
+                >
+              </div>
+              <p class="captcha-tip">此验证码15分钟内有效</p>
+            </lay-form-item>
+
+            <lay-form-item
+              label="邀请码"
+              prop="invitationCode"
+              :label-width="labelWidth"
+            >
+              <lay-input
+                v-model="enterpriseForm.invitationCode"
+                placeholder="选填"
+              />
+            </lay-form-item>
+
+            <div class="agreement">
+              <lay-checkbox v-model="enterpriseForm.agreed" required
+                >我已阅读并同意<a
+                  href="https://newbeall.com/serviceAgreement"
+                  class="agreement-link"
+                  >服务协议</a
+                >和<a
+                  href="https://newbeall.com/privacyPolicy"
+                  class="agreement-link"
+                  >隐私协议</a
+                ></lay-checkbox
+              >
+            </div>
+
+            <lay-form-item style="text-align: center">
+              <lay-button type="primary" @click="handleEnterpriseSubmit"
+                >下一步</lay-button
+              >
+            </lay-form-item>
+          </lay-form>
+        </div>
+
+        <!-- 公司信息填写页面 -->
+        <div v-else-if="currentStep === 1">
+          <lay-form
+            ref="companyInfoFormRef"
+            :model="enterpriseForm"
+            :rules="companyInfoRules"
+          >
+            <lay-form-item
+              label="公司简称"
+              prop="companyAbbreviation"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.companyAbbreviation"
+                placeholder="请输入公司简称"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="公司角色"
+              prop="role"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-radio v-model="enterpriseForm.role" name="role" value="gy"
+                >产品供应商</lay-radio
+              >
+              <lay-radio v-model="enterpriseForm.role" name="role" value="cg"
+                >工程集成商</lay-radio
+              >
+              <p class="role-tip">一个公司可以注册两个不同的角色账号哦！</p>
+            </lay-form-item>
+
+            <lay-form-item
+              label="所在地区"
+              prop="province"
+              :label-width="labelWidth"
+              required
+            >
+              <div class="region-selector">
+                <lay-select
+                  v-model="enterpriseForm.province"
+                  placeholder="请选择省"
+                  @change="handleProvinceChange"
+                >
+                  <lay-option
+                    v-for="province in provinces"
+                    :value="province.code"
+                    :label="province.name"
+                    :key="province.code"
+                  />
+                </lay-select>
+                <lay-select
+                  v-model="enterpriseForm.city"
+                  placeholder="请选择市"
+                  @change="handleCityChange"
+                >
+                  <lay-option
+                    v-for="city in cities"
+                    :value="city.code"
+                    :label="city.name"
+                    :key="city.code"
+                  />
+                </lay-select>
+                <lay-select
+                  v-model="enterpriseForm.district"
+                  placeholder="请选择区"
+                >
+                  <lay-option
+                    v-for="district in districts"
+                    :value="district.code"
+                    :label="district.name"
+                    :key="district.code"
+                  />
+                </lay-select>
+              </div>
+            </lay-form-item>
+
+            <lay-form-item
+              label="详细地址"
+              prop="address"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.address"
+                placeholder="请输入详细地址"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="法人代表"
+              prop="legalPerson"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.legalPerson"
+                placeholder="请输入法人代表姓名"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="税务登记号"
+              prop="taxId"
+              :label-width="labelWidth"
+              required
+            >
+              <lay-input
+                v-model="enterpriseForm.taxId"
+                placeholder="请输入15位或者18位的英文字母和数字"
+              />
+            </lay-form-item>
+
+            <lay-form-item
+              label="营业执照"
+              prop="businessLicense"
+              :label-width="labelWidth"
+              required
+            >
+              <div class="upload-container">
+                <lay-input
+                  v-model="enterpriseForm.businessLicense"
+                  readonly
+                  placeholder="请上传jpg、png格式图片"
+                />
+                <lay-button @click="uploadBusinessLicense">上传</lay-button>
+              </div>
+            </lay-form-item>
+
+            <lay-form-item
+              label="施工资质"
+              prop="constructionQualification"
+              :label-width="labelWidth"
+            >
+              <div class="upload-container">
+                <lay-input
+                  v-model="enterpriseForm.constructionQualification"
+                  readonly
+                  placeholder="请上传jpg、png格式图片（选填）"
+                />
+                <lay-button @click="uploadConstructionQualification"
+                  >上传</lay-button
+                >
+              </div>
+            </lay-form-item>
+
+            <lay-form-item style="text-align: center">
+              <lay-button type="default" @click="prevStep">上一步</lay-button>
+              <lay-button type="primary" @click="handleCompanyInfoSubmit"
+                >下一步</lay-button
+              >
+            </lay-form-item>
+          </lay-form>
+        </div>
+
+        <!-- 注册成功页面 -->
+        <div v-else-if="currentStep === 2">
+          <lay-result status="success" title="注册成功">
+            <template #description>
+              <p>恭喜您完成注册，请点击下方按钮返回登录页面</p>
+            </template>
+            <template #extra>
+              <lay-button type="primary" @click="goToLogin"
+                >返回登录页</lay-button
+              >
+            </template>
+          </lay-result>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive } from 'vue';
+<script lang="ts" setup>
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import CoverLayout from '@/layouts/CoverLayout.vue';
-import notify from '@/utils/notify.ts';
+import { type LayFormInstance } from 'layui-vue';
 
+// 路由
 const router = useRouter();
-const registerFormRef = ref();
+
+// 响应式数据
 const activeTab = ref('personal');
 const currentStep = ref(0);
-const steps = computed(() => {
-  return activeTab.value === 'personal'
-    ? [
-        { title: '填写账户信息' },
-        { title: '注册成功' }
-      ]
-    : [
-        { title: '填写账户信息' },
-        { title: '填写公司信息' },
-        { title: '注册成功' }
-      ];
-});
-const labelWidth = ref(100);
+const labelWidth = '120px';
 
-// 验证码按钮状态
-const isCaptchaDisabled = ref(false);
-const captchaButtonText = ref('发送验证码');
-
-// 状态管理
-const usernameFocus = ref(false);
-const passwordFocus = ref(false);
-const confirmPasswordFocus = ref(false);
-const realNameFocus = ref(false);
-const phoneFocus = ref(false);
-const captchaFocus = ref(false);
-const invitationCodeFocus = ref(false);
-const enterpriseNameFocus = ref(false);
-const contactNameFocus = ref(false);
-const contactPhoneFocus = ref(false);
-
-// 表单数据
-const form = reactive({
-  // 公共字段
+// 个人注册表单
+const personalFormRef = ref<LayFormInstance>();
+const personalForm = reactive({
   username: '',
   password: '',
   confirmPassword: '',
+  realName: '',
+  gender: '1',
+  phone: '',
   captcha: '',
   invitationCode: '',
   agreed: false,
-  // 个人注册字段
-  realName: '',
-  gender: 'male',
-  phone: '',
-  // 企业注册字段
+});
+
+// 企业注册表单
+const enterpriseFormRef = ref<LayFormInstance>();
+const companyInfoFormRef = ref<LayFormInstance>();
+const enterpriseForm = reactive({
   enterpriseName: '',
+  username: '',
+  password: '',
+  confirmPassword: '',
+  contactName: '',
+  contactPhone: '',
+  captcha: '',
+  invitationCode: '',
+  agreed: false,
   companyAbbreviation: '',
   role: 'gy',
   province: '',
@@ -560,378 +584,498 @@ const form = reactive({
   district: '',
   address: '',
   legalPerson: '',
-  contactName: '',
-  contactPhone: '',
+  taxId: '',
+  businessLicense: '',
+  constructionQualification: '',
 });
 
-// 表单校验规则
-const rules = {
-  companyName: [
-    { required: true, message: '请输入公司名称', trigger: 'blur' },
-    { min: 3, message: '公司名称至少3个字符', trigger: 'blur' }
-  ],
-  companyAbbreviation: [
-    { required: true, message: '请输入公司简称', trigger: 'blur' },
-    { min: 2, max: 6, message: '公司简称2-6个字符', trigger: 'blur' }
-  ],
-  province: [
-    { required: true, message: '请选择省份', trigger: 'change' }
-  ],
-  city: [
-    { required: true, message: '请选择城市', trigger: 'change' }
-  ],
-  address: [
-    { required: true, message: '请输入详细地址', trigger: 'blur' },
-    { min: 3, message: '详细地址至少3个字符', trigger: 'blur' }
-  ],
-  legalPerson: [
-    { required: true, message: '请输入法人代表', trigger: 'blur' },
-    { pattern: /^[一-龥]{2,10}$/, message: '请输入2-10位中文', trigger: 'blur' }
-  ],
+// 验证码相关
+const isCaptchaDisabled = ref(false);
+const captchaButtonText = ref('发送验证码');
+const countdown = ref(60);
 
+// 个人注册验证规则
+const personalRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度3-20位', trigger: 'blur' },
     {
-      pattern: /^[a-zA-Z][a-zA-Z0-9_-]{2,19}$/,
-      message: '请输入字母、数字、下划线、减号，以字母开头、3-20位',
+      pattern: /^[a-zA-Z][a-zA-Z0-9_-]*$/,
+      message: '只能输入字母、数字、下划线、减号，且以字母开头',
       trigger: 'blur',
     },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度在6到20个字符之间', trigger: 'blur' },
+    { required: true, message: '密码不能为空', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度6-20位', trigger: 'blur' },
     {
-      pattern:
-        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*()_+`\-=\[\]{};':",.\/?])/,
-      message: '6-20位英文（区分大小写）、数字、字符的组合',
+      pattern: /^(?=.*[A-Za-z])(?=.*\d).{6,20}$/,
+      message: '密码至少包含字母和数字',
       trigger: 'blur',
     },
   ],
   confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: '请再输入一遍密码', trigger: 'blur' },
     {
-      validator: (value: string) => value === form.password,
-      message: '两次输入的密码不一致',
+      validator: (rule, value) => value === personalForm.password,
+      message: '两次密码输入不一致',
       trigger: 'blur',
     },
   ],
   realName: [
-    { required: true, message: '请输入真实姓名', trigger: 'blur' },
-    {
-      pattern: /^[\u4e00-\u9fa5]{2,10}$/,
-      message: '2-10位中文真实姓名',
-      trigger: 'blur',
-    },
+    { required: true, message: '真实姓名不能为空', trigger: 'blur' },
+    { min: 2, max: 10, message: '真实姓名长度2-10位', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5]+$/, message: '只能输入中文', trigger: 'blur' },
   ],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
   phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { required: true, message: '手机号不能为空', trigger: 'blur' },
     {
       pattern: /^1[3-9]\d{9}$/,
-      message: '请输入11位有效的手机号码',
+      message: '请输入有效的手机号码',
       trigger: 'blur',
     },
   ],
   captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
-    { len: 6, message: '请输入6位验证码', trigger: 'blur' },
+    { required: true, message: '验证码不能为空', trigger: 'blur' },
+    { pattern: /^\d{6}$/, message: '请输入6位数字验证码', trigger: 'blur' },
   ],
+  agreed: [{ required: true, message: '请先同意条款', trigger: 'change' }],
+};
+
+// 企业注册验证规则
+const enterpriseRules = {
   enterpriseName: [
-    { required: true, message: '请输入企业名称', trigger: 'blur' },
+    { required: true, message: '企业名称不能为空', trigger: 'blur' },
+    { min: 3, message: '企业名称至少3个字符', trigger: 'blur' },
   ],
-  contactName: [
-    { required: true, message: '请输入联系人姓名', trigger: 'blur' },
-  ],
-  contactPhone: [
-    { required: true, message: '请输入联系电话', trigger: 'blur' },
+  username: [
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度3-20位', trigger: 'blur' },
     {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '请输入11位有效的手机号码',
+      pattern: /^[a-zA-Z][a-zA-Z0-9_-]*$/,
+      message: '只能输入字母、数字、下划线、减号，且以字母开头',
       trigger: 'blur',
     },
   ],
-  agreed: [
+  password: [
+    { required: true, message: '密码不能为空', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度6-20位', trigger: 'blur' },
     {
-      required: true,
-      message: '请阅读并同意服务协议和隐私协议',
-      trigger: 'change',
+      pattern: /^(?=.*[A-Za-z])(?=.*\d).{6,20}$/,
+      message: '密码至少包含字母和数字',
+      trigger: 'blur',
     },
+  ],
+  confirmPassword: [
+    { required: true, message: '请再输入一遍密码', trigger: 'blur' },
+    {
+      validator: (rule, value) => value === enterpriseForm.password,
+      message: '两次密码输入不一致',
+      trigger: 'blur',
+    },
+  ],
+  contactName: [
+    { required: true, message: '联系人姓名不能为空', trigger: 'blur' },
+    { min: 2, max: 10, message: '联系人姓名长度2-10位', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5]+$/, message: '只能输入中文', trigger: 'blur' },
+  ],
+  contactPhone: [
+    { required: true, message: '联系电话不能为空', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入有效的手机号码',
+      trigger: 'blur',
+    },
+  ],
+  captcha: [
+    { required: true, message: '验证码不能为空', trigger: 'blur' },
+    { pattern: /^\d{6}$/, message: '请输入6位数字验证码', trigger: 'blur' },
+  ],
+  agreed: [{ required: true, message: '请先同意条款', trigger: 'change' }],
+};
+
+// 公司信息验证规则
+const companyInfoRules = {
+  companyAbbreviation: [
+    { required: true, message: '公司简称不能为空', trigger: 'blur' },
+    { min: 2, max: 6, message: '请输入2~6个字符', trigger: 'blur' },
+    {
+      pattern: /^[\u4e00-\u9fa5a-zA-Z0-9]+$/,
+      message: '无法输入特殊符号',
+      trigger: 'blur',
+    },
+  ],
+  role: [{ required: true, message: '请选择公司角色', trigger: 'change' }],
+  province: [{ required: true, message: '请选择省份', trigger: 'change' }],
+  city: [{ required: true, message: '请选择城市', trigger: 'change' }],
+  address: [
+    { required: true, message: '详细地址不能为空', trigger: 'blur' },
+    { min: 3, message: '最少输入3个字符', trigger: 'blur' },
+  ],
+  legalPerson: [
+    { required: true, message: '请输入法人代表', trigger: 'blur' },
+    { min: 2, max: 10, message: '法人代表长度2-10位', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5]+$/, message: '只能输入中文', trigger: 'blur' },
+  ],
+  taxId: [
+    { required: true, message: '税务登记号不能为空', trigger: 'blur' },
+    {
+      pattern: /^[A-Za-z0-9]{15,18}$/,
+      message: '请输入15位或者18位的英文字母和数字',
+      trigger: 'blur',
+    },
+  ],
+  businessLicense: [
+    { required: true, message: '请上传营业执照', trigger: 'blur' },
   ],
 };
 
-// 地区选择逻辑
-const provinces = ref([
+// 地区数据（模拟）
+const provinces = [
   { code: '110000', name: '北京' },
-  { code: '310000', name: '上海' },
-  { code: '440000', name: '广东' }
-  // 其他省份数据
-]);
+  { code: '120000', name: '天津' },
+  { code: '130000', name: '河北省' },
+  { code: '140000', name: '山西省' },
+  // 更多省份数据...
+];
+
 const cities = ref([]);
 const districts = ref([]);
 
+// 处理省份变化
 const handleProvinceChange = (code) => {
-  // 模拟城市数据加载
+  // 模拟根据省份加载城市数据
   cities.value = [
-    { code: code + '01', name: '市辖区' },
-    { code: code + '02', name: '其他区' }
+    { code: `${code}01`, name: '市辖区' },
+    {
+      code: `${code}02`,
+      name: `${provinces.find((p) => p.code === code)?.name}市`,
+    },
   ];
   districts.value = [];
 };
 
+// 处理城市变化
 const handleCityChange = (code) => {
-  // 模拟区县数据加载
+  // 模拟根据城市加载区县数据
   districts.value = [
-    { code: code + '01', name: '城区' },
-    { code: code + '02', name: '郊区' }
+    { code: `${code}01`, name: '区1' },
+    { code: `${code}02`, name: '区2' },
+    { code: `${code}03`, name: '区3' },
   ];
 };
 
-// 发送验证码
-const sendCaptcha = async () => {
-  const phone = activeTab.value === 'personal' ? form.phone : form.contactPhone;
-  if (!phone) {
-    notify.error('请先输入手机号码');
+// 发送个人注册验证码
+const sendPersonalCaptcha = () => {
+  if (!personalForm.phone) {
+    alert('请输入手机号码');
     return;
   }
 
-  if (!/^1[3-9]\d{9}$/.test(phone)) {
-    notify.error('请输入有效的手机号码');
+  // 模拟发送验证码
+  isCaptchaDisabled.value = true;
+  captchaButtonText.value = `${countdown.value}s后可重发`;
+
+  const timer = setInterval(() => {
+    countdown.value--;
+    captchaButtonText.value = `${countdown.value}s后可重发`;
+
+    if (countdown.value <= 0) {
+      clearInterval(timer);
+      isCaptchaDisabled.value = false;
+      captchaButtonText.value = '发送验证码';
+      countdown.value = 60;
+    }
+  }, 1000);
+};
+
+// 发送企业注册验证码
+const sendEnterpriseCaptcha = () => {
+  if (!enterpriseForm.contactPhone) {
+    alert('请输入手机号码');
     return;
   }
 
-  try {
-    isCaptchaDisabled.value = true;
-    captchaButtonText.value = '发送中...';
+  // 模拟发送验证码
+  isCaptchaDisabled.value = true;
+  captchaButtonText.value = `${countdown.value}s后可重发`;
 
-    // 模拟API调用，实际项目中替换为真实接口
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  const timer = setInterval(() => {
+    countdown.value--;
+    captchaButtonText.value = `${countdown.value}s后可重发`;
 
-    notify.success('验证码已发送，请注意查收');
-
-    // 60秒倒计时
-    let countdown = 60;
-    const timer = setInterval(() => {
-      countdown--;
-      captchaButtonText.value = `${countdown}秒后重新发送`;
-      if (countdown <= 0) {
-        clearInterval(timer);
-        isCaptchaDisabled.value = false;
-        captchaButtonText.value = '发送验证码';
-      }
-    }, 1000);
-  } catch (error) {
-    notify.error('验证码发送失败，请稍后重试');
-    console.error(error);
-    isCaptchaDisabled.value = false;
-    captchaButtonText.value = '发送验证码';
-  }
+    if (countdown.value <= 0) {
+      clearInterval(timer);
+      isCaptchaDisabled.value = false;
+      captchaButtonText.value = '发送验证码';
+      countdown.value = 60;
+    }
+  }, 1000);
 };
 
 // 密码强度检测
-const getStrengthClass = (index: number) => {
-  const strength = form.password ? getPasswordStrength(form.password) : 0;
-  return strength > index ? 'strength-high' : 'strength-low';
-};
-
-// 计算密码强度
-const getPasswordStrength = (password: string) => {
+const getPasswordStrength = (password) => {
   let strength = 0;
-  if (password.length >= 8) strength++;
   if (/[A-Z]/.test(password)) strength++;
   if (/[a-z]/.test(password)) strength++;
   if (/\d/.test(password)) strength++;
-  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  if (/[^A-Za-z\d]/.test(password)) strength++;
   return Math.min(strength, 3);
 };
 
-// 表单提交
-const handleSubmit = async () => {
-  const isValid = await new Promise((resolve) => {
-    registerFormRef.value.validate((valid: boolean) => resolve(valid));
-  });
+// 获取密码强度样式
+const getStrengthClass = (index) => {
+  const password =
+    activeTab.value === 'personal'
+      ? personalForm.password
+      : enterpriseForm.password;
+  const strength = getPasswordStrength(password);
+  return index < strength ? 'strong' : 'weak';
+};
 
-  if (!isValid) return;
+// 处理个人注册提交
+const handlePersonalSubmit = async () => {
+  if (!personalFormRef.value) return;
 
   try {
-    // 根据当前步骤和注册类型执行不同验证
-    if ((activeTab.value === 'personal' && currentStep.value === 0) ||
-        (activeTab.value === 'enterprise' && currentStep.value === 0)) {
-      // 验证账户信息
-      const isValid = await registerFormRef.value.validateField(['username', 'password', 'confirmPassword', 'captcha']);
-      if (!isValid) return;
-    } else if (activeTab.value === 'enterprise' && currentStep.value === 1) {
-      // 验证企业信息
-      const isValid = await registerFormRef.value.validateField(['companyName', 'companyAbbreviation', 'province', 'city', 'address']);
-      if (!isValid) return;
-    }
-
-    // 模拟API调用，实际项目中替换为真实接口
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    currentStep.value++;
+    await personalFormRef.value.validate();
+    // 模拟提交成功，进入下一步
+    currentStep.value = 1;
   } catch (error) {
-    notify.error('注册失败，请稍后重试');
-    console.error(error);
+    // 验证失败
+    console.log('验证失败:', error);
   }
 };
 
-// 前往登录页
-const goToLogin = () => {
-  router.push('/login');
+// 处理企业注册提交
+const handleEnterpriseSubmit = async () => {
+  if (!enterpriseFormRef.value) return;
+
+  try {
+    await enterpriseFormRef.value.validate();
+    // 模拟提交成功，进入下一步
+    currentStep.value = 1;
+  } catch (error) {
+    // 验证失败
+    console.log('验证失败:', error);
+  }
 };
 
-// 下一步
-const nextStep = () => {
-  currentStep.value++;
+// 处理公司信息提交
+const handleCompanyInfoSubmit = async () => {
+  if (!companyInfoFormRef.value) return;
+
+  try {
+    await companyInfoFormRef.value.validate();
+    // 模拟提交成功，进入下一步
+    currentStep.value = 2;
+  } catch (error) {
+    // 验证失败
+    console.log('验证失败:', error);
+  }
 };
 
 // 上一步
 const prevStep = () => {
-  currentStep.value--;
+  if (currentStep.value > 0) {
+    currentStep.value--;
+  }
+};
+
+// 返回登录页
+const goToLogin = () => {
+  router.push('/login');
+};
+
+// 上传营业执照
+const uploadBusinessLicense = () => {
+  // 模拟文件上传
+  enterpriseForm.businessLicense = 'business_license.jpg';
+};
+
+// 上传施工资质
+const uploadConstructionQualification = () => {
+  // 模拟文件上传
+  enterpriseForm.constructionQualification = 'construction_qualification.jpg';
 };
 </script>
 
 <style lang="scss" scoped>
-.login-page {
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.register-title {
+  text-align: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.register-tabs {
+  margin: 20px;
+}
+
+.register-form {
+  padding: 0 20px 20px;
+}
+
+.steps {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  box-sizing: border-box;
-
-  .login-card {
-    width: 40rem;
-    background: rgba(255, 255, 255);
-    border-radius: $border-radius-large;
-    padding: 2rem 3rem;
-    box-shadow: $box-shadow-base;
-    backdrop-filter: blur(5px);
-    overflow: hidden;
-    position: relative;
-
-    .back {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-    }
-
-    .welcome-text {
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: $primary-color;
-      margin: 2rem 0;
-    }
-
-    .register-tabs {
-      margin-bottom: 1.5rem;
-    }
-
-    .login-form {
-      width: 100%;
-
-      .form-group {
-        :deep(.layui-input) {
-          padding: 0 0.5rem;
-          border: 1px solid #e2e2e2;
-          border-radius: $border-radius-base;
-          font-size: 0.8rem;
-          transition: all 0.3s ease;
-
-          &.input-focus,
-          &:focus {
-            border-color: $input-focus-border-color;
-            box-shadow: 0 0 0 2px $primary-color-light;
-            outline: none;
-          }
-        }
-
-        :deep(.layui-form-item-label) {
-          padding: 0.5rem 0;
-        }
-      }
-
-      .gender-options {
-        display: flex;
-        gap: 1rem;
-        padding-top: 0.3rem;
-      }
-
-      .captcha {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-
-        .captcha-button {
-          min-width: 100px;
-        }
-      }
-
-      .captcha-tip {
-        font-size: 0.7rem;
-        color: $text-secondary;
-        margin-top: 0.3rem;
-      }
-
-      .password-strength {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.3rem;
-        font-size: 0.7rem;
-
-        .strength-indicator {
-          display: inline-block;
-          width: 20px;
-          height: 6px;
-          border-radius: 3px;
-          background-color: #e5e5e5;
-
-          &.strength-high {
-            background-color: $primary-color;
-          }
-        }
-      }
-
-      .agreement {
-        margin: 1rem 0;
-        font-size: 0.8rem;
-        display: flex;
-        align-items: center;
-
-        .checkbox {
-          :deep(.layui-checkbox-label) {
-            height: auto;
-          }
-        }
-
-        .agreement-link {
-          color: $primary-color;
-          margin: 0 0.2rem;
-        }
-      }
-
-      .submit-btn {
-        width: 90%;
-        height: 2.5rem;
-        font-size: 1rem;
-      }
-    }
-  }
+  margin: 20px 0;
 }
 
-@media (max-width: $pad_layout_breakpoint) {
-  .login-card {
-    width: 90%;
-    padding: 1rem;
-  }
+.step-item {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #dcdcdc;
+  position: relative;
+  transition: all 0.3s;
+}
 
-  .welcome-text {
-    font-size: 1.2rem;
-  }
+.step-item.active {
+  background-color: #1890ff;
+}
 
-  .submit-btn {
-    width: 100%;
-  }
+.step-line {
+  flex: 1;
+  height: 2px;
+  background-color: #dcdcdc;
+  margin: 0 10px;
+  transition: all 0.3s;
+}
+
+.step-line.active {
+  background-color: #1890ff;
+}
+
+.step-titles {
+  display: flex;
+  justify-content: space-between;
+  margin: -10px 50px 20px;
+}
+
+.step-titles > div {
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.step-titles > div.active {
+  color: #1890ff;
+}
+
+.step-titles > div span {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #dcdcdc;
+  color: #fff;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.step-titles > div.active span {
+  background-color: #1890ff;
+}
+
+.gender-radio {
+  display: flex;
+  gap: 20px;
+}
+
+.password-strength {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.strength-indicator {
+  display: inline-block;
+  width: 60px;
+  height: 8px;
+  margin: 0 5px;
+  background-color: #dcdcdc;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.strength-indicator.strong {
+  background-color: #52c41a;
+}
+
+.captcha-container {
+  display: flex;
+  gap: 10px;
+}
+
+.captcha-container .lay-input {
+  flex: 1;
+}
+
+.captcha-tip {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #999;
+}
+
+.agreement {
+  margin: 20px 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+.agreement-link {
+  color: #1890ff;
+  text-decoration: underline;
+}
+
+.region-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.region-selector .lay-select {
+  flex: 1;
+}
+
+.upload-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.upload-container .lay-input {
+  flex: 1;
+}
+
+.role-tip {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #999;
+}
+
+.prev-btn {
+  margin-right: 10px;
 }
 </style>
