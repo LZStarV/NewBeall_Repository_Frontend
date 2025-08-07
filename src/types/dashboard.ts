@@ -29,3 +29,14 @@ export interface DashboardMessage {
   userList: number[]; // 当前在线用户
   messageUserReceiveList: UserReceiveListRes[]; // 获取公告内容
 }
+
+export interface MemberChatRes {
+  avatar: string;
+  content: string;
+  fromOid: string;
+  fromUid: number;
+  topicId: number;
+  topicTime: number;
+  topicType: number;
+  userName: string;
+}
