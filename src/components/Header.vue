@@ -83,10 +83,7 @@
         <!-- 用户头像和菜单 -->
         <lay-dropdown>
           <div class="user-info">
-            <lay-avatar
-              src="https://portrait.gitee.com/uploads/avatars/user/1611/4834751_Jmysy_1578975358.png"
-              size="sm"
-            />
+            <lay-avatar :src="defaultAvatar" radius size="sm" />
             <span class="username">管理员</span>
             <lay-icon type="layui-icon-down" />
           </div>
@@ -115,6 +112,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FeedbackPanel from '@/components/FeedbackPanel.vue';
+import defaultAvatar from '@/assets/image/default/defaultAvatar.png';
 
 const router = useRouter();
 
@@ -204,7 +202,7 @@ const logout = () => {
 .header {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-image: url('@/assets/image/default/background.png');
   display: flex;
   align-items: center;
   justify-content: space-between;
