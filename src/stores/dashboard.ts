@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { TempTotalRes, UserReceiveListRes } from '@/types/dashboard';
+import type { GetBlackboardDataRes } from '@/api/blackboard/blackboardApi.type';
 
 export const useDashboardStore = defineStore('dashboard', () => {
+  // 工作台api数据
+  const blackboardData = ref<GetBlackboardDataRes>();
+
   // 工作台 ws数据
 
   // 临时报价数据
@@ -37,6 +41,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
   // 折率审批数量
   const discountNum = ref<number>(0);
+
+  // 设置工作台api数据
+  const setBlackboardData = (data: GetBlackboardDataRes) => {
+    blackboardData.value = data;
+  };
 
   // 设置临时报价数据
   const setTempTotalData = (data: TempTotalRes[]) => {
@@ -133,7 +142,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
   };
 
   return {
-    // 数据
+    blackboardData,
+    // ws数据
     tempTotalData,
     onlineUserList,
     dynamicData,
@@ -146,7 +156,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     inventoryOrdersNum,
     discountNum,
 
-    // 设置方法
+    setBlackboardData,
+    // ws设置方法
     setTempTotalData,
     setOnlineUserList,
     setDynamicData,
