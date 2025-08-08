@@ -25,13 +25,9 @@ export function createMemberChatWebSocket(
     },
     onMessage: (event) => {
       console.log('💬收到工作台留言消息:', event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (onMessageReceived) {
-          onMessageReceived(data);
-        }
-      } catch (error) {
-        console.error('解析消息数据失败:', error);
+      const data = JSON.parse(event.data);
+      if (onMessageReceived) {
+        onMessageReceived(data);
       }
     },
     onClose: (event) => {

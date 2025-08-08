@@ -75,6 +75,7 @@ import type { WebSocketClient } from '@/utils/websocket';
 import { useDashboardStore } from '@/stores/dashboard';
 import { useChatStore } from '@/stores/chat';
 import { createDashBoardWebSocket } from '@/websocket/dashboard';
+import blackboardApi from '@/api/blackboard/blackboardApi';
 
 // ws
 let wsClient: WebSocketClient;
@@ -98,6 +99,10 @@ onMounted(async () => {
   // 获取用户信息
   await chatStore.setUserInfo();
   const userId = chatStore.userInfoData?.id;
+
+  // 获取工作台数据
+  const res = await blackboardApi.getBlackboardData();
+  dashboardStore.blackboardData = res.data || res;
 
   // 创建ws实例
   if (userId) {

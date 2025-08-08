@@ -23,7 +23,7 @@
 
       <!-- 用户列表 -->
       <div class="member-list">
-        <lay-checkbox-group v-model="selectedUsers" @change="handleGroupChange">
+        <lay-checkbox-group v-model="selectedUsers">
           <div
             v-for="user in blackboardData?.users"
             :key="user.id || user.phone"
@@ -54,60 +54,68 @@
     offset="r"
     @close="handleCloseChatDrawer"
   >
-    <div class="chat-content">
-      <div class="chat-messages">
-        <div
-          v-for="message in chatMessages"
-          :key="message.topicId"
-          class="message-item"
-        >
-          <div class="message-avatar">
-            <Avatar :url="message.avatar" :alt="message.userName" size="2rem" />
-          </div>
-          <div class="message-body">
-            <div class="message-header">
-              <span class="message-user">{{ message.userName }}</span>
-              <span class="message-time">{{
-                parseDateTime(message.topicTime)
-              }}</span>
-            </div>
-            <div class="message-content">{{ message.content }}</div>
-          </div>
+    <div class="chat-messages">
+      <div
+        v-for="message in chatMessages"
+        :key="message.topicId"
+        class="message-item"
+      >
+        <div class="message-avatar">
+          <Avatar :url="message.avatar" :alt="message.userName" size="2rem" />
         </div>
-      </div>
-
-      <div class="chat-input">
-        <lay-textarea
-          v-model="newMessage"
-          placeholder="请输入留言内容..."
-          :rows="3"
-          :maxlength="500"
-          show-count
-        />
-        <div class="input-actions">
-          <lay-button type="primary" size="sm" @click="sendMessage">
-            发送
-          </lay-button>
+        <div class="message-body">
+          <div class="message-header">
+            <span class="message-user">{{ message.userName }}</span>
+            <span class="message-time">{{
+              parseDateTime(message.topicTime)
+            }}</span>
+          </div>
+          <div class="message-content">{{ message.content }}</div>
         </div>
       </div>
     </div>
+    <template #footer>
+      <div class="chat-comment">
+        <div class="user-avatar">
+          <Avatar
+            :url="chatStore.userInfoData?.avatar"
+            :alt="chatStore.userInfoData?.name"
+            size="2rem"
+          />
+        </div>
+        <div class="chat-input">
+          <lay-textarea
+            v-model="newMessage.content"
+            :rows="1"
+            :maxlength="500"
+          />
+        </div>
+        <div class="input-actions">
+          <lay-button type="primary" size="sm" @click="sendMessage">
+            评论
+          </lay-button>
+        </div>
+      </div>
+    </template>
   </lay-layer>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import BaseCard from './BaseCard.vue';
 import Avatar from '@/components/Avatar.vue';
-import blackboardApi from '@/api/blackboard/blackboardApi';
-import type { GetBlackboardDataRes } from '@/api/blackboard/blackboardApi.type';
 import { useChatStore } from '@/stores/chat';
 import type { WebSocketClient } from '@/utils/websocket';
 import { createMemberChatWebSocket } from '@/websocket/memberChat';
 import type { MemberChatRes } from '@/types/dashboard';
 import { layer } from '@layui/layui-vue';
 import { useFormatDate } from '@/composables/useFormatDate';
+import topicApi from '@/api/topic/topicApi';
+import { useDashboardStore } from '@/stores/dashboard';
 
-const blackboardData = ref<GetBlackboardDataRes>();
+const dashboardStore = useDashboardStore();
+
+const blackboardData = computed(() => dashboardStore.blackboardData);
 const selectedUsers = ref<(string | number)[]>([]);
 const isSelectAll = ref(false);
 
@@ -117,15 +125,18 @@ const chatStore = useChatStore();
 const showChatDrawer = ref(false);
 const chatMessages = ref<MemberChatRes[]>([]);
 const currentChatUser = ref<string>('');
-const newMessage = ref('');
+const newMessage = ref({
+  content: '',
+  oid: 0 as number | string,
+  type: 2,
+  userids: [] as (number | string)[],
+});
+const userId = ref<string | number>();
+const receptionUserid = ref();
+userId.value = chatStore.userInfoData?.id;
 
 // 使用时间格式化组合函数
 const { parseDateTime } = useFormatDate();
-
-const getBlackboardData = async () => {
-  const res = await blackboardApi.getBlackboardData();
-  blackboardData.value = res.data || res;
-};
 
 // 监听选中用户变化，更新全选状态
 watch(
@@ -155,37 +166,56 @@ const handleSelectAll = (checked: boolean) => {
   }
 };
 
-// 处理组变化
-const handleGroupChange = (val: (string | number)[]) => {
-  console.log('组选择变化:', val);
-};
-
-// 留言
+// 点击留言
 const handleClickChat = () => {
   if (selectedUsers.value.length === 0) {
     layer.msg('请先选择要留言的用户', { icon: 2 });
     return;
   }
 
-  if (selectedUsers.value.length > 1) {
-    layer.msg('一次只能与一个用户聊天，请选择一个用户', { icon: 2 });
-    return;
+  // 获取选中用户的姓名列表
+  const selectedUserNames = selectedUsers.value.map((userId) => {
+    const user = blackboardData.value?.users?.find(
+      (user) => (user.id || user.phone) === userId,
+    );
+    return user?.name || '未知用户';
+  });
+
+  if (selectedUsers.value.length === 1) {
+    // 只留言一个用户时
+    // ws: /TopicServer/userId/receptionUserid/type
+    /* addTopic: {
+      content,
+      type,
+      oid: selectedUsers.value[0],
+      userids: null,
+    }*/
+    receptionUserid.value = selectedUsers.value[0];
+    // 接收留言用户id
+    newMessage.value.oid = selectedUsers.value[0];
+    newMessage.value.userids = []; // 单个用户时清空userids
+    currentChatUser.value = selectedUserNames[0];
+  } else {
+    // 多个用户时
+    // ws: /TopicServer/userId/0/type
+    /* addTopic: {
+      content,
+      type,
+      oid: 0,
+      userids: selectedUsers.value;
+    }*/
+    newMessage.value.oid = 0;
+    receptionUserid.value = 0;
+    newMessage.value.userids = selectedUsers.value;
+    // 多个用户时，标题显示所有用户名
+    currentChatUser.value = selectedUserNames.join('、');
   }
 
-  const userId = chatStore.userInfoData?.id;
-  const receptionUserid = selectedUsers.value[0];
-
-  // 获取选中用户的姓名
-  const selectedUser = blackboardData.value?.users?.find(
-    (user) => (user.id || user.phone) === receptionUserid,
-  );
-  currentChatUser.value = selectedUser?.name || '未知用户';
-
   // 创建ws实例
-  if (userId) {
+  if (userId.value) {
     wsClient = createMemberChatWebSocket(
-      userId,
-      Number(receptionUserid),
+      userId.value,
+      Number(receptionUserid.value),
       2,
       (data: unknown) => {
         // 处理接收到的消息
@@ -208,8 +238,8 @@ const handleCloseChatDrawer = () => {
   showChatDrawer.value = false;
   chatMessages.value = [];
   currentChatUser.value = '';
-  newMessage.value = '';
-
+  newMessage.value.content = '';
+  console.log('关闭');
   // 关闭WebSocket连接
   if (wsClient) {
     wsClient.disconnect();
@@ -217,30 +247,28 @@ const handleCloseChatDrawer = () => {
 };
 
 // 发送消息
-const sendMessage = () => {
-  if (!newMessage.value.trim()) {
+const sendMessage = async () => {
+  if (!newMessage.value?.content) {
     layer.msg('请输入消息内容', { icon: 2 });
     return;
   }
+  try {
+    // 构造API请求数据，确保类型正确
+    const apiData = {
+      content: newMessage.value.content,
+      oid: newMessage.value.oid,
+      type: newMessage.value.type,
+      userids: newMessage.value.userids.map((id) => Number(id)), // 统一转换为number类型
+    };
 
-  // TODO: 实现发送消息功能
-  // 这里需要根据具体的WebSocket协议发送消息
-  if (wsClient) {
-    const messageData = JSON.stringify({
-      content: newMessage.value.trim(),
-      type: 'message',
-    });
-
-    wsClient.send(messageData);
-
+    await topicApi.addTopic(apiData);
+    layer.msg('评论成功', { icon: 1 });
     // 清空输入框
-    newMessage.value = '';
+    newMessage.value.content = '';
+  } catch (error) {
+    layer.msg('评论失败, 请稍后重试。', { icon: 2 });
   }
 };
-
-onMounted(() => {
-  getBlackboardData();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -299,21 +327,9 @@ onMounted(() => {
 }
 
 // 聊天抽屉样式
-.chat-content {
-  height: 100%;
-  @include flex(column);
-  padding: 20px;
-}
-
 .chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  border: 1px solid #e8e8e8;
+  padding: 20px;
   border-radius: 8px;
-  padding: 15px;
-  background-color: #fafafa;
-
   .message-item {
     @include flex(row, flex-start, flex-start);
     margin-bottom: 15px;
@@ -332,17 +348,18 @@ onMounted(() => {
       min-width: 0;
 
       .message-header {
-        @include flex(row, space-between, center);
+        @include flex(row, flex-start, center);
         margin-bottom: 5px;
 
         .message-user {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 500;
           color: var(--global-primary-color);
+          margin-right: 8px;
         }
 
         .message-time {
-          font-size: 12px;
+          font-size: 10px;
           color: #999;
         }
       }
@@ -352,25 +369,20 @@ onMounted(() => {
         color: #333;
         line-height: 1.4;
         word-wrap: break-word;
-        background: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #e8e8e8;
+        padding: 8px 0px;
       }
     }
   }
 }
 
-.chat-input {
-  flex-shrink: 0;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  padding: 15px;
-  background: white;
-
-  .input-actions {
-    @include flex(row, flex-end, center);
-    margin-top: 10px;
+.chat-comment {
+  border-top: 1px solid #eaeaea;
+  @include flex(row, space-between, center);
+  padding: 20px;
+  gap: 10px;
+  .chat-input {
+    flex: 1;
+    flex-shrink: 0;
   }
 }
 </style>
