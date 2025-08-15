@@ -34,7 +34,10 @@
       <div class="close-btn" @click="showQRCode = false">×</div>
       <h3>微信扫一扫，添加微信客服</h3>
       <div class="qr-code-img">
-        <img src="@/assets/image/default/customer_service_QR.jpg" alt="微信客服二维码" />
+        <img
+          src="@/assets/image/default/customer_service_QR.jpg"
+          alt="微信客服二维码"
+        />
       </div>
     </div>
   </div>
@@ -42,11 +45,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import SvgIcon from '@/components/SvgIcon.vue';
 import type { ContactGroup, UserInfo } from '../Chat.type';
 import { getContactGroup } from '@/api/chat/chatApi';
 import { useChatStore } from '@/stores/chat';
-import Avatar from '@/components/Avatar.vue';
 
 const navItemsList = ref<ContactGroup[]>();
 

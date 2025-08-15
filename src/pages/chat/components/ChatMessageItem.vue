@@ -120,12 +120,10 @@
 </template>
 
 <script setup lang="ts">
-import Avatar from '@/components/Avatar.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
 import { computed, ref } from 'vue';
 import { getUnreadUserList } from '@/api/chat/chatApi';
 import type { UserInfo } from '@/pages/chat/Chat.type';
-import SvgIcon from '@/components/SvgIcon.vue';
 import {
   EMOJI_RESOURCE_CONFIG,
   emojiRegex,

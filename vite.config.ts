@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 import svgLoader from 'vite-svg-loader';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+import Components from 'unplugin-vue-components/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +14,14 @@ export default defineConfig({
     createSvgIconsPlugin({
       iconDirs: [path.resolve(process.cwd(), './src/assets/icons')],
       symbolId: 'icon-[dir]-[name]',
+    }),
+    // 自动引入src/components组件
+    Components({
+      // 指定组件位置，默认是src/components
+      dirs: ['src/components'],
+      extensions: ['vue'],
+      // 配置文件生成位置
+      dts: 'src/components.d.ts',
     }),
   ],
   test: {

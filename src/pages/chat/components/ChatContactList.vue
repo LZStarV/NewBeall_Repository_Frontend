@@ -129,7 +129,6 @@
 </template>
 
 <script setup lang="ts">
-import SvgIcon from '@/components/SvgIcon.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
 import { onMounted, ref, watch, nextTick, computed } from 'vue';
 import type { ChatInfo, ContactInfo, UserInfo } from '../Chat.type';
@@ -141,7 +140,6 @@ import {
   createGroup,
   getAdminInfo,
 } from '@/api/chat/chatApi';
-import Avatar from '@/components/Avatar.vue';
 import { useChatStore } from '@/stores/chat';
 
 const { formatDateTime, compareDateTime } = useFormatDate();

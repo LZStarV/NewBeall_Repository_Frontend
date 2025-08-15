@@ -208,9 +208,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch, computed, onUnmounted } from 'vue';
 import type { ChatInfo, ChatMessage, UserInfo } from '../Chat.type';
-import SvgIcon from '@/components/SvgIcon.vue';
 import ChatMessageItem from './ChatMessageItem.vue';
-import FeedbackPanel from '@/components/FeedbackPanel.vue';
 import {
   getMessages,
   sendMessage,
@@ -218,7 +216,6 @@ import {
   getNotJoinMember,
   joinGroup,
 } from '@/api/chat/chatApi';
-import Avatar from '@/components/Avatar.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
 import dayjs from 'dayjs';
 import {
