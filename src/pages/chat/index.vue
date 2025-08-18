@@ -39,7 +39,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use "sass:color";
+@use 'sass:color';
 
 .chat-container {
   display: flex;

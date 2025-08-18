@@ -1,7 +1,7 @@
-import { getMe } from '@/api/chat/chatApi';
-import type { ChatInfo, UserInfo } from '@/pages/chat/Chat.type';
+import { getMe, getTempWindow } from '@/api/chat/chatApi';
+import type { ChatInfo, ChatMessage, UserInfo } from '@/pages/chat/Chat.type';
 import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import notify from '@/utils/notify';
 
@@ -17,6 +17,19 @@ export const useChatStore = defineStore('chat', () => {
   const chatInfo = ref<ChatInfo | null>(null); // 聊天信息
 
   const isCompanyInfoShow = ref(false); // 是否显示公司信息面板
+
+  const currentTempChatList = ref<ChatInfo[]>(); // 当前临时聊天列表
+
+  const currentToKey = computed(() => {
+    return chatInfo.value?.toKey;
+  });
+
+  const unreadNumber = computed(() => {
+    return currentTempChatList.value?.reduce(
+      (acc, item) => acc + item.unreadCount,
+      0,
+    );
+  });
   // ========== Actions (操作方法) ==========
   // 设置侧边导航栏激活项
   const setActiveNavItem = (newActiveNavItem: string) => {
@@ -44,8 +57,37 @@ export const useChatStore = defineStore('chat', () => {
     }
   };
   // 设置公司信息面板是否显示
-  const setCompanyInfoVisiable = (val : boolean) => {
+  const setCompanyInfoVisiable = (val: boolean) => {
     isCompanyInfoShow.value = val;
+  };
+  // 设置消息读取状态
+  const setChatUnreadInfo = (unreadUserIds: number[]) => {
+    if (chatInfo.value) {
+      setChatInfo({
+        ...chatInfo.value,
+        unreadCount: unreadUserIds.length,
+      });
+    }
+  };
+  // 更新消息列表
+  const updateTempChatList = async (message: ChatInfo | null = null) => {
+    if (currentToKey.value && currentToKey.value == message?.toKey) {
+      // 将本条消息的未读数量设置为0
+      currentTempChatList.value = currentTempChatList.value?.map((item) => {
+        if (item.toKey === message?.toKey) {
+          return {
+            ...item,
+            unreadCount: 0,
+          };
+        }
+        return item;
+      });
+      return;
+    }
+    const res = await getTempWindow();
+    if (res.data instanceof Array) {
+      currentTempChatList.value = res.data;
+    }
   };
   // ========== 返回 State + Actions ==========
   return {
@@ -53,9 +95,14 @@ export const useChatStore = defineStore('chat', () => {
     activeNavItem,
     chatInfo,
     isCompanyInfoShow,
+    currentToKey,
+    currentTempChatList,
+    unreadNumber,
     setActiveNavItem,
     setChatInfo,
     setCompanyInfoVisiable,
     setUserInfo,
+    setChatUnreadInfo,
+    updateTempChatList,
   };
 });
