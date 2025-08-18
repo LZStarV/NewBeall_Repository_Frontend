@@ -402,7 +402,8 @@ onMounted(async () => {
 });
 
 const getMessageList = async () => {
-  const res = await getMessages(chatStore.chatInfo!.toKey);
+  if (!chatStore.currentToKey) return;
+  const res = await getMessages(chatStore.currentToKey);
   chatMessages.value = res.data.sort((a: ChatMessage, b: ChatMessage) => {
     return Number(a.sendTime) - Number(b.sendTime);
   });

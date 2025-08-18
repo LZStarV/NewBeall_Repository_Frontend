@@ -57,6 +57,11 @@
           <span>{{
             formatDateTime(isChatInfo(item) ? item.lastTime : item.times || '')
           }}</span>
+          <span
+            v-if="isChatInfo(item) && item.unreadCount"
+            class="unread-count"
+            >{{ item.unreadCount > 99 ? '99+' : item.unreadCount }}</span
+          >
         </div>
       </div>
     </div>
@@ -134,7 +139,6 @@ import { onMounted, ref, watch, nextTick, computed } from 'vue';
 import type { ChatInfo, ContactInfo, UserInfo } from '../Chat.type';
 import {
   getAnyMessageList,
-  getTempWindow,
   saveTempWindow,
   getCanCreateGroupUserList,
   createGroup,
@@ -213,6 +217,8 @@ const handleClickItem = async (chatInfo: ChatInfo | ContactInfo) => {
     // 传出点击item的chatInfo，供聊天框使用
     if (isChatInfo(chatInfo)) {
       chatStore.setChatInfo(chatInfo);
+      // 清空当前消息的未读状态
+      chatStore.updateTempChatList(chatInfo);
     }
     return;
   }
@@ -267,10 +273,15 @@ onMounted(async () => {
   userInfo.value = chatStore.userInfoData!;
 });
 
-const getContactList = async () => {
+const getContactList = async (navToTemp: boolean = true) => {
   let res: { data: ChatInfo[] | ContactInfo[] };
   if (contactUrl.value == 'temp') {
-    res = await getTempWindow();
+    // res = await getTempWindow();
+    if (!chatStore.currentTempChatList) {
+      await chatStore.updateTempChatList();
+    }
+    res = { data: chatStore.currentTempChatList! };
+    console.log('res', res);
   } else if (contactUrl.value.length >= 0) {
     res = await getAnyMessageList(contactUrl.value);
   } else {
@@ -298,7 +309,7 @@ const getContactList = async () => {
     }
 
     // 如果有 toKey，就选中
-    if (toKey.value.length > 0) {
+    if (navToTemp && toKey.value.length > 0) {
       const itemIndex = contactList.value.findIndex((item) => {
         if ('lastTime' in item) {
           // 是 ChatInfo
@@ -330,6 +341,14 @@ watch(contactUrl, () => {
   searchKeyword.value = '';
   getContactList();
 });
+
+// 当未读数量发生变化时，更新联系人列表
+watch(
+  () => chatStore.unreadNumber,
+  () => {
+    getContactList(false);
+  },
+);
 
 onMounted(() => getContactList());
 
@@ -509,6 +528,11 @@ const connectWithAdmin = async () => {
         span {
           color: white !important; // 强制覆盖原来的深色
         }
+
+        .unread-count {
+          background-color: white !important;
+          color: $primary-color !important;
+        }
       }
 
       &:hover {
@@ -550,6 +574,20 @@ const connectWithAdmin = async () => {
 
       .meta-right {
         width: 5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        .unread-count {
+          background-color: $primary-color;
+          color: white;
+          border-radius: 0.5rem;
+          height: 1rem;
+          padding: 0 0.35rem;
+          text-align: center;
+          user-select: none;
+        }
 
         span {
           display: block;

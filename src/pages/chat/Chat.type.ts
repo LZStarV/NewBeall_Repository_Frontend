@@ -44,12 +44,15 @@ export interface ChatWindow extends ChatInfo {
 // 聊天消息
 export interface ChatMessage {
   avatar?: string; // 头像
-  chatName: string;
+  chatName: string; // 窗口名称
   content: string; // 消息内容
+  described?: string; // 消息描述
   fromId: number; // 消息发送者id
   id?: number; // 消息id
+  isRefresh?: boolean;
   read?: string; // 已读取本条消息的用户id数组字符串
-  readStatus?: string;
+  prefix?: string; // 聊天类型(py为单聊，JG为群聊, OR为订单发送列表, BJ为历史报价单聊天，PRO为供应商聊天)
+  readStatus?: boolean; // 是否已读
   sendName?: string; // 本条消息者名字
   sendTime: string; // 本条消息发送时间戳
   toId: string; // 聊天室id，由toKey传入
