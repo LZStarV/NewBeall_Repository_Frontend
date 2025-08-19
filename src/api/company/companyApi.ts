@@ -1,4 +1,9 @@
-import type { CompanyData, CompanyDetailResponseData } from './companyApi.type';
+import { objectToFormData } from '@/utils/formData';
+import type {
+  BrowseListRes,
+  CompanyData,
+  CompanyDetailResponseData,
+} from './companyApi.type';
 import http from '@/utils/http';
 
 // 公司控制器
@@ -64,8 +69,11 @@ export default {
     });
   },
   // 修改我司信息
-  updateMyCompanyInfo(companyData: CompanyData) {
-    return http.post('/company/update', null, { params: companyData });
+  updateMyCompanyInfo(companyData: any) {
+    const formData = objectToFormData(companyData);
+    return http.post('/company/update', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
   // 更新公司业务信息
   updateCompanyBusiness(
@@ -123,6 +131,19 @@ export default {
 
   // 获取公司查看记录列表
   getBrowseList() {
-    return http.get('/companyBrowse/browseList');
+    return http.get<BrowseListRes>('/companyBrowse/browseList');
+  },
+
+  // 公司主页模块显示/隐藏
+  openModel(status: number, modelName: string) {
+    // 传递表单数据
+    const formData = new FormData();
+    formData.append('status', status.toString());
+    formData.append('modelName', modelName);
+    return http.post('/company/openModel', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };

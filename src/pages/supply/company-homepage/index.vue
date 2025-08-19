@@ -8,58 +8,92 @@
             <h4>企业信息管理</h4>
           </header>
 
-          <!-- 完善企业介绍提示 -->
-          <div class="intro-tip">
-            完善的企业介绍，有助于平台用户更好的认识您。
-          </div>
+          <div class="sidebar-content">
+            <div class="intro-tip">
+              完善的企业介绍，有助于平台用户更好的认识您。
+            </div>
+            <div class="intro-notice" @click="handleClickNotice">
+              请认真阅读并遵守《
+              <span style="color: red">公司信息填写须知</span>
+              》
+              <lay-icon type="layui-icon-question"></lay-icon>
+            </div>
 
-          <!-- 审核状态 -->
-          <div class="audit-status">
-            <div class="status-item pending">
-              <i class="layui-icon layui-icon-time"></i>
-              <span>等待审核</span>
-            </div>
-            <div class="status-item passed">
-              <i class="layui-icon layui-icon-ok"></i>
-              <span>审核通过</span>
-            </div>
-            <div class="status-item rejected">
-              <i class="layui-icon layui-icon-close"></i>
-              <span>审核不通过</span>
-            </div>
-          </div>
-
-          <div class="audit-notice">注意：审核通过的模块才能对外展示</div>
-
-          <!-- 信息完善度 -->
-          <div class="completion-rate">
-            <div class="rate-header">
-              <span>信息完善度</span>
-              <span class="percentage">67%</span>
-            </div>
-            <div class="layui-progress">
-              <div class="layui-progress-bar" lay-percent="67%"></div>
-            </div>
-            <div class="rate-tip">
-              <i class="layui-icon layui-icon-star"></i>
-              当信息完善达到100，壹新将赠予您50积分奖励
-            </div>
-          </div>
-
-          <!-- 导航菜单 -->
-          <div class="nav-menu">
-            <div
-              v-for="item in menuItems"
-              :key="item.key"
-              class="menu-item"
-              :class="{ active: activeMenu === item.key }"
-              @click="switchMenu(item.key)"
-            >
-              <i :class="item.icon"></i>
-              <span>{{ item.label }}</span>
-              <div class="layui-btn layui-btn-xs" :class="item.statusClass">
-                {{ item.statusText }}
+            <!-- 审核状态 -->
+            <div class="audit-status">
+              <div class="status-item pending">
+                <i class="layui-icon layui-icon-log"></i>
+                <span>等待审核</span>
               </div>
+              <div class="status-item passed">
+                <i class="layui-icon layui-icon-ok-circle"></i>
+                <span>审核通过</span>
+              </div>
+              <div class="status-item rejected">
+                <i class="layui-icon layui-icon-close-fill"></i>
+                <span>审核不通过</span>
+              </div>
+            </div>
+
+            <div class="audit-notice">注意：审核通过的模块才能对外展示</div>
+
+            <!-- 信息完善度 -->
+            <div class="completion-rate">
+              <div class="rate-header">
+                <span>信息完善度</span>
+              </div>
+              <div class="layui-progress">
+                <lay-progress
+                  :percent="companyDetails?.perfection || 0"
+                  size="big"
+                  theme="blue"
+                  :show-text="true"
+                ></lay-progress>
+              </div>
+              <div class="rate-tip">
+                <i class="layui-icon layui-icon-star"></i>
+                当信息完善达到100，壹新将赠予您50积分奖励
+              </div>
+            </div>
+
+            <!-- 导航菜单 -->
+            <div class="nav-menu">
+              <lay-form>
+                <div
+                  v-for="item in menuItems"
+                  :key="item.key"
+                  class="menu-item"
+                  :class="{ active: activeMenu === item.key }"
+                  @click="switchMenu(item.key)"
+                >
+                  <i :class="item.icon"></i>
+                  <span>{{ item.label }}</span>
+                  <i
+                    class="layui-icon"
+                    :class="[
+                      item.statusIcon,
+                      {
+                        'status-pending': item.statusIcon === 'layui-icon-log',
+                        'status-passed':
+                          item.statusIcon === 'layui-icon-ok-circle',
+                        'status-rejected':
+                          item.statusIcon === 'layui-icon-close-fill',
+                      },
+                    ]"
+                  ></i>
+                  <div class="switch">
+                    <lay-form-item mode="inline">
+                      <lay-switch
+                        v-model="item.isOpen"
+                        onswitch-text="公开"
+                        unswitch-text="隐藏"
+                        @change="handleSwitchChange(item)"
+                        @click.stop
+                      ></lay-switch>
+                    </lay-form-item>
+                  </div>
+                </div>
+              </lay-form>
             </div>
           </div>
         </section>
@@ -68,149 +102,12 @@
 
       <lay-col md="16" sm="16" xs="24">
         <section class="right-content">
-          <!-- 企业基础信息 -->
-          <div v-if="activeMenu === 'basic'" class="content-section">
-            <div class="section-header">
-              <h4>企业信息管理</h4>
-              <div class="view-count">
-                <i class="layui-icon layui-icon-survey"></i>
-                <span>122</span>
-              </div>
-            </div>
-
-            <div class="layui-form">
-              <div class="form-section">
-                <div class="layui-form-item">
-                  <label class="layui-form-label">注册角色</label>
-                  <div class="layui-input-block">
-                    <span class="form-value">工程集成商</span>
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">企业全称</label>
-                  <div class="layui-input-block">
-                    <span class="form-value">广州壹新网络科技有限公司</span>
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">企业简称</label>
-                  <div class="layui-input-block">
-                    <span class="form-value">广州壹新网络科技有限公司</span>
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">客户单位</label>
-                  <div class="layui-input-block">
-                    <input
-                      type="text"
-                      class="layui-input"
-                      placeholder="请输入客户单位"
-                    />
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">所在地区</label>
-                  <div class="layui-input-block">
-                    <div class="select-group">
-                      <select name="province" class="layui-select">
-                        <option value="">广东省</option>
-                      </select>
-                      <select name="city" class="layui-select">
-                        <option value="">广州市</option>
-                      </select>
-                      <select name="district" class="layui-select">
-                        <option value="">黄埔区</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 联系人信息 -->
-              <div class="contact-section">
-                <h5>联系人信息</h5>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">*姓名</label>
-                  <div class="layui-input-block">
-                    <input type="text" class="layui-input" value="广东省" />
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">*性别</label>
-                  <div class="layui-input-block">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      title="男"
-                      checked
-                    />
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      title="女"
-                    />
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">*电话</label>
-                  <div class="layui-input-block">
-                    <input
-                      type="text"
-                      class="layui-input"
-                      value="17728117013"
-                    />
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">*邮箱</label>
-                  <div class="layui-input-block">
-                    <input
-                      type="text"
-                      class="layui-input"
-                      value="17728117013"
-                    />
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
-                  <label class="layui-form-label">*职位</label>
-                  <div class="layui-input-block">
-                    <input type="text" class="layui-input" placeholder="职位" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="layui-form-item">
-                <div class="layui-input-block">
-                  <button type="submit" class="layui-btn">保存</button>
-                </div>
-              </div>
-            </div>
+          <div class="view-count">
+            <i class="layui-icon layui-icon-eye"></i>
+            <span>{{ companyDetails?.browseCount }}</span>
           </div>
-
-          <!-- 其他模块内容 -->
-          <div v-else class="content-section">
-            <div class="section-header">
-              <h4>{{ getCurrentMenuLabel() }}</h4>
-              <div class="view-count">
-                <i class="layui-icon layui-icon-survey"></i>
-                <span>122</span>
-              </div>
-            </div>
-            <div class="placeholder-content">
-              {{ getCurrentMenuLabel() }}模块内容待开发...
-            </div>
-          </div>
+           <!-- 动态组件渲染 -->
+          <component :is="currentComponent" :company-data="companyDetails" @data-updated="getMyCompanyDetails"/>
         </section>
       </lay-col>
     </lay-row>
@@ -218,74 +115,136 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import companyApi from '@/api/company/companyApi';
+import type { CompanyDetailResponseData } from '@/api/company/companyApi.type';
+import { layer } from '@layui/layui-vue';
+import { computed, onMounted, ref } from 'vue';
+import BasicInfo from './components/BasicInfo.vue';
+import RegisterInfo from './components/RegisterInfo.vue';
+import BusinessInfo from './components/BusinessInfo.vue';
+import BusinessAreaInfo from './components/BusinessAreaInfo.vue';
+import ProfileInfo from './components/ProfileInfo.vue';
+import AchievementInfo from './components/AchievementInfo.vue';
+import QualificationInfo from './components/QualificationInfo.vue';
+import AttachmentInfo from './components/AttachmentInfo.vue';
+
+// 公司信息
+const companyDetails = ref<CompanyDetailResponseData>();
 
 // 当前激活的菜单
-const activeMenu = ref('basic');
+const activeMenu = ref('basicInfo');
 
-// 菜单项配置
-const menuItems = ref([
+const menuConfig = [
   {
-    key: 'basic',
+    key: 'basicInfo',
     label: '企业基础信息',
     icon: 'layui-icon layui-icon-home',
-    statusClass: 'layui-btn-primary',
-    statusText: '隐藏',
   },
   {
-    key: 'register',
+    key: 'registerInfo',
     label: '企业注册信息',
     icon: 'layui-icon layui-icon-file',
-    statusClass: '',
-    statusText: '公开',
   },
   {
-    key: 'business',
+    key: 'businessInfo',
     label: '主营业务系统',
     icon: 'layui-icon layui-icon-app',
-    statusClass: 'layui-btn-primary',
-    statusText: '隐藏',
   },
   {
-    key: 'coverage',
+    key: 'businessAreaInfo',
     label: '业务覆盖区域',
     icon: 'layui-icon layui-icon-location',
-    statusClass: '',
-    statusText: '公开',
   },
   {
     key: 'profile',
     label: '企业信息简介',
     icon: 'layui-icon layui-icon-list',
-    statusClass: '',
-    statusText: '公开',
   },
   {
-    key: 'engineering',
+    key: 'achievement',
     label: '企业工程业绩',
     icon: 'layui-icon layui-icon-chart-screen',
-    statusClass: '',
-    statusText: '公开',
   },
   {
-    key: 'qualification',
+    key: 'qualifica',
     label: '企业资质证书',
     icon: 'layui-icon layui-icon-file-b',
-    statusClass: '',
-    statusText: '公开',
   },
   {
-    key: 'operation',
+    key: 'companyAttachment',
     label: '企业宣传资料',
     icon: 'layui-icon layui-icon-video',
-    statusClass: '',
-    statusText: '公开',
   },
-]);
+];
+
+// 组件映射
+const componentMap = {
+  basicInfo: BasicInfo,
+  registerInfo: RegisterInfo,
+  businessInfo: BusinessInfo,
+  businessAreaInfo: BusinessAreaInfo,
+  profile: ProfileInfo,
+  achievement: AchievementInfo,
+  qualifica: QualificationInfo,
+  companyAttachment: AttachmentInfo,
+};
+
+// 当前组件
+const currentComponent = computed(() => {
+  return (
+    componentMap[activeMenu.value as keyof typeof componentMap] || BasicInfo
+  );
+});
+
+// 菜单配置项
+const menuItems = ref(
+  menuConfig.map((item) => ({
+    ...item,
+    isOpen: false,
+    statusIcon: 'layui-icon-log', // 默认等待状态
+  })),
+);
 
 // 切换菜单
 const switchMenu = (key: string) => {
   activeMenu.value = key;
+};
+
+// 处理开关变化
+const handleSwitchChange = async (item: any) => {
+  // 调用接口--点击前状态isOpen
+  await companyApi.openModel(item.isOpen ? 1 : 0, item.key);
+
+  //点击后状态isOpen
+  if (item.isOpen) layer.msg('取消隐藏', { icon: 1 });
+  else layer.msg('信息隐藏成功', { icon: 1 });
+
+  // 更新菜单配置
+  getMyCompanyDetails();
+};
+
+// 根据 API 数据更新菜单项
+const updateMenuItems = () => {
+  if (companyDetails.value?.roleMap) {
+    const roleMap = companyDetails.value.roleMap;
+
+    menuItems.value.forEach((item) => {
+      const roleData = roleMap[item.key as keyof typeof roleMap];
+      if (roleData) {
+        item.isOpen = !(roleData.isOpen === 1);
+        item.statusIcon = roleData.statusIcon;
+      }
+    });
+  }
+};
+
+// 获取我司详情
+const getMyCompanyDetails = async () => {
+  const res = await companyApi.getMyCompanyDetailed();
+  companyDetails.value = res.data || res;
+
+  // 数据加载完成后更新菜单项
+  updateMenuItems();
 };
 
 // 获取当前菜单标签
@@ -295,6 +254,50 @@ const getCurrentMenuLabel = () => {
   );
   return currentItem?.label || '';
 };
+
+// 显示公司填写须知
+const handleClickNotice = () => {
+  layer.open({
+    type: 0,
+    title: '公司信息填写须知',
+    area: ['50%'],
+    isHtmlFragment: true,
+    content: `
+      <div style="
+        padding: 20px;
+        line-height: 1.6;
+        color: #333;
+        font-size: 14px;
+      ">
+        <p style="margin-bottom: 16px; text-align: justify;">
+          您在本页面编辑、上传的公司信息将作为云端产品库下的公司主页展示，供平台采购商浏览。为保障采购商合法权益并确保您的产品效果，您承诺并确认：
+        </p>
+
+        <ol style="padding-left: 20px; margin: 0;">
+          <li style="margin-bottom: 12px; text-align: justify;">
+            您的填写行为已获得所在公司的授权，相关内容经过公司确认。
+          </li>
+
+          <li style="margin-bottom: 12px; text-align: justify;">
+            填写、上传真实、合法、有效的公司信息，据实填写并及时更新公司介绍、规模、产品等，以免对采购商造成误导。
+          </li>
+
+          <li style="margin-bottom: 12px; text-align: justify;">
+            填写、上传的图文、视频等资料不存在违法违规或涉嫌侵犯第三方合法权益的情形，如由此产生相关法律风险或造成损失，由您及所在公司承担法律责任。
+          </li>
+
+          <li style="margin-bottom: 12px; text-align: justify;">
+            您授权设计报价管理平台以提供产品服务为目的在其他场景下免费使用您在本页面填写的公司信息，以便为您提供更佳的服务体验。
+          </li>
+        </ol>
+      </div>
+    `,
+  });
+};
+
+onMounted(async () => {
+  await getMyCompanyDetails();
+});
 </script>
 
 <style scoped lang="scss">
@@ -302,18 +305,22 @@ const getCurrentMenuLabel = () => {
   height: 100%;
 }
 
+h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  border-left: 3px solid var(--global-primary-color);
+  padding-left: 15px;
+}
+
 .left-sidebar {
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 20px 0;
 
-  .sidebar-header {
-    h4 {
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
-      margin: 0;
-    }
+  .sidebar-content {
+    padding: 0 20px;
   }
 
   .intro-tip {
@@ -323,9 +330,19 @@ const getCurrentMenuLabel = () => {
     line-height: 1.4;
   }
 
+  .intro-notice {
+    margin: 15px 0;
+    color: #868686;
+    font-size: 12px;
+    cursor: pointer;
+
+    .layui-icon {
+      font-size: 12px;
+    }
+  }
+
   .audit-status {
-    @include flex();
-    gap: 25px;
+    @include flex(row, space-between, center);
     flex-wrap: wrap;
 
     .status-item {
@@ -334,7 +351,6 @@ const getCurrentMenuLabel = () => {
       font-size: 14px;
 
       i {
-        font-weight: 600;
         margin-right: 4px;
       }
 
@@ -370,10 +386,8 @@ const getCurrentMenuLabel = () => {
     padding: 12px 0;
 
     .rate-header {
-      display: flex;
-      justify-content: space-between;
       margin-bottom: 10px;
-      font-size: 14px;
+      font-size: 15px;
 
       .percentage {
         color: #1890ff;
@@ -382,7 +396,7 @@ const getCurrentMenuLabel = () => {
     }
 
     .layui-progress {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .rate-tip {
@@ -399,22 +413,18 @@ const getCurrentMenuLabel = () => {
 
   .nav-menu {
     .menu-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 0;
+      @include flex(row, flex-start, center);
+      padding: 4px 0;
       cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
       transition: all 0.2s ease;
       margin-top: 10px;
-
-      &:hover {
-        background: #f8f9fa;
-      }
+      border-bottom-right-radius: 10px;
+      border-top-right-radius: 10px;
 
       &.active {
         background: #e6f7ff;
         border-left: 3px solid #1890ff;
-        padding-left: 10px;
+        padding-left: 7px;
         margin-left: -10px;
       }
 
@@ -425,18 +435,31 @@ const getCurrentMenuLabel = () => {
       }
 
       span {
-        flex: 1;
         font-size: 14px;
         color: #333;
+        margin-right: 5px;
       }
 
-      .layui-btn {
-        margin-left: auto;
+      // 状态图标颜色
+      .status-pending {
+        color: #fa8c16;
+      }
 
-        &.layui-btn-primary {
-          background-color: #f0f0f0;
-          border-color: #f0f0f0;
-          color: #666;
+      .status-passed {
+        color: #52c41a;
+      }
+
+      .status-rejected {
+        color: #ff4d4f;
+      }
+
+      .switch {
+        @include flex(row, flex-end, center);
+        flex: 1;
+
+        :deep(.layui-form-item) {
+          margin-bottom: 8px;
+          overflow: hidden;
         }
       }
     }
@@ -446,49 +469,26 @@ const getCurrentMenuLabel = () => {
 .right-content {
   background: white;
   border-radius: 12px;
+  position: relative;
+  padding: 20px 0;
 
-  .content-section {
-    padding: 20px;
 
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
+  .view-count {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    color: #666;
+    font-size: 14px;
 
-      h4 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin: 0;
-      }
-
-      .view-count {
-        display: flex;
-        align-items: center;
-        color: #666;
-        font-size: 14px;
-
-        i {
-          margin-right: 5px;
-        }
-      }
+    i {
+      margin-right: 5px;
     }
+  }
+  .content-section {
+
 
     .form-section {
       margin-bottom: 40px;
-    }
-
-    .contact-section {
-      h5 {
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-        margin: 0 0 20px 0;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #1890ff;
-        display: inline-block;
-      }
     }
 
     .form-value {
@@ -515,16 +515,22 @@ const getCurrentMenuLabel = () => {
   }
 }
 
-// 覆盖 Layui 样式
-:deep(.layui-progress-bar) {
-  background-color: #1890ff;
-}
+.notice-content {
+  line-height: 1.6;
+  color: #333;
 
-:deep(.layui-form-label) {
-  width: 120px;
-}
+  p {
+    margin: 0 0 16px 0;
+    text-align: justify;
 
-:deep(.layui-input-block) {
-  margin-left: 140px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: #1890ff;
+      font-weight: 600;
+    }
+  }
 }
 </style>
