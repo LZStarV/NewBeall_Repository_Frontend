@@ -83,7 +83,6 @@ export interface CompanyData {
   workarea: string;
   workarea2: string;
   yxRegisterTime: string; // 公司注册时间
-  zhuceziben: string; // 注册资本
 }
 
 // 公司信息
@@ -154,4 +153,14 @@ export interface CompanyDetailResponseData {
     basicInfo: ComnpanyRoleMapData;
   };
   user: CompanyUserType;
+}
+
+// 获取公司查看记录列表
+export interface BrowseListRes {
+  companyId: number;
+  companyName: string;
+  createDate: string;
+  id: number;
+  isRead: number;
+  targetCompanyId: number;
 }
