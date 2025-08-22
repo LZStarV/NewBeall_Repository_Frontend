@@ -16,15 +16,7 @@ npm i
 npm run dev
 ```
 
-**注意**：此命令会一并启动WebSocket代理服务器，如果只想单独启动其一，请使用下面命令：
-
-不启动WebSocket代理服务器：
-
-```bash
-npm run dev:page
-```
-
-单独启动WebSocket代理服务器：
+启动WebSocket代理服务器： (已改走vite proxy代理，本地自建代理服务器将废弃)
 
 ```bash
 npm run dev:proxy
