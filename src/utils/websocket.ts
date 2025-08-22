@@ -86,12 +86,16 @@ export class WebSocketClient {
     // 构建WebSocket URL
     this.url = this.buildWebSocketUrl();
 
-    this.reconnectAttempts = options.reconnectAttempts || DEFAULT_RECONNECT_ATTEMPTS;
-    this.reconnectInterval = options.reconnectInterval || DEFAULT_RECONNECT_INTERVAL;
+    this.reconnectAttempts =
+      options.reconnectAttempts || DEFAULT_RECONNECT_ATTEMPTS;
+    this.reconnectInterval =
+      options.reconnectInterval || DEFAULT_RECONNECT_INTERVAL;
 
     // 心跳检测配置
-    this.heartbeatInterval = options.heartbeatInterval || DEFAULT_HEARTBEAT_INTERVAL;
-    this.heartbeatTimeout = options.heartbeatTimeout || DEFAULT_HEARTBEAT_TIMEOUT;
+    this.heartbeatInterval =
+      options.heartbeatInterval || DEFAULT_HEARTBEAT_INTERVAL;
+    this.heartbeatTimeout =
+      options.heartbeatTimeout || DEFAULT_HEARTBEAT_TIMEOUT;
     this.pingMessage = options.pingMessage || DEFAULT_PING_MESSAGE;
 
     this.onOpenCallback = options.onOpen;
@@ -101,7 +105,9 @@ export class WebSocketClient {
 
     // 调试代码，未来可删除
     console.log(`🌍 当前环境: ${env.getAppEnv()}`);
-    console.log(`🔌 WebSocket模式: ${this.isDevelopment ? '开发代理模式' : '生产直连模式'}`);
+    console.log(
+      `🔌 WebSocket模式: ${this.isDevelopment ? '开发代理模式' : '生产直连模式'}`,
+    );
     console.log(`🔗 WebSocket URL: ${this.url}`);
 
     // 监听网络状态变化
@@ -130,30 +136,9 @@ export class WebSocketClient {
    * 构建开发环境的代理URL
    */
   private buildProxyUrl(): string {
-    const proxyUrl = env.getWsProxyUrl() || 'ws://localhost:3001/ws';
-    const url = new URL(proxyUrl, window.location.href);
+    const proxyUrl = env.getWsProxyUrl();
 
-    // 添加目标路径
-    url.searchParams.set('path', this.targetPath);
-
-    // 添加Cookie（可选，HttpOnly cookies会由浏览器自动发送）
-    if (this.options.cookies) {
-      const cookieString = typeof this.options.cookies === 'string'
-        ? this.options.cookies
-        : Object.entries(this.options.cookies)
-            .map(([key, value]) => `${key}=${value}`)
-            .join('; ');
-      url.searchParams.set('cookies', cookieString);
-      console.log('手动传递的cookies:', cookieString);
-    }
-    // 添加自定义Origin
-    const customOrigin = this.options.customOrigin || env.getWsTargetOrigin();
-    if (customOrigin) {
-      url.searchParams.set('origin', customOrigin);
-    } else {
-      // 默认使用当前页面的origin
-      url.searchParams.set('origin', window.location.origin);
-    }
+    const url = new URL(proxyUrl + this.targetPath, window.location.href);
 
     console.log('🚀 开发环境代理URL:', url.toString());
     return url.toString();
@@ -277,7 +262,9 @@ export class WebSocketClient {
    * @param data 要发送的数据，可以是字符串、ArrayBufferLike、Blob 或 ArrayBufferView。
    * @returns 发送是否成功。
    */
-  public send(data: string | ArrayBufferLike | Blob | ArrayBufferView): boolean {
+  public send(
+    data: string | ArrayBufferLike | Blob | ArrayBufferView,
+  ): boolean {
     if (this.isDestroyed) {
       console.warn('⚠️ WebSocket客户端已销毁，无法发送消息');
       return false;
@@ -342,7 +329,9 @@ export class WebSocketClient {
    * @param event CloseEvent 对象。
    */
   protected handleClose(event: CloseEvent): void {
-    console.log(`[WebSocket] 连接关闭: code=${event.code}, reason="${event.reason}", wasClean=${event.wasClean}`);
+    console.log(
+      `[WebSocket] 连接关闭: code=${event.code}, reason="${event.reason}", wasClean=${event.wasClean}`,
+    );
 
     this.isConnected.value = false;
     this.isConnecting.value = false;
@@ -355,7 +344,11 @@ export class WebSocketClient {
 
     // 只有在非手动断开且非正常关闭时才尝试重连
     // 4000是心跳超时，应该触发重连；1000是正常关闭，不应该重连
-    if (!this.isManualDisconnect && event.code !== WEBSOCKET_NORMAL_CLOSE_CODE && event.code !== WEBSOCKET_MANUAL_DISCONNECT_CODE) {
+    if (
+      !this.isManualDisconnect &&
+      event.code !== WEBSOCKET_NORMAL_CLOSE_CODE &&
+      event.code !== WEBSOCKET_MANUAL_DISCONNECT_CODE
+    ) {
       console.log('[WebSocket] 意外断开，准备重连...');
       this.attemptReconnect();
     } else if (event.code === WEBSOCKET_HEARTBEAT_TIMEOUT_CODE) {
@@ -387,7 +380,9 @@ export class WebSocketClient {
    */
   protected attemptReconnect(): void {
     if (this.reconnectCount >= this.reconnectAttempts) {
-      console.error(`WebSocket 重连失败，已尝试 ${this.reconnectAttempts} 次，达到重连上限！`);
+      console.error(
+        `WebSocket 重连失败，已尝试 ${this.reconnectAttempts} 次，达到重连上限！`,
+      );
       return;
     }
 
@@ -422,16 +417,23 @@ export class WebSocketClient {
       if (this.isConnected.value && this.socket) {
         // 发送心跳消息
         const pingResult = this.send(this.pingMessage);
-        console.log(`发送心跳消息 ${this.pingMessage} `, pingResult ? '成功' : '失败');
+        console.log(
+          `发送心跳消息 ${this.pingMessage} `,
+          pingResult ? '成功' : '失败',
+        );
 
         // 设置心跳超时检测
         this.heartbeatTimeoutTimer = window.setTimeout(() => {
           const now = Date.now();
           const timeSinceLastHeartbeat = now - this.lastHeartbeatTime;
-          console.log(`心跳检查: 距离上次消息 ${timeSinceLastHeartbeat}ms (超时阈值: ${this.heartbeatTimeout}ms)`);
+          console.log(
+            `心跳检查: 距离上次消息 ${timeSinceLastHeartbeat}ms (超时阈值: ${this.heartbeatTimeout}ms)`,
+          );
 
           if (timeSinceLastHeartbeat > this.heartbeatTimeout) {
-            console.warn(`心跳超时，连接可能已断开 (${timeSinceLastHeartbeat}ms > ${this.heartbeatTimeout}ms)`);
+            console.warn(
+              `心跳超时，连接可能已断开 (${timeSinceLastHeartbeat}ms > ${this.heartbeatTimeout}ms)`,
+            );
             this.socket?.close(WEBSOCKET_HEARTBEAT_TIMEOUT_CODE, '心跳超时'); // 关闭连接，触发重连
           } else {
             console.log('心跳检查正常');
@@ -441,7 +443,7 @@ export class WebSocketClient {
     }, this.heartbeatInterval);
   }
 
-    /**
+  /**
    * 清除心跳检测定时器。
    */
   private clearHeartbeat(): void {
@@ -464,7 +466,11 @@ export class WebSocketClient {
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => {
         console.log('网络已恢复，尝试重新连接WebSocket');
-        if (!this.isDestroyed && !this.isConnected.value && !this.isConnecting.value) {
+        if (
+          !this.isDestroyed &&
+          !this.isConnected.value &&
+          !this.isConnecting.value
+        ) {
           this.reconnectCount = 0; // 重置重连次数
           this.connect();
         }
@@ -482,7 +488,8 @@ export class WebSocketClient {
  * 创建通用WebSocket连接 - 完全自定义配置
  * 自动根据环境选择代理或直连模式
  */
-export function createWebSocket(options: Omit<WebSocketOptions, 'url'>): WebSocketClient {
+export function createWebSocket(
+  options: Omit<WebSocketOptions, 'url'>,
+): WebSocketClient {
   return new WebSocketClient(options);
 }
-

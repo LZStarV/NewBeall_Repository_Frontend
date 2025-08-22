@@ -65,11 +65,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      // 通过本地自建第三方代理服务器代理WebSocket连接
+      // 代理WebSocket连接
       '/ws': {
-        target: 'ws://localhost:3001', // 指向代理服务器
+        target: 'ws://120.78.76.80:8080', // 指向代理服务器
         ws: true,
-        changeOrigin: true,
+        rewriteWsOrigin: true,
         rewrite: (path) => path.replace(/^\/ws/, ''),
       },
     },

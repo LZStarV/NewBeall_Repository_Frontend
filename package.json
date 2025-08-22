@@ -29,9 +29,9 @@
     }
   },
   "scripts": {
-    "dev": "npm run install:proxy && concurrently \"vite\" \"npm run dev:proxy\"",
-    "dev:page": "vite",
-    "dev:proxy": "cd proxy-server && npm run dev",
+    "dev": "vite",
+    "dev:proxy": "npm run install:proxy && concurrently \"vite\" \"npm run proxy\"",
+    "proxy": "cd proxy-server && npm run dev",
     "install:proxy": "cd proxy-server && npm install",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
