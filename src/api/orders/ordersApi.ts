@@ -5,13 +5,14 @@ import type {
   Instruction,
   ExportProductDetailed,
   Settle,
+  QuotationListResponse,
   OrderPrice,
   OrderListRow,
   Quotation,
-  QuotationListResponse,
-  OrderModuleListResponse,
   OrderChargePerson,
+  OrderModuleListResponse,
 } from './orderApi.type';
+import type { GetOrdersListParams } from './orderApi.type';
 import type { Product } from '../product/productApi.type';
 // import { getExpiredAuth } from '@/api/auth/authApi';
 
@@ -59,23 +60,38 @@ export default {
   },
 
   // 获取报价单列表（历史报价）
-  getOrdersList(
-    order: string,
-    offset: number,
-    limit: number,
-    type?: number,
-    pageNumber?: number,
-  ) {
+  getOrdersList(params: GetOrdersListParams) {
     const formData = new FormData();
-    formData.append('order', order);
-    formData.append('offset', offset.toString());
-    formData.append('limit', limit.toString());
-    if (type !== undefined) {
-      formData.append('type', type.toString());
-    }
-    if (pageNumber !== undefined) {
-      formData.append('pageNumber', pageNumber.toString());
-    }
+
+    // 必填
+    formData.append('order', params.order);
+    formData.append('offset', params.offset.toString());
+    formData.append('limit', params.limit.toString());
+
+    // 公共处理函数
+    const appendField = (key: keyof GetOrdersListParams) => {
+      const value = params[key];
+      if (value !== undefined) {
+        formData.append(key, String(value));
+        formData.append(`query[${key}]`, String(value));
+      }
+    };
+
+    // 非互斥字段
+    [
+      'type',
+      'pageNumber',
+      'attr',
+      'chargePerson',
+      'createName',
+      'createDate',
+    ].forEach((k) => appendField(k as keyof GetOrdersListParams));
+
+    // 互斥字段
+    ['projectName', 'contacts', 'ordersType'].forEach((k) =>
+      appendField(k as keyof GetOrdersListParams),
+    );
+
     return http.post<
       FormData,
       { rows: QuotationListResponse[]; total: number }

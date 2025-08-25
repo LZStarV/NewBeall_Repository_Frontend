@@ -31,6 +31,7 @@
 
           <lay-form-item label="属性">
             <lay-select v-model="attribute" placeholder="请输入">
+              <lay-select-option value="">全部</lay-select-option>
               <lay-select-option
                 v-for="attr in orderAttributeList"
                 :key="attr.id"
@@ -43,10 +44,11 @@
 
           <lay-form-item label="负责人">
             <lay-select v-model="chargePerson" placeholder="请选择">
+              <lay-select-option value="">全部</lay-select-option>
               <lay-select-option
                 v-for="item in ordersChargePersonList"
                 :key="item.id"
-                :value="item.id"
+                :value="String(item.id)"
               >
                 {{ item.name }}
               </lay-select-option>
@@ -55,6 +57,7 @@
 
           <lay-form-item label="制单人">
             <lay-select v-model="createUser" placeholder="请选择">
+              <lay-select-option value="">全部</lay-select-option>
               <lay-select-option
                 v-for="item in ordersCreateUserList"
                 :key="item"
@@ -129,6 +132,16 @@
             {{ row.contacts }}
           </span>
         </template>
+        <!-- 评论列自定义渲染 -->
+        <template #chat="{ row }">
+          <button
+            class="chat-button"
+            :title="'进入聊天室'"
+            @click="goToChat(row)"
+          >
+            <SvgIcon name="message_2" width="1rem" />
+          </button>
+        </template>
       </lay-table>
     </lay-card>
 
@@ -149,12 +162,14 @@
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
-import { ref, onMounted, h, reactive } from 'vue';
+import { ref, onMounted, h, reactive, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
 import type {
   OrderChargePerson,
   QuotationListResponse,
   OrderPrice,
+  GetOrdersListParams,
 } from '@/api/orders/orderApi.type';
 import type {
   TableColumn,
@@ -162,10 +177,13 @@ import type {
 } from '@layui/layui-vue/types/component/table/typing';
 import QuotationInfo from '../components/QuotationInfo.vue';
 
+// 路由实例
+const router = useRouter();
+
 // 工具栏响应式数据
 const typeFilter = ref('projectName');
 const quotationNameSearch = ref<string>();
-const chargePerson = ref<number>();
+const chargePerson = ref<string>();
 const createUser = ref<string>();
 const createDate = ref<string>();
 const attribute = ref<string>();
@@ -310,13 +328,13 @@ const columns = [
   {
     title: '评论',
     width: '80px',
-    key: 'remark',
-    ellipsisTooltip: true,
+    key: 'chat',
+    customSlot: 'chat',
   },
   {
     title: '文件夹',
     width: '80px',
-    key: 'remark',
+    key: 'folder',
     ellipsisTooltip: true,
   },
 ] as TableColumn[];
@@ -337,6 +355,18 @@ const pagination = reactive({
 const showDetailModal = (row: QuotationListResponse) => {
   selectedRow.value = row;
   detailModalVisible.value = true;
+};
+
+// 跳转到聊天页面
+const goToChat = (row: QuotationListResponse) => {
+  router.push({
+    path: '/chat',
+    query: {
+      prefix: 'BJ',
+      chatName: row.projectName,
+      toId: row.ordersId,
+    },
+  });
 };
 
 // 日期排序
@@ -394,22 +424,62 @@ const getPriceInfo = async (orderIds: string[]) => {
 const getOrdersList = async (type?: number) => {
   try {
     loading.value = true;
-    const res = (await ordersApi.getOrdersList(
-      'desc',
-      (pagination.current - 1) * pagination.pageSize,
-      pagination.pageSize,
-      type,
-    )) as unknown as { rows: QuotationListResponse[]; total: number };
+
+    // 构建查询参数
+    let params: GetOrdersListParams = {
+      order: 'desc',
+      offset: (pagination.current - 1) * pagination.pageSize,
+      limit: pagination.pageSize,
+    };
+
+    // 添加可选参数
+    if (type !== undefined && type !== -1) {
+      params.type = type;
+    }
+    if (attribute.value && attribute.value !== '') {
+      params.attr = Number(attribute.value);
+    }
+    if (chargePerson.value && chargePerson.value !== '') {
+      params.chargePerson = chargePerson.value;
+    }
+    if (createUser.value && createUser.value !== '') {
+      params.createName = createUser.value;
+    }
+    if (createDate.value) {
+      params.createDate = createDate.value;
+    }
+
+    // 处理互斥的搜索字段
+    if (quotationNameSearch.value) {
+      switch (typeFilter.value) {
+        case 'projectName':
+          params = { ...params, projectName: quotationNameSearch.value };
+          break;
+        case 'contacts':
+          params = { ...params, contacts: quotationNameSearch.value };
+          break;
+        case 'orderstype':
+          params = { ...params, ordersType: quotationNameSearch.value };
+          break;
+      }
+    }
+
+    const res = (await ordersApi.getOrdersList(params)) as unknown as {
+      rows: QuotationListResponse[];
+      total: number;
+    };
 
     if (res.rows) {
       // 获取所有订单ID
-      const orderIds = res.rows.map((item) => item.ordersId);
+      const orderIds = res.rows.map(
+        (item: QuotationListResponse) => item.ordersId,
+      );
 
       // 获取价格信息
       const priceMap: Record<string, OrderPrice> = await getPriceInfo(orderIds);
 
       // 处理数据格式
-      dataSource.value = res.rows.map((item) => ({
+      dataSource.value = res.rows.map((item: QuotationListResponse) => ({
         ...item,
         // 拼接报价类型
         ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
@@ -443,17 +513,30 @@ const getOrdersList = async (type?: number) => {
 
 // 处理搜索
 const handleSearch = () => {
+  // 清除防抖定时器，立即执行搜索
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
   pagination.current = 1;
   const currentTab = tabItem.find((item) => item.title === current2.value);
   const type = currentTab ? currentTab.type : undefined;
-
-  // 这里可以添加搜索条件的处理
-  // 目前先调用基础的数据获取，后续可以根据需要添加搜索参数
   getOrdersList(type === -1 ? undefined : type);
 };
 
 // 处理刷新
 const handleRefresh = () => {
+  // 清空所有搜索字段
+  typeFilter.value = 'projectName';
+  quotationNameSearch.value = '';
+  attribute.value = '';
+  chargePerson.value = '';
+  createUser.value = '';
+  createDate.value = '';
+
+  // 重置分页
+  pagination.current = 1;
+
   const currentTab = tabItem.find((item) => item.title === current2.value);
   const type = currentTab ? currentTab.type : undefined;
   getOrdersList(type === -1 ? undefined : type);
@@ -494,6 +577,34 @@ const getOrdersChargePerson = async () => {
     console.error('获取负责人列表失败:', error);
   }
 };
+
+// 防抖函数
+let searchTimeout: NodeJS.Timeout | null = null;
+const debouncedSearch = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    pagination.current = 1;
+    const currentTab = tabItem.find((item) => item.title === current2.value);
+    const type = currentTab ? currentTab.type : undefined;
+    getOrdersList(type === -1 ? undefined : type);
+  }, 500); // 500ms 防抖
+};
+
+// 监听筛选条件变化，自动触发数据请求
+watch(
+  [typeFilter, attribute, chargePerson, createUser, createDate],
+  () => {
+    debouncedSearch();
+  },
+  { deep: true },
+);
+
+// 单独监听搜索输入框，使用防抖
+watch(quotationNameSearch, () => {
+  debouncedSearch();
+});
 
 onMounted(() => {
   getOrderAttributeList();
@@ -557,6 +668,23 @@ onMounted(() => {
     color: $primary-color;
     cursor: pointer;
     text-decoration: none;
+  }
+
+  // 聊天按钮样式
+  .chat-button {
+    @include button-style($primary-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
   }
 
   @media (max-width: $desktop_layout_breakpoint) {
