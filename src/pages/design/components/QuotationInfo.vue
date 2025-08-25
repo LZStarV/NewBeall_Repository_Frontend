@@ -125,6 +125,7 @@
     <!-- 报价产品信息 -->
     <lay-row :gutter="20">
       <h5>报价产品信息</h5>
+      <ProductionList :order-id="localQuotationData.ordersId" />
     </lay-row>
   </div>
 </template>
@@ -134,6 +135,7 @@ import clinetApi from '@/api/client/clinetApi';
 import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import ordersApi from '@/api/orders/ordersApi';
 import { ref, watch } from 'vue';
+import ProductionList from './ProductionList.vue';
 
 interface QuotationFormData {
   ordersId: string;
@@ -257,7 +259,9 @@ watch(
 watch(
   localQuotationData,
   (newValue) => {
-    emit('update:modelValue', newValue);
+    if (newValue) {
+      emit('update:modelValue', newValue);
+    }
   },
   { deep: true }
 );

@@ -137,7 +137,11 @@ export default {
 
   // 获取报价产品信息列表
   getOrderProductList(orderId: string, page: number, limit: number) {
-    return http.get<Product[]>('/orders/findProlist', { orderId, page, limit });
+    return http.get<{ count: number; data: Product[] }>('/orders/findProlist', {
+      orderId,
+      page,
+      limit,
+    });
   },
 
   // 获取查看方案云列表
