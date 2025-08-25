@@ -106,8 +106,12 @@
             <i class="layui-icon layui-icon-eye"></i>
             <span>{{ companyDetails?.browseCount }}</span>
           </div>
-           <!-- 动态组件渲染 -->
-          <component :is="currentComponent" :company-data="companyDetails" @data-updated="getMyCompanyDetails"/>
+          <!-- 动态组件渲染 -->
+          <component
+            :is="currentComponent"
+            :company-data="companyDetails"
+            @data-updated="getMyCompanyDetails"
+          />
         </section>
       </lay-col>
     </lay-row>
@@ -273,23 +277,23 @@ const handleClickNotice = () => {
           您在本页面编辑、上传的公司信息将作为云端产品库下的公司主页展示，供平台采购商浏览。为保障采购商合法权益并确保您的产品效果，您承诺并确认：
         </p>
 
-        <ol style="padding-left: 20px; margin: 0;">
+        <ul style="padding-left: 0px">
           <li style="margin-bottom: 12px; text-align: justify;">
-            您的填写行为已获得所在公司的授权，相关内容经过公司确认。
+            1、您的填写行为已获得所在公司的授权，相关内容经过公司确认。
           </li>
 
           <li style="margin-bottom: 12px; text-align: justify;">
-            填写、上传真实、合法、有效的公司信息，据实填写并及时更新公司介绍、规模、产品等，以免对采购商造成误导。
+            2、填写、上传真实、合法、有效的公司信息，据实填写并及时更新公司介绍、规模、产品等，以免对采购商造成误导。
           </li>
 
           <li style="margin-bottom: 12px; text-align: justify;">
-            填写、上传的图文、视频等资料不存在违法违规或涉嫌侵犯第三方合法权益的情形，如由此产生相关法律风险或造成损失，由您及所在公司承担法律责任。
+            3、填写、上传的图文、视频等资料不存在违法违规或涉嫌侵犯第三方合法权益的情形，如由此产生相关法律风险或造成损失，由您及所在公司承担法律责任。
           </li>
 
           <li style="margin-bottom: 12px; text-align: justify;">
-            您授权设计报价管理平台以提供产品服务为目的在其他场景下免费使用您在本页面填写的公司信息，以便为您提供更佳的服务体验。
+            4、您授权设计报价管理平台以提供产品服务为目的在其他场景下免费使用您在本页面填写的公司信息，以便为您提供更佳的服务体验。
           </li>
-        </ol>
+        </ul>
       </div>
     `,
   });
@@ -472,7 +476,6 @@ h4 {
   position: relative;
   padding: 20px 0;
 
-
   .view-count {
     position: absolute;
     right: 20px;
@@ -482,54 +485,6 @@ h4 {
 
     i {
       margin-right: 5px;
-    }
-  }
-  .content-section {
-
-
-    .form-section {
-      margin-bottom: 40px;
-    }
-
-    .form-value {
-      font-size: 14px;
-      color: #333;
-      line-height: 38px;
-    }
-
-    .select-group {
-      display: flex;
-      gap: 10px;
-
-      .layui-select {
-        min-width: 120px;
-      }
-    }
-
-    .placeholder-content {
-      text-align: center;
-      padding: 60px 0;
-      color: #999;
-      font-size: 16px;
-    }
-  }
-}
-
-.notice-content {
-  line-height: 1.6;
-  color: #333;
-
-  p {
-    margin: 0 0 16px 0;
-    text-align: justify;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    strong {
-      color: #1890ff;
-      font-weight: 600;
     }
   }
 }

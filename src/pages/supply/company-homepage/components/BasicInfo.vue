@@ -1,5 +1,7 @@
 <template>
-  <div class="basicInfoPage">
+  <lay-loading v-if="isConnecting" />
+
+  <div v-else class="basicInfoPage">
     <h4>企业基本信息</h4>
 
     <lay-form
@@ -92,8 +94,8 @@
           <lay-input v-model="formData.career" placeholder="请输入职位" />
         </lay-form-item>
       </div>
-      <lay-form-item style="text-align: center">
-        <lay-button type="primary" @click="submit" :loading="submitting">保存</lay-button>
+      <lay-form-item style="text-align: end; margin-right: 40px">
+        <lay-button type="normal" @click="submit" :loading="submitting">保存</lay-button>
       </lay-form-item>
     </lay-form>
   </div>
@@ -106,6 +108,8 @@ import type { CompanyDetailResponseData } from '@/api/company/companyApi.type';
 import registerApi from '@/api/register/registerApi';
 import { layer } from '@layui/layui-vue';
 import { onMounted, reactive, ref, watch } from 'vue';
+
+const isConnecting = ref(true);
 
 // 定义props
 interface Props {
@@ -328,6 +332,9 @@ onMounted(async ()=> {
   if (props.companyData) {
     await initFormData(props.companyData);
   }
+  setTimeout(()=> {
+    isConnecting.value = false;
+  }, 500);
 });
 </script>
 
@@ -368,5 +375,15 @@ onMounted(async ()=> {
   width: 170px;
   display: inline-block;
   margin-right: 20px;
+}
+
+
+.layui-loading {
+  width: 100%;
+  height: 100vh;
+}
+
+:deep(.layui-loading-spinning) {
+  background-color: transparent;
 }
 </style>
