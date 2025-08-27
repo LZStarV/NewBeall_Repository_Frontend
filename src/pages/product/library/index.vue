@@ -6,7 +6,8 @@
                 <div class="filter-section">
                     <lay-form :model="filterForm" layout="inline">
                         <lay-form-item label="产品名称">
-                            <lay-input v-model="filterForm.productName" placeholder="请输入产品名称" style="width: 140px" />
+                            <lay-input v-model="filterForm.productName" placeholder="请输入产品名称" style="width: 140px"
+                                @keydown="handleQuickSearch" />
                         </lay-form-item>
                         <lay-form-item label="品牌">
                             <lay-select v-model="filterForm.brand" placeholder="请选择" style="width: 100px">
@@ -29,7 +30,6 @@
                         </lay-form-item>
                         <lay-form-item label="型号">
                             <lay-select v-model="filterForm.model" placeholder="请选择" style="width: 100px">
-
                                 <lay-select-option v-for="model in productModels" :key="model.value"
                                     :value="model.value">
                                     {{ model.label }}
@@ -43,10 +43,10 @@
                             </lay-select>
                         </lay-form-item>
                         <lay-form-item>
-                            <lay-button type="primary">
+                            <lay-button type="primary" @click="handleSearch">
                                 <lay-icon type="layui-icon-search" />
                             </lay-button>
-                            <lay-button>
+                            <lay-button @click="handleRefreshForm">
                                 <lay-icon type="layui-icon-refresh" />
                             </lay-button>
                         </lay-form-item>
@@ -55,813 +55,75 @@
             </lay-card>
 
             <!-- 表格区域 -->
-            <lay-card>
-                <!-- 工具栏区域 -->
-                <div class="fixed-table-toolbar">
-                    <span data-title="AI填充数据" @click="handleAiFill" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-set" />
-                    </span>
-                    <span data-title="复制" @click="handleCopy" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-template" />
-                    </span>
-                    <span data-title="询价" @click="handleInquiry" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-dollar" />
-                    </span>
-                    <span data-title="显示重复产品" @click="handleShowDuplicate" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-table" />
-                    </span>
-                    <span data-title="单个新增" @click="handleSingleAdd" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-addition" />
-                    </span>
-                    <span data-title="批量新增" @click="handleBatchAdd" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-add-circle" />
-                    </span>
-                    <span data-title="修改" @click="handleEdit" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-edit" />
-                    </span>
-                    <span data-title="删除" @click="handleDelete" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-delete" />
-                    </span>
-                    <span data-title="批量导出" @click="handleBatchExport" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-export" />
-                    </span>
-                    <span data-title="全库备份" @click="handleFullBackup" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-download-circle" />
-                    </span>
-                    <span data-title="品牌管理" @click="handleBrandManagement" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-diamond" />
-                    </span>
-                    <span data-title="添加至闲置云" @click="handleAddToIdleCloud" class="btnIcon invite-but">
-                        <lay-icon type="layui-icon-upload" />
-                    </span>
-
-                    <div class="dropdown-container">
-                        <button type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
-                            @click="toggleColumnsDropdown">
-                            <lay-icon type="layui-icon-shrink-right" />
-                        </button>
-                        <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.proId"
-                                        @change="updateVisibleColumns" /> 产品编号
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.name"
-                                        @change="updateVisibleColumns" /> 产品名称
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.brand"
-                                        @change="updateVisibleColumns" /> 品牌
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.model"
-                                        @change="updateVisibleColumns" /> 型号
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.trait"
-                                        @change="updateVisibleColumns" /> 参数/特性
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.unit"
-                                        @change="updateVisibleColumns" /> 单位
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.purchaseprice"
-                                        @change="updateVisibleColumns" /> 成本
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.price"
-                                        @change="updateVisibleColumns" /> 参考售价
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.marketprice"
-                                        @change="updateVisibleColumns" /> 市场指导价
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.pictureaddress"
-                                        @change="updateVisibleColumns" /> 产品图片
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.uname"
-                                        @change="updateVisibleColumns" /> 创建人
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.cloudLibrary"
-                                        @change="updateVisibleColumns" /> 云端库
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.openUpdate"
-                                        @change="updateVisibleColumns" /> 开放星标
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.designatedOpen"
-                                        @change="updateVisibleColumns" /> 指定开放
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.defaultDiscount"
-                                        @change="updateVisibleColumns" /> 默认折率(%)
-                                </label>
-                            </li>
-                            <li role="menuitem">
-                                <label>
-                                    <input type="checkbox" v-model="columnVisibility.autoHandle"
-                                        @change="updateVisibleColumns" /> 自动报价
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- 产品列表表格 -->
-                <div class="content-area">
-                    <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
-                        @change="handleTableChange" :loading="loading">
-                        <!-- 复选框列 -->
-                        <template #checkbox="{ row }">
-                            <div class="custom-checkbox" @click="toggleRowCheck(row)">
-                                <div class="checkbox-square" :class="{ checked: row.checked }">
-                                    <lay-icon v-if="row.checked" type="layui-icon-ok" />
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- 产品名称列 -->
-                        <template #productName="{ row }">
-                            <a href="#" class="product-link" @click.prevent="handleViewProduct(row)">{{ row.name
-                            }}</a>
-                        </template>
-
-                        <!-- 产品图片列 -->
-                        <template #productImage="{ row }">
-                            <div class="table-image-container">
-                                <img v-if="row.pictureaddress || row.pictureaddressOne"
-                                    :src="`https://yx.newbeall.com/softLink/${row.pictureaddress || row.pictureaddressOne}`"
-                                    :alt="row.name" class="table-product-image" @error="handleImageError" />
-                                <div v-else class="table-no-image">
-                                    <lay-icon type="layui-icon-picture" />
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- 参数/特性列 -->
-                        <template #parameters="{ row }">
-                            <a href="#" class="parameters-link" @click.prevent="handleViewParameters(row)">参数特性</a>
-                        </template>
-
-                        <!-- 云端库开关 -->
-                        <template #cloudLibrary="{ row }">
-                            <lay-switch :model-value="row.isOpen === 1"
-                                @update:model-value="(value) => updateCloudLibraryStatus(row, value)" onswitch-text="ON"
-                                offswitch-text="OFF" :style="{
-                                    '--lay-switch-on-color': '#5FB878',
-                                    '--lay-switch-off-color': '#d9d9d9'
-                                }" />
-                        </template>
-
-                        <!-- 开放星标列 -->
-                        <template #openUpdate="{ row }">
-                            <span :style="{ color: '#5FB878' }" class="action-text"
-                                @click="handleOpenPermissionManagement(row)">
-                                点击设置
-                            </span>
-                        </template>
-
-                        <!-- 指定开放列 -->
-                        <template #designatedOpen="{ row }">
-                            <span :style="{ color: '#5FB878' }" class="action-text"
-                                @click="handleOpenDesignatedOpenManagement(row)">
-                                点击设置
-                            </span>
-                        </template>
-
-                        <!-- 自动报价开关 -->
-                        <template #autoPrice="{ row }">
-                            <lay-switch v-model="row.autoHandle" onswitch-text="开" offswitch-text="关" />
-                        </template>
-                    </lay-table>
-                </div>
-            </lay-card>
+        <ProductTable 
+            ref="productTableRef"
+            @view-product="handleViewProduct"
+            @view-parameters="handleViewParameters"
+            @open-permission-management="handleOpenPermissionManagement"
+            @open-designated-open-management="handleOpenDesignatedOpenManagement"
+            @brand-management="handleBrandManagement"
+            @add-to-idle-cloud="handleAddToIdleCloud"
+        />
         </div>
 
         <!-- 产品详情弹窗 -->
-        <ModalWindow :visible="productDetailVisible" :title="selectedProduct ? `${selectedProduct.name}--详情` : '产品详情'"
-            :btn="productDetailButtons" :sync-height="true" @close="closeProductDetail">
-            <div v-if="selectedProduct" class="product-detail">
-                <!-- 产品头部信息 -->
-                <div class="product-header">
-                    <div class="product-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-text">暂无图片信息</span>
-                        </div>
-                    </div>
-
-                    <div class="product-basic-info">
-                        <div class="info-row">
-                            <span class="label">创建时间：</span>
-                            <span class="value">{{ selectedProduct.createtime || '暂无' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">产品编号：</span>
-                            <span class="value">{{ selectedProduct.proId }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">品牌：</span>
-                            <span class="value">{{ selectedProduct.brand }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">型号：</span>
-                            <span class="value">{{ selectedProduct.model }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">数量单位：</span>
-                            <span class="value">{{ selectedProduct.unit }}</span>
-                        </div>
-
-                        <!-- 价格信息表格 -->
-                        <div class="price-table-section">
-                            <div class="price-table">
-                                <lay-table :columns="priceColumns" :data-source="priceData" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 选项卡内容 -->
-                <div class="tabs-container">
-                    <lay-tab v-model="activeTab" type="card">
-                        <lay-tab-item id="1" title="产品参数">
-                            <div class="tab-content">
-                                <div class="param-list">
-                                    <div class="param-item">
-                                        <span class="param-label">产品参数：</span>
-                                        <span class="param-value">{{ selectedProduct.param || '暂无参数' }}</span>
-                                    </div>
-                                    <div class="param-item">
-                                        <span class="param-label">产品特征：</span>
-                                        <span class="param-value">{{ selectedProduct.trait || '暂无特征' }}</span>
-                                    </div>
-                                    <div class="param-item">
-                                        <span class="param-label">库存数量：</span>
-                                        <span class="param-value">{{ selectedProduct.inventory }}</span>
-                                    </div>
-                                    <div class="param-item">
-                                        <span class="param-label">销售数量：</span>
-                                        <span class="param-value">{{ selectedProduct.sales }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </lay-tab-item>
-                        <lay-tab-item id="2" title="产品特点">
-                            <div class="tab-content">
-                                <div class="features-content">
-                                    <p>{{ selectedProduct.trait }}</p>
-                                    <br />
-                                    <h4>产品信息：</h4>
-                                    <ul>
-                                        <li>品牌：{{ selectedProduct.brand }}</li>
-                                        <li>型号：{{ selectedProduct.model }}</li>
-                                        <li>创建用户：{{ selectedProduct.uname }}</li>
-                                        <li>公司：{{ selectedProduct.company }}</li>
-                                        <li>默认折扣：{{ selectedProduct.defaultDiscount }}%</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </lay-tab-item>
-                    </lay-tab>
-                </div>
-
-                <!-- 设置状态信息 -->
-                <div class="status-section">
-                    <h3>产品设置状态</h3>
-                    <div class="status-grid">
-                        <div class="status-item">
-                            <label>开放状态：</label>
-                            <span :class="['status', selectedProduct.isOpen ? 'enabled' : 'disabled']">
-                                {{ selectedProduct.isOpen ? '已开放' : '未开放' }}
-                            </span>
-                        </div>
-                        <div class="status-item">
-                            <label>自动处理：</label>
-                            <span :class="['status', selectedProduct.autoHandle ? 'enabled' : 'disabled']">
-                                {{ selectedProduct.autoHandle ? '已启用' : '已禁用' }}
-                            </span>
-                        </div>
-                        <div class="status-item">
-                            <label>审核状态：</label>
-                            <span :class="['status', selectedProduct.approved ? 'enabled' : 'disabled']">
-                                {{ selectedProduct.approved ? '已审核' : '未审核' }}
-                            </span>
-                        </div>
-                        <div class="status-item">
-                            <label>库存管理：</label>
-                            <span :class="['status', selectedProduct.isInventory ? 'enabled' : 'disabled']">
-                                {{ selectedProduct.isInventory ? '已启用' : '已禁用' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ModalWindow>
+        <ProductDetail 
+            :visible="productDetailVisible"
+            :selected-product="selectedProduct"
+            @close="closeProductDetail"
+        />
 
         <!-- 产品星标管理弹窗 -->
-        <RightSideModal :visible="permissionVisible" :title="`产品星标管理`" :width="rightModalWidth" :mask-closable="true"
-            @close="closePermissionPopup">
-            <div class="permission-management">
-                <!-- 注意提示 -->
-                <div class="notice-section">
-                    <div class="notice-content">
-                        <span class="notice-text">注意：当前操作产品：</span>
-                        <span class="product-name">{{ selectedPermissionProduct?.name || '测试产品' }}</span>
-                    </div>
-                </div>
-
-                <!-- 授权公司选择 -->
-                <div class="company-select-section">
-                    <div class="select-container">
-                        <lay-select v-model="selectedCompany" :placeholder="companySearchText" style="width: 200px;">
-                            <lay-select-option value="">请选择授权公司</lay-select-option>
-                            <lay-select-option v-for="company in authorizedCompanies" :key="company.id"
-                                :value="company.id">
-                                {{ company.name }}
-                            </lay-select-option>
-                        </lay-select>
-                        <button class="add-btn">
-                            <lay-icon type="layui-icon-addition" />
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 公司列表表格 -->
-                <div class="company-table-section">
-                    <div class="table-toolbar">
-                        <div class="dropdown-container">
-                            <button type="button" aria-label="columns"
-                                class="btn btn-default btn-outline dropdown-toggle"
-                                @click="togglePermissionColumnsDropdown">
-                                <lay-icon type="layui-icon-shrink-right" />
-                            </button>
-                            <ul class="dropdown-menu" :class="{ 'show': showPermissionColumnsDropdown }">
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="permissionColumnVisibility.companyName"
-                                            @change="updatePermissionVisibleColumns" /> 公司名称
-                                    </label>
-                                </li>
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="permissionColumnVisibility.deleteRule"
-                                            @change="updatePermissionVisibleColumns" /> 删除规则
-                                    </label>
-                                </li>
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="permissionColumnVisibility.status"
-                                            @change="updatePermissionVisibleColumns" /> 状态
-                                    </label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="company-table">
-                        <table class="simple-table">
-                            <thead>
-                                <tr>
-                                    <th v-if="permissionColumnVisibility.companyName">公司名称</th>
-                                    <th v-if="permissionColumnVisibility.deleteRule">删除规则</th>
-                                    <th v-if="permissionColumnVisibility.status">状态</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="company in authorizedCompanies" :key="company.id">
-                                    <td v-if="permissionColumnVisibility.companyName">{{ company.name }}</td>
-                                    <td v-if="permissionColumnVisibility.deleteRule">默认规则</td>
-                                    <td v-if="permissionColumnVisibility.status">
-                                        <span
-                                            :class="['status-badge', company.status === '已授权' ? 'authorized' : 'unauthorized']">
-                                            {{ company.status }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr v-if="authorizedCompanies.length === 0">
-                                    <td :colspan="getPermissionVisibleColumnsCount()" class="no-data">无数据</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </RightSideModal>
+        <PermissionManagement 
+            :visible="permissionVisible"
+            :selected-product="selectedPermissionProduct"
+            :right-modal-width="rightModalWidth"
+            :authorized-companies="authorizedCompanies"
+            @close="closePermissionPopup"
+            @update-authorized-companies="handleUpdateAuthorizedCompanies"
+        />
 
         <!-- 右侧参数详情弹窗 -->
-        <RightSideModal :visible="parametersVisible" :title="`${selectedParametersProduct?.name || ''} - 产品详情`"
-            :width="rightModalWidth" :mask-closable="true" @close="closeParametersPopup">
-            <div v-if="selectedParametersProduct" class="parameters-detail">
-                <!-- 产品基本信息 -->
-                <div class="info-section">
-                    <h4 class="section-title">
-                        <lay-icon type="layui-icon-list" />
-                        基本信息
-                    </h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="label">产品名称：</span>
-                            <span class="value">{{ selectedParametersProduct?.name }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">品牌：</span>
-                            <span class="value">{{ selectedParametersProduct?.brand }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">型号：</span>
-                            <span class="value">{{ selectedParametersProduct?.model }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">单位：</span>
-                            <span class="value">{{ selectedParametersProduct?.unit }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 产品图片 -->
-                <div class="info-section">
-                    <h4 class="section-title">
-                        <lay-icon type="layui-icon-picture" />
-                        产品图片
-                    </h4>
-                    <div class="product-images">
-                        <div class="single-image-container"
-                            v-if="selectedParametersProduct?.pictureaddress || selectedParametersProduct?.pictureaddressOne">
-                            <img :src="`https://yx.newbeall.com/softLink/${selectedParametersProduct?.pictureaddress || selectedParametersProduct?.pictureaddressOne}`"
-                                :alt="selectedParametersProduct?.name" class="product-image-full"
-                                @error="handleImageError" />
-                        </div>
-                        <div v-else class="single-image-container no-image">
-                            <lay-icon type="layui-icon-picture" />
-                            <span>暂无图片</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 产品特点 -->
-                <div class="info-section">
-                    <h4 class="section-title">
-                        <lay-icon type="layui-icon-star-fill" />
-                        产品特点
-                    </h4>
-                    <div class="features-content">
-                        <p class="description">{{ selectedParametersProduct?.trait || '暂无产品特点描述' }}</p>
-                    </div>
-                </div>
-
-                <!-- 详细参数 -->
-                <div class="info-section">
-                    <h4 class="section-title">
-                        <lay-icon type="layui-icon-set" />
-                        详细参数
-                    </h4>
-                    <div class="params-content">
-                        <div class="param-description">
-                            <div class="param-text"
-                                v-html="formatParamText(selectedParametersProduct?.param || '暂无详细参数描述')">
-                            </div>
-                        </div>
-                        <div class="params-grid">
-                            <div class="param-item">
-                                <span class="param-label">库存数量：</span>
-                                <span class="param-value">{{ selectedParametersProduct?.inventory }}</span>
-                            </div>
-                            <div class="param-item">
-                                <span class="param-label">销售数量：</span>
-                                <span class="param-value">{{ selectedParametersProduct?.sales }}</span>
-                            </div>
-                            <div class="param-item">
-                                <span class="param-label">默认折扣：</span>
-                                <span class="param-value">{{ selectedParametersProduct?.defaultDiscount }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 产品资料 -->
-                <div class="info-section">
-                    <h4 class="section-title">
-                        <lay-icon type="layui-icon-file" />
-                        产品资料
-                    </h4>
-                    <div class="no-data-message">
-                        <p>暂无数据</p>
-                    </div>
-                </div>
-            </div>
-        </RightSideModal>
+        <ParametersDetail 
+            :visible="parametersVisible"
+            :selected-product="selectedParametersProduct"
+            :right-modal-width="rightModalWidth"
+            @close="closeParametersPopup"
+        />
 
         <!-- 指定开放管理弹窗 -->
-        <RightSideModal :visible="designatedOpenVisible" :title="`指定开放管理`" :width="rightModalWidth"
-            :mask-closable="true" @close="closeDesignatedOpenPopup">
-            <div class="permission-management">
-                <!-- 注意提示 -->
-                <div class="notice-section">
-                    <div class="notice-content">
-                        <span class="notice-text">注意：当前操作产品：</span>
-                        <span class="product-name">{{ selectedDesignatedOpenProduct?.name || '测试产品' }}</span>
-                    </div>
-                </div>
-
-                <!-- 授权公司选择 -->
-                <div class="company-select-section">
-                    <div class="select-container">
-                        <lay-select v-model="selectedCompany" :placeholder="companySearchText" style="width: 200px;">
-                            <lay-select-option value="">请选择授权公司</lay-select-option>
-                            <lay-select-option v-for="company in authorizedCompanies" :key="company.id"
-                                :value="company.id">
-                                {{ company.name }}
-                            </lay-select-option>
-                        </lay-select>
-                        <button class="add-btn">
-                            <lay-icon type="layui-icon-addition" />
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 公司列表表格 -->
-                <div class="company-table-section">
-                    <div class="table-toolbar">
-                        <div class="dropdown-container">
-                            <button type="button" aria-label="columns"
-                                class="btn btn-default btn-outline dropdown-toggle"
-                                @click="toggleDesignatedOpenColumnsDropdown">
-                                <lay-icon type="layui-icon-shrink-right" />
-                            </button>
-                            <ul class="dropdown-menu" :class="{ 'show': showDesignatedOpenColumnsDropdown }">
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="designatedOpenColumnVisibility.companyName"
-                                            @change="updateDesignatedOpenVisibleColumns" /> 公司名称
-                                    </label>
-                                </li>
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="designatedOpenColumnVisibility.deleteRule"
-                                            @change="updateDesignatedOpenVisibleColumns" /> 删除规则
-                                    </label>
-                                </li>
-                                <li role="menuitem">
-                                    <label>
-                                        <input type="checkbox" v-model="designatedOpenColumnVisibility.status"
-                                            @change="updateDesignatedOpenVisibleColumns" /> 状态
-                                    </label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="company-table">
-                        <table class="simple-table">
-                            <thead>
-                                <tr>
-                                    <th v-if="designatedOpenColumnVisibility.companyName">公司名称</th>
-                                    <th v-if="designatedOpenColumnVisibility.deleteRule">删除规则</th>
-                                    <th v-if="designatedOpenColumnVisibility.status">状态</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="company in authorizedCompanies" :key="company.id">
-                                    <td v-if="designatedOpenColumnVisibility.companyName">{{ company.name }}</td>
-                                    <td v-if="designatedOpenColumnVisibility.deleteRule">默认规则</td>
-                                    <td v-if="designatedOpenColumnVisibility.status">
-                                        <span
-                                            :class="['status-badge', company.status === '已授权' ? 'authorized' : 'unauthorized']">
-                                            {{ company.status }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr v-if="authorizedCompanies.length === 0">
-                                    <td :colspan="getDesignatedOpenVisibleColumnsCount()" class="no-data">无数据</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </RightSideModal>
+        <DesignatedOpenManagement 
+            :visible="designatedOpenVisible"
+            :selected-product="selectedDesignatedOpenProduct"
+            :right-modal-width="rightModalWidth"
+            :authorized-companies="authorizedCompanies"
+            @close="closeDesignatedOpenPopup"
+            @update-authorized-companies="handleUpdateAuthorizedCompanies"
+        />
 
         <!-- 闲置云询价弹窗 -->
-        <RightSideModal :visible="idleCloudVisible" :title="`请输入闲置售价`" :width="rightModalWidth" :mask-closable="true"
-            @close="closeIdleCloudPopup">
-            <div class="idle-cloud-form">
-                <div class="form-group">
-                    <label for="idlePrice">{{ selectedIdleProduct.name }}：</label>
-                    <input type="text" id="idlePrice" v-model="idleCloudForm.idlePrice" placeholder="请输入库存售价" />
-                </div>
+        <IdleCloudInquiry 
+            :visible="idleCloudVisible"
+            :selected-product="selectedIdleProduct"
+            :right-modal-width="rightModalWidth"
+            @close="closeIdleCloudPopup"
+            @submit="handleIdleCloudSubmit"
+        />
 
-                <!-- 备注选择开关 -->
-                <div class="form-group">
-                    <label class="switch-label">
-                        <input type="checkbox" v-model="idleCloudForm.enableRemarks" />
-                        <span class="switch-text">添加备注</span>
-                    </label>
-                </div>
-
-                <!-- 表格区域，根据备注开关决定是否显示 -->
-                <div v-if="idleCloudForm.enableRemarks" class="details-table">
-                    <div class="form-group">
-                        <label for="condition">成色：</label>
-                        <input type="text" id="condition" v-model="idleCloudForm.condition" placeholder="请输入成色" />
-                    </div>
-                    <div class="form-group">
-                        <label for="functionalState">功能状态：</label>
-                        <input type="text" id="functionalState" v-model="idleCloudForm.functionalState"
-                            placeholder="请输入功能状态" />
-                    </div>
-                    <div class="form-group">
-                        <label for="equipmentDetails">设备详情：</label>
-                        <textarea id="equipmentDetails" v-model="idleCloudForm.equipmentDetails"
-                            placeholder="请输入设备详情"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="isUnderWarranty">是否在保：</label>
-                        <input type="text" id="isUnderWarranty" v-model="idleCloudForm.isUnderWarranty"
-                            placeholder="请输入是否在保" />
-                    </div>
-                    <div class="form-group">
-                        <label for="others">其他：</label>
-                        <textarea id="others" v-model="idleCloudForm.others" placeholder="请输入其他"></textarea>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <lay-button type="primary" @click="submitIdleCloudForm">确定</lay-button>
-                    <lay-button @click="closeIdleCloudPopup">取消</lay-button>
-                </div>
-            </div>
-        </RightSideModal>
-
-        <!-- 品牌管理页面覆盖层 -->
-        <div v-if="brandManagementVisible" class="brand-management-overlay">
-            <div class="brand-management-page">
-                <div class="brand-header">
-                    <h2>品牌管理</h2>
-                    <button class="close-btn" @click="closeBrandManagement">
-                        <lay-icon type="layui-icon-close" />
-                    </button>
-                </div>
-                <div class="brand-content">
-                    <div class="brand-table-container">
-                        <table class="brand-table">
-                            <thead>
-                                <tr>
-                                    <th>品牌</th>
-                                    <th>云端库</th>
-                                    <th>星标指定开放</th>
-                                    <th>品牌指定开放</th>
-                                    <th>默认折率(%)</th>
-                                    <th>自动报价</th>
-                                    <th>品牌自动报价管理</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="brand in brandList" :key="brand.id">
-                                    <td>{{ brand.name }}</td>
-                                    <td>
-                                        <lay-switch :model-value="brand.isOpen === 1"
-                                            @update:model-value="(value) => updateBrandCloudLibrary(brand, value)"
-                                            onswitch-text="ON" offswitch-text="OFF" />
-                                    </td>
-                                    <td>
-                                        <span class="setting-link" @click="handleStarSetting(brand)">点击设置</span>
-                                    </td>
-                                    <td>
-                                        <span class="setting-link" @click="handleBrandSetting(brand)">点击设置</span>
-                                    </td>
-                                    <td>{{ brand.defaultDiscount }}</td>
-                                    <td>
-                                        <lay-switch :model-value="brand.autoPrice"
-                                            @update:model-value="(value) => updateBrandAutoPrice(brand, value)"
-                                            onswitch-text="ON" offswitch-text="OFF" />
-                                    </td>
-                                    <td>
-                                        <button class="management-btn" @click="handleBrandPriceManagement(brand)">
-                                            <lay-icon type="layui-icon-set" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- 品牌管理页面 -->
+        <BrandManagement 
+            :visible="brandManagementVisible"
+            :product-brand="productBrand"
+            @close="closeBrandManagement"
+            @brand-price-management="handleBrandPriceManagement"
+        />
         <!-- 品牌自动报价管理弹窗 -->
-        <RightSideModal :visible="brandPriceManagementVisible" :title="`品牌自动报价管理`" :width="rightModalWidth"
-            :mask-closable="true" @close="closeBrandPriceManagement">
-            <div class="brand-price-management">
-                <!-- 顶部输入搜索区域 -->
-                <div class="search-section">
-                    <div class="search-row">
-                        <label>请输入公司名称</label>
-                        <input type="text" v-model="brandPriceForm.companyName" placeholder="请输入公司名称"
-                            class="search-input" />
-                        <span class="highlight-text">当前操作品牌自产优质</span>
-                    </div>
-                </div>
-
-                <!-- 添加按钮和表格 -->
-                <div class="table-section">
-                    <!-- 添加按钮 -->
-                    <div class="add-button-row">
-                        <button class="add-btn" @click="handleAddCompany">
-                            <lay-icon type="layui-icon-add-1" />
-                        </button>
-                        <div class="column-filter">
-                            <lay-icon type="layui-icon-shrink-right" @click="toggleBrandPriceColumnsDropdown" />
-                            <div v-if="showBrandPriceColumnsDropdown" class="columns-dropdown">
-                                <div class="dropdown-header">
-                                    <span>选择显示列</span>
-                                    <button @click="toggleBrandPriceColumnsDropdown" class="close-dropdown">×</button>
-                                </div>
-                                <div class="column-options">
-                                    <label v-for="column in allBrandPriceColumns" :key="column.key">
-                                        <input type="checkbox" v-model="brandPriceColumnVisibility[column.key]" />
-                                        {{ column.title }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 品牌自动报价表格 -->
-                    <div class="brand-price-table-container">
-                        <table class="brand-price-table">
-                            <thead>
-                                <tr>
-                                    <th v-if="brandPriceColumnVisibility.companyName">公司名称</th>
-                                    <th v-if="brandPriceColumnVisibility.entryTime">载至时间</th>
-                                    <th v-if="brandPriceColumnVisibility.defaultPrice">默认折率</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="company in brandPriceCompanyList" :key="company.id">
-                                    <td v-if="brandPriceColumnVisibility.companyName">{{ company.name }}</td>
-                                    <td v-if="brandPriceColumnVisibility.entryTime">{{ company.entryTime }}</td>
-                                    <td v-if="brandPriceColumnVisibility.defaultPrice">{{ company.defaultPrice }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- 分页 -->
-                    <div class="pagination-section">
-                        <div class="pagination-controls">
-                            <span class="pagination-info">共 1 条</span>
-                            <div class="pagination-buttons">
-                                <button class="page-btn current">1</button>
-                            </div>
-                            <div class="page-size-selector">
-                                <select v-model="brandPricePagination.pageSize">
-                                    <option value="10">10 条/页</option>
-                                    <option value="20">20 条/页</option>
-                                    <option value="50">50 条/页</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </RightSideModal>
-
-        <!-- 删除确认弹窗 -->
-        <!-- 已移除删除确认弹窗，改用原生confirm -->
-
+        <BrandPriceManagement 
+            :visible="brandPriceManagementVisible"
+            :selected-brand="selectedBrand"
+            :right-modal-width="rightModalWidth"
+            @close="closeBrandPriceManagement"
+        />
     </div>
 </template>
 
@@ -869,6 +131,14 @@
 import { ref, reactive, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import RightSideModal from '@/components/RightSideModal.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
+import BrandManagement from './BrandManagement.vue';
+import BrandPriceManagement from './BrandPriceManagement.vue';
+import PermissionManagement from './PermissionManagement.vue';
+import DesignatedOpenManagement from './DesignatedOpenManagement.vue';
+import IdleCloudInquiry from './IdleCloudInquiry.vue';
+import ProductDetail from './ProductDetail.vue';
+import ParametersDetail from './ParametersDetail.vue';
+import ProductTable from './ProductTable.vue';
 import http from '@/utils/http';
 import Notify from '@/utils/notify';
 
@@ -943,7 +213,6 @@ interface Product {
 // 产品详情弹窗状态
 const productDetailVisible = ref(false);
 const selectedProduct = ref<Product | null>(null);
-const activeTab = ref('1');
 
 // 右侧参数弹窗状态
 const parametersVisible = ref(false);
@@ -960,19 +229,16 @@ const selectedDesignatedOpenProduct = ref<Product | null>(null);
 // 闲置云询价弹窗状态
 const idleCloudVisible = ref(false);
 const selectedIdleProduct = ref<Product>({ name: '' } as Product);
-const idleCloudForm = reactive({
-    idlePrice: '',        // 库存售价
-    enableRemarks: false,  // 是否添加备注
-    remarks: '',          // 备注
-    condition: '',        // 成色
-    functionalState: '',  // 功能状态
-    equipmentDetails: '', // 设备详情
-    isUnderWarranty: '',  // 是否在保
-    others: ''            // 其他
-});
+
 
 // 响应式弹窗宽度
 const rightModalWidth = ref('35%');
+
+// 搜索加载状态
+const searchLoading = ref(false);
+
+// ProductTable 组件引用
+const productTableRef = ref();
 
 // 权限管理相关数据
 const authorizedCompanies = ref<Company[]>([]);
@@ -991,14 +257,16 @@ const productCreator = ref<ProductModel[]>([]);
 const fetchCompanyList = async () => {
     try {
         const response = await http.get('/company/getAllCompany');
-        if (response.data && Array.isArray(response.data)) {
-            authorizedCompanies.value = response.data.map((company: any) => ({
+        const responseData = response.data || response;
+        if (responseData && Array.isArray(responseData)) {
+            authorizedCompanies.value = responseData.map((company: any) => ({
                 id: company.id || company.companyId,
                 name: company.companyName,
                 status: company.aduitStatus === 1 ? '已授权' : '未授权'
             }));
         }
-    } catch {
+    } catch (error) {
+        console.error('获取公司列表失败:', error);
         Notify.error({
             title: '获取数据失败',
             content: '无法获取公司列表，请稍后重试',
@@ -1009,25 +277,38 @@ const fetchCompanyList = async () => {
 // 获取产品数据
 const fetchProductList = async () => {
     try {
+        loading.value = true;
         const params = {
             page: pagination.current,
             limit: pagination.limit,
         };
 
         const response = await http.get('/product/productsList', params);
-        if (response && response.rows && Array.isArray(response.rows)) {
-            tableData.value = response.rows.map((item: any) => ({
+        const responseData = response.data || response;
+        if (responseData && responseData.rows && Array.isArray(responseData.rows)) {
+            tableData.value = responseData.rows.map((item: any) => ({
                 ...item,
                 checked: false
             }));
-            pagination.total = response.total || response.rows.length;
+            pagination.total = responseData.total || responseData.rows.length;
+        } else {
+            if (Array.isArray(responseData)) {
+                tableData.value = responseData.map((item: any) => ({
+                    ...item,
+                    checked: false
+                }));
+                pagination.total = responseData.length;
+            }
         }
-    } catch {
+    } catch (error) {
+        console.error('获取产品列表失败:', error);
         Notify.error({
             title: '获取数据失败',
             content: '无法获取产品列表，请稍后重试',
             time: 3000
         });
+    } finally {
+        loading.value = false;
     }
 };
 //获取产品类型
@@ -1036,15 +317,16 @@ const fetchProductModels = async () => {
         const response = await http.post('/product/getModelS');
         // 处理字符串数组
         let modelData = [];
-        if (response && Array.isArray(response)) {
-            modelData = response;
+        const responseData = response.data || response;
+        if (responseData && Array.isArray(responseData)) {
+            modelData = responseData;
             productModels.value = modelData.map((item: string) => ({
                 value: item,
                 label: item
             }));
-
         }
-    } catch {
+    } catch (error) {
+        console.error('获取产品型号失败:', error);
         Notify.error({
             title: '获取数据失败',
             content: '无法获取产品型号，请稍后重试',
@@ -1058,73 +340,44 @@ const fetchProductBrand = async () => {
         const response = await http.post('/product/getBrandS');
         // 处理字符串数组
         let modelData = [];
-        if (response && Array.isArray(response)) {
-            modelData = response;
+        const responseData = response.data || response;
+        if (responseData && Array.isArray(responseData)) {
+            modelData = responseData;
             productBrand.value = modelData.map((item: string) => ({
                 value: item,
                 label: item
             }));
-
         }
-    } catch {
+    } catch (error) {
+        console.error('获取产品品牌失败:', error);
         Notify.error({
             title: '获取数据失败',
             content: '无法获取产品品牌，请稍后重试',
             time: 3000
         });
     }
-
-
 };
 const fetchProductCreator = async () => {
     try {
         const response = await http.post('/product/getQueryFieldVal');
         let modelData = [];
-        if (response && Array.isArray(response)) {
-            modelData = response;
+        const responseData = response.data || response;
+        if (responseData && Array.isArray(responseData)) {
+            modelData = responseData;
             productCreator.value = modelData.map((item: string) => ({
                 value: item,
                 label: item
             }));
-
         }
-    } catch {
+    } catch (error) {
+        console.error('获取创建人列表失败:', error);
         Notify.error({
             title: '获取数据失败',
-            content: '无法获取产品品牌，请稍后重试',
+            content: '无法获取创建人列表，请稍后重试',
             time: 3000
         });
     }
-
 };
-// 产品详情弹窗按钮配置
-const productDetailButtons = ref([
-    {
-        text: '关闭',
-        callback: () => closeProductDetail()
-    }
-]);
-
-// 价格表格配置
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const priceColumns: any[] = [
-    { title: '成本价', key: 'cost', width: '120px' },
-    { title: '参考售价', key: 'referencePrice', width: '120px' },
-    { title: '市场指导价', key: 'marketPrice', width: '130px' }
-];
-
-// 价格数据
-const priceData = computed(() => {
-    if (!selectedProduct.value) return [];
-
-    return [
-        {
-            cost: `¥${selectedProduct.value.purchaseprice}`,
-            referencePrice: `¥${selectedProduct.value.price}`,
-            marketPrice: `¥${selectedProduct.value.marketprice}`
-        }
-    ];
-});
 
 // 过滤表单
 const filterForm = reactive({
@@ -1137,94 +390,133 @@ const filterForm = reactive({
     libraryType: ''
 });
 
-// 列显示控制
-const columnVisibility = reactive({
-    proId: true,             // 产品编号
-    name: true,              // 产品名称
-    brand: true,             // 品牌
-    model: true,             // 型号
-    trait: true,             // 产品特点
-    unit: true,              // 单位
-    purchaseprice: true,     // 成本
-    price: true,             // 参考售价
-    marketprice: true,       // 市场指导价
-    pictureaddress: true,    // 产品图片
-    uname: true,             // 创建人
-    cloudLibrary: true,      // 云端库
-    openUpdate: true,        // 开放星标
-    designatedOpen: true,    // 指定开放
-    defaultDiscount: true,   // 默认折率
-    autoHandle: true         // 自动报价
-});
+// 搜索功能
+const handleSearch = async () => {
+    try {
+        // 检查是否有搜索条件
+        const hasSearchConditions = !!(
+            filterForm.productName.trim() ||
+            filterForm.brand ||
+            filterForm.creator ||
+            filterForm.model ||
+            filterForm.modifyTime
+        );
 
-const showColumnsDropdown = ref(false);
+        if (!hasSearchConditions) {
+            Notify.error({
+                title: '搜索提示',
+                content: '请至少输入一个搜索条件',
+                time: 3000
+            });
+            return;
+        }
 
-// 表格列配置
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const allColumns: any[] = [
-    {
-        title: '',
-        key: 'checkbox',
-        width: '50px',
-        customSlot: 'checkbox'
-    },
-    { title: '产品编号', key: 'proId', width: '100px' },
-    { title: '产品名称', key: 'name', width: '120px', customSlot: 'productName' },
-    { title: '品牌', key: 'brand', width: '80px' },
-    { title: '型号', key: 'model', width: '100px' },
-    { title: '参数/特性', key: 'trait', width: '100px', customSlot: 'parameters' },
-    { title: '单位', key: 'unit', width: '60px' },
-    { title: '成本', key: 'purchaseprice', width: '80px' },
-    { title: '参考售价', key: 'price', width: '80px' },
-    { title: '市场指导价', key: 'marketprice', width: '100px' },
-    { title: '产品图片', key: 'pictureaddress', width: '80px', customSlot: 'productImage' },
-    { title: '创建人', key: 'uname', width: '80px' },
-    { title: '云端库', key: 'cloudLibrary', width: '80px', customSlot: 'cloudLibrary' },
-    { title: '开放星标', key: 'openUpdate', width: '80px', customSlot: 'openUpdate' },
-    { title: '指定开放', key: 'designatedOpen', width: '80px', customSlot: 'designatedOpen' },
-    { title: '默认折率(%)', key: 'defaultDiscount', width: '100px' },
-    { title: '自动报价', key: 'autoHandle', width: '80px', customSlot: 'autoPrice' }
-];
+        searchLoading.value = true;
 
-// 计算可见列
-const columns = computed(() => {
-    return allColumns.filter(column => {
-        if (column.key === 'checkbox') return true;
-        return columnVisibility[column.key as keyof typeof columnVisibility] !== false;
-    });
-});
+        // 构建搜索参数
+        const searchParams: any = {
+            page: 1, // 搜索时重置为第一页
+            limit: 80,
+        };
 
-// 兼容原有代码，保持visibleColumns别名
-const visibleColumns = columns;
+        // 添加搜索条件
+        if (filterForm.productName.trim()) {
+            searchParams.name = filterForm.productName.trim();
+        }
+        if (filterForm.brand) {
+            searchParams.brand = filterForm.brand;
+        }
+        if (filterForm.creator) {
+            searchParams.creator = filterForm.creator;
+        }
+        if (filterForm.model) {
+            searchParams.model = filterForm.model;
+        }
+        if (filterForm.modifyTime) {
+            searchParams.modifyTime = filterForm.modifyTime;
+        }
+        if (filterForm.libraryType) {
+            searchParams.libraryType = filterForm.libraryType;
+        }
 
-// 表格数据 - 改为从API获取
-const tableData = ref<Product[]>([]);
+        console.log('搜索参数:', searchParams);
 
-// 加载状态
-const loading = ref(false);
-// 表格变化处理
-const handleTableChange = async (pageData: { current: number; limit: number }) => {
-    pagination.current = pageData.current;
-    pagination.limit = pageData.limit;
-    await fetchProductList();
+        // 通过ProductTable组件进行搜索
+        if (productTableRef.value) {
+            await productTableRef.value.fetchProductList(searchParams);
+            
+            Notify.success({
+                title: '搜索完成',
+                content: '已更新搜索结果',
+                time: 3000
+            });
+        } else {
+            throw new Error('表格组件未初始化');
+        }
+    } catch (error: any) {
+        console.error('搜索失败:', error);
+        Notify.error({
+            title: '搜索失败',
+            content: error.message || '搜索过程中发生错误，请稍后重试',
+            time: 3000
+        });
+    } finally {
+        searchLoading.value = false;
+    }
 };
 
-// 刷新数据
-const handleRefresh = async () => {
-    await fetchProductList();
+// 重置搜索表单
+const handleRefreshForm = async () => {
+    try {
+        // 检查是否有搜索条件
+        const hasSearchConditions = !!(
+            filterForm.productName.trim() ||
+            filterForm.brand ||
+            filterForm.creator ||
+            filterForm.model ||
+            filterForm.modifyTime ||
+            filterForm.libraryType
+        );
+
+        if (hasSearchConditions) {
+            const confirmReset = confirm('确定要重置所有搜索条件并刷新数据吗？');
+            if (!confirmReset) {
+                return;
+            }
+        }
+
+        searchLoading.value = true;
+
+        // 重置表单数据
+        filterForm.productName = '';
+        filterForm.brand = '';
+        filterForm.creator = '';
+        filterForm.modifyTime = '';
+        filterForm.model = '';
+        filterForm.serviceType = '';
+        filterForm.libraryType = '';
+
+        // 重置表格数据，获取所有产品
+        if (productTableRef.value) {
+            await productTableRef.value.fetchProductList();
+        }
+
+        Notify.success({
+            title: '重置成功',
+            content: '已重置搜索条件并刷新数据',
+            time: 3000
+        });
+    } catch (error: any) {
+        console.error('重置失败:', error);
+        Notify.error({
+            title: '重置失败',
+            content: '重置过程中发生错误，请稍后重试',
+            time: 3000
+        });
+    } finally {
+        searchLoading.value = false;
+    }
 };
-
-// 分页配置
-const pagination = reactive({
-    current: 1,
-    limit: 80,
-    total: 0
-});
-
-// 全选状态
-const allChecked = ref(false);
-const indeterminate = ref(false);
-
 // 响应式弹窗宽度计算
 const updateModalWidth = () => {
     const screenWidth = window.innerWidth;
@@ -1242,146 +534,6 @@ const updateModalWidth = () => {
         rightModalWidth.value = '90%';
     }
 };
-
-// 更新全选状态
-const updateCheckAllState = () => {
-    const checkedCount = tableData.value.filter(item => item.checked).length;
-    const total = tableData.value.length;
-
-    if (checkedCount === 0) {
-        allChecked.value = false;
-        indeterminate.value = false;
-    } else if (checkedCount === total) {
-        allChecked.value = true;
-        indeterminate.value = false;
-    } else {
-        allChecked.value = false;
-        indeterminate.value = true;
-    }
-};
-
-// 切换行复选框状态
-const toggleRowCheck = (row: { checked: boolean }) => {
-    row.checked = !row.checked;
-    updateCheckAllState();
-};
-
-// 更新可见列
-const updateVisibleColumns = () => {
-    // 列显示状态更新时的处理逻辑
-};
-
-// 切换列下拉菜单
-const toggleColumnsDropdown = () => {
-    showColumnsDropdown.value = !showColumnsDropdown.value;
-};
-
-// 工具栏功能方法
-// AI填充数据
-const handleAiFill = () => {
-    console.log('AI填充数据');
-    // 这里可以调用AI接口填充产品数据
-};
-
-// 复制
-const handleCopy = () => {
-    const selectedRows = tableData.value.filter(row => row.checked);
-    if (selectedRows.length === 0) {
-        Notify.error({
-            title: '提示',
-            content: '请选择要复制的产品',
-            time: 3000
-        });
-        return;
-    }
-
-    try {
-        // 创建复制数据，格式化为表格形式
-        const headers = [
-            '产品编号', '产品名称', '品牌', '规格型号', '单位',
-            '成本', '工程价', '市场指导价', '创建人', '创建时间'
-        ];
-
-        // 表头行
-        let copyText = headers.join('\t') + '\n';
-
-        // 数据行
-        selectedRows.forEach(row => {
-            const rowData = [
-                row.proId || '',
-                row.name || '',
-                row.brand || '',
-                row.model || '',
-                row.unit || '',
-                row.purchaseprice || '',
-                row.price || '',
-                row.marketprice || '',
-                row.uname || '',
-                row.createtime || ''
-            ];
-            copyText += rowData.join('\t') + '\n';
-        });
-
-        // 使用现代浏览器的剪贴板API
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(copyText).then(() => {
-                Notify.success({
-                    title: '复制成功',
-                    content: `已复制 ${selectedRows.length} 条产品记录到剪贴板`,
-                    time: 3000
-                });
-            }).catch(err => {
-                fallbackCopyMethod(copyText, selectedRows.length);
-            });
-        } else {
-            // 降级方案：使用传统的execCommand方法
-            fallbackCopyMethod(copyText, selectedRows.length);
-        }
-    } catch (error) {
-        Notify.error({
-            title: '复制失败',
-            content: '复制过程中发生错误，请重试',
-            time: 3000
-        });
-    }
-};
-
-// 降级复制方法
-const fallbackCopyMethod = (text: string, count: number) => {
-    try {
-        // 创建临时文本区域
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-
-        // 选择并复制
-        textArea.focus();
-        textArea.select();
-
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-
-        if (successful) {
-            Notify.success({
-                title: '复制成功',
-                content: `已复制 ${count} 条产品记录到剪贴板`,
-                time: 3000
-            });
-        } else {
-            throw new Error('execCommand failed');
-        }
-    } catch (err) {
-        Notify.error({
-            title: '复制失败',
-            content: '无法复制到剪贴板，请手动复制数据',
-            time: 3000
-        });
-    }
-};
-
 // 询价
 const handleInquiry = () => {
     const selectedRows = tableData.value.filter(row => row.checked);
@@ -1742,8 +894,7 @@ const handleBrandManagement = () => {
 };
 
 // 添加至闲置云
-const handleAddToIdleCloud = () => {
-    const selectedRows = tableData.value.filter(row => row.checked);
+const handleAddToIdleCloud = (selectedRows: Product[]) => {
     if (selectedRows.length === 0) {
         Notify.error({
             title: '提示',
@@ -1825,11 +976,14 @@ onMounted(async () => {
     updateModalWidth();
     window.addEventListener('resize', handleResize);
 
+    // 加载搜索历史
+    loadSearchHistory();
+
     // 并行获取产品型号和产品列表
     await Promise.all([
         fetchProductModels(),
         fetchProductBrand(),
-        fetchProductList(),
+
         fetchProductCreator(),
         fetchCompanyList()
     ]);
@@ -1838,35 +992,6 @@ onMounted(async () => {
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
 });
-
-// 格式化参数文本，处理分号和逗号的换行
-const formatParamText = (text: string) => {
-    if (!text) return '';
-    // 将分号替换为换行符，并确保换行符后有空格
-    return text.replace(/;/g, '<br />&nbsp;&nbsp;').replace(/,/g, '<br />&nbsp;&nbsp;');
-};
-
-// 权限管理相关数据
-const permissionColumnVisibility = reactive({
-    companyName: true,
-    deleteRule: true,
-    status: true
-});
-
-const togglePermissionColumnsDropdown = () => {
-    showPermissionColumnsDropdown.value = !showPermissionColumnsDropdown.value;
-};
-
-const getPermissionVisibleColumnsCount = () => {
-    return Object.values(permissionColumnVisibility).filter(Boolean).length;
-};
-
-const updatePermissionVisibleColumns = () => {
-    // 权限管理相关数据更新时的处理逻辑
-};
-
-const showPermissionColumnsDropdown = ref(false);
-
 const updateCloudLibraryStatus = (row: Product, value: boolean) => {
     // 更新云端库状态：true -> 1, false -> 0
     row.isOpen = value ? 1 : 0;
@@ -1889,54 +1014,9 @@ const closeDesignatedOpenPopup = () => {
     selectedCompany.value = '';
 };
 
-// 打开指定开放管理弹窗
-const toggleDesignatedOpenColumnsDropdown = () => {
-    showDesignatedOpenColumnsDropdown.value = !showDesignatedOpenColumnsDropdown.value;
-};
-
-// 打开指定开放管理弹窗
-const updateDesignatedOpenVisibleColumns = () => {
-    // 更新指定开放管理列的显示状态
-};
-
-const showDesignatedOpenColumnsDropdown = ref(false);
-
-const getDesignatedOpenVisibleColumnsCount = () => {
-    return Object.values(designatedOpenColumnVisibility).filter(Boolean).length;
-};
-
-const designatedOpenColumnVisibility = reactive({
-    companyName: true,
-    deleteRule: true,
-    status: true
-});
-
-// 提交闲置云询价弹窗
-const submitIdleCloudForm = () => {
-    closeIdleCloudPopup();
-};
-
 // 关闭闲置云询价弹窗
 const closeIdleCloudPopup = () => {
     idleCloudVisible.value = false;
-    idleCloudForm.idlePrice = '';
-    idleCloudForm.enableRemarks = false;
-    idleCloudForm.remarks = '';
-    idleCloudForm.condition = '';
-    idleCloudForm.functionalState = '';
-    idleCloudForm.equipmentDetails = '';
-    idleCloudForm.isUnderWarranty = '';
-    idleCloudForm.others = '';
-};
-
-// 计算是否显示详细表格
-const shouldShowTable = computed(() => {
-    return idleCloudForm.enableRemarks;
-});
-
-// 处理备注开关变化
-const handleRemarksToggle = () => {
-    idleCloudForm.enableRemarks = !idleCloudForm.enableRemarks;
 };
 
 // 更新品牌云端库状态
@@ -1953,6 +1033,27 @@ const updateBrandAutoPrice = (brand: any, value: boolean) => {
     // 这里可以添加API调用来更新后端数据
 };
 
+// 处理星标设置
+const handleStarSetting = (brand: any) => {
+    console.log('处理星标设置:', brand.name);
+    // 这里可以打开星标设置弹窗或处理星标设置逻辑
+    Notify.info({
+        title: '星标设置',
+        content: `正在为品牌 ${brand.name} 设置星标`,
+        time: 3000
+    });
+};
+
+// 处理品牌设置
+const handleBrandSetting = (brand: any) => {
+    console.log('处理品牌设置:', brand.name);
+    Notify.info({
+        title: '品牌设置',
+        content: `正在为品牌 ${brand.name} 进行设置`,
+        time: 3000
+    });
+};
+
 // 处理品牌自动报价管理
 const handleBrandPriceManagement = (brand: any) => {
     console.log('处理品牌自动报价管理:', brand.name);
@@ -1965,30 +1066,26 @@ const handleBrandPriceManagement = (brand: any) => {
 const closeBrandPriceManagement = () => {
     brandPriceManagementVisible.value = false;
     selectedBrand.value = null;
-    brandPriceForm.companyName = '';
+};
+
+// 更新授权公司列表
+const handleUpdateAuthorizedCompanies = (companies: Company[]) => {
+    authorizedCompanies.value = companies;
+};
+
+// 处理闲置云提交
+const handleIdleCloudSubmit = (data: any) => {
+    console.log('闲置云提交数据:', data);
+    // 这里可以添加提交到后端的逻辑
+    Notify.success({
+        title: '成功',
+        content: '闲置云询价提交成功',
+        time: 3000
+    });
 };
 
 // 选中的品牌
 const selectedBrand = ref<any>(null);
-
-// 品牌自动报价表单
-const brandPriceForm = reactive({
-    companyName: ''
-});
-
-// 品牌列表
-const brandList = ref([
-    { id: 1, name: '国产设备', isOpen: 1, autoPrice: 1, defaultDiscount: 80 },
-    { id: 2, name: '国产设备', isOpen: 0, autoPrice: 0, defaultDiscount: 70 },
-    { id: 3, name: '/', isOpen: 0, autoPrice: 0, defaultDiscount: 0 },
-    { id: 4, name: 'MA', isOpen: 0, autoPrice: 0, defaultDiscount: 80 },
-    { id: 5, name: '珠江', isOpen: 0, autoPrice: 0, defaultDiscount: 70 },
-    { id: 6, name: 'ETC', isOpen: 0, autoPrice: 0, defaultDiscount: 0 },
-    { id: 7, name: '中国', isOpen: 0, autoPrice: 0, defaultDiscount: 80 },
-    { id: 8, name: '中国路易', isOpen: 0, autoPrice: 0, defaultDiscount: 70 },
-    { id: 9, name: '华为', isOpen: 0, autoPrice: 0, defaultDiscount: 0 },
-    { id: 10, name: 'H3C', isOpen: 0, autoPrice: 0, defaultDiscount: 80 }
-]);
 
 // 品牌管理页面覆盖层
 const brandManagementVisible = ref(false);
@@ -1996,75 +1093,56 @@ const brandManagementVisible = ref(false);
 // 关闭品牌管理页面
 const closeBrandManagement = () => {
     brandManagementVisible.value = false;
-};
-
-// 删除确认弹窗按钮配置
-// const deleteConfirmButtons = ref([...]);
-// const closeDeleteConfirm = () => {...};
+}
 
 // 品牌自动报价管理弹窗状态
 const brandPriceManagementVisible = ref(false);
 
-// 品牌自动报价表格列配置
-const allBrandPriceColumns = ref([
-    { key: 'companyName', title: '公司名称' },
-    { key: 'entryTime', title: '载至时间' },
-    { key: 'defaultPrice', title: '默认折率' }
-]);
-
-// 品牌自动报价表格列显示控制
-const brandPriceColumnVisibility = reactive({
-    companyName: true,
-    entryTime: true,
-    defaultPrice: true
-});
-
-// 品牌自动报价表格数据
-const brandPriceCompanyList = ref([
-    { id: 1, name: '公司A', entryTime: '2023-01-01', defaultPrice: '80%' },
-    { id: 2, name: '公司B', entryTime: '2023-01-02', defaultPrice: '75%' },
-    { id: 3, name: '公司C', entryTime: '2023-01-03', defaultPrice: '70%' }
-]);
-
-// 分页配置
-const brandPricePagination = reactive({
-    pageSize: 10,
-    currentPage: 1
-});
-
-// 添加公司
-const handleAddCompany = () => {
-    // 这里可以添加添加公司的逻辑
-    console.log('添加公司');
+// 快速搜索功能（支持Enter键搜索）
+const handleQuickSearch = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+        handleSearch();
+    }
 };
 
-// 切换品牌自动报价表格列显示
-const toggleBrandPriceColumnsDropdown = () => {
-    showBrandPriceColumnsDropdown.value = !showBrandPriceColumnsDropdown.value;
+// 新增：搜索历史管理
+const searchHistory = ref<string[]>([]);
+const maxSearchHistory = 10;
+
+const addToSearchHistory = (searchTerm: string) => {
+    if (searchTerm.trim()) {
+        // 移除已存在的相同搜索词
+        const index = searchHistory.value.indexOf(searchTerm);
+        if (index !== -1) {
+            searchHistory.value.splice(index, 1);
+        }
+
+        // 添加到开头
+        searchHistory.value.unshift(searchTerm);
+
+        // 限制历史记录数量
+        if (searchHistory.value.length > maxSearchHistory) {
+            searchHistory.value = searchHistory.value.slice(0, maxSearchHistory);
+        }
+
+        // 保存到本地存储
+        localStorage.setItem('productSearchHistory', JSON.stringify(searchHistory.value));
+    }
 };
 
-// 显示品牌自动报价表格列
-const showBrandPriceColumnsDropdown = ref(false);
-
-// 表格列配置
-const columnsDropdown = ref([
-    { key: 'companyName', title: '公司名称' },
-    { key: 'entryTime', title: '载至时间' },
-    { key: 'defaultPrice', title: '默认折率' }
-]);
-
-// 表格数据
-const tableDataDropdown = ref([
-    { key: 'companyName', title: '公司名称', value: '公司A' },
-    { key: 'entryTime', title: '载至时间', value: '2023-01-01' },
-    { key: 'defaultPrice', title: '默认折率', value: '80%' }
-]);
-
-// 表格变化处理
-const handleTableChangeDropdown = (pageData: { current: number; limit: number }) => {
-    brandPricePagination.currentPage = pageData.current;
-    brandPricePagination.pageSize = pageData.limit;
+// 加载搜索历史
+const loadSearchHistory = () => {
+    try {
+        const saved = localStorage.getItem('productSearchHistory');
+        if (saved) {
+            searchHistory.value = JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('加载搜索历史失败:', error);
+        searchHistory.value = [];
+    }
 };
+
 </script>
 
 <style scoped lang="scss">
@@ -2075,8 +1153,6 @@ const handleTableChangeDropdown = (pageData: { current: number; limit: number })
     position: relative; // 为右侧弹窗提供定位参考
 }
 
-
-
 .filter-section {
     background: white;
     padding: 16px 20px;
@@ -2084,7 +1160,6 @@ const handleTableChangeDropdown = (pageData: { current: number; limit: number })
     border-radius: 6px;
     border: 1px solid #e8e8e8;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-
 
     :deep(.layui-form) {
         display: flex;
@@ -2245,177 +1320,6 @@ const handleTableChangeDropdown = (pageData: { current: number; limit: number })
         }
     }
 }
-
-// 工具栏样式
-.fixed-table-toolbar {
-    padding: 15px 20px;
-    border-bottom: 1px solid #e8e8e8;
-    margin-bottom: 0;
-    background: #fff;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-
-    .btnIcon,
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: #495057;
-
-        &:hover {
-            background: #e9ecef;
-            border-color: #adb5bd;
-        }
-
-        .layui-icon {
-            font-size: 18px;
-            line-height: 1;
-        }
-    }
-
-    .invite-but {
-        position: relative;
-
-        &:hover::after {
-            content: attr(data-title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 8px;
-            padding: 6px 10px;
-            background: #333;
-            color: #fff;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        &:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 2px;
-            border: 4px solid transparent;
-            border-top-color: #333;
-            z-index: 1001;
-        }
-    }
-
-    .dropdown-container {
-        position: relative;
-    }
-
-    .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        z-index: 1000;
-        display: none;
-        min-width: 160px;
-        padding: 5px 0;
-        margin: 2px 0 0;
-        font-size: 12px;
-        text-align: left;
-        list-style: none;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-
-        &.show {
-            display: block;
-        }
-
-        li {
-            &:hover {
-                background-color: #f5f5f5;
-            }
-
-            label {
-                display: block;
-                padding: 8px 15px;
-                font-weight: normal;
-                line-height: 1.4;
-                color: #333;
-                white-space: nowrap;
-                cursor: pointer;
-                margin: 0;
-
-                input[type="checkbox"] {
-                    margin-right: 8px;
-                }
-            }
-        }
-    }
-}
-
-// 复选框样式
-.custom-checkbox {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.checkbox-square {
-    width: 14px;
-    height: 14px;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-
-    .layui-icon {
-        font-size: 10px;
-        line-height: 1;
-    }
-
-    &.checked {
-        background-color: #5FB878;
-        border-color: #5FB878;
-        color: white;
-    }
-}
-
-// 链接样式
-.product-link,
-.parameters-link {
-    color: #1890ff;
-    text-decoration: none;
-    font-size: 12px;
-
-    &:hover {
-        text-decoration: underline;
-    }
-}
-
-// 操作文字样式
-.action-text {
-    cursor: pointer;
-    font-size: 12px;
-
-    &:hover {
-        text-decoration: underline;
-    }
-}
-
 // 开关样式优化
 :deep(.layui-switch) {
     transform: scale(0.8);
@@ -2444,864 +1348,6 @@ const handleTableChangeDropdown = (pageData: { current: number; limit: number })
         color: #999;
     }
 }
-
-// 产品详情弹窗样式
-.product-detail {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-
-    .product-header {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 24px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #f0f0f0;
-
-        .product-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-right: 24px;
-            background-color: #f0f0f0;
-
-            .image-placeholder {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #888;
-                font-size: 13px;
-                line-height: 1.4;
-            }
-        }
-
-        .product-basic-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            flex: 1;
-
-            .info-row {
-                display: flex;
-                margin-bottom: 8px;
-                line-height: 1.5;
-
-                .label {
-                    font-weight: 500;
-                    color: #666;
-                    min-width: 80px;
-                    margin-right: 12px;
-                    font-size: 14px;
-                }
-
-                .value {
-                    color: #333;
-                    font-weight: 600;
-                    font-size: 14px;
-                }
-            }
-
-            .price-table-section {
-                margin-top: 16px;
-
-                .price-table {
-                    :deep(.layui-table) {
-                        border: 1px solid #e8e8e8;
-                        border-radius: 6px;
-                        overflow: hidden;
-                        font-size: 12px;
-
-                        .layui-table-header {
-                            background: #f8f9fa;
-                        }
-
-                        .layui-table-body {
-                            tr:hover {
-                                background-color: #f0f8ff;
-                            }
-                        }
-
-                        th,
-                        td {
-                            border-color: #e8e8e8;
-                            text-align: center;
-                            padding: 6px 8px;
-                        }
-
-                        .layui-table-cell-content {
-                            text-align: center;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 13px;
-                        }
-                    }
-                }
-            }
-        }
-
-        .product-title {
-            h2 {
-                margin: 0;
-                font-size: 26px;
-                color: #333;
-                font-weight: 700;
-                line-height: 1.3;
-            }
-        }
-    }
-
-    .tabs-container {
-        margin-bottom: 24px;
-
-        :deep(.layui-tab) {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-            .layui-tab-title {
-                li {
-                    font-size: 15px;
-                    padding: 12px 20px;
-                    line-height: 1.4;
-                    font-weight: 500;
-                }
-            }
-
-            .layui-tab-content {
-                padding: 24px;
-                background-color: #f8f9fa;
-                border-radius: 0 0 8px 8px;
-                min-height: 200px;
-            }
-        }
-
-        .tab-content {
-            .param-list {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                gap: 16px 28px;
-
-                .param-item {
-                    display: flex;
-                    align-items: flex-start;
-                    margin-bottom: 4px;
-
-                    .param-label {
-                        font-weight: 500;
-                        font-size: 14px;
-                        line-height: 1.5;
-                        flex-shrink: 0;
-                    }
-
-                    .param-value {
-                        color: #333;
-                        font-weight: 600;
-                        font-size: 14px;
-                        line-height: 1.5;
-                    }
-                }
-            }
-
-            .features-content {
-                p {
-                    margin: 0 0 18px 0;
-                    color: #666;
-                    line-height: 1.7;
-                    font-size: 14px;
-                }
-
-                h4 {
-                    margin: 0 0 12px 0;
-                    font-size: 16px;
-                    color: #333;
-                    font-weight: 600;
-                    line-height: 1.4;
-                }
-
-                ul {
-                    padding-left: 24px;
-                    margin: 0;
-
-                    li {
-                        color: #666;
-                        line-height: 1.7;
-                        font-size: 14px;
-                        margin-bottom: 6px;
-                    }
-                }
-            }
-        }
-    }
-
-    .status-section {
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid #f0f0f0;
-
-        h3 {
-            margin: 0 0 18px 0;
-            font-size: 17px;
-            color: #333;
-            font-weight: 600;
-            line-height: 1.4;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: #fafafa;
-            border-radius: 6px;
-
-            label {
-                font-weight: 500;
-                color: #666;
-                min-width: 80px;
-                margin-right: 12px;
-                font-size: 14px;
-                line-height: 1.4;
-            }
-
-            .status {
-                padding: 4px 12px;
-                border-radius: 4px;
-                font-size: 13px;
-                font-weight: 500;
-                line-height: 1.3;
-
-                &.enabled {
-                    background: #f6ffed;
-                    color: #52c41a;
-                    border: 1px solid #b7eb8f;
-                }
-
-                &.disabled {
-                    background: #fff2f0;
-                    color: #ff4d4f;
-                    border: 1px solid #ffccc7;
-                }
-            }
-        }
-    }
-}
-
-// 产品星标管理弹窗样式
-.permission-management {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-
-    .notice-section {
-        margin-bottom: 24px;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #eee;
-
-        .notice-content {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-
-            .notice-text {
-                font-weight: 500;
-                color: #333;
-                font-size: 14px;
-            }
-
-            .product-name {
-                font-weight: 600;
-                color: #1890ff;
-                font-size: 14px;
-            }
-        }
-    }
-
-    .company-select-section {
-        margin-bottom: 24px;
-
-        .select-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f8f9fa;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            padding: 8px 12px;
-
-            .layui-select {
-                flex: 1;
-            }
-
-            .add-btn {
-                background: #1890ff;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 12px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: background-color 0.2s ease;
-
-                &:hover {
-                    background: #40a9ff;
-                }
-
-                .layui-icon {
-                    font-size: 12px;
-                }
-            }
-        }
-    }
-
-    .company-table-section {
-        .table-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #eee;
-
-            .export-btn {
-                background: #1890ff;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 12px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: background-color 0.2s ease;
-
-                &:hover {
-                    background: #40a9ff;
-                }
-
-                .layui-icon {
-                    font-size: 12px;
-                }
-            }
-        }
-
-        .company-table {
-            :deep(.layui-table) {
-                border: 1px solid #e8e8e8;
-                border-radius: 6px;
-                overflow: hidden;
-                font-size: 12px;
-
-                .layui-table-header {
-                    background: #f8f9fa;
-                }
-
-                .layui-table-body {
-                    tr:hover {
-                        background-color: #f0f8ff;
-                    }
-                }
-
-                th,
-                td {
-                    border-color: #e8e8e8;
-                    text-align: center;
-                    padding: 6px 8px;
-                }
-
-                .layui-table-cell-content {
-                    text-align: center;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 13px;
-                }
-            }
-
-            .simple-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 12px;
-
-                th,
-                td {
-                    border: 1px solid #e8e8e8;
-                    padding: 8px 12px;
-                    text-align: left;
-                }
-
-                th {
-                    background-color: #f8f9fa;
-                    font-weight: 500;
-                    color: #333;
-                }
-
-                td {
-                    color: #666;
-                }
-
-                .no-data {
-                    text-align: center;
-                    padding: 20px;
-                    color: #888;
-                    font-size: 14px;
-                }
-            }
-        }
-    }
-}
-
-// 右侧弹窗内容样式优化
-.parameters-detail {
-    .info-section {
-        margin-bottom: 24px;
-
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 0 0 16px 0;
-            font-size: 16px;
-            color: #333;
-            font-weight: 600;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #1890ff;
-
-            .layui-icon {
-                color: #1890ff;
-                font-size: 16px;
-            }
-        }
-
-        .info-grid,
-        .params-grid {
-            display: grid;
-            gap: 12px;
-        }
-
-        .info-item,
-        .param-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border-left: 3px solid #e8e8e8;
-            transition: all 0.2s ease;
-
-            &:hover {
-                border-left-color: #1890ff;
-                background: #f0f8ff;
-            }
-
-            .label,
-            .param-label {
-                font-weight: 500;
-                color: #666;
-                min-width: 80px;
-                flex-shrink: 0;
-                font-size: 13px;
-            }
-
-            .value,
-            .param-value {
-                color: #333;
-                font-weight: 600;
-                font-size: 13px;
-                flex: 1;
-                word-break: break-all;
-            }
-        }
-
-        .product-images {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-
-            .single-image-container {
-                width: 200px;
-                height: 200px;
-                border-radius: 8px;
-                overflow: hidden;
-                background-color: transparent;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: none;
-
-                .product-image-full {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                    border-radius: 8px;
-                }
-
-                &.no-image {
-                    background-color: #f8f9fa;
-                    border: 1px solid #eee;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    color: #888;
-                    font-size: 12px;
-
-                    .layui-icon {
-                        font-size: 32px;
-                        margin-bottom: 8px;
-                    }
-                }
-            }
-        }
-
-        .no-data-message {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #eee;
-
-            p {
-                margin: 0;
-                color: #888;
-                font-size: 14px;
-                font-weight: 500;
-            }
-        }
-
-        .product-materials {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-
-            .material-item {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 12px;
-                background: #f8f9fa;
-                border-radius: 6px;
-                border-left: 3px solid #e8e8e8;
-                transition: all 0.2s ease;
-
-                &:hover {
-                    border-left-color: #1890ff;
-                    background: #f0f8ff;
-                }
-
-                .material-label {
-                    font-weight: 500;
-                    color: #666;
-                    font-size: 13px;
-                }
-
-                .material-value {
-                    color: #333;
-                    font-weight: 600;
-                    font-size: 13px;
-                }
-            }
-        }
-
-        .price-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-
-            .price-item {
-                background: #f8f9fa;
-                border-radius: 8px;
-                padding: 16px;
-                text-align: center;
-                border: 2px solid transparent;
-                transition: all 0.3s ease;
-
-                &.cost {
-                    border-color: #ff7875;
-
-                    &:hover {
-                        background: #fff2f0;
-                        transform: translateY(-2px);
-                    }
-                }
-
-                &.reference {
-                    border-color: #52c41a;
-
-                    &:hover {
-                        background: #f6ffed;
-                        transform: translateY(-2px);
-                    }
-                }
-
-                &.market {
-                    border-color: #1890ff;
-
-                    &:hover {
-                        background: #f0f8ff;
-                        transform: translateY(-2px);
-                    }
-                }
-
-                .label {
-                    display: block;
-                    font-size: 12px;
-                    color: #666;
-                    margin-bottom: 8px;
-                    font-weight: 500;
-                }
-
-                .value {
-                    display: block;
-                    font-size: 18px;
-                    font-weight: 700;
-                    color: #333;
-                }
-            }
-        }
-
-        .features-content {
-            .description {
-                margin: 0 0 16px 0;
-                color: #666;
-                line-height: 1.8;
-                font-size: 14px;
-                padding: 20px;
-                background: #f8f9fa;
-                border-radius: 8px;
-                border-left: 4px solid #1890ff;
-                white-space: pre-wrap;
-                word-break: break-word;
-                word-wrap: break-word;
-                min-height: 100px;
-                max-height: none;
-                overflow: visible;
-                box-sizing: border-box;
-                text-align: justify;
-                letter-spacing: 0.5px;
-            }
-
-            .features-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-
-                .feature-tag {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    padding: 6px 12px;
-                    background: #e6f7ff;
-                    color: #1890ff;
-                    border-radius: 16px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    border: 1px solid #91d5ff;
-
-                    .layui-icon {
-                        font-size: 12px;
-                    }
-                }
-            }
-        }
-
-        .params-content {
-            .param-description {
-                margin-bottom: 16px;
-
-                .param-text {
-                    margin: 0;
-                    color: #666;
-                    line-height: 1.8;
-                    font-size: 14px;
-                    padding: 20px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    border-left: 4px solid #1890ff;
-                    word-break: break-word;
-                    word-wrap: break-word;
-                    min-height: 100px;
-                    max-height: none;
-                    overflow: visible;
-                    box-sizing: border-box;
-                    text-align: justify;
-                    letter-spacing: 0.5px;
-                }
-
-                p {
-                    margin: 0;
-                    color: #666;
-                    line-height: 1.8;
-                    font-size: 14px;
-                    padding: 20px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    border-left: 4px solid #1890ff;
-                    white-space: pre-wrap;
-                    word-break: break-word;
-                    word-wrap: break-word;
-                    min-height: 100px;
-                    max-height: none;
-                    overflow: visible;
-                    box-sizing: border-box;
-                    text-align: justify;
-                    letter-spacing: 0.5px;
-                }
-            }
-        }
-
-        .features-content {
-            .description {
-                margin: 0 0 16px 0;
-                color: #666;
-                line-height: 1.6;
-                font-size: 14px;
-                padding: 16px;
-                background: #f8f9fa;
-                border-radius: 6px;
-                border-left: 3px solid #1890ff;
-                white-space: pre-wrap;
-                word-break: break-word;
-                min-height: 80px;
-                max-height: none;
-                overflow: visible;
-                box-sizing: border-box;
-            }
-
-            .features-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-
-                .feature-tag {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    padding: 6px 12px;
-                    background: #e6f7ff;
-                    color: #1890ff;
-                    border-radius: 16px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    border: 1px solid #91d5ff;
-
-                    .layui-icon {
-                        font-size: 12px;
-                    }
-                }
-            }
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-
-            .status-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px 16px;
-                background: #f8f9fa;
-                border-radius: 6px;
-                transition: all 0.2s ease;
-
-                &:hover {
-                    background: #f0f8ff;
-                }
-
-                .status-label {
-                    font-weight: 500;
-                    color: #333;
-                    font-size: 14px;
-                }
-
-                .status-value {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    font-size: 13px;
-                    font-weight: 600;
-
-                    &.enabled {
-                        color: #52c41a;
-                    }
-
-                    &.disabled {
-                        color: #ff4d4f;
-                    }
-
-                    .layui-icon {
-                        font-size: 14px;
-                    }
-                }
-            }
-        }
-    }
-}
-
-// 表格图片容器样式
-.table-image-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid #eee;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-}
-
-// 表格无图片提示样式
-.table-no-image {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    font-size: 12px;
-
-    .layui-icon {
-        font-size: 24px;
-        margin-bottom: 4px;
-    }
-}
-
 // 状态标识样式
 .status-badge {
     padding: 4px 8px;
@@ -3320,565 +1366,6 @@ const handleTableChangeDropdown = (pageData: { current: number; limit: number })
         background: #fff2f0;
         color: #ff4d4f;
         border: 1px solid #ffccc7;
-    }
-}
-
-// 闲置云询价弹窗样式
-.idle-cloud-form {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-
-    .form-group {
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-
-        label {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-
-            &::before {
-                content: '*';
-                color: #ff4d4f;
-                margin-right: 4px;
-                font-weight: bold;
-            }
-        }
-
-        .switch-label {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-
-            &::before {
-                display: none;
-            }
-
-            input[type="checkbox"] {
-                margin-right: 8px;
-                width: 16px;
-                height: 16px;
-                cursor: pointer;
-            }
-
-            .switch-text {
-                user-select: none;
-            }
-        }
-
-        input[type="text"] {
-            height: 36px;
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.2s ease;
-
-            &:hover {
-                border-color: #40a9ff;
-            }
-
-            &:focus {
-                border-color: #1890ff;
-                box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-                outline: none;
-            }
-
-            &::placeholder {
-                color: #bfbfbf;
-                font-size: 13px;
-            }
-        }
-
-        textarea {
-            min-height: 80px;
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            font-size: 14px;
-            resize: vertical;
-            transition: all 0.2s ease;
-
-            &:hover {
-                border-color: #40a9ff;
-            }
-
-            &:focus {
-                border-color: #1890ff;
-                box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-                outline: none;
-            }
-
-            &::placeholder {
-                color: #bfbfbf;
-                font-size: 13px;
-            }
-        }
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid #f0f0f0;
-
-        :deep(.layui-btn) {
-            min-width: 80px;
-            height: 36px;
-            font-size: 14px;
-            border-radius: 4px;
-            padding: 0 16px;
-        }
-    }
-}
-
-// 品牌管理页面覆盖层样式
-.brand-management-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(2px);
-    z-index: 1000;
-
-    .brand-management-page {
-        width: 100%;
-        height: 100%;
-        padding: 24px;
-        background-color: white;
-        overflow-y: auto;
-
-        .brand-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #f0f0f0;
-
-            h2 {
-                font-size: 24px;
-                color: #333;
-                margin: 0;
-            }
-
-            .close-btn {
-                background: none;
-                border: none;
-                font-size: 24px;
-                cursor: pointer;
-                color: #888;
-                padding: 8px;
-                border-radius: 4px;
-                transition: all 0.2s;
-
-                &:hover {
-                    background-color: #f5f5f5;
-                    color: #333;
-                }
-            }
-        }
-
-        .brand-content {
-            .brand-table-container {
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-
-                .brand-table {
-                    width: 100%;
-                    border-collapse: collapse;
-
-                    thead tr {
-                        background: #f8f9fa;
-                    }
-
-                    th,
-                    td {
-                        padding: 12px 16px;
-                        text-align: center;
-                        border-bottom: 1px solid #e8e8e8;
-                    }
-
-                    th {
-                        font-weight: 600;
-                        color: #333;
-                        font-size: 14px;
-                    }
-
-                    td {
-                        color: #666;
-                        font-size: 13px;
-                    }
-
-                    tbody tr:hover {
-                        background-color: #f0f8ff;
-                    }
-
-                    .setting-link {
-                        color: #1890ff;
-                        cursor: pointer;
-                        text-decoration: none;
-
-                        &:hover {
-                            color: #40a9ff;
-                            text-decoration: underline;
-                        }
-                    }
-
-                    .management-btn {
-                        background: #1890ff;
-                        color: white;
-                        border: none;
-                        padding: 6px 12px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-
-                        &:hover {
-                            background: #40a9ff;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// 删除确认弹窗样式
-.delete-confirm {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-
-    p {
-        margin: 0 0 18px 0;
-        color: #666;
-        line-height: 1.7;
-        font-size: 14px;
-    }
-}
-
-// 品牌自动报价管理弹窗样式
-.brand-price-management {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-
-    .search-section {
-        margin-bottom: 24px;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #eee;
-
-        .search-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-
-            label {
-                font-weight: 500;
-                color: #333;
-                font-size: 14px;
-            }
-
-            .search-input {
-                flex: 1;
-                height: 36px;
-                padding: 8px 12px;
-                border: 1px solid #d9d9d9;
-                border-radius: 4px;
-                font-size: 14px;
-                transition: all 0.2s ease;
-
-                &:hover {
-                    border-color: #40a9ff;
-                }
-
-                &:focus {
-                    border-color: #1890ff;
-                    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-                    outline: none;
-                }
-
-                &::placeholder {
-                    color: #bfbfbf;
-                    font-size: 13px;
-                }
-            }
-
-            .highlight-text {
-                font-size: 12px;
-                color: #888;
-            }
-        }
-    }
-
-    .table-section {
-        .add-button-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-
-            .add-btn {
-                background: #1890ff;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 12px;
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-
-                &:hover {
-                    background: #40a9ff;
-                }
-
-                .layui-icon {
-                    font-size: 12px;
-                }
-            }
-
-            .column-filter {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-
-                .layui-icon {
-                    font-size: 16px;
-                    cursor: pointer;
-                }
-
-                .columns-dropdown {
-                    position: relative;
-
-                    .dropdown-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 8px 12px;
-                        background: #f8f9fa;
-                        border-radius: 4px;
-                        border: 1px solid #eee;
-
-                        span {
-                            font-weight: 500;
-                            color: #333;
-                            font-size: 14px;
-                        }
-
-                        .close-dropdown {
-                            background: none;
-                            border: none;
-                            font-size: 16px;
-                            cursor: pointer;
-                            color: #888;
-                            padding: 4px;
-                            border-radius: 4px;
-                            transition: all 0.2s;
-
-                            &:hover {
-                                background-color: #f5f5f5;
-                                color: #333;
-                            }
-                        }
-                    }
-
-                    .column-options {
-                        position: absolute;
-                        top: 100%;
-                        right: 0;
-                        z-index: 1000;
-                        display: none;
-                        min-width: 160px;
-                        padding: 5px 0;
-                        margin: 2px 0 0;
-                        font-size: 12px;
-                        text-align: left;
-                        list-style: none;
-                        background-color: #fff;
-                        background-clip: padding-box;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-
-                        &.show {
-                            display: block;
-                        }
-
-                        li {
-                            &:hover {
-                                background-color: #f5f5f5;
-                            }
-
-                            label {
-                                display: block;
-                                padding: 8px 15px;
-                                font-weight: normal;
-                                line-height: 1.4;
-                                color: #333;
-                                white-space: nowrap;
-                                cursor: pointer;
-                                margin: 0;
-
-                                input[type="checkbox"] {
-                                    margin-right: 8px;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        .brand-price-table-container {
-            :deep(.layui-table) {
-                border: 1px solid #e8e8e8;
-                border-radius: 6px;
-                overflow: hidden;
-                font-size: 12px;
-
-                .layui-table-header {
-                    background: #f8f9fa;
-                }
-
-                .layui-table-body {
-                    tr:hover {
-                        background-color: #f0f8ff;
-                    }
-                }
-
-                th,
-                td {
-                    border-color: #e8e8e8;
-                    text-align: center;
-                    padding: 6px 8px;
-                }
-
-                .layui-table-cell-content {
-                    text-align: center;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 13px;
-                }
-            }
-
-            .simple-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 12px;
-
-                th,
-                td {
-                    border: 1px solid #e8e8e8;
-                    padding: 8px 12px;
-                    text-align: left;
-                }
-
-                th {
-                    background-color: #f8f9fa;
-                    font-weight: 500;
-                    color: #333;
-                }
-
-                td {
-                    color: #666;
-                }
-
-                .no-data {
-                    text-align: center;
-                    padding: 20px;
-                    color: #888;
-                    font-size: 14px;
-                }
-            }
-        }
-
-        .pagination-section {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 16px;
-
-            .pagination-controls {
-                display: flex;
-                align-items: center;
-                gap: 16px;
-
-                .pagination-info {
-                    font-size: 12px;
-                    color: #666;
-                }
-
-                .pagination-buttons {
-                    display: flex;
-                    gap: 8px;
-
-                    .page-btn {
-                        background: #1890ff;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        padding: 6px 12px;
-                        font-size: 12px;
-                        cursor: pointer;
-                        transition: background-color 0.2s ease;
-
-                        &:hover {
-                            background: #40a9ff;
-                        }
-
-                        &.current {
-                            background-color: #40a9ff;
-                            pointer-events: none;
-                        }
-                    }
-                }
-
-                .page-size-selector {
-                    select {
-                        height: 36px;
-                        padding: 8px 12px;
-                        border: 1px solid #d9d9d9;
-                        border-radius: 4px;
-                        font-size: 14px;
-                        transition: all 0.2s ease;
-
-                        &:hover {
-                            border-color: #40a9ff;
-                        }
-
-                        &:focus {
-                            border-color: #1890ff;
-                            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-                            outline: none;
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 </style>
