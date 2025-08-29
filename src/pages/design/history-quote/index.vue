@@ -96,20 +96,54 @@
         :default-toolbar="defaultToolbars"
         :loading="loading"
         :pagination="pagination"
+        v-model:selectedKey="selectedKey"
         even
         @pagination="handlePagination"
         @sort-change="sortChange"
       >
         <template #toolbar>
-          <lay-tab v-model="current2" type="brief" @change="handleTabChange">
-            <lay-tab-item
-              v-for="item in tabItem"
-              :id="item.title"
-              :key="item.title"
-              :title="item.title"
-              :icon="item.iconRenderFunction"
-            />
-          </lay-tab>
+          <div class="toolbar">
+            <lay-tab v-model="current2" type="brief" @change="handleTabChange">
+              <lay-tab-item
+                v-for="item in tabItem"
+                :id="item.title"
+                :key="item.title"
+                :title="item.title"
+                :icon="item.iconRenderFunction"
+              />
+            </lay-tab>
+
+            <div class="btn-group">
+              <button title="显示价格" @click="handleShowPrice">
+                <SvgIcon name="money" width="1.1rem" />
+              </button>
+              <button title="修改" @click="handleEdit">
+                <SvgIcon name="edit" width="1.1rem" />
+              </button>
+              <button title="复制" @click="handleCopy">
+                <SvgIcon name="copy" width="1.1rem" />
+              </button>
+              <button title="导出" @click="handleExport">
+                <SvgIcon name="export" width="1.1rem" />
+              </button>
+              <button title="导入" @click="handleImport">
+                <SvgIcon name="download" width="1.1rem" />
+              </button>
+              <button title="删除" @click="handleDelete">
+                <SvgIcon name="cancel" width="1.1rem" />
+              </button>
+              <button title="属性" @click="handleProperty">
+                <SvgIcon name="company_information" width="1.1rem" />
+              </button>
+              <button title="发送" @click="handleSend">
+                <SvgIcon name="order_send_order" width="1.1rem" />
+              </button>
+              <button title="协作" @click="handleCollaborate">
+                <SvgIcon name="supply_chain" width="1.1rem" />
+              </button>
+              <div class="split"></div>
+            </div>
+          </div>
         </template>
 
         <!-- 工程项目名称列自定义渲染 -->
@@ -131,6 +165,10 @@
           >
             {{ row.contacts }}
           </span>
+        </template>
+        <!-- 总成本列自定义渲染 -->
+        <template #purchasepriceSum="{ row }">
+          <span class="price-sum">{{ row.purchasepriceSum }}</span>
         </template>
         <!-- 评论列自定义渲染 -->
         <template #chat="{ row }">
@@ -156,13 +194,130 @@
         <lay-empty />
       </div>
     </ModalWindow>
+
+    <!-- 编辑弹窗 -->
+    <ModalWindow
+      :visible="editModalVisible"
+      title="编辑报价单"
+      @close="editModalVisible = false"
+    >
+      <QuotationEdit
+        :showCustomerInfoDefault="false"
+        :is-new-quotation="false"
+        @save="handleEditSave"
+        @cancel="editModalVisible = false"
+      />
+    </ModalWindow>
+
+    <!-- 删除确认弹窗 -->
+    <ModalWindow
+      :visible="deleteModalVisible"
+      title="删除确认"
+      :btn="[
+        {
+          text: '确认删除',
+          style: 'background-color: #ff4d4f; border-color: #ff4d4f;',
+          disabled: !isDeleteButtonEnabled,
+          callback: handleDeleteConfirm,
+        },
+        {
+          text: '取消',
+          callback: () => {
+            deleteModalVisible = false;
+          },
+        },
+      ]"
+      :maxmin="false"
+      :resize="false"
+      :area="['400px', '350px']"
+      @close="deleteModalVisible = false"
+    >
+      <div class="delete-confirm-content">
+        <div class="warning-text">
+          正在删除报价 "<span class="project-name-red">{{
+            selectedRow?.projectName
+          }}</span
+          >"
+        </div>
+        <div class="warning-info">
+          报价删除后，报价内容无法恢复，请谨慎操作！
+        </div>
+        <div class="confirm-input-section">
+          <label>请输入 "DELETE" 确认删除：</label>
+          <lay-input
+            v-model="deleteConfirmInput"
+            placeholder="请输入 DELETE"
+            class="confirm-input"
+          />
+        </div>
+      </div>
+    </ModalWindow>
+
+    <!-- 导出确认弹窗 -->
+    <ModalWindow
+      :visible="exportModalVisible"
+      title="导出报价单"
+      :btn="[
+        {
+          text: '确认导出',
+          callback: handleExportConfirm,
+        },
+        {
+          text: '取消',
+          callback: () => {
+            exportModalVisible = false;
+          },
+        },
+      ]"
+      :maxmin="false"
+      :resize="false"
+      :area="['400px', '320px']"
+      @close="exportModalVisible = false"
+    >
+      <div class="export-modal-content">
+        <div class="export-message">您是否要导出此报价单</div>
+        <div class="export-options">
+          <div class="option-item">
+            <lay-checkbox
+              skin="primary"
+              v-model="exportOptions.derivePrime"
+              value="derivePrime"
+              size="lg"
+            >
+              同时导出成本价
+            </lay-checkbox>
+          </div>
+          <div class="option-item">
+            <lay-checkbox
+              skin="primary"
+              v-model="exportOptions.isExplanation"
+              value="isExplanation"
+              size="lg"
+            >
+              导出报价说明
+            </lay-checkbox>
+          </div>
+          <div class="option-item">
+            <lay-checkbox
+              skin="primary"
+              v-model="exportOptions.isSeal"
+              value="isSeal"
+              size="lg"
+            >
+              加盖印章
+            </lay-checkbox>
+          </div>
+        </div>
+      </div>
+    </ModalWindow>
   </div>
 </template>
 
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
-import { ref, onMounted, h, reactive, watch } from 'vue';
+import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
+import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
 import type {
@@ -176,6 +331,8 @@ import type {
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
 import QuotationInfo from '../components/QuotationInfo.vue';
+import { layer } from '@layui/layui-vue';
+import notify from '@/utils/notify';
 
 // 路由实例
 const router = useRouter();
@@ -195,6 +352,17 @@ const dataSource = ref<QuotationListResponse[]>([]);
 // 弹窗相关
 const detailModalVisible = ref(false);
 const selectedRow = ref<QuotationListResponse | null>(null);
+const editModalVisible = ref(false);
+const deleteModalVisible = ref(false);
+const deleteConfirmInput = ref('');
+
+// 导出确认弹窗相关状态
+const exportModalVisible = ref(false);
+const exportOptions = reactive({
+  derivePrime: false, // 同时导出成本价
+  isExplanation: false, // 导出报价说明
+  isSeal: false, // 加盖印章
+});
 
 // tab数据
 const current2 = ref('全部');
@@ -258,8 +426,8 @@ const defaultToolbars: TableDefaultToolbar[] = [
 ];
 
 // 表格列配置
-const columns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+const columns = ref([
+  { title: '', width: '20px', type: 'radio', fixed: 'left' as const },
   {
     title: '编号',
     width: '180px',
@@ -302,6 +470,7 @@ const columns = [
     title: '总成本',
     width: '120px',
     key: 'purchasepriceSum',
+    customSlot: 'purchasepriceSum',
     hide: true,
   },
   {
@@ -322,7 +491,7 @@ const columns = [
   },
   {
     title: '项目备注',
-    width: '400px',
+    width: '200px',
     key: 'projectRemark',
   },
   {
@@ -337,7 +506,7 @@ const columns = [
     key: 'folder',
     ellipsisTooltip: true,
   },
-] as TableColumn[];
+]) as Ref<TableColumn[]>;
 
 // 外部获取响应式数据
 const orderAttributeList = ref<{ id: number; name: string }[]>();
@@ -367,6 +536,179 @@ const goToChat = (row: QuotationListResponse) => {
       toId: row.ordersId,
     },
   });
+};
+
+const showPriceColumns = ref(false);
+
+// 工具栏按钮事件处理函数
+const handleShowPrice = () => {
+  showPriceColumns.value = !showPriceColumns.value;
+  // 动态更新表格列的显示状态
+  columns.value.forEach((column) => {
+    if (column.key === 'priceSum' || column.key === 'purchasepriceSum') {
+      column.hide = !showPriceColumns.value;
+    }
+  });
+};
+
+const selectedKey = ref();
+
+const handleEdit = () => {
+  console.log(selectedKey.value);
+  if (!selectedKey.value) {
+    layer.msg('请先选择要修改的报价单', { icon: 2 });
+    return;
+  }
+  editModalVisible.value = true;
+};
+
+const handleEditSave = (data: any) => {
+  console.log('保存编辑数据:', data);
+  // TODO: 实现保存逻辑
+  editModalVisible.value = false;
+  layer.msg('保存成功', { icon: 1 });
+};
+
+const handleCopy = async () => {
+  // 检查是否有选中的行
+  if (!selectedKey.value) {
+    layer.msg('请先选择要复制的订单', { icon: 2 });
+    return;
+  }
+
+  // 弹出确认对话框
+  layer.confirm('确定要复制选中的订单吗？', {
+    title: '确认复制',
+    icon: 3,
+    yes: async (index: number) => {
+      try {
+        // 调用复制API
+        await ordersApi.copyOrders(selectedKey.value);
+
+        // 操作成功提示
+        notify.success('订单复制成功');
+
+        // 刷新当前页面数据
+        const currentTab = tabItem.find(
+          (item) => item.title === current2.value,
+        );
+        const type = currentTab ? currentTab.type : undefined;
+        await getOrdersList(type === -1 ? undefined : type);
+
+        // 关闭确认对话框
+        layer.close(index);
+      } catch (error) {
+        console.error('复制订单失败:', error);
+        notify.error('复制订单失败，请重试');
+      }
+    },
+  });
+};
+
+const handleExport = () => {
+  // 检查是否有选中的行
+  if (!selectedKey.value) {
+    layer.msg('请先选择要导出的报价单', { icon: 2 });
+    return;
+  }
+
+  // 重置导出选项
+  exportOptions.derivePrime = false;
+  exportOptions.isExplanation = false;
+  exportOptions.isSeal = false;
+
+  // 显示导出确认弹窗
+  exportModalVisible.value = true;
+};
+
+// 确认导出
+const handleExportConfirm = async () => {
+  try {
+    // 调用导出API
+    await ordersApi.exportQuotation(
+      selectedKey.value,
+      exportOptions.derivePrime,
+      exportOptions.isExplanation,
+      exportOptions.isSeal,
+    );
+
+    // 操作成功提示
+    notify.success('报价单成功导出');
+
+    // 关闭弹窗
+    exportModalVisible.value = false;
+  } catch (error) {
+    console.error('导出报价单失败:', error);
+    notify.error('导出报价单失败，请重试');
+  }
+};
+
+const handleImport = () => {
+  console.log('导入功能');
+  // TODO: 实现导入功能
+};
+
+const handleDelete = () => {
+  // 检查是否有选中的行
+  if (!selectedKey.value) {
+    layer.msg('请先选择要删除的报价单', { icon: 2 });
+    return;
+  }
+
+  // 获取选中行的数据
+  const selectedRowData = dataSource.value.find(
+    (item) => item.ordersId === selectedKey.value,
+  );
+
+  if (selectedRowData) {
+    selectedRow.value = selectedRowData;
+    deleteConfirmInput.value = '';
+    deleteModalVisible.value = true;
+  }
+};
+
+// 删除确认处理
+const handleDeleteConfirm = async () => {
+  if (!selectedRow.value) return;
+
+  try {
+    // 调用删除API
+    await ordersApi.deleteOrders(selectedRow.value.ordersId);
+
+    // 操作成功提示
+    notify.success('删除成功');
+
+    // 关闭弹窗
+    deleteModalVisible.value = false;
+
+    // 刷新当前页面数据
+    const currentTab = tabItem.find((item) => item.title === current2.value);
+    const type = currentTab ? currentTab.type : undefined;
+    await getOrdersList(type === -1 ? undefined : type);
+  } catch (error) {
+    console.error('删除报价单失败:', error);
+    notify.error('删除失败，请重试');
+  }
+};
+
+// 计算删除按钮是否可用
+const isDeleteButtonEnabled = computed(() => {
+  return deleteConfirmInput.value === 'DELETE';
+});
+
+const handleProperty = () => {
+  console.log('属性功能');
+  // TODO: 实现属性功能
+};
+
+const handleSend = () => {
+  console.log('发送功能');
+  // TODO: 实现发送功能
+};
+
+const handleCollaborate = () => {
+  console.log('协作功能');
+  // TODO: 实现协作功能
 };
 
 // 日期排序
@@ -480,6 +822,7 @@ const getOrdersList = async (type?: number) => {
 
       // 处理数据格式
       dataSource.value = res.rows.map((item: QuotationListResponse) => ({
+        id: item.ordersId,
         ...item,
         // 拼接报价类型
         ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
@@ -663,6 +1006,32 @@ onMounted(() => {
     }
   }
 
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      .split {
+        width: 1px;
+        height: 24px;
+        background-color: #e6e6e6;
+      }
+
+      button {
+        @include button-style($primary-color);
+      }
+    }
+  }
+
+  .price-sum {
+    color: $danger-color;
+  }
+
   // 工程项目名称链接样式
   .project-name-link {
     color: $primary-color;
@@ -687,6 +1056,45 @@ onMounted(() => {
     }
   }
 
+  // 删除确认弹窗样式
+  :deep(.delete-confirm-content) {
+    padding: 20px;
+
+    .warning-text {
+      font-size: 16px;
+      margin-bottom: 15px;
+      color: #333;
+
+      .project-name-red {
+        color: #ff4d4f;
+        font-weight: bold;
+      }
+    }
+
+    .warning-info {
+      background-color: #fff2f0;
+      border: 1px solid #ffccc7;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      color: #cf1322;
+      font-size: 14px;
+    }
+
+    .confirm-input-section {
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .confirm-input {
+        width: 100%;
+      }
+    }
+  }
+
   @media (max-width: $desktop_layout_breakpoint) {
     :deep(.layui-date-picker) {
       width: 100%;
@@ -705,6 +1113,24 @@ onMounted(() => {
 
       :deep(.layui-form-item) {
         margin-bottom: 0;
+      }
+    }
+  }
+
+  // 导出确认弹窗样式
+  .export-modal-content {
+    padding: 20px;
+
+    .export-message {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    .export-options {
+      .option-item {
+        margin-bottom: 15px;
       }
     }
   }

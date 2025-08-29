@@ -14,6 +14,7 @@ import type {
 } from './orderApi.type';
 import type { GetOrdersListParams } from './orderApi.type';
 import type { Product } from '../product/productApi.type';
+import env from '@/utils/env';
 // import { getExpiredAuth } from '@/api/auth/authApi';
 
 export default {
@@ -113,16 +114,45 @@ export default {
   // 复制报价单
   copyOrders(orderId: string) {
     const formData = new FormData();
-    formData.append('orderId', orderId);
-    return http.post<FormData, { rows: OrderListRow[] }>(
-      `/orders/copyOrders`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    formData.append('ordersId', orderId);
+    return http.post<FormData>(`/orders/copyOrders`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       },
-    );
+    });
+  },
+
+  // 删除报价单
+  deleteOrders(orderId: string) {
+    const formData = new FormData();
+    formData.append('ordersId', orderId);
+    return http.post<FormData>('/orders/delete', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 导出报价单
+  exportQuotation(
+    orderId: string,
+    derivePrime: boolean, // 是否同时导出成本价
+    isExplanation: boolean, // 是否导出报价说明
+    isSeal: boolean, // 是否加盖印章
+  ) {
+    window.location.href = `${env.getApiBaseUrl()}/orders/exportQuotation?ordersId=${orderId}&derivePrime=${Number(derivePrime)}&isExplanation=${Number(isExplanation)}&isSeal=${Number(isSeal)}`;
+  },
+
+  // 设置报价单属性
+  setOrdersAttr(orderId: string, attr: number) {
+    const formData = new FormData();
+    formData.append('orderid', orderId);
+    formData.append('attr', attr.toString());
+    return http.post<FormData>('/orders/setPropert', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 
   // 获取报价单信息-操作记录
