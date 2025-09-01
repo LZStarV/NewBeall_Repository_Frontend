@@ -5,14 +5,16 @@ import type {
   Instruction,
   ExportProductDetailed,
   Settle,
+  QuotationListResponse,
   OrderPrice,
   OrderListRow,
   Quotation,
-  QuotationListResponse,
-  OrderModuleListResponse,
   OrderChargePerson,
+  OrderModuleListResponse,
 } from './orderApi.type';
+import type { GetOrdersListParams } from './orderApi.type';
 import type { Product } from '../product/productApi.type';
+import env from '@/utils/env';
 // import { getExpiredAuth } from '@/api/auth/authApi';
 
 export default {
@@ -59,23 +61,38 @@ export default {
   },
 
   // 获取报价单列表（历史报价）
-  getOrdersList(
-    order: string,
-    offset: number,
-    limit: number,
-    type?: number,
-    pageNumber?: number,
-  ) {
+  getOrdersList(params: GetOrdersListParams) {
     const formData = new FormData();
-    formData.append('order', order);
-    formData.append('offset', offset.toString());
-    formData.append('limit', limit.toString());
-    if (type !== undefined) {
-      formData.append('type', type.toString());
-    }
-    if (pageNumber !== undefined) {
-      formData.append('pageNumber', pageNumber.toString());
-    }
+
+    // 必填
+    formData.append('order', params.order);
+    formData.append('offset', params.offset.toString());
+    formData.append('limit', params.limit.toString());
+
+    // 公共处理函数
+    const appendField = (key: keyof GetOrdersListParams) => {
+      const value = params[key];
+      if (value !== undefined) {
+        formData.append(key, String(value));
+        formData.append(`query[${key}]`, String(value));
+      }
+    };
+
+    // 非互斥字段
+    [
+      'type',
+      'pageNumber',
+      'attr',
+      'chargePerson',
+      'createName',
+      'createDate',
+    ].forEach((k) => appendField(k as keyof GetOrdersListParams));
+
+    // 互斥字段
+    ['projectName', 'contacts', 'ordersType'].forEach((k) =>
+      appendField(k as keyof GetOrdersListParams),
+    );
+
     return http.post<
       FormData,
       { rows: QuotationListResponse[]; total: number }
@@ -97,16 +114,45 @@ export default {
   // 复制报价单
   copyOrders(orderId: string) {
     const formData = new FormData();
-    formData.append('orderId', orderId);
-    return http.post<FormData, { rows: OrderListRow[] }>(
-      `/orders/copyOrders`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    formData.append('ordersId', orderId);
+    return http.post<FormData>(`/orders/copyOrders`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       },
-    );
+    });
+  },
+
+  // 删除报价单
+  deleteOrders(orderId: string) {
+    const formData = new FormData();
+    formData.append('ordersId', orderId);
+    return http.post<FormData>('/orders/delete', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 导出报价单
+  exportQuotation(
+    orderId: string,
+    derivePrime: boolean, // 是否同时导出成本价
+    isExplanation: boolean, // 是否导出报价说明
+    isSeal: boolean, // 是否加盖印章
+  ) {
+    window.location.href = `${env.getApiBaseUrl()}/orders/exportQuotation?ordersId=${orderId}&derivePrime=${Number(derivePrime)}&isExplanation=${Number(isExplanation)}&isSeal=${Number(isSeal)}`;
+  },
+
+  // 设置报价单属性
+  setOrdersAttr(orderId: string, attr: number) {
+    const formData = new FormData();
+    formData.append('orderid', orderId);
+    formData.append('attr', attr.toString());
+    return http.post<FormData>('/orders/setPropert', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 
   // 获取报价单信息-操作记录
@@ -137,7 +183,11 @@ export default {
 
   // 获取报价产品信息列表
   getOrderProductList(orderId: string, page: number, limit: number) {
-    return http.get<Product[]>('/orders/findProlist', { orderId, page, limit });
+    return http.get<{ count: number; data: Product[] }>('/orders/findProlist', {
+      orderId,
+      page,
+      limit,
+    });
   },
 
   // 获取查看方案云列表
@@ -190,6 +240,31 @@ export default {
       FormData,
       { rows: OrderModuleListResponse[]; total: number }
     >('/orderModule/moduleList', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 设置报价单属性
+  setOrdersProperty(
+    type: number,
+    important: boolean,
+    purchase: boolean,
+    lockMark: boolean,
+    integration: number,
+    shareName: string,
+    orderid: string,
+  ) {
+    const formData = new FormData();
+    formData.append('type', type.toString());
+    formData.append('important', Number(important).toString());
+    formData.append('purchase', Number(purchase).toString());
+    formData.append('lockMark', Number(lockMark).toString());
+    formData.append('integration', integration.toString());
+    formData.append('shareName', shareName);
+    formData.append('orderid', orderid);
+    return http.post<FormData>('/orders/setProperty', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

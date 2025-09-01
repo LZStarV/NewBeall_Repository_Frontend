@@ -2,10 +2,7 @@
   <lay-card class="quotation-edit-card">
     <div v-if="enableCustomerInfo">
       <button class="show-customer-info-btn">
-        <SvgIcon
-          :name="showCustomerInfo ? 'double_up' : 'double_down'"
-          @click="showCustomerInfo = !showCustomerInfo"
-        />
+        <SvgIcon :name="showCustomerInfo ? 'double_up' : 'double_down'" @click="showCustomerInfo = !showCustomerInfo" />
       </button>
       <lay-row v-if="showCustomerInfo" :gutter="20">
         <lay-col :xs="24" :md="12">
@@ -17,8 +14,9 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">客户单位</label>
-                <lay-select v-model="customerInfo.name" placeholder="请选择" @change="handleClientChange">
-                  <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client" :label="client.contacts" />
+                <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange">
+                  <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
+                    :label="client.contacts" />
                 </lay-select>
                 <lay-button type="normal" size="md" class="info-button">
                   <SvgIcon name="group_chat" width="16" height="16" />
@@ -40,12 +38,8 @@
               <div class="form-row">
                 <label class="form-head-label">客户邮箱</label>
                 <lay-input v-model="customerInfo.email" disabled />
-                <lay-button
-                  type="normal"
-                  size="md"
-                  class="info-button"
-                  @click="showCustomerBankInfo = !showCustomerBankInfo"
-                >
+                <lay-button type="normal" size="md" class="info-button"
+                  @click="showCustomerBankInfo = !showCustomerBankInfo">
                   {{ showCustomerBankInfo ? '收起信息' : '账户信息' }}
                 </lay-button>
               </div>
@@ -79,40 +73,21 @@
               <div class="form-row">
                 <label class="form-head-label required">项目负责人</label>
                 <lay-select v-model="projectInfo.manager" placeholder="请选择">
-                  <lay-select-option
-                    v-for="item in projectManagerList"
-                    :key="item.id"
-                    :value="item.id"
-                    :label="item.name"
-                  />
+                  <lay-select-option v-for="item in projectManagerList" :key="item.id" :value="item.id"
+                    :label="item.name" />
                 </lay-select>
               </div>
               <div class="form-row">
                 <label class="form-head-label required">报价单类型</label>
                 <div class="select-group">
-                  <QuoteTypeSelect
-                    v-model="projectInfo.quoteType1"
-                    :category="1"
-                    placeholder="请选择"
-                  />
-                  <QuoteTypeSelect
-                    v-model="projectInfo.quoteType2"
-                    :category="2"
-                    placeholder="请选择"
-                  />
-                  <QuoteTypeSelect
-                    v-model="projectInfo.quoteType3"
-                    :category="3"
-                    placeholder="请选择"
-                  />
+                  <QuoteTypeSelect v-model="projectInfo.quoteType1" :category="1" placeholder="请选择" />
+                  <QuoteTypeSelect v-model="projectInfo.quoteType2" :category="2" placeholder="请选择" />
+                  <QuoteTypeSelect v-model="projectInfo.quoteType3" :category="3" placeholder="请选择" />
                 </div>
               </div>
               <div class="form-row">
                 <label class="form-head-label">报价单性质</label>
-                <lay-select
-                  v-model="projectInfo.nature"
-                  placeholder="初步建议阶段"
-                >
+                <lay-select v-model="projectInfo.nature" placeholder="初步建议阶段">
                   <lay-select-option value="初步建议阶段">
                     初步建议阶段
                   </lay-select-option>
@@ -161,12 +136,8 @@
               <div class="form-row">
                 <label class="form-head-label">客户邮箱</label>
                 <lay-input v-model="companyInfo.email" disabled />
-                <lay-button
-                  type="normal"
-                  size="md"
-                  class="info-button"
-                  @click="showCompanyBankInfo = !showCompanyBankInfo"
-                >
+                <lay-button type="normal" size="md" class="info-button"
+                  @click="showCompanyBankInfo = !showCompanyBankInfo">
                   {{ showCompanyBankInfo ? '收起信息' : '账户信息' }}
                 </lay-button>
               </div>
@@ -195,10 +166,7 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">交货方式</label>
-                <lay-select
-                  v-model="tradeInfo.deliveryMethod"
-                  placeholder="请选择"
-                >
+                <lay-select v-model="tradeInfo.deliveryMethod" placeholder="请选择">
                   <lay-select-option value="">请选择</lay-select-option>
                   <lay-select-option value="货到付款">
                     货到付款
@@ -211,11 +179,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">交货时间</label>
-                <lay-date-picker
-                  v-model="tradeInfo.deliveryTime"
-                  placeholder="点击选择交货时间"
-                  allow-clear
-                />
+                <lay-date-picker v-model="tradeInfo.deliveryTime" placeholder="点击选择交货时间" allow-clear />
               </div>
               <div class="form-row">
                 <label class="form-head-label">交货地点</label>
@@ -227,16 +191,8 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">结算方式</label>
-                <lay-select
-                  v-model="tradeInfo.paymentMethod"
-                  placeholder="请选择"
-                >
-                  <lay-select-option
-                    v-for="item in settleList"
-                    :key="item.id"
-                    :value="item.id"
-                    :label="item.method"
-                  />
+                <lay-select v-model="tradeInfo.paymentMethod" placeholder="请选择">
+                  <lay-select-option v-for="item in settleList" :key="item.id" :value="item.id" :label="item.method" />
                 </lay-select>
               </div>
             </div>
@@ -275,18 +231,10 @@
           <div class="module-card">
             <div class="module-content">
               <div class="form-row">
-                <QuoteTypeSelect
-                  v-model="modelInfo.ordersType1"
-                  :category="1"
-                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId"
-                  placeholder="请选择"
-                />
-                <QuoteTypeSelect
-                  v-model="modelInfo.ordersType3"
-                  :category="3"
-                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId"
-                  placeholder="请选择"
-                />
+                <QuoteTypeSelect v-model="modelInfo.ordersType1" :category="1"
+                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
+                <QuoteTypeSelect v-model="modelInfo.ordersType3" :category="3"
+                  :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
               </div>
             </div>
           </div>
@@ -298,34 +246,18 @@
         <div class="module-header">
           <h5>报价目录</h5>
           <div class="module-header-toolbar">
-            <button
-              v-for="btn of quotationMenuConfig"
-              :key="btn.name"
-              class="toolbar-btn"
-              :title="btn.name"
-              @click="btn.btnAction"
-            >
+            <button v-for="btn of quotationMenuConfig" :key="btn.name" class="toolbar-btn" :title="btn.name"
+              @click="btn.btnAction">
               <SvgIcon :name="btn.iconName" width="1.25rem" height="1.25rem" />
             </button>
           </div>
         </div>
         <div class="module-content">
           <!-- 表格区域 -->
-          <AdvancedTable
-            :columns="quotationColumns"
-            :data-source="quotationData as Record<string, unknown>[]"
-            :enable-drag="true"
-            :pagination="false"
-            :show-toolbar="false"
-            :row-key="'id'"
-            :responsive="true"
-            :clickable="true"
-            @update:data-source="handleQuotationDataUpdate"
-            @cell-update="handleCellUpdate"
-            @row-drag="handleRowDrag"
-            @button-click="handleButtonClick"
-            @row-click="handleRowClick"
-          />
+          <AdvancedTable :columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
+            :enable-drag="true" :pagination="false" :show-toolbar="false" :row-key="'id'" :responsive="true"
+            :clickable="true" @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate"
+            @row-drag="handleRowDrag" @button-click="handleButtonClick" @row-click="handleRowClick" />
           <!-- 成本统计-->
           <div class="cost-statistics">
             <div class="cost-statistics-item">
@@ -348,16 +280,11 @@
   <SideToolbar />
 
   <!-- 新建子项目 drawer -->
-  <SubProjectDrawer
-    v-model:visible="showSubProjectDrawer"
-    @submit="handleSubProjectSubmit"
-  />
+  <SubProjectDrawer v-model:visible="showSubProjectDrawer" @submit="handleSubProjectSubmit" />
 
   <!-- 产品利率输入弹窗 -->
-  <ProductInterestRateDialog
-    v-model:visible="showProductInterestRateDialog"
-    @confirm="handleProductInterestRateConfirm"
-  />
+  <ProductInterestRateDialog v-model:visible="showProductInterestRateDialog"
+    @confirm="handleProductInterestRateConfirm" />
 </template>
 
 <script setup lang="ts">
@@ -877,14 +804,16 @@ const projectManagerList = ref<OrderChargePerson[]>();
 // 客户信息列表
 const clientInfoList = ref<ClientType[]>();
 
+const customerName = ref('');
+
 // 处理客户信息选择切换
 const handleClientChange = ((value: ClientType) => {
   customerInfo.value = {
     name: value.contacts,
-    address : value.address,
-    contact : value.contactUser,
-    phone : value.tel,
-    email : value.email,
+    address: value.address,
+    contact: value.contactUser,
+    phone: value.tel,
+    email: value.email,
     bankAccount: '', // 预留
     bankName: '',    // 预留
     taxNumber: '',   // 预留
@@ -898,8 +827,7 @@ const getClientInfoList = async () => {
     limit: 50, offset: 0, order: 'desc', contacts: '', contactUser: '',
     clientStatus: '', clientSource: '', categoryName: '',
   }) as unknown as { rows: ClientType[] };
-  clientInfoList.value = res.rows;
-  console.log(clientInfoList.value);
+  clientInfoList.value = res.rows.filter((item) => item.contacts.length > 0);
 };
 
 // 获取我司信息
@@ -921,7 +849,6 @@ const getMyCompanyInfo = async () => {
 // 获取项目负责人列表
 const getProjectManagerList = async () => {
   const res = await ordersApi.getOrdersChargePerson();
-  console.log(res.data);
 
   projectManagerList.value = res.data;
 };

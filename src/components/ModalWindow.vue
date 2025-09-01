@@ -3,10 +3,10 @@
   <lay-layer
     v-model="windowVisible"
     :teleport-disabled="!isTeleport"
-    :maxmin="true"
+    :maxmin="maxmin"
     :title="title"
-    resize
-    :area="['80%', '80%']"
+    :resize="resize"
+    :area="sizeArgs"
     :btn="btn"
     @close="emit('close')"
   >
@@ -40,12 +40,18 @@ const {
   isTeleport = false, // 是否可以提升到整个页面，如果不可以，那就要求上层组件position: relative
   btn = ref([]), // 传入的按钮配置
   syncHeight = false, // 是否让内容高度与layui-layer-content保持一致
+  maxmin = true, // 默认可以最大化/最小化
+  resize = true, // 默认可以调整大小
+  sizeArgs = ['80%', '80%'],
 } = defineProps<{
   visible: boolean;
   title: string;
   btn?: BtnType[]; // 需要传入响应式按钮变量
   isTeleport?: boolean;
-  syncHeight?: boolean; // 新增：是否同步高度
+  syncHeight?: boolean; // 是否同步高度
+  maxmin?: boolean; // 是否可以最大化/最小化
+  resize?: boolean; // 是否可以调整大小
+  sizeArgs?: [string, string]; // 弹窗大小
 }>();
 
 const emit = defineEmits<{
