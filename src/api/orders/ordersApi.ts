@@ -245,4 +245,29 @@ export default {
       },
     });
   },
+
+  // 设置报价单属性
+  setOrdersProperty(
+    type: number,
+    important: boolean,
+    purchase: boolean,
+    lockMark: boolean,
+    integration: number,
+    shareName: string,
+    orderid: string,
+  ) {
+    const formData = new FormData();
+    formData.append('type', type.toString());
+    formData.append('important', Number(important).toString());
+    formData.append('purchase', Number(purchase).toString());
+    formData.append('lockMark', Number(lockMark).toString());
+    formData.append('integration', integration.toString());
+    formData.append('shareName', shareName);
+    formData.append('orderid', orderid);
+    return http.post<FormData>('/orders/setProperty', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };

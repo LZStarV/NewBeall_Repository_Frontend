@@ -310,6 +310,111 @@
         </div>
       </div>
     </ModalWindow>
+
+    <!-- 属性设置弹窗 -->
+    <ModalWindow
+      :visible="propertyModalVisible"
+      title="设置报价单属性"
+      :btn="[
+        {
+          text: '确定',
+          callback: handlePropertyConfirm,
+        },
+        {
+          text: '取消',
+          callback: () => {
+            propertyModalVisible = false;
+          },
+        },
+      ]"
+      :maxmin="false"
+      :resize="false"
+      :size-args="['400px', '500px']"
+      @close="propertyModalVisible = false"
+    >
+      <div class="property-modal-content">
+        <!-- 审核状态区域 -->
+        <div class="property-section">
+          <div class="section-header">
+            <lay-switch v-model="propertyForm.shareOrdersEnabled" />
+            <span class="section-title">审核状态</span>
+          </div>
+          <div class="section-content" v-if="propertyForm.shareOrdersEnabled">
+            <div class="status-display">
+              当前状态：
+              <span
+                :class="{
+                  'status-auditing': selectedRowData?.shareOrders === 2,
+                  'status-unaudited': selectedRowData?.shareOrders === 0,
+                }"
+              >
+                {{ auditStatusText }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 共享名称输入框 -->
+        <div class="property-section">
+          <div class="section-title">共享名称</div>
+          <lay-input
+            v-model="propertyForm.shareName"
+            placeholder="项目名称请注意隐藏项目信息"
+          />
+        </div>
+
+        <!-- 项目状态区域 -->
+        <div class="property-section">
+          <div class="section-header">
+            <lay-switch v-model="propertyForm.projectStatusEnabled" />
+            <span class="section-title">项目状态</span>
+          </div>
+          <div class="section-content" v-if="propertyForm.projectStatusEnabled">
+            <lay-select
+              v-model="propertyForm.projectStatus"
+              placeholder="请选择项目状态"
+            >
+              <lay-select-option
+                v-for="option in projectStatusOptions"
+                :key="option.value"
+                :value="option.value"
+                :label="option.label"
+              />
+            </lay-select>
+          </div>
+        </div>
+
+        <!-- 重要项目设置 -->
+        <div class="property-section">
+          <div class="section-header">
+            <lay-switch v-model="propertyForm.important" />
+            <span class="section-title">设置为重要项目</span>
+          </div>
+        </div>
+
+        <!-- 采购订单设置 -->
+        <div class="property-section">
+          <div class="section-header">
+            <lay-switch v-model="propertyForm.purchase" />
+            <span class="section-title">采购订单</span>
+          </div>
+        </div>
+
+        <!-- 锁定状态设置 -->
+        <div class="property-section">
+          <div class="section-header">
+            <lay-switch v-model="propertyForm.lockMark" />
+            <span class="section-title">
+              {{
+                selectedRowData?.lockOwnerName
+                  ? `此报价已被${selectedRowData.lockOwnerName}锁定`
+                  : '设置报价项目为锁定状态'
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </ModalWindow>
   </div>
 </template>
 
@@ -362,6 +467,46 @@ const exportOptions = reactive({
   derivePrime: false, // 同时导出成本价
   isExplanation: false, // 导出报价说明
   isSeal: false, // 加盖印章
+});
+
+// 属性设置弹窗相关状态
+const propertyModalVisible = ref(false);
+const propertyForm = reactive({
+  shareOrdersEnabled: false, // 审核状态开关
+  ordersIntegration: 0, // 审核状态下拉值
+  shareName: '', // 共享名称
+  projectStatusEnabled: false, // 项目状态开关
+  projectStatus: 0, // 项目状态值
+  important: false, // 重要项目
+  purchase: false, // 采购订单
+  lockMark: false, // 锁定状态
+});
+
+// 审核状态数组
+const shareStatus = [
+  '审核状态:(未设置)',
+  '审核状态:(已通过)',
+  '审核状态:(审核中)',
+  '审核状态:(驳回)',
+];
+
+// 项目状态数组
+const projectStatusOptions = [
+  { value: -1, label: '未选择' },
+  { value: 0, label: '已失败' },
+  { value: 1, label: '已中标' },
+  { value: 2, label: '进行中' },
+];
+
+// 计算审核状态显示文本
+const auditStatusText = computed(() => {
+  const shareOrders = selectedRowData.value?.shareOrders || 0;
+  return shareStatus[shareOrders] || shareStatus[0];
+});
+
+// 当前选中行的数据计算属性
+const selectedRowData = computed(() => {
+  return dataSource.value.find((item) => item.ordersId === selectedKey.value);
 });
 
 // tab数据
@@ -697,8 +842,66 @@ const isDeleteButtonEnabled = computed(() => {
 });
 
 const handleProperty = () => {
-  console.log('属性功能');
-  // TODO: 实现属性功能
+  // 检查是否有选中的行
+  if (!selectedKey.value) {
+    layer.msg('请先选择要设置属性的报价单', { icon: 2 });
+    return;
+  }
+
+  // 获取选中行的数据
+  const selectedRowData = dataSource.value.find(
+    (item) => item.ordersId === selectedKey.value,
+  );
+
+  if (!selectedRowData) {
+    layer.msg('未找到选中的报价单数据', { icon: 2 });
+    return;
+  }
+
+  // 初始化表单数据
+  // 审核状态：shareOrders为0时关闭，其他情况开启
+  propertyForm.shareOrdersEnabled = selectedRowData.shareOrders !== 0;
+  propertyForm.ordersIntegration = selectedRowData.ordersIntegration || 0;
+  propertyForm.shareName = selectedRowData.shareName || '';
+  // 项目状态：type为-1时关闭，其他情况（0,1,2）开启
+  propertyForm.projectStatusEnabled = selectedRowData.type !== -1;
+  propertyForm.projectStatus = selectedRowData.type;
+  propertyForm.important = selectedRowData.important === 1;
+  propertyForm.purchase = selectedRowData.purchase === 1;
+  propertyForm.lockMark = Number(selectedRowData.lockMark) === 1;
+
+  // 显示属性设置弹窗
+  propertyModalVisible.value = true;
+};
+
+// 确认属性设置
+const handlePropertyConfirm = async () => {
+  try {
+    // 调用设置属性API
+    await ordersApi.setOrdersProperty(
+      propertyForm.projectStatus,
+      propertyForm.important,
+      propertyForm.purchase,
+      propertyForm.lockMark,
+      propertyForm.ordersIntegration,
+      propertyForm.shareName,
+      selectedKey.value,
+    );
+
+    // 操作成功提示
+    notify.success('属性设置成功');
+
+    // 刷新当前页面数据
+    const currentTab = tabItem.find((item) => item.title === current2.value);
+    const type = currentTab ? currentTab.type : undefined;
+    await getOrdersList(type === -1 ? undefined : type);
+
+    // 关闭弹窗
+    propertyModalVisible.value = false;
+  } catch (error) {
+    console.error('设置属性失败:', error);
+    notify.error('设置属性失败，请重试');
+  }
 };
 
 const handleSend = () => {
@@ -1132,6 +1335,56 @@ onMounted(() => {
       .option-item {
         margin-bottom: 15px;
       }
+    }
+  }
+
+  // 属性设置弹窗样式
+  .property-modal-content {
+    padding: 24px;
+    .property-section {
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+
+        .section-title {
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+        }
+      }
+
+      .section-content {
+        padding-left: 8px;
+
+        .status-display {
+          margin-bottom: 8px;
+          font-size: 13px;
+          color: #666;
+
+          .status-auditing {
+            color: #1890ff;
+            font-weight: 500;
+          }
+
+          .status-unaudited {
+            color: #999;
+          }
+        }
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    :deep(.layui-input) {
+      border-radius: 6px;
+    }
+
+    :deep(.layui-select) {
+      border-radius: 6px;
     }
   }
 }
