@@ -270,4 +270,50 @@ export default {
       },
     });
   },
+
+  //发送报价单给客户
+  sendOrdersClient(orderId: string) {
+    const formData = new FormData();
+    formData.append('ordersId', orderId);
+    return http.post<FormData>('/orders/sendOrdersClient', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 查询报价单供应商
+  queryOrdersStatus(orderId: string) {
+    const formData = new FormData();
+    formData.append('ordersId', orderId);
+    return http.post<FormData>('/ordersNotice/queryOrdersStatu', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 获取当前报价单协作状态
+  getCoopState(orderId: string) {
+    const formData = new FormData();
+    formData.append('orderId', orderId);
+    return http.post<FormData>('/orders/coopState', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 开始协作
+  coopStart(orderId: string, coopUser: string, projectName: string) {
+    const formData = new FormData();
+    formData.append('ordersId', orderId);
+    formData.append('coopUser', coopUser);
+    formData.append('projectName', projectName);
+    return http.post<FormData>('/orders/coopStart', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };

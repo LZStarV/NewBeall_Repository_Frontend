@@ -74,7 +74,7 @@ export default {
     http.post('/client/update', null, { params }),
 
   // 客户与产品供应商界面所用的用户树
-  userTree: () => http.post<null, UserTreeType>('/client/userTree'),
+  userTree: () => http.post<null, UserTreeType[]>('/client/userTree'),
 
   // 获取供应商客户列表
   gyClientList: (params: GyClientQueryListType) => {
