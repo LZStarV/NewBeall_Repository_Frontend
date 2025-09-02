@@ -514,6 +514,7 @@ const propertyForm = reactive({
   shareOrdersEnabled: false, // 审核状态开关
   auditStatus: 0, // 审核状态下拉值
   ordersIntegration: 0, // 积分设置值
+
   shareName: '', // 共享名称
   projectStatusEnabled: false, // 项目状态开关
   projectStatus: 0, // 项目状态值
@@ -912,6 +913,7 @@ const handleProperty = () => {
   // 审核状态：shareOrders为0时关闭，其他情况开启
   propertyForm.shareOrdersEnabled = selectedRowData.shareOrders !== 0;
   propertyForm.auditStatus = selectedRowData.shareOrders || 0;
+
   propertyForm.ordersIntegration = selectedRowData.ordersIntegration || 0;
   propertyForm.shareName = selectedRowData.shareName || '';
   // 项目状态：type为-1时关闭，其他情况（0,1,2）开启
