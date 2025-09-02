@@ -28,5 +28,7 @@ declare module 'vue' {
     SvgIcon: typeof import('./components/SvgIcon.vue')['default']
     Tabs: typeof import('./components/Tabs.vue')['default']
     TextCell: typeof import('./components/table-cells/TextCell.vue')['default']
+    Tree: typeof import('./components/Tree.vue')['default']
+    TreeNodeItem: typeof import('./components/TreeNodeItem.vue')['default']
   }
 }

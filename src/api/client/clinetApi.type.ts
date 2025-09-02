@@ -64,11 +64,11 @@ export interface GyClientQueryListType extends ClientQueryListType {
 export interface UserTreeType {
   checked: boolean;
   chkDisabled: boolean;
-  id: number;
+  id: string;
   isOpen: boolean;
   isUser: string;
   name: string;
   nocheck: boolean;
   open: boolean;
-  pId: number;
+  pId: string;
 }
