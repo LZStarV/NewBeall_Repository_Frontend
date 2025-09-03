@@ -17,6 +17,16 @@
       </div>
     </div>
 
+    <!--通知栏-->
+    <!--    <div class="header-middle">-->
+    <!--      <lay-notice-bar-->
+    <!--        scrollable-->
+    <!--        left-icon="layui-icon-speaker"-->
+    <!--        :textlist="noticeList"-->
+    <!--        class="notice-scroller"-->
+    <!--      ></lay-notice-bar>-->
+    <!--    </div>-->
+
     <!-- 右侧工具栏 -->
     <div class="header-right">
       <div class="toolbar">
@@ -120,7 +130,13 @@ const router = useRouter();
 const emit = defineEmits<{
   'toggle-sidebar': [collapsed: boolean];
 }>();
-
+// 通知
+const noticeList = ref([
+  { id: '1', text: '条目一' },
+  { id: '2', text: '条目二' },
+  { id: '3', text: '条目三' },
+  { id: '4', text: '条目四' },
+]);
 // 添加侧边栏折叠状态
 const sidebarCollapsed = ref(false);
 // 消息数量
@@ -202,7 +218,6 @@ const logout = () => {
 .header {
   width: 100%;
   height: 100%;
-  background-image: url('@/assets/image/default/background.png');
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -236,6 +251,19 @@ const logout = () => {
     }
   }
 
+  .header-middle {
+    display: flex;
+    align-items: center;
+
+    .notice-scroller {
+      color: #ffffff;
+      font-sixe: 50px;
+
+      .layui-notice-bar-warp-left-icon {
+      }
+    }
+  }
+
   .header-right {
     display: flex;
     align-items: center;
@@ -252,15 +280,15 @@ const logout = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
       transition: all 0.3s ease;
-      background: transparent;
       border: none;
+      border-radius: 50%;
+      background-color: rgba(27, 27, 27, 0.3);
       color: rgba(255, 255, 255, 0.8);
 
       &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #fff;
+        background-color: rgb(255, 255, 255);
+        color: $primary-color;
         transform: translateY(-1px);
       }
 
@@ -320,8 +348,7 @@ const logout = () => {
       gap: 8px;
 
       .toolbar-btn {
-        width: 32px;
-        height: 32px;
+        width: 24px;
 
         .layui-icon {
           font-size: 14px;

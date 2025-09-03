@@ -10,7 +10,7 @@ export const useTabsStore = defineStore('tabs', {
     tabs: [
       {
         path: '/dashboard',
-        title: '工作台',
+        title: '首页',
       },
     ] as TabItem[],
     activeTab: '/dashboard',
