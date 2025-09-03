@@ -29,7 +29,11 @@
           <lay-avatar
             :src="defaultAvatar"
             radius
-            :size="collapsed ? 'sm' : 'md'"
+            :style="
+              collapsed
+                ? 'width: 30px; height: 30px'
+                : 'width: 50px; height: 50px'
+            "
           />
         </div>
         <div v-show="!collapsed" class="user-details">
@@ -330,6 +334,8 @@ const navigateTo = (path: string) => {
 // 用户信息盒子样式
 .user-info-box {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   padding: 20px;
   height: 8rem;
@@ -339,22 +345,19 @@ const navigateTo = (path: string) => {
 
   .user-avatar {
     flex-shrink: 0;
-    margin-right: 12px;
   }
 
   .user-details {
-    flex: 1;
     min-width: 0;
+    margin: 5px;
+    text-align: center;
 
     .username {
       font-size: 16px;
       font-weight: 600;
       line-height: 1.4;
       color: #fff;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-bottom: 5px;
     }
 
     .user-role {

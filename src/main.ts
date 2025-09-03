@@ -10,7 +10,7 @@ import '@/styles/index.scss';
 
 // 引入Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 //全局注册面包屑组件
 import BaseBreadcrumb from '@/components/Breadcrumb.vue';

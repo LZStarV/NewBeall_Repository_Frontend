@@ -8,12 +8,14 @@
 
     <!-- 右侧主内容区域 -->
     <div class="main-content-layout">
-      <div class="header-wrapper">
-        <Header @toggle-sidebar="handleHeaderToggle" />
-      </div>
+      <div class="full-header-wrapper">
+        <div class="header-wrapper">
+          <Header @toggle-sidebar="handleHeaderToggle" />
+        </div>
 
-      <div class="tabs-wrapper">
-        <Tabs />
+        <div class="tabs-wrapper">
+          <Tabs />
+        </div>
       </div>
 
       <div class="content-wrapper">
@@ -55,12 +57,16 @@ const handleHeaderToggle = (collapsed: boolean) => {
     flex: 1;
     height: 100%;
     display: flex;
+
     flex-direction: column;
-    background: #f6f7fb;
     min-width: 0;
 
+    .full-header-wrapper {
+      background-image: url('@/assets/image/default/background.png');
+    }
+
     .header-wrapper {
-      height: 80px;
+      height: 60px;
     }
 
     .tabs-wrapper {
