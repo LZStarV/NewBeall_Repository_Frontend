@@ -46,13 +46,12 @@
                 <lay-progress
                   :percent="companyDetails?.perfection || 0"
                   size="big"
-                  theme="blue"
                   :show-text="true"
                 ></lay-progress>
               </div>
               <div class="rate-tip">
                 <i class="layui-icon layui-icon-star"></i>
-                当信息完善达到100，壹新将赠予您50积分奖励
+                <span>当信息完善达到100，壹新将赠予您50积分奖励</span>
               </div>
             </div>
 
@@ -392,22 +391,23 @@ h4 {
     .rate-header {
       margin-bottom: 10px;
       font-size: 15px;
-
-      .percentage {
-        color: #1890ff;
-        font-weight: 600;
-      }
     }
 
     .layui-progress {
       margin-bottom: 20px;
+      :deep(.layui-progress-bar) {
+        background-color: var(--global-primary-color) !important;
+      }
     }
 
     .rate-tip {
-      display: flex;
-      align-items: center;
+      @include flex(row, center, center);
+      max-width: 320px;
       font-size: 12px;
-      color: #1890ff;
+      color: var(--global-primary-color);
+      border: 1px solid var(--global-primary-color);
+      border-radius: 12px;
+      padding: 3px;
 
       i {
         margin-right: 5px;
@@ -426,8 +426,12 @@ h4 {
       border-top-right-radius: 10px;
 
       &.active {
-        background: #e6f7ff;
-        border-left: 3px solid #1890ff;
+        background: color-mix(
+          in srgb,
+          var(--global-primary-color),
+          transparent 90%
+        );
+        border-left: 3px solid var(--global-primary-color);
         padding-left: 7px;
         margin-left: -10px;
       }
@@ -435,7 +439,7 @@ h4 {
       i {
         margin-right: 10px;
         font-size: 16px;
-        color: #1890ff;
+        color: var(--global-primary-color);
       }
 
       span {
@@ -475,6 +479,7 @@ h4 {
   border-radius: 12px;
   position: relative;
   padding: 20px 0;
+  min-height: 765px;
 
   .view-count {
     position: absolute;
