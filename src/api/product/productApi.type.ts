@@ -1,25 +1,45 @@
 export interface Product {
   brand: string;
-  imgSrc: string;
+  changeState: number;
+  companyId: number;
+  costprice: string;
+  createrid: string;
+  discountprice: string;
+  encryptId: string;
+  gyCompany: string;
+  gysource: string;
+  id: string;
+  interestrateprice: string;
+  inventoryPrice: string;
+  inventoryRemark: string;
+  isInventory: number;
+  isTemporary: number;
+  marketprice: string;
   model: string;
-  num: string; // 1.0
+  modifyprice: string;
+  name: string;
+  num: number;
+  oldEncryptId: string;
+  orderId: string;
   param: string;
-  proName: string;
+  pictureaddress: string;
+  pictureaddressOne: string;
+  price: number;
+  productCurrChainId: string;
+  productCurrState: string;
   productId: string;
   profitprice: string;
-  prosub: number;
-  purchaseprice: number;
-  pursub: string;
+  purchaseprice: string;
+  receiveid: string;
+  recommend: false;
+  remark: string;
+  sequence: string;
+  subproject: string; // 子项目
+  subprojectClass: string;
+  subprojectColor: string;
+  subprojectLevel: string;
+  subprojectParent: string;
   trait: string;
   unit: string;
-  // changeState: number;
-  // costprice: string; // 0.88
-  // discountprice: string;
-  // encryptId: string;
-  // interestrateprice: string;
-  // modifyprice: string; // 0.00
-  // productCurrChainId: string;
-  // productCurrState: string;
-  // remark: string;
-  // subprojectClass: string;
+  xjProductId: string;
 }

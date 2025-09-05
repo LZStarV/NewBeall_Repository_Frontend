@@ -312,3 +312,28 @@ export interface OrderChargePerson {
   id: number;
   name: string;
 }
+
+// 报价单查询信息
+// 公共字段
+interface BaseParams {
+  order: string;
+  offset: number;
+  limit: number;
+
+  type?: number;
+  pageNumber?: number;
+  attr?: number; // 属性id
+  chargePerson?: string; // 负责人的id
+  createName?: string; // 制单人
+  createDate?: string; // 制单日期
+}
+
+// 三个互斥字段
+type Exclusive =
+  | { projectName: string; contacts?: never; ordersType?: never } // 工程项目名
+  | { projectName?: never; contacts: string; ordersType?: never } // 客户单位名
+  | { projectName?: never; contacts?: never; ordersType: string } // 报价类型
+  | { projectName?: never; contacts?: never; ordersType?: never }; // 全部不传
+
+// 最终参数类型
+export type GetOrdersListParams = BaseParams & Exclusive;
