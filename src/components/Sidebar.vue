@@ -1,26 +1,5 @@
 <template>
   <div class="sidebar-container" :class="{ collapsed }">
-    <!-- 品牌标题区域 -->
-    <div class="brand-header">
-      <div class="brand-content">
-        <div v-show="!collapsed" class="brand-info">
-          <img
-            src="@/assets/image/default/cover_logo.png"
-            alt="Newbeall Logo"
-            class="brand-logo-img"
-          />
-          <span class="brand-subtitle">-设计报价管理平台-</span>
-        </div>
-        <div v-show="collapsed" class="brand-logo">
-          <img
-            src="@/assets/image/default/cover_logo.png"
-            alt="Newbeall Logo"
-            class="logo-img-collapsed"
-          />
-        </div>
-      </div>
-    </div>
-
     <!-- 侧边栏菜单 -->
     <div class="sidebar-menu">
       <!-- 用户信息盒子 -->
@@ -37,7 +16,7 @@
           />
         </div>
         <div v-show="!collapsed" class="user-details">
-          <div class="username">张三</div>
+          <div class="dropdown-display-name">张三</div>
           <div class="user-role">产品供应商</div>
         </div>
       </div>
@@ -135,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useTabsStore } from '@/stores/tabs';
 import {
@@ -233,14 +212,14 @@ const navigateTo = (path: string) => {
 
 <style scoped lang="scss">
 .sidebar-container {
+  box-shadow: $box-shadow-base;
+  border-radius: $border-radius-extra-large;
   height: 100%;
   width: 100%;
-  background: #fff;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  overflow: hidden; // 防止整个侧边栏滚动
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
   position: relative;
   z-index: 100;
 
@@ -262,69 +241,9 @@ const navigateTo = (path: string) => {
   }
 }
 
-// 品牌标题区域样式
-.brand-header {
-  background-image: url('@/assets/image/default/background.png');
-  height: 80px;
-  padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0; // 防止被压缩
-
-  .brand-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
-    .brand-info {
-      text-align: center;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      .brand-logo-img {
-        max-height: 30px;
-        max-width: 150px;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        margin-bottom: 4px;
-      }
-
-      .brand-subtitle {
-        font-size: 10px;
-        opacity: 0.8;
-        display: block;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-      }
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-
-      .logo-img-collapsed {
-        width: 32px;
-        height: 32px;
-        object-fit: contain;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 4px;
-      }
-    }
-  }
-}
-
 .sidebar-menu {
   flex: 1;
+  border-radius: $border-radius-extra-large;
   display: flex;
   flex-direction: column;
   overflow: hidden; // 防止整个菜单区域滚动
@@ -352,7 +271,7 @@ const navigateTo = (path: string) => {
     margin: 5px;
     text-align: center;
 
-    .username {
+    .dropdown-display-name {
       font-size: 16px;
       font-weight: 600;
       line-height: 1.4;
@@ -374,6 +293,7 @@ const navigateTo = (path: string) => {
 
 // 菜单列表容器 - 可滚动区域
 .menu-list-container {
+  background-color: #fff;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;

@@ -2,30 +2,38 @@
   <div class="header">
     <!-- 左侧区域 -->
     <div class="header-left">
-      <div class="collapse-btn" @click="toggleSidebar">
-        <lay-icon
-          :type="
-            sidebarCollapsed
-              ? 'layui-icon-spread-left'
-              : 'layui-icon-shrink-right'
-          "
-        />
-      </div>
-      <!-- 刷新按钮 -->
-      <div class="collapse-btn" @click="refreshPage">
-        <lay-icon type="layui-icon-refresh" />
+      <!-- 品牌标题区域 -->
+      <div class="brand-content">
+        <div class="brand-info">
+          <img
+            src="@/assets/image/default/cover_logo.png"
+            alt="Newbeall Logo"
+            class="brand-logo-img"
+          />
+          <span class="brand-subtitle">-设计报价管理平台-</span>
+        </div>
+        <div class="header-actions">
+          <div class="collapse-btn" @click="toggleSidebar">
+            <lay-icon
+              :type="
+                sidebarCollapsed
+                  ? 'layui-icon-spread-left'
+                  : 'layui-icon-shrink-right'
+              "
+            />
+          </div>
+          <!-- 刷新按钮 -->
+          <div class="collapse-btn" @click="refreshPage">
+            <lay-icon type="layui-icon-refresh" />
+          </div>
+        </div>
       </div>
     </div>
 
     <!--通知栏-->
-    <!--    <div class="header-middle">-->
-    <!--      <lay-notice-bar-->
-    <!--        scrollable-->
-    <!--        left-icon="layui-icon-speaker"-->
-    <!--        :textlist="noticeList"-->
-    <!--        class="notice-scroller"-->
-    <!--      ></lay-notice-bar>-->
-    <!--    </div>-->
+    <div class="header-middle">
+      <NoticeBar :textlist="noticeList" />
+    </div>
 
     <!-- 右侧工具栏 -->
     <div class="header-right">
@@ -92,9 +100,9 @@
 
         <!-- 用户头像和菜单 -->
         <lay-dropdown>
-          <div class="user-info">
+          <div class="dropdown">
             <lay-avatar :src="defaultAvatar" radius size="sm" />
-            <span class="username">管理员</span>
+            <span class="dropdown-display-name">管理员</span>
             <lay-icon type="layui-icon-down" />
           </div>
           <template #content>
@@ -121,6 +129,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import NoticeBar from '@/components/NoticeBar.vue';
 import FeedbackPanel from '@/components/FeedbackPanel.vue';
 import defaultAvatar from '@/assets/image/default/defaultAvatar.png';
 
@@ -132,10 +141,10 @@ const emit = defineEmits<{
 }>();
 // 通知
 const noticeList = ref([
-  { id: '1', text: '条目一' },
-  { id: '2', text: '条目二' },
-  { id: '3', text: '条目三' },
-  { id: '4', text: '条目四' },
+  '1111111111111111111111111111111111111111111111',
+  '2',
+  '3',
+  '4',
 ]);
 // 添加侧边栏折叠状态
 const sidebarCollapsed = ref(false);
@@ -218,35 +227,73 @@ const logout = () => {
 .header {
   width: 100%;
   height: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.5fr 3fr 3fr;
   align-items: center;
-  justify-content: space-between;
   padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 
   .header-left {
     display: flex;
     align-items: center;
     gap: 16px;
 
-    .collapse-btn {
+    .brand-content {
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      color: rgba(255, 255, 255, 0.8);
+      justify-content: space-between;
+      height: 100%;
+      margin-right: 16px;
+      padding-right: 16px;
 
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #fff;
+      .brand-info {
+        text-align: center;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .brand-logo-img {
+          max-height: 30px;
+          max-width: 150px;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          margin-bottom: 4px;
+        }
+
+        .brand-subtitle {
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.8);
+        }
       }
 
-      .layui-icon {
-        font-size: 16px;
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 16px;
+
+        .collapse-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          cursor: pointer;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          color: rgba(255, 255, 255, 0.8);
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+          }
+
+          .layui-icon {
+            font-size: 16px;
+          }
+        }
       }
     }
   }
@@ -254,19 +301,14 @@ const logout = () => {
   .header-middle {
     display: flex;
     align-items: center;
-
-    .notice-scroller {
-      color: #ffffff;
-      font-sixe: 50px;
-
-      .layui-notice-bar-warp-left-icon {
-      }
-    }
+    padding: 0 20px;
+    margin-right: 20px;
   }
 
   .header-right {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
   }
 
   .toolbar {
@@ -297,7 +339,7 @@ const logout = () => {
       }
     }
 
-    .user-info {
+    .dropdown {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -312,7 +354,7 @@ const logout = () => {
         color: #fff;
       }
 
-      .username {
+      .dropdown-display-name {
         font-size: 14px;
         font-weight: 500;
       }
@@ -328,6 +370,8 @@ const logout = () => {
 // 响应式设计
 @media (max-width: 768px) {
   .header {
+    display: flex;
+    justify-content: space-between;
     padding: 0 10px;
 
     .header-left {
@@ -355,10 +399,10 @@ const logout = () => {
         }
       }
 
-      .user-info {
+      .dropdown {
         padding: 4px 8px;
 
-        .username {
+        .dropdown-display-name {
           font-size: 12px;
         }
       }
