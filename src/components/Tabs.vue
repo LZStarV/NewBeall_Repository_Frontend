@@ -25,21 +25,22 @@
 
     <!-- 标签页操作按钮 -->
     <div class="tabs-actions">
-      <div class="dropdown">
-        <button
-          class="menu-button btn btn-primary dropdown-toggle"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          关闭操作 <span class="caret"></span>
-        </button>
-        <ul class="menu-content dropdown-menu">
-          <li class="dropdown-item" @click="refreshCurrentTab">刷新当前页</li>
-          <li class="dropdown-item" @click="closeOtherTabs">关闭其他标签</li>
-          <li class="dropdown-item" @click="closeAllTabs">关闭全部标签</li>
-        </ul>
-      </div>
+      <lay-dropdown>
+        <div class="dropdown">
+          <span class="dropdown-display-name">关闭操作</span>
+          <lay-icon type="layui-icon-down" />
+        </div>
+        <template #content>
+          <lay-dropdown-menu>
+            <lay-dropdown-menu-item @click="closeOtherTabs">
+              关闭其他标签
+            </lay-dropdown-menu-item>
+            <lay-dropdown-menu-item divided @click="closeAllTabs">
+              关闭全部标签
+            </lay-dropdown-menu-item>
+          </lay-dropdown-menu>
+        </template>
+      </lay-dropdown>
     </div>
   </div>
 </template>
@@ -48,6 +49,7 @@
 import { computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useTabsStore } from '@/stores/tabs';
+import defaultAvatar from '@assets/image/default/defaultAvatar.png';
 
 const router = useRouter();
 const route = useRoute();
@@ -106,9 +108,10 @@ const closeAllTabs = () => {
 .tabs-container {
   display: flex;
   align-items: center;
-  height: 100%;
-  border-bottom: 1px solid #e4e7ed;
+  width: 100%;
+  height: 50%;
   padding: 0 16px;
+  justify-content: space-between;
 }
 
 .tabs-wrapper {
@@ -194,6 +197,8 @@ const closeAllTabs = () => {
 
 .tabs-actions {
   margin-left: 16px;
+  display: flex;
+  justify-content: flex-end;
 
   .menu-button {
     height: 24px;
@@ -209,6 +214,34 @@ const closeAllTabs = () => {
       &:hover {
         cursor: pointer;
       }
+    }
+  }
+
+  .dropdown {
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(27, 27, 27, 0.3);
+    color: rgba(255, 255, 255, 0.9);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .dropdown-display-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-right: 6px;
+    }
+
+    .layui-icon {
+      font-size: 12px;
+      opacity: 0.7;
     }
   }
 }

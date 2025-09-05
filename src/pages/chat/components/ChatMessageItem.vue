@@ -7,7 +7,7 @@
       </div>
       <div class="message-content">
         <div class="message-header">
-          <span class="username">{{ userName }}</span>
+          <span class="dropdown-display-name">{{ userName }}</span>
           <span class="time">{{ parseDateTime(parseInt(time)) }}</span>
         </div>
         <div class="message-bubble other-message">
@@ -262,7 +262,7 @@ const getEmojiPrefix = (categoryId: string) => {
   margin-bottom: 4px;
 }
 
-.username {
+.dropdown-display-name {
   font-size: 14px;
   font-weight: 500;
   color: #374151;

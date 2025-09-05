@@ -35,7 +35,7 @@
               <Avatar :url="user.avatar" :alt="user.name" size="2.5rem" />
             </div>
 
-            <div class="user-info">
+            <div class="dropdown">
               <div class="user-name">{{ user.name }}</div>
               <div class="user-phone">{{ user.phone }}</div>
             </div>
@@ -302,7 +302,7 @@ const sendMessage = async () => {
     margin-right: 12px;
   }
 
-  .user-info {
+  .dropdown {
     flex: 1;
     min-width: 0;
 

@@ -1,26 +1,25 @@
 <!-- src/layouts/MainLayout.vue -->
 <template>
   <div class="main-layout">
-    <!-- 左侧边栏 -->
-    <div class="sidebar-wrapper" :class="{ collapsed: sidebarCollapsed }">
-      <Sidebar :collapsed="sidebarCollapsed" />
-    </div>
-
-    <!-- 右侧主内容区域 -->
-    <div class="main-content-layout">
-      <div class="full-header-wrapper">
-        <div class="header-wrapper">
-          <Header @toggle-sidebar="handleHeaderToggle" />
-        </div>
-
-        <div class="tabs-wrapper">
-          <Tabs />
-        </div>
+    <lay-header class="main-header">
+      <div class="header-wrapper">
+        <Header @toggle-sidebar="handleHeaderToggle" />
       </div>
+      <div class="tabs-wrapper">
+        <Tabs />
+      </div>
+    </lay-header>
 
-      <div class="content-wrapper">
+    <div class="main-content">
+      <lay-side width="230px" class="main-aside">
+        <div class="sidebar-wrapper" :class="{ collapsed: sidebarCollapsed }">
+          <Sidebar :collapsed="sidebarCollapsed" />
+        </div>
+      </lay-side>
+
+      <lay-body class="main-body">
         <RouterView />
-      </div>
+      </lay-body>
     </div>
   </div>
 </template>
@@ -39,46 +38,127 @@ const handleHeaderToggle = (collapsed: boolean) => {
 </script>
 
 <style scoped lang="scss">
+$headerHeight: 64px;
+$tabsHeight: 100px;
+$totalHeaderHeight: $headerHeight + $tabsHeight;
+$mainContentMarginTop: $headerHeight + $tabsHeight / 2;
+$sidebarWidth: 300px;
+$sidebarWidthCollapsed: 80px;
+
 .main-layout {
   height: 100vh;
   display: flex;
-  width: 100%;
+  flex-direction: column;
+  background-color: #f0f2f5;
 
-  .sidebar-wrapper {
-    width: 240px;
-    height: 100%;
-
-    &.collapsed {
-      width: 60px;
-    }
-  }
-
-  .main-content-layout {
-    flex: 1;
-    height: 100%;
+  .main-header {
+    width: 100%;
+    height: $totalHeaderHeight;
+    background-image: url('@/assets/image/default/background.png');
     display: flex;
-
     flex-direction: column;
-    min-width: 0;
-
-    .full-header-wrapper {
-      background-image: url('@/assets/image/default/background.png');
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 
     .header-wrapper {
-      height: 60px;
+      height: $headerHeight;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .tabs-wrapper {
-      height: 40px;
+      height: $tabsHeight;
+      flex-shrink: 0;
+      width: 100%;
+      padding: 0 20px;
+      display: flex;
+      align-items: flex-start;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    position: fixed;
+    top: $mainContentMarginTop;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1001;
+
+    .main-aside {
+      width: $sidebarWidth;
+      flex-shrink: 0;
+      z-index: 90;
+      padding: 0 20px;
+      transition: width 0.3s ease;
+
+      &.collapsed {
+        width: $sidebarWidthCollapsed;
+      }
+
+      .sidebar-wrapper {
+        height: 100%;
+        transition: width 0.3s ease;
+        padding-bottom: 20px;
+      }
     }
 
-    .content-wrapper {
+    .main-body {
       flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      // 为右侧弹窗提供定位参考
-      position: relative;
+      background-color: #ffffff;
+      box-shadow: $box-shadow-base;
+      height: calc(100vh - $mainContentMarginTop - 20px);
+      padding: 20px;
+      margin: 0 20px;
+      border-radius: $border-radius-extra-large;
+      transition: margin-left 0.3s ease;
+      z-index: 80;
+
+      .main-layout &.collapsed {
+        margin-left: $sidebarWidthCollapsed;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 1024px) {
+  .main-layout {
+    > lay-layout {
+      .lay-body {
+        padding: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  $headerHeight: 56px;
+  $tabsHeight: 40px;
+  $totalHeaderHeight: $headerHeight + $tabsHeight;
+
+  .main-layout {
+    .main-header {
+      height: $totalHeaderHeight;
+
+      .header-wrapper {
+        height: $headerHeight;
+      }
+
+      .tabs-wrapper {
+        height: $tabsHeight;
+        padding: 0 12px;
+      }
+    }
+
+    > lay-layout {
+      .lay-body {
+        padding: 12px;
+      }
     }
   }
 }
