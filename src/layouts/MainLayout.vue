@@ -109,11 +109,8 @@ $sidebarWidthCollapsed: 80px;
 
     .main-body {
       flex: 1;
-      background-color: #ffffff;
-      box-shadow: $box-shadow-base;
       height: calc(100vh - $mainContentMarginTop - 20px);
-      padding: 20px;
-      margin: 0 20px;
+      padding-right: 20px;
       border-radius: $border-radius-extra-large;
       transition: margin-left 0.3s ease;
       z-index: 80;
