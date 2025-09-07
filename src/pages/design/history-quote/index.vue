@@ -2,90 +2,88 @@
   <div class="history-quote-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <div class="toolbar">
-        <lay-form
-          layout="inline"
-          :pane="true"
-          :label-width="80"
-          class="toolbar-form-items"
-        >
-          <lay-form-item class="form-item-search">
-            <template #label>
-              <lay-select v-model="typeFilter">
-                <lay-select-option value="projectName">
-                  工程项目名
-                </lay-select-option>
-                <lay-select-option value="contacts">客户单位</lay-select-option>
-                <lay-select-option value="orderstype">
-                  报价类型
-                </lay-select-option>
-              </lay-select>
-            </template>
-            <lay-input
-              v-model="quotationNameSearch"
-              placeholder="请输入方案名称进行搜索"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
-
-          <lay-form-item label="属性">
-            <lay-select v-model="attribute" placeholder="请输入">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="attr in orderAttributeList"
-                :key="attr.id"
-                :value="attr.id"
-              >
-                {{ attr.name }}
+      <lay-form
+        layout="inline"
+        :pane="true"
+        :label-width="80"
+        class="toolbar-form-items"
+      >
+        <lay-form-item class="form-item-search">
+          <template #label>
+            <lay-select v-model="typeFilter">
+              <lay-select-option value="projectName">
+                工程项目名
+              </lay-select-option>
+              <lay-select-option value="contacts">客户单位</lay-select-option>
+              <lay-select-option value="orderstype">
+                报价类型
               </lay-select-option>
             </lay-select>
-          </lay-form-item>
+          </template>
+          <lay-input
+            v-model="quotationNameSearch"
+            placeholder="请输入方案名称进行搜索"
+            class="search-input"
+            mode="block"
+          />
+        </lay-form-item>
 
-          <lay-form-item label="负责人">
-            <lay-select v-model="chargePerson" placeholder="请选择">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="item in ordersChargePersonList"
-                :key="item.id"
-                :value="String(item.id)"
-              >
-                {{ item.name }}
-              </lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="属性">
+          <lay-select v-model="attribute" placeholder="请输入">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option
+              v-for="attr in orderAttributeList"
+              :key="attr.id"
+              :value="attr.id"
+            >
+              {{ attr.name }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="制单人">
-            <lay-select v-model="createUser" placeholder="请选择">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="item in ordersCreateUserList"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="负责人">
+          <lay-select v-model="chargePerson" placeholder="请选择">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option
+              v-for="item in ordersChargePersonList"
+              :key="item.id"
+              :value="String(item.id)"
+            >
+              {{ item.name }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="制单日期">
-            <lay-date-picker
-              v-model="createDate"
-              placeholder="click me"
-              allow-clear
-            />
-          </lay-form-item>
+        <lay-form-item label="制单人">
+          <lay-select v-model="createUser" placeholder="请选择">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option
+              v-for="item in ordersCreateUserList"
+              :key="item"
+              :value="item"
+            >
+              {{ item }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <div class="toolbar-btns">
-            <button title="搜索" @click="handleSearch">
-              <SvgIcon name="search" width="1.1rem" />
-            </button>
-            <button title="刷新" @click="handleRefresh">
-              <SvgIcon name="refresh" width="1.2rem" />
-            </button>
-          </div>
-        </lay-form>
-      </div>
+        <lay-form-item label="制单日期">
+          <lay-date-picker
+            v-model="createDate"
+            placeholder="click me"
+            allow-clear
+          />
+        </lay-form-item>
+
+        <div class="toolbar-btns">
+          <button title="搜索" @click="handleSearch">
+            <SvgIcon name="search" width="1.1rem" />
+          </button>
+          <button title="刷新" @click="handleRefresh">
+            <SvgIcon name="refresh" width="1.2rem" />
+          </button>
+        </div>
+      </lay-form>
     </lay-card>
 
     <!-- 底部列表区域 -->
@@ -1035,11 +1033,18 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .history-quote-page {
-  padding: 24px;
-
   :deep(.layui-form-item) {
     label {
       width: 100px !important;
+    }
+  }
+
+  .content-list-card {
+    height: 100%;
+    :deep(.layui-card-body) {
+      padding: 0 0 10px 0 !important;
+      overflow: hidden;
+      border-radius: var(--card-border-radius);
     }
   }
 

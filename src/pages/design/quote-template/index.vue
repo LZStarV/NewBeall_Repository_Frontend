@@ -2,79 +2,77 @@
   <div class="quote-template-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <div class="toolbar">
-        <lay-form
-          layout="inline"
-          :pane="true"
-          :label-width="80"
-          class="toolbar-form-items"
-        >
-          <lay-form-item label="模块名">
-            <lay-input
-              v-model="moduleNameSearch"
-              placeholder="请输入模块名"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
+      <lay-form
+        layout="inline"
+        :pane="true"
+        :label-width="80"
+        class="toolbar-form-items"
+      >
+        <lay-form-item label="模块名">
+          <lay-input
+            v-model="moduleNameSearch"
+            placeholder="请输入模块名"
+            class="search-input"
+            mode="block"
+          />
+        </lay-form-item>
 
-          <lay-form-item label="类别">
-            <lay-select v-model="categorySearch1" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
-          <lay-form-item>
-            <lay-select v-model="categorySearch2" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="类别">
+          <lay-select v-model="categorySearch1" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
+        <lay-form-item>
+          <lay-select v-model="categorySearch2" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="面积">
-            <lay-select v-model="squareSearch" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="面积">
+          <lay-select v-model="squareSearch" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="配置">
-            <lay-select v-model="configSearch" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="配置">
+          <lay-select v-model="configSearch" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="国别">
-            <lay-select v-model="countrySearch" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="国别">
+          <lay-select v-model="countrySearch" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="点位数">
-            <lay-select v-model="pointNumberSearch" placeholder="请选择">
-              <lay-select-option value="1">类别1</lay-select-option>
-              <lay-select-option value="2">类别2</lay-select-option>
-              <lay-select-option value="3">类别3</lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="点位数">
+          <lay-select v-model="pointNumberSearch" placeholder="请选择">
+            <lay-select-option value="1">类别1</lay-select-option>
+            <lay-select-option value="2">类别2</lay-select-option>
+            <lay-select-option value="3">类别3</lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <div class="toolbar-btns">
-            <button title="搜索" @click="handleSearch">
-              <SvgIcon name="search" width="1.1rem" />
-            </button>
-            <button title="刷新" @click="handleRefresh">
-              <SvgIcon name="refresh" width="1.2rem" />
-            </button>
-          </div>
-        </lay-form>
-      </div>
+        <div class="toolbar-btns">
+          <button title="搜索" @click="handleSearch">
+            <SvgIcon name="search" width="1.1rem" />
+          </button>
+          <button title="刷新" @click="handleRefresh">
+            <SvgIcon name="refresh" width="1.2rem" />
+          </button>
+        </div>
+      </lay-form>
     </lay-card>
 
     <!-- 底部列表区域 -->
@@ -295,11 +293,18 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .quote-template-page {
-  padding: 24px;
-
   :deep(.layui-form-item) {
     label {
       width: 100px !important;
+    }
+  }
+
+  .content-list-card {
+    height: 100%;
+    :deep(.layui-card-body) {
+      padding: 0 0 10px 0 !important;
+      overflow: hidden;
+      border-radius: var(--card-border-radius);
     }
   }
 
@@ -332,6 +337,7 @@ onMounted(() => {
   .page-info {
     margin-top: 1rem;
     font-size: 14px;
+    margin-left: 20px;
     color: $text-regular;
   }
 

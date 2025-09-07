@@ -94,3 +94,18 @@
 .layui-btn + .layui-btn {
   margin-left: 0;
 }
+
+.layui-card-body {
+  padding: 16px !important;
+}
+
+// 缩小radio默认大小
+
+.layui-radio[size='md'] {
+  font-size: 18px;
+
+  .layui-form-radio > i {
+    font-size: 18px;
+    line-height: 18px;
+  }
+}

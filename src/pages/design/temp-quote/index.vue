@@ -2,58 +2,56 @@
   <div class="temp-quote-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <div class="toolbar">
-        <lay-form
-          layout="inline"
-          :pane="true"
-          :label-width="80"
-          class="toolbar-form-items"
-        >
-          <lay-form-item label="工程项目名">
-            <lay-input
-              v-model="quotationNameSearch"
-              placeholder="请输入工程项目名"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
+      <lay-form
+        layout="inline"
+        :pane="true"
+        :label-width="80"
+        class="toolbar-form-items"
+      >
+        <lay-form-item label="工程项目名">
+          <lay-input
+            v-model="quotationNameSearch"
+            placeholder="请输入工程项目名"
+            class="search-input"
+            mode="block"
+          />
+        </lay-form-item>
 
-          <lay-form-item label="客户单位">
-            <lay-input
-              v-model="clientNameSearch"
-              placeholder="请输入客户单位"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
+        <lay-form-item label="客户单位">
+          <lay-input
+            v-model="clientNameSearch"
+            placeholder="请输入客户单位"
+            class="search-input"
+            mode="block"
+          />
+        </lay-form-item>
 
-          <lay-form-item label="报价类型">
-            <lay-input
-              v-model="quoteTypeSearch"
-              placeholder="请输入报价类型"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
+        <lay-form-item label="报价类型">
+          <lay-input
+            v-model="quoteTypeSearch"
+            placeholder="请输入报价类型"
+            class="search-input"
+            mode="block"
+          />
+        </lay-form-item>
 
-          <lay-form-item label="制单日期">
-            <lay-date-picker
-              v-model="createDate"
-              placeholder="请选择制单日期"
-              allow-clear
-            />
-          </lay-form-item>
+        <lay-form-item label="制单日期">
+          <lay-date-picker
+            v-model="createDate"
+            placeholder="请选择制单日期"
+            allow-clear
+          />
+        </lay-form-item>
 
-          <div class="toolbar-btns">
-            <button title="搜索" @click="handleSearch">
-              <SvgIcon name="search" width="1.1rem" />
-            </button>
-            <button title="刷新" @click="handleRefresh">
-              <SvgIcon name="refresh" width="1.2rem" />
-            </button>
-          </div>
-        </lay-form>
-      </div>
+        <div class="toolbar-btns">
+          <button title="搜索" @click="handleSearch">
+            <SvgIcon name="search" width="1.1rem" />
+          </button>
+          <button title="刷新" @click="handleRefresh">
+            <SvgIcon name="refresh" width="1.2rem" />
+          </button>
+        </div>
+      </lay-form>
     </lay-card>
 
     <!-- 底部列表区域 -->
@@ -259,11 +257,18 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .temp-quote-page {
-  padding: 24px;
-
   :deep(.layui-form-item) {
     label {
       width: 100px !important;
+    }
+  }
+
+  .content-list-card {
+    height: 100%;
+    :deep(.layui-card-body) {
+      padding: 0 0 10px 0 !important;
+      overflow: hidden;
+      border-radius: var(--card-border-radius);
     }
   }
 
@@ -296,6 +301,7 @@ onMounted(() => {
   .page-info {
     margin-top: 1rem;
     font-size: 14px;
+    margin-left: 20px;
     color: $text-regular;
   }
 

@@ -169,8 +169,4 @@ const handleTempSave = async (data: Quotation) => {
 };
 </script>
 
-<style scoped lang="scss">
-.new-quote-page {
-  padding: 24px;
-}
-</style>
+<style scoped lang="scss"></style>
