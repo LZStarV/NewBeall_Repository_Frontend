@@ -1113,13 +1113,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
-    height: 32px;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
   }
 
   // 删除确认弹窗样式

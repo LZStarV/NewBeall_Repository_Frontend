@@ -65,7 +65,18 @@
         even
         @pagination="handlePaginationChange"
         @sort-change="sortChange"
-      />
+      >
+        <!-- 工程项目名称列自定义渲染 -->
+        <template #projectName="{ row }">
+          <span class="project-name-link" :title="row.projectName">
+            {{ row.projectName }}
+          </span>
+        </template>
+        <!-- 总成本列自定义渲染 -->
+        <template #purchasepriceSum="{ row }">
+          <span class="price-sum">{{ row.purchasepriceSum }}</span>
+        </template>
+      </lay-table>
       <div class="page-info">
         <span>
           显示第
@@ -80,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import type {
   TableColumn,
@@ -116,7 +127,7 @@ const defaultToolbars: TableDefaultToolbar[] = [
 
 // 表格列配置
 const columns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  { title: '', width: '20px', type: 'radio', fixed: 'left' as const },
   {
     title: '编号',
     width: '180px',
@@ -129,6 +140,7 @@ const columns = [
     width: '300px',
     key: 'projectName',
     ellipsisTooltip: true,
+    customSlot: 'projectName',
   },
   {
     title: '客户单位',
@@ -157,6 +169,7 @@ const columns = [
     title: '总成本',
     width: '120px',
     key: 'purchasepriceSum',
+    customSlot: 'purchasepriceSum',
   },
   {
     title: '交货时间',
@@ -269,7 +282,10 @@ watch(
   data,
   (newData: TempQuotationListResponse[] | null) => {
     if (newData) {
-      dataSource.value = newData;
+      dataSource.value = newData.map((item) => ({
+        id: item.ordersId, // 为了radio可操作引入id字段
+        ...item,
+      }));
     } else {
       dataSource.value = [];
     }
@@ -311,6 +327,16 @@ const handlePaginationChange = (e: { current: number; pageSize: number }) => {
       padding: 0 0 10px 0 !important;
       overflow: hidden;
       border-radius: var(--card-border-radius);
+    }
+
+    .project-name-link {
+      color: $primary-color;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .price-sum {
+      color: $danger-color;
     }
   }
 
