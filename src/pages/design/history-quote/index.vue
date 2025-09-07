@@ -437,11 +437,9 @@
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
-import Tree from '@/components/Tree.vue';
 import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
-import clientApi from '@/api/client/clinetApi';
 import type {
   OrderChargePerson,
   QuotationListResponse,
@@ -454,8 +452,6 @@ import type {
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
 import QuotationInfo from '../components/QuotationInfo.vue';
-import { layer } from '@layui/layui-vue';
-import notify from '@/utils/notify';
 import { useChatStore } from '@/stores/chat';
 import type { UserInfo } from '@/pages/chat/Chat.type';
 
@@ -698,8 +694,6 @@ const goToChat = (row: QuotationListResponse) => {
     },
   });
 };
-
-const showPriceColumns = ref(false);
 
 const selectedKey = ref();
 
@@ -947,21 +941,16 @@ watch(quotationNameSearch, () => {
 });
 
 // 初始化hooks
-const {
-  showPriceColumns: hookShowPriceColumns,
-  handleShowPrice,
-  handleEdit,
-  handleEditSave,
-  handleCopy,
-} = useQuotationActions({
-  selectedKey,
-  dataSource,
-  editModalVisible,
-  getOrdersList,
-  tabItem,
-  current2,
-  columns,
-});
+const { handleShowPrice, handleEdit, handleEditSave, handleCopy } =
+  useQuotationActions({
+    selectedKey,
+    dataSource,
+    editModalVisible,
+    getOrdersList,
+    tabItem,
+    current2,
+    columns,
+  });
 
 const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
   {
@@ -984,8 +973,6 @@ const {
   shareStatus,
   integrationOptions,
   projectStatusOptions,
-  selectedRowData: propertySelectedRowData,
-  auditStatusText: hookAuditStatusText,
   handleProperty,
   handlePropertyConfirm,
   handleAuditStatusChange,
@@ -999,15 +986,14 @@ const {
   current2,
 });
 
-const { handleSend, handleSendToClient, handleSendToSupplier } =
-  useQuotationSend({
-    selectedKey,
-    dataSource,
-    currentUser,
-    getOrdersList,
-    tabItem,
-    current2,
-  });
+const { handleSend } = useQuotationSend({
+  selectedKey,
+  dataSource,
+  currentUser,
+  getOrdersList,
+  tabItem,
+  current2,
+});
 
 const { handleCollaborate } = useQuotationCollaborate({
   selectedKey,

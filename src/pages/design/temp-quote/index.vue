@@ -63,6 +63,7 @@
         :loading="loading"
         :pagination="pagination"
         even
+        @pagination="handlePaginationChange"
         @sort-change="sortChange"
       />
       <div class="page-info">
@@ -79,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import type {
   TableColumn,
@@ -87,12 +88,13 @@ import type {
 } from '@layui/layui-vue/types/component/table/typing';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ordersApi from '@/api/orders/ordersApi';
+import { useToolbarSearch } from '@/composables/useToolbarSearch';
 
 // 工具栏响应式数据
-const quotationNameSearch = ref<string>();
-const clientNameSearch = ref<string>();
-const quoteTypeSearch = ref<string>();
-const createDate = ref<string>();
+const quotationNameSearch = ref<string>('');
+const clientNameSearch = ref<string>('');
+const quoteTypeSearch = ref<string>('');
+const createDate = ref<string>('');
 
 interface TempQuotationListResponse extends QuotationListResponse {
   status: string;
@@ -100,7 +102,6 @@ interface TempQuotationListResponse extends QuotationListResponse {
 }
 
 // 表格数据
-const loading = ref(false);
 const dataSource = ref<TempQuotationListResponse[]>([]);
 
 // 表头配置
@@ -217,7 +218,7 @@ const getStatus = (isAudit: number) => {
     case 0:
       return '待审核';
     case 1:
-      return '驳回'; // 要把文字颜色设置为红色
+      return '驳回';
     case 3:
       return '设计中';
     default:
@@ -225,34 +226,75 @@ const getStatus = (isAudit: number) => {
   }
 };
 
+// 使用 useToolbarSearch hook
+const { data, loading, error, search, reset } = useToolbarSearch({
+  searchParams: {
+    projectName: quotationNameSearch,
+    contacts: clientNameSearch,
+    orderstype: quoteTypeSearch,
+    createDate: createDate,
+  },
+  apiFunction: async (params) => {
+    const res = (await ordersApi.getQuotationList(
+      'desc',
+      (pagination.current - 1) * pagination.pageSize,
+      pagination.pageSize,
+      params.projectName as string,
+      params.contacts as string,
+      params.createDate as string,
+      params.orderstype as string,
+    )) as unknown as { rows: QuotationListResponse[]; total: number };
+
+    // 更新分页总数
+    pagination.total = res.total;
+
+    // 处理数据格式
+    const processedData = res.rows.map((item) => ({
+      ...item,
+      status: getStatus(item.isAudit),
+      ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
+        .filter(Boolean)
+        .join('/'),
+    }));
+
+    return processedData;
+  },
+  enableDebounce: true,
+  debounceDelay: 100,
+  immediate: true,
+});
+
+// 监听搜索结果变化，更新表格数据
+watch(
+  data,
+  (newData: TempQuotationListResponse[] | null) => {
+    if (newData) {
+      dataSource.value = newData;
+    } else {
+      dataSource.value = [];
+    }
+  },
+  { immediate: true },
+);
+
 // 处理搜索
 const handleSearch = () => {
   pagination.current = 1;
+  search();
 };
 
 // 处理刷新
-const handleRefresh = () => {};
-
-const getTempQuoteList = async () => {
-  const res = (await ordersApi.getQuotationList(
-    'desc',
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.pageSize,
-  )) as unknown as { rows: QuotationListResponse[]; total: number };
-
-  pagination.total = res.total;
-  dataSource.value = res.rows.map((item) => ({
-    ...item,
-    status: getStatus(item.isAudit),
-    ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
-      .filter(Boolean)
-      .join('/'),
-  }));
+const handleRefresh = () => {
+  pagination.current = 1;
+  reset();
 };
 
-onMounted(() => {
-  getTempQuoteList();
-});
+// 处理分页变化
+const handlePaginationChange = (e: { current: number; pageSize: number }) => {
+  pagination.current = e.current;
+  pagination.pageSize = e.pageSize;
+  search();
+};
 </script>
 
 <style scoped lang="scss">

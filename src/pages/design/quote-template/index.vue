@@ -19,48 +19,72 @@
 
         <lay-form-item label="类别">
           <lay-select v-model="categorySearch1" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in categoryOptions1"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
         <lay-form-item>
           <lay-select v-model="categorySearch2" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in categoryOptions2"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
 
         <lay-form-item label="面积">
           <lay-select v-model="squareSearch" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in squareOptions"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
 
         <lay-form-item label="配置">
           <lay-select v-model="configSearch" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in configOptions"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
 
         <lay-form-item label="国别">
           <lay-select v-model="countrySearch" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in countryOptions"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
 
         <lay-form-item label="点位数">
           <lay-select v-model="pointNumberSearch" placeholder="请选择">
-            <lay-select-option value="1">类别1</lay-select-option>
-            <lay-select-option value="2">类别2</lay-select-option>
-            <lay-select-option value="3">类别3</lay-select-option>
+            <lay-select-option
+              v-for="option in pointNumberOptions"
+              :key="option.value"
+              :value="option.name"
+            >
+              {{ option.name }}
+            </lay-select-option>
           </lay-select>
         </lay-form-item>
 
@@ -104,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
 import type {
   OrderModuleListResponse,
   OrderPrice,
@@ -113,28 +137,121 @@ import type {
   TableColumn,
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
+import type { SearchParams } from '@/composables/useToolbarSearch';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ordersApi from '@/api/orders/ordersApi';
+import { useToolbarSearch } from '@/composables/useToolbarSearch';
+
+// 下拉框选项类型
+interface SelectOption {
+  name: string;
+  value: number;
+}
 
 // 工具栏响应式数据
-const moduleNameSearch = ref<string>();
-const categorySearch1 = ref<string>();
-const categorySearch2 = ref<string>();
-const squareSearch = ref<string>(); // 面积
-const configSearch = ref<string>(); // 配置
-const countrySearch = ref<string>(); // 国别
-const pointNumberSearch = ref<string>(); // 点位数
+const moduleNameSearch = ref<string>(''); // projectName
+const categorySearch1 = ref<string>(''); // ordersType1
+const categorySearch2 = ref<string>(''); // ordersType3
+const squareSearch = ref<string>(''); // ordersType4 - 面积
+const configSearch = ref<string>(''); // ordersType5 - 配置
+const countrySearch = ref<string>(''); // ordersType6 - 国别
+const pointNumberSearch = ref<string>(''); // ordersType7 - 点位数
+
+// 下拉框选项数据
+const categoryOptions1 = ref<SelectOption[]>([]);
+const categoryOptions2 = ref<SelectOption[]>([]);
+const squareOptions = ref<SelectOption[]>([]);
+const configOptions = ref<SelectOption[]>([]);
+const countryOptions = ref<SelectOption[]>([]);
+const pointNumberOptions = ref<SelectOption[]>([]);
+
+// 分页参数
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0,
+});
+
+// 使用 useToolbarSearch hook
+const { data, loading, error, search, reset } = useToolbarSearch({
+  searchParams: {
+    projectName: moduleNameSearch,
+    ordersType1: categorySearch1,
+    ordersType3: categorySearch2,
+    ordersType4: squareSearch,
+    ordersType5: configSearch,
+    ordersType6: countrySearch,
+    ordersType7: pointNumberSearch,
+  },
+  apiFunction: async (searchParams: SearchParams) => {
+    const res = (await ordersApi.getOrderModuleList(
+      'desc',
+      (pagination.current - 1) * pagination.pageSize,
+      pagination.pageSize,
+      searchParams.projectName as string,
+      searchParams.ordersType1 as string,
+      undefined, // ordersType2
+      searchParams.ordersType3 as string,
+      searchParams.ordersType4 as string,
+      searchParams.ordersType5 as string,
+      searchParams.ordersType6 as string,
+      searchParams.ordersType7 as string,
+    )) as unknown as { rows: OrderModuleListResponse[]; total: number };
+
+    // 获取价格信息
+    const priceRes = (await ordersApi.getPriceByOrderId(
+      res.rows.map((item) => item.ordersId),
+    )) as unknown as Record<string, OrderPrice>;
+
+    // 更新分页总数
+    pagination.total = res.total;
+
+    // 处理数据格式
+    const processedData = res.rows.map((item) => ({
+      ...item,
+      beFromCompany: item.beFromCompany || '公司自建',
+      rate: item.rate || '0.00',
+      ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
+        .filter(Boolean)
+        .join('/'),
+      ...(priceRes[item.ordersId]
+        ? {
+            priceSum: priceRes[item.ordersId].priceSum?.toString() || '0.00',
+            purchasepriceSum:
+              priceRes[item.ordersId].purchasepriceSum?.toString() || '0.00',
+          }
+        : {}),
+    }));
+
+    return processedData;
+  },
+  enableDebounce: true,
+  debounceDelay: 100,
+  immediate: true,
+});
 
 // 表格数据
-const loading = ref(false);
 const dataSource = ref<(OrderModuleListResponse & { ordersType: string })[]>();
+
+// 监听搜索结果变化
+watch(
+  data,
+  (newData: (OrderModuleListResponse & { ordersType: string })[] | null) => {
+    if (newData) {
+      dataSource.value = newData;
+    }
+  },
+  { immediate: true },
+);
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
   {
     icon: 'layui-icon-refresh',
     title: '刷新',
-    onClick: () => {},
+    onClick: () => {
+      reset();
+    },
   },
   'filter',
 ];
@@ -207,13 +324,6 @@ const columns = [
   },
 ] as TableColumn[];
 
-// 分页参数
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0,
-});
-
 // 排序
 const sortChange = (key: string, sort: string) => {
   if (!dataSource.value) return;
@@ -246,48 +356,50 @@ const sortChange = (key: string, sort: string) => {
 };
 
 // 处理搜索
-const handleSearch = () => {
+const handleSearch = async () => {
   pagination.current = 1;
+  await search();
 };
 
 // 处理刷新
-const handleRefresh = () => {};
-
-const getSourceData = async () => {
-  const res = (await ordersApi.getOrderModuleList(
-    'desc',
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.pageSize,
-  )) as unknown as { rows: OrderModuleListResponse[]; total: number };
-  console.log(res.rows);
-
-  // 获取价格
-  const priceRes = (await ordersApi.getPriceByOrderId(
-    res.rows.map((item) => item.ordersId),
-  )) as unknown as Record<string, OrderPrice>;
-
-  console.log(priceRes);
-
-  pagination.total = res.total;
-  dataSource.value = res.rows.map((item) => ({
-    ...item,
-    beFromCompany: item.beFromCompany || '公司自建',
-    rate: item.rate || '0.00',
-    ordersType: [item.ordersType1, item.ordersType2, item.ordersType3]
-      .filter(Boolean)
-      .join('/'),
-    ...(priceRes[item.ordersId]
-      ? {
-          priceSum: priceRes[item.ordersId].priceSum?.toString() || '0.00',
-          purchasepriceSum:
-            priceRes[item.ordersId].purchasepriceSum?.toString() || '0.00',
-        }
-      : {}),
-  }));
+const handleRefresh = () => {
+  reset();
 };
 
+// 处理分页变化
+const handlePaginationChange = async () => {
+  await search();
+};
+
+// 获取下拉框数据
+const loadSelectOptions = async () => {
+  try {
+    // 并行获取所有下拉框数据
+    const [category1, category3, category4, category5, category6, category7] =
+      await Promise.all([
+        ordersApi.getOrderType(1), // categorySearch1 对应 ordersType1
+        ordersApi.getOrderType(3), // categorySearch2 对应 ordersType3
+        ordersApi.getOrderType(4), // squareSearch 对应 ordersType4
+        ordersApi.getOrderType(5), // configSearch 对应 ordersType5
+        ordersApi.getOrderType(6), // countrySearch 对应 ordersType6
+        ordersApi.getOrderType(7), // pointNumberSearch 对应 ordersType7
+      ]);
+
+    // 更新选项数据
+    categoryOptions1.value = category1.data || [];
+    categoryOptions2.value = category3.data || [];
+    squareOptions.value = category4.data || [];
+    configOptions.value = category5.data || [];
+    countryOptions.value = category6.data || [];
+    pointNumberOptions.value = category7.data || [];
+  } catch (error) {
+    console.error('获取下拉框数据失败:', error);
+  }
+};
+
+// 页面加载时获取下拉框数据
 onMounted(() => {
-  getSourceData();
+  loadSelectOptions();
 });
 </script>
 
