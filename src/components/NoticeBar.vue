@@ -1,13 +1,21 @@
 <template>
   <!-- 通知栏容器：Flex 布局，左侧图标 + 右侧翻动文本 -->
-  <div class="notice-bar">
-    <!-- 左侧本地图标：直接引入 SVG 文件，不用任何类名 -->
-    <div class="notice-bar__logo">
-      <!-- 直接使用导入的 SVG 组件（Vue3 支持直接导入 SVG 为组件） -->
+  <div
+    :style="{
+      width: `${width}px`,
+    }"
+    class="notice-bar"
+  >
+    <div
+      :style="{
+        width: `${width < 16 ? 0 : width}px`,
+      }"
+      class="notice-bar__logo"
+    >
       <Notify class="notice-bar__logo-icon" />
     </div>
 
-    <!-- 右侧垂直翻动文本区（核心逻辑不变） -->
+    <!-- 右侧垂直翻动文本区，添加tooltip功能 -->
     <div class="notice-bar__content">
       <div
         class="notice-bar__list"
@@ -19,6 +27,7 @@
         <div
           v-for="(text, idx) in textlist"
           :key="idx"
+          :content="text"
           class="notice-bar__item"
         >
           {{ text }}
@@ -30,11 +39,14 @@
 
 <script setup>
 import Notify from '@assets/icons/notify.svg';
-
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 
-// 2. 仅保留核心 props：通知文本列表（必传）
 const props = defineProps({
+  width: {
+    type: Number,
+    required: false,
+    default: 200,
+  },
   textlist: {
     type: Array,
     required: true,
@@ -70,38 +82,35 @@ watch(
 </script>
 
 <style scoped>
-/* 通知栏容器：基础样式，想改直接调 */
 .notice-bar {
   width: 100%;
-  height: 40px; /* 固定高度，确保只显示一条文本 */
-  line-height: 40px; /* 文本垂直居中 */
-  padding: 0 16px; /* 左右内边距，避免贴边 */
+  height: 40px;
+  line-height: 40px;
   box-sizing: border-box;
-  display: flex; /* 让图标和文本横向排列 */
-  align-items: center; /* 垂直居中对齐 */
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
-/* 图标容器：控制图标和文本的间距 */
 .notice-bar__logo {
   margin-right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 24px;
+  width: 100%;
 
   .notice-bar__logo-icon {
     color: #fff;
   }
 }
 
-/* 文本内容区：确保只显示当前条文本，溢出隐藏 */
 .notice-bar__content {
-  flex: 1; /* 占满剩余宽度，避免文本被挤压 */
   height: 100%;
   overflow: hidden; /* 隐藏超出的文本 */
   position: relative;
 }
 
-/* 文本列表：控制翻转动画的容器 */
 .notice-bar__list {
   width: 100%;
   height: 100%;
@@ -111,9 +120,9 @@ watch(
 .notice-bar__item {
   width: 100%;
   height: 100%;
-  white-space: nowrap; /* 禁止文本换行 */
-  overflow: hidden; /* 隐藏超出部分 */
-  text-overflow: ellipsis; /* 超出显示省略号（...） */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #ffffff;
   font-size: 14px;
 }

@@ -121,42 +121,4 @@ $sidebarWidthCollapsed: 80px;
     }
   }
 }
-
-// 响应式设计
-@media (max-width: 1024px) {
-  .main-layout {
-    > lay-layout {
-      .lay-body {
-        padding: 16px;
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  $headerHeight: 56px;
-  $tabsHeight: 40px;
-  $totalHeaderHeight: $headerHeight + $tabsHeight;
-
-  .main-layout {
-    .main-header {
-      height: $totalHeaderHeight;
-
-      .header-wrapper {
-        height: $headerHeight;
-      }
-
-      .tabs-wrapper {
-        height: $tabsHeight;
-        padding: 0 12px;
-      }
-    }
-
-    > lay-layout {
-      .lay-body {
-        padding: 12px;
-      }
-    }
-  }
-}
 </style>
