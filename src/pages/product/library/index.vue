@@ -55,82 +55,45 @@
             </lay-card>
 
             <!-- 表格区域 -->
-        <ProductTable 
-            ref="productTableRef"
-            @view-product="handleViewProduct"
-            @view-parameters="handleViewParameters"
-            @open-permission-management="handleOpenPermissionManagement"
-            @open-designated-open-management="handleOpenDesignatedOpenManagement"
-            @brand-management="handleBrandManagement"
-            @add-to-idle-cloud="handleAddToIdleCloud"
-        />
+            <ProductTable ref="productTableRef" @view-product="handleViewProduct"
+                @view-parameters="handleViewParameters" @open-permission-management="handleOpenPermissionManagement"
+                @open-designated-open-management="handleOpenDesignatedOpenManagement"
+                @brand-management="handleBrandManagement" @add-to-idle-cloud="handleAddToIdleCloud" />
         </div>
 
         <!-- 产品详情弹窗 -->
-        <ProductDetail 
-            :visible="productDetailVisible"
-            :selected-product="selectedProduct"
-            @close="closeProductDetail"
-        />
+        <ProductDetail :visible="productDetailVisible" :selected-product="selectedProduct"
+            @close="closeProductDetail" />
 
         <!-- 产品星标管理弹窗 -->
-        <PermissionManagement 
-            :visible="permissionVisible"
-            :selected-product="selectedPermissionProduct"
-            :right-modal-width="rightModalWidth"
-            :authorized-companies="authorizedCompanies"
-            @close="closePermissionPopup"
-            @update-authorized-companies="handleUpdateAuthorizedCompanies"
-        />
+        <PermissionManagement :visible="permissionVisible" :selected-product="selectedPermissionProduct"
+            :right-modal-width="rightModalWidth" :authorized-companies="authorizedCompanies"
+            @close="closePermissionPopup" @update-authorized-companies="handleUpdateAuthorizedCompanies" />
 
         <!-- 右侧参数详情弹窗 -->
-        <ParametersDetail 
-            :visible="parametersVisible"
-            :selected-product="selectedParametersProduct"
-            :right-modal-width="rightModalWidth"
-            @close="closeParametersPopup"
-        />
+        <ParametersDetail :visible="parametersVisible" :selected-product="selectedParametersProduct"
+            :right-modal-width="rightModalWidth" @close="closeParametersPopup" />
 
         <!-- 指定开放管理弹窗 -->
-        <DesignatedOpenManagement 
-            :visible="designatedOpenVisible"
-            :selected-product="selectedDesignatedOpenProduct"
-            :right-modal-width="rightModalWidth"
-            :authorized-companies="authorizedCompanies"
-            @close="closeDesignatedOpenPopup"
-            @update-authorized-companies="handleUpdateAuthorizedCompanies"
-        />
+        <DesignatedOpenManagement :visible="designatedOpenVisible" :selected-product="selectedDesignatedOpenProduct"
+            :right-modal-width="rightModalWidth" :authorized-companies="authorizedCompanies"
+            @close="closeDesignatedOpenPopup" @update-authorized-companies="handleUpdateAuthorizedCompanies" />
 
         <!-- 闲置云询价弹窗 -->
-        <IdleCloudInquiry 
-            :visible="idleCloudVisible"
-            :selected-product="selectedIdleProduct"
-            :right-modal-width="rightModalWidth"
-            @close="closeIdleCloudPopup"
-            @submit="handleIdleCloudSubmit"
-        />
+        <IdleCloudInquiry :visible="idleCloudVisible" :selected-product="selectedIdleProduct"
+            :right-modal-width="rightModalWidth" @close="closeIdleCloudPopup" @submit="handleIdleCloudSubmit" />
 
         <!-- 品牌管理页面 -->
-        <BrandManagement 
-            :visible="brandManagementVisible"
-            :product-brand="productBrand"
-            @close="closeBrandManagement"
-            @brand-price-management="handleBrandPriceManagement"
-        />
+        <BrandManagement :visible="brandManagementVisible" :product-brand="productBrand" @close="closeBrandManagement"
+            @brand-price-management="handleBrandPriceManagement" />
         <!-- 品牌自动报价管理弹窗 -->
-        <BrandPriceManagement 
-            :visible="brandPriceManagementVisible"
-            :selected-brand="selectedBrand"
-            :right-modal-width="rightModalWidth"
-            @close="closeBrandPriceManagement"
-        />
+        <BrandPriceManagement :visible="brandPriceManagementVisible" :selected-brand="selectedBrand"
+            :right-modal-width="rightModalWidth" @close="closeBrandPriceManagement" />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, nextTick, onMounted, onUnmounted } from 'vue';
-import RightSideModal from '@/components/RightSideModal.vue';
-import ModalWindow from '@/components/ModalWindow.vue';
+import { ref, reactive, nextTick, onMounted, onUnmounted } from 'vue';
 import BrandManagement from './BrandManagement.vue';
 import BrandPriceManagement from './BrandPriceManagement.vue';
 import PermissionManagement from './PermissionManagement.vue';
@@ -141,74 +104,22 @@ import ParametersDetail from './ParametersDetail.vue';
 import ProductTable from './ProductTable.vue';
 import http from '@/utils/http';
 import Notify from '@/utils/notify';
+import type { Company, ProductModel, Product } from './type';
 
-// 公司接口类型定义
-interface Company {
-    id: number | string;
-    name: string;
-    status: string;
-}
 
-// 产品类型/型号接口类型定义
-interface ProductModel {
-    value: string;
-    label: string;
-    [key: string]: string;
-}
 
-// 产品接口类型定义
-interface Product {
-    checked?: boolean;              // 前端添加的选中状态
-    approved: boolean;              // 审核状态
-    autoHandle: number;             // 自动处理
-    brand: string;                  // 品牌
-    company: string;                // 公司
-    companyId: number;              // 公司ID
-    costprice: string;              // 成本价
-    createtime: string;             // 创建时间
-    createuser: string;             // 创建用户
-    defaultDiscount: string;        // 默认折扣
-    delflag: string;                // 删除标志
-    discountprice: string;          // 折扣价
-    gyCompany: string;              // 供应商公司
-    gysource: string;               // 供应商来源
-    id: string;                     // ID
-    interestrateprice: string;      // 利率价格
-    inventory: number;              // 库存
-    inventoryPrice: string;         // 库存价格
-    inventoryRemark: string;        // 库存备注
-    isInventory: number;            // 是否库存管理
-    isOpen: number;                 // 是否开放
-    isTemporary: number;            // 是否临时
-    item: string;                   // 项目
-    marketprice: string;            // 市场价
-    model: string;                  // 型号
-    modifyprice: string;            // 修改价格
-    modifytime: string;             // 修改时间
-    modifyuser: string;             // 修改用户
-    name: string;                   // 产品名称
-    noStarParam: string;            // 非星级参数
-    notStarTrait: string;           // 非星级特征
-    num: string;                    // 数量
-    param: string;                  // 参数
-    pendingParam: string;           // 待处理参数
-    pictureaddress: string;         // 图片地址
-    pictureaddressOne: string;      // 图片地址1
-    points: string;                 // 积分
-    price: string;                  // 价格
-    proId: string;                  // 产品ID
-    productAtlas: string;           // 产品图册
-    purchaseprice: string;          // 采购价
-    receiveName: string;            // 接收名称
-    receiveid: string;              // 接收ID
-    repeal: string;                 // 撤销
-    sales: number;                  // 销售数量
-    subprojectClass: string;        // 子项目类别
-    trait: string;                  // 特征
-    uname: string;                  // 用户名称
-    unit: string;                   // 单位
-    version: string;                // 版本
-}
+// 表格数据和状态
+const tableData = ref<Product[]>([]);
+const loading = ref(false);
+const pagination = reactive({
+    current: 1,
+    limit: 80,
+    total: 0
+});
+
+// 全选状态
+const allChecked = ref(false);
+const indeterminate = ref(false);
 
 // 产品详情弹窗状态
 const productDetailVisible = ref(false);
@@ -237,14 +148,13 @@ const rightModalWidth = ref('35%');
 // 搜索加载状态
 const searchLoading = ref(false);
 
-// ProductTable 组件引用
+// 引用ProductTable 组件
 const productTableRef = ref();
 
 // 权限管理相关数据
 const authorizedCompanies = ref<Company[]>([]);
 
 const selectedCompany = ref('');
-const companySearchText = ref('请选择授权公司');
 
 // 产品型号
 const productModels = ref<ProductModel[]>([]);
@@ -345,7 +255,10 @@ const fetchProductBrand = async () => {
             modelData = responseData;
             productBrand.value = modelData.map((item: string) => ({
                 value: item,
-                label: item
+                label: item,
+                isOpen: 0,
+                autoPrice: false,
+                defaultDiscount: '0'
             }));
         }
     } catch (error) {
@@ -444,7 +357,7 @@ const handleSearch = async () => {
         // 通过ProductTable组件进行搜索
         if (productTableRef.value) {
             await productTableRef.value.fetchProductList(searchParams);
-            
+
             Notify.success({
                 title: '搜索完成',
                 content: '已更新搜索结果',
@@ -626,29 +539,6 @@ const handleEdit = () => {
     // 这里可以打开编辑产品弹窗
 };
 
-// 删除
-const handleDelete = async () => {
-    const selectedRows = tableData.value.filter(row => row.checked);
-    if (selectedRows.length === 0) {
-        Notify.error({
-            title: '提示',
-            content: '请选择要删除的产品',
-            time: 3000
-        });
-        return;
-    }
-
-    // 确认删除操作
-    const confirmMessage = selectedRows.length === 1
-        ? `确定要删除产品 "${selectedRows[0].name}" 吗？`
-        : `确定要删除选中的 ${selectedRows.length} 个产品吗？`;
-
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-
-    await executeDelete(selectedRows);
-};
 
 // 执行删除操作
 const executeDelete = async (selectedRows: Product[]) => {
@@ -710,182 +600,6 @@ const executeDelete = async (selectedRows: Product[]) => {
     }
 };
 
-// 批量导出
-const handleBatchExport = () => {
-    const selectedRows = tableData.value.filter(row => row.checked);
-    if (selectedRows.length === 0) {
-        Notify.error({
-            title: '提示',
-            content: '请选择要导出的产品',
-            time: 3000
-        });
-        return;
-    }
-
-    // 创建Excel数据
-    const exportData = selectedRows.map(row => ({
-        '产品名称': row.name,
-        '品牌': row.brand,
-        '规格型号': row.model,
-        '产品特点': row.trait || '',
-        '详细参数': row.param || '',
-        '库存数': row.inventory || '',
-        '计量单位': row.unit,
-        '成本': row.purchaseprice,
-        '工程价': row.price,
-        '市场指导价': row.marketprice,
-        '类别': row.subprojectClass || '',
-        '产品图片': (row.pictureaddress || row.pictureaddressOne) ?
-            `https://yx.newbeall.com/softLink/${row.pictureaddress || row.pictureaddressOne}` : '',
-        '供应商公司': row.gyCompany || ''
-    }));
-
-    // 导出Excel
-    exportToExcel(exportData, '产品列表导出.xlsx');
-
-    Notify.success({
-        title: '导出成功',
-        content: `已成功导出 ${selectedRows.length} 条产品记录`,
-        time: 3000
-    });
-};
-
-// 导出Excel函数
-const exportToExcel = (data: any[], filename: string) => {
-    try {
-        // 创建工作簿
-        const worksheet = [];
-
-        // 添加表头
-        if (data.length > 0) {
-            const headers = Object.keys(data[0]);
-            worksheet.push(headers);
-
-            // 添加数据行
-            data.forEach(row => {
-                const rowData = headers.map(header => row[header] || '');
-                worksheet.push(rowData);
-            });
-        }
-
-        // 转换为CSV格式并下载
-        const csvContent = worksheet.map(row => row.join(',')).join('\n');
-        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename.replace('.xlsx', '.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch (error) {
-        Notify.error({
-            title: '导出失败',
-            content: '导出过程中发生错误，请重试',
-            time: 3000
-        });
-    }
-};
-
-// 全库备份
-const handleFullBackup = async () => {
-    // 确认备份操作
-    if (!confirm('确定要进行全库备份吗？此操作可能需要较长时间。')) {
-        return;
-    }
-
-    try {
-        Notify.info({
-            title: '备份中',
-            content: '正在进行全库备份，请稍候...',
-            time: 3000
-        });
-
-        // 获取所有产品数据进行备份
-        const backupData = await getAllProductsForBackup();
-
-        if (backupData.length === 0) {
-            Notify.error({
-                title: '备份失败',
-                content: '没有可备份的产品数据',
-                time: 3000
-            });
-            return;
-        }
-
-        // 创建备份文件
-        const backupContent = {
-            backupTime: new Date().toISOString(),
-            productCount: backupData.length,
-            data: backupData
-        };
-
-        // 生成备份文件名
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-        const filename = `产品库全库备份_${timestamp}.json`;
-
-        // 下载备份文件
-        downloadBackupFile(backupContent, filename);
-
-        Notify.success({
-            title: '备份成功',
-            content: `已成功备份 ${backupData.length} 条产品记录`,
-            time: 3000
-        });
-
-    } catch (error: any) {
-        Notify.error({
-            title: '备份失败',
-            content: error.message || '备份过程中发生错误，请重试',
-            time: 3000
-        });
-    }
-};
-
-// 获取所有产品数据用于备份
-const getAllProductsForBackup = async (): Promise<Product[]> => {
-    try {
-        // 获取所有产品数据，不分页
-        const response: any = await http.get('/product/productsList', {
-            page: 1,
-            limit: 99999  // 获取所有数据
-        });
-
-        if (response && response.rows && Array.isArray(response.rows)) {
-            return response.rows;
-        }
-        return [];
-
-    } catch {
-        Notify.error({
-            title: '备份失败',
-            content: '备份过程中发生错误，请重试',
-            time: 3000
-        });
-    }
-};
-
-// 下载备份文件
-const downloadBackupFile = (data: any, filename: string) => {
-    try {
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
-
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch {
-        Notify.error({
-            title: '备份失败',
-            content: '备份文件生成失败',
-            time: 3000
-        });
-    }
-};
 
 // 品牌管理
 const handleBrandManagement = () => {
@@ -957,12 +671,6 @@ const closePermissionPopup = () => {
     selectedCompany.value = '';
 };
 
-// 图片加载失败处理
-const handleImageError = (event: Event) => {
-    const target = event.target as HTMLImageElement;
-    target.src = 'https://via.placeholder.com/150'; // 替换为默认图片
-    target.alt = '加载失败';
-};
 
 // 窗口大小变化监听
 const handleResize = () => {
@@ -971,7 +679,7 @@ const handleResize = () => {
     }
 };
 
-// 生命周期 - 页面加载时获取数据
+// 页面加载时获取数据
 onMounted(async () => {
     updateModalWidth();
     window.addEventListener('resize', handleResize);
@@ -988,15 +696,11 @@ onMounted(async () => {
         fetchCompanyList()
     ]);
 });
-
+// 卸载时移除事件监听
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
 });
-const updateCloudLibraryStatus = (row: Product, value: boolean) => {
-    // 更新云端库状态：true -> 1, false -> 0
-    row.isOpen = value ? 1 : 0;
-    // 这里可以添加调用API更新后端数据的逻辑
-};
+
 
 // 打开指定开放管理弹窗
 const handleOpenDesignatedOpenManagement = (product: Product) => {
@@ -1017,41 +721,6 @@ const closeDesignatedOpenPopup = () => {
 // 关闭闲置云询价弹窗
 const closeIdleCloudPopup = () => {
     idleCloudVisible.value = false;
-};
-
-// 更新品牌云端库状态
-const updateBrandCloudLibrary = (brand: any, value: boolean) => {
-    brand.isOpen = value ? 1 : 0;
-    console.log('更新品牌云端库状态:', brand.name, '设置为:', value ? 'ON' : 'OFF');
-    // 这里可以添加API调用来更新后端数据
-};
-
-// 更新品牌自动报价
-const updateBrandAutoPrice = (brand: any, value: boolean) => {
-    brand.autoPrice = value ? 1 : 0;
-    console.log('更新品牌自动报价:', brand.name, '设置为:', value ? 'ON' : 'OFF');
-    // 这里可以添加API调用来更新后端数据
-};
-
-// 处理星标设置
-const handleStarSetting = (brand: any) => {
-    console.log('处理星标设置:', brand.name);
-    // 这里可以打开星标设置弹窗或处理星标设置逻辑
-    Notify.info({
-        title: '星标设置',
-        content: `正在为品牌 ${brand.name} 设置星标`,
-        time: 3000
-    });
-};
-
-// 处理品牌设置
-const handleBrandSetting = (brand: any) => {
-    console.log('处理品牌设置:', brand.name);
-    Notify.info({
-        title: '品牌设置',
-        content: `正在为品牌 ${brand.name} 进行设置`,
-        time: 3000
-    });
 };
 
 // 处理品牌自动报价管理
@@ -1105,32 +774,10 @@ const handleQuickSearch = (event: KeyboardEvent) => {
     }
 };
 
-// 新增：搜索历史管理
+// 搜索历史管理
 const searchHistory = ref<string[]>([]);
-const maxSearchHistory = 10;
 
-const addToSearchHistory = (searchTerm: string) => {
-    if (searchTerm.trim()) {
-        // 移除已存在的相同搜索词
-        const index = searchHistory.value.indexOf(searchTerm);
-        if (index !== -1) {
-            searchHistory.value.splice(index, 1);
-        }
-
-        // 添加到开头
-        searchHistory.value.unshift(searchTerm);
-
-        // 限制历史记录数量
-        if (searchHistory.value.length > maxSearchHistory) {
-            searchHistory.value = searchHistory.value.slice(0, maxSearchHistory);
-        }
-
-        // 保存到本地存储
-        localStorage.setItem('productSearchHistory', JSON.stringify(searchHistory.value));
-    }
-};
-
-// 加载搜索历史
+// 搜索历史
 const loadSearchHistory = () => {
     try {
         const saved = localStorage.getItem('productSearchHistory');
@@ -1320,6 +967,7 @@ const loadSearchHistory = () => {
         }
     }
 }
+
 // 开关样式优化
 :deep(.layui-switch) {
     transform: scale(0.8);
@@ -1348,6 +996,7 @@ const loadSearchHistory = () => {
         color: #999;
     }
 }
+
 // 状态标识样式
 .status-badge {
     padding: 4px 8px;
