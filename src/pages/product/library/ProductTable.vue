@@ -48,98 +48,78 @@
         <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.proId"
-                @change="updateVisibleColumns" /> 产品编号
+              <input type="checkbox" v-model="columnVisibility.proId" @change="updateVisibleColumns" /> 产品编号
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.name"
-                @change="updateVisibleColumns" /> 产品名称
+              <input type="checkbox" v-model="columnVisibility.name" @change="updateVisibleColumns" /> 产品名称
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.brand"
-                @change="updateVisibleColumns" /> 品牌
+              <input type="checkbox" v-model="columnVisibility.brand" @change="updateVisibleColumns" /> 品牌
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.model"
-                @change="updateVisibleColumns" /> 型号
+              <input type="checkbox" v-model="columnVisibility.model" @change="updateVisibleColumns" /> 型号
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.trait"
-                @change="updateVisibleColumns" /> 参数/特性
+              <input type="checkbox" v-model="columnVisibility.trait" @change="updateVisibleColumns" /> 参数/特性
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.unit"
-                @change="updateVisibleColumns" /> 单位
+              <input type="checkbox" v-model="columnVisibility.unit" @change="updateVisibleColumns" /> 单位
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.purchaseprice"
-                @change="updateVisibleColumns" /> 成本
+              <input type="checkbox" v-model="columnVisibility.purchaseprice" @change="updateVisibleColumns" /> 成本
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.price"
-                @change="updateVisibleColumns" /> 参考售价
+              <input type="checkbox" v-model="columnVisibility.price" @change="updateVisibleColumns" /> 参考售价
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.marketprice"
-                @change="updateVisibleColumns" /> 市场指导价
+              <input type="checkbox" v-model="columnVisibility.marketprice" @change="updateVisibleColumns" /> 市场指导价
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.pictureaddress"
-                @change="updateVisibleColumns" /> 产品图片
+              <input type="checkbox" v-model="columnVisibility.uname" @change="updateVisibleColumns" /> 创建人
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.uname"
-                @change="updateVisibleColumns" /> 创建人
+              <input type="checkbox" v-model="columnVisibility.cloudLibrary" @change="updateVisibleColumns" /> 云端库
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.cloudLibrary"
-                @change="updateVisibleColumns" /> 云端库
+              <input type="checkbox" v-model="columnVisibility.openUpdate" @change="updateVisibleColumns" /> 开放星标
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.openUpdate"
-                @change="updateVisibleColumns" /> 开放星标
+              <input type="checkbox" v-model="columnVisibility.designatedOpen" @change="updateVisibleColumns" /> 指定开放
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.designatedOpen"
-                @change="updateVisibleColumns" /> 指定开放
+              <input type="checkbox" v-model="columnVisibility.defaultDiscount" @change="updateVisibleColumns" />
+              默认折率(%)
             </label>
           </li>
           <li role="menuitem">
             <label>
-              <input type="checkbox" v-model="columnVisibility.defaultDiscount"
-                @change="updateVisibleColumns" /> 默认折率(%)
-            </label>
-          </li>
-          <li role="menuitem">
-            <label>
-              <input type="checkbox" v-model="columnVisibility.autoHandle"
-                @change="updateVisibleColumns" /> 自动报价
+              <input type="checkbox" v-model="columnVisibility.autoHandle" @change="updateVisibleColumns" /> 自动报价
             </label>
           </li>
         </ul>
@@ -148,8 +128,8 @@
 
     <!-- 产品列表表格 -->
     <div class="content-area">
-      <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
-        @change="handleTableChange" :loading="loading">
+      <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination" @change="handleTableChange"
+        :loading="loading">
         <!-- 复选框列 -->
         <template #checkbox="{ row }">
           <div class="custom-checkbox" @click="toggleRowCheck(row)">
@@ -164,19 +144,8 @@
           <a href="#" class="product-link" @click.prevent="handleViewProduct(row)">{{ row.name }}</a>
         </template>
 
-        <!-- 产品图片列 -->
-        <template #productImage="{ row }">
-          <div class="table-image-container">
-            <img v-if="row.pictureaddress || row.pictureaddressOne"
-              :src="`https://yx.newbeall.com/softLink/${row.pictureaddress || row.pictureaddressOne}`"
-              :alt="row.name" class="table-product-image" @error="handleImageError" />
-            <div v-else class="table-no-image">
-              <lay-icon type="layui-icon-picture" />
-            </div>
-          </div>
-        </template>
 
-        <!-- 参数/特性列 -->
+        <!-- 参数特性列 -->
         <template #parameters="{ row }">
           <a href="#" class="parameters-link" @click.prevent="handleViewParameters(row)">参数特性</a>
         </template>
@@ -193,16 +162,14 @@
 
         <!-- 开放星标列 -->
         <template #openUpdate="{ row }">
-          <span :style="{ color: '#5FB878' }" class="action-text"
-            @click="handleOpenPermissionManagement(row)">
+          <span :style="{ color: '#5FB878' }" class="action-text" @click="handleOpenPermissionManagement(row)">
             点击设置
           </span>
         </template>
 
         <!-- 指定开放列 -->
         <template #designatedOpen="{ row }">
-          <span :style="{ color: '#5FB878' }" class="action-text"
-            @click="handleOpenDesignatedOpenManagement(row)">
+          <span :style="{ color: '#5FB878' }" class="action-text" @click="handleOpenDesignatedOpenManagement(row)">
             点击设置
           </span>
         </template>
@@ -214,62 +181,21 @@
       </lay-table>
     </div>
   </lay-card>
-  
+
   <!-- 单个新增弹窗 -->
-  <SingleProductAdd 
-    :visible="singleAddVisible"
-    @close="closeSingleAdd"
-    @success="handleAddSuccess"
-  />
+  <SingleProductAdd :visible="singleAddVisible" @close="closeSingleAdd" @success="handleAddSuccess" />
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, computed } from 'vue'
+import axios from 'axios'
 import http from '@/utils/http'
 import Notify from '@/utils/notify'
+import env from '@/utils/env'
 import SingleProductAdd from './SingleProductAdd.vue'
+import type { Product } from './type'
+import { allColumns } from './type'
 
-// 产品接口类型定义
-interface Product {
-  checked?: boolean
-  approved: boolean
-  autoHandle: number
-  brand: string
-  company: string
-  condition: string
-  createtime: string
-  defaultDiscount: number
-  getdate: string
-  inventory: number
-  isInventory: number
-  isOpen: number
-  isTemporary: number
-  item: string
-  marketprice: string
-  model: string
-  modifyprice: string
-  modifytime: string
-  modifyuser: string
-  name: string
-  param: string
-  pictureaddress: string
-  pictureaddressOne: string
-  price: number
-  proId: string
-  purchaseprice: number
-  sales: number
-  trait: string
-  uname: string
-  unit: string
-  version: string
-}
-
-// 定义组件的props
-interface Props {
-  // 可以根据需要添加props
-}
-
-const props = defineProps<Props>()
 
 // 定义组件的emits
 const emit = defineEmits<{
@@ -305,7 +231,6 @@ const columnVisibility = reactive({
   purchaseprice: true,     // 成本
   price: true,             // 参考售价
   marketprice: true,       // 市场指导价
-  pictureaddress: true,    // 产品图片
   uname: true,             // 创建人
   cloudLibrary: true,      // 云端库
   openUpdate: true,        // 开放星标
@@ -315,33 +240,6 @@ const columnVisibility = reactive({
 })
 
 const showColumnsDropdown = ref(false)
-
-// 表格列配置
-const allColumns: any[] = [
-  {
-    title: '',
-    key: 'checkbox',
-    width: '40px',
-    customSlot: 'checkbox',
-    fixed: 'left'
-  },
-  { title: '产品编号', key: 'proId', width: '100px' },
-  { title: '产品名称', key: 'name', width: '200px', customSlot: 'productName' },
-  { title: '品牌', key: 'brand', width: '100px' },
-  { title: '型号', key: 'model', width: '100px' },
-  { title: '参数/特性', key: 'trait', width: '100px', customSlot: 'parameters' },
-  { title: '单位', key: 'unit', width: '60px' },
-  { title: '成本', key: 'purchaseprice', width: '80px' },
-  { title: '参考售价', key: 'price', width: '80px' },
-  { title: '市场指导价', key: 'marketprice', width: '100px' },
-  { title: '产品图片', key: 'pictureaddress', width: '80px', customSlot: 'productImage' },
-  { title: '创建人', key: 'uname', width: '80px' },
-  { title: '云端库', key: 'cloudLibrary', width: '80px', customSlot: 'cloudLibrary' },
-  { title: '开放星标', key: 'openUpdate', width: '80px', customSlot: 'openUpdate' },
-  { title: '指定开放', key: 'designatedOpen', width: '80px', customSlot: 'designatedOpen' },
-  { title: '默认折率(%)', key: 'defaultDiscount', width: '100px' },
-  { title: '自动报价', key: 'autoHandle', width: '80px', customSlot: 'autoPrice' }
-]
 
 // 计算可见列
 const visibleColumns = computed(() => {
@@ -366,17 +264,18 @@ const singleAddVisible = ref(false)
 const fetchProductList = async (searchParams?: any) => {
   try {
     loading.value = true
-    
+
     // 如果有搜索参数，重置分页到第一页
     if (searchParams && Object.keys(searchParams).length > 0) {
       pagination.current = 1;
     }
-    
+
     const params = {
       page: pagination.current,
       limit: pagination.limit,
       ...searchParams
     }
+
 
     const response = await http.get('/product/productsList', params)
     const responseData = response.data || response
@@ -386,7 +285,7 @@ const fetchProductList = async (searchParams?: any) => {
         checked: false
       }))
       pagination.total = responseData.total || responseData.rows.length
-      
+
       // 重置选择状态
       allChecked.value = false
       indeterminate.value = false
@@ -398,7 +297,7 @@ const fetchProductList = async (searchParams?: any) => {
           checked: false
         }))
         pagination.total = responseData.length
-        
+
         // 重置选择状态
         allChecked.value = false
         indeterminate.value = false
@@ -456,11 +355,79 @@ const toggleColumnsDropdown = () => {
   showColumnsDropdown.value = !showColumnsDropdown.value
 }
 
+
 // 工具栏功能方法
+
 // AI填充数据
-const handleAiFill = () => {
-  console.log('AI填充数据')
-  // 这里可以调用AI接口填充产品数据
+const handleAiFill = async () => {
+  // 检查是否选中了产品
+  const selectedRows = tableData.value.filter(row => row.checked)
+  if (selectedRows.length === 0) {
+    Notify.error({
+      title: '提示',
+      content: '请选择要进行AI填充的产品',
+      time: 3000
+    })
+    return
+  }
+
+  // 弹出积分扣除确认提示
+  const confirmed = confirm(
+    `• 成功解析一个产品将扣除1个积分，最大可能扣除 ${selectedRows.length} 个积分\n` +
+    `是否继续提交AI填充？`
+  )
+
+  if (!confirmed) {
+    return // 用户选择取消，直接返回
+  }
+
+  // 用户确认后，执行实际的AI填充
+  await performAiFill(selectedRows)
+}
+
+// 执行AI填充的实际逻辑
+const performAiFill = async (selectedRows: Product[]) => {
+  try {
+    // 获取选中的产品编号
+    const productIds = selectedRows.map(row => row.proId)
+
+    // 直接使用 axios 发送请求，避免 HTTP 拦截器的自动跳转
+    const response = await axios.post(`${env.getApiBaseUrl()}/AI/ProductAiParse`,
+      { productIds }
+    )
+
+    // 处理成功响应
+    console.log('AI填充数据:', response.data)
+    Notify.success({
+      title: 'AI填充成功',
+      content: `已成功为 ${selectedRows.length} 个产品进行AI填充`,
+      time: 3000
+    })
+
+    // 刷新产品列表以显示更新后的数据
+    await fetchProductList()
+
+  } catch (error: any) {
+    console.error('AI填充失败:', error)
+
+    // 检查是否是权限错误（401）
+    if (error.response?.status === 401) {
+      Notify.error({
+        title: '权限不足',
+        content: '您没有使用AI填充功能的权限，请联系管理员',
+        time: 5000
+      })
+      return // 阻止进一步的错误处理，不会跳转
+    }
+
+    // 处理其他类型的错误
+    const errorMessage = error.response?.data?.message || error.message || 'AI填充过程中发生未知错误'
+    Notify.error({
+      title: 'AI填充失败',
+      content: errorMessage,
+      time: 3000
+    })
+  }
 }
 
 // 复制
@@ -596,7 +563,7 @@ const handleAddSuccess = (product: any) => {
     content: `产品 "${product.name}" 已成功添加到产品库`,
     time: 3000
   })
-  
+
   // 刷新产品列表
   fetchProductList()
 }
@@ -638,16 +605,18 @@ const handleDelete = async () => {
   }
 
   try {
-    // 这里可以调用删除API
-    console.log('删除产品:', selectedRows)
-    
-    // 模拟删除成功后刷新数据
+    const productIds = selectedRows.map(row => row.proId)
+    const formData = new FormData()
+    productIds.forEach(id => formData.append('productIds[]', id))
+    await http.post('/product/delete', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
     await fetchProductList()
-    
     // 重置选择状态
     allChecked.value = false
     indeterminate.value = false
-    
     Notify.success({
       title: '删除成功',
       content: `已删除 ${selectedRows.length} 个产品`,
@@ -687,8 +656,6 @@ const handleBatchExport = () => {
     '工程价': row.price,
     '市场指导价': row.marketprice,
     '类别': row.subprojectClass || '',
-    '产品图片': (row.pictureaddress || row.pictureaddressOne) ?
-      `https://yx.newbeall.com/softLink/${row.pictureaddress || row.pictureaddressOne}` : '',
     '供应商公司': row.gyCompany || ''
   }))
 
@@ -710,7 +677,7 @@ const handleFullBackup = async () => {
   try {
     console.log('开始全库备份...')
     // 这里可以调用备份API
-    
+
     Notify.success({
       title: '备份成功',
       content: '全库备份已完成',
@@ -741,7 +708,7 @@ const handleAddToIdleCloud = () => {
     })
     return
   }
-  
+
   emit('addToIdleCloud', selectedRows)
 }
 
@@ -773,12 +740,6 @@ const updateCloudLibraryStatus = (row: Product, value: boolean) => {
   console.log('更新云端库状态:', row.name, '设置为:', value ? 'ON' : 'OFF')
 }
 
-// 图片加载失败处理
-const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  target.src = 'https://via.placeholder.com/150' // 替换为默认图片
-  target.alt = '加载失败'
-}
 
 // 暴露方法给父组件
 defineExpose({
@@ -793,6 +754,12 @@ fetchProductList()
 </script>
 
 <style lang="scss" scoped>
+// 全局字体大小控制
+:deep(.lay-card) {
+  font-size: $font-size-extra-small;
+}
+
+
 // 工具栏样式
 .fixed-table-toolbar {
   padding: 15px 20px;
@@ -962,41 +929,5 @@ fetchProductList()
 // 表格内容区域
 .content-area {
   position: relative; // 为右侧弹窗提供定位参考
-}
-
-// 表格图片容器样式
-.table-image-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid #eee;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-// 表格无图片提示样式
-.table-no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #888;
-  font-size: 12px;
-
-  .layui-icon {
-    font-size: 24px;
-    margin-bottom: 4px;
-  }
 }
 </style>
