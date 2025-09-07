@@ -461,6 +461,15 @@ import notify from '@/utils/notify';
 import { useChatStore } from '@/stores/chat';
 import type { UserInfo } from '@/pages/chat/Chat.type';
 
+// 导入自定义hooks
+import { useQuotationActions } from '@/composables/design/useQuotationActions';
+import { useQuotationExport } from '@/composables/design/useQuotationExport';
+import { useQuotationDelete } from '@/composables/design/useQuotationDelete';
+import { useQuotationProperty } from '@/composables/design/useQuotationProperty';
+import { useQuotationSend } from '@/composables/design/useQuotationSend';
+import { useQuotationCollaborate } from '@/composables/design/useQuotationCollaborate';
+import { useQuotationImport } from '@/composables/design/useQuotationImport';
+
 // 路由实例
 const router = useRouter();
 
@@ -497,57 +506,15 @@ const deleteConfirmInput = ref('');
 
 // 导出确认弹窗相关状态
 const exportModalVisible = ref(false);
-const exportOptions = reactive({
-  derivePrime: false, // 同时导出成本价
-  isExplanation: false, // 导出报价说明
-  isSeal: false, // 加盖印章
-});
 
 // 协作相关状态
 const userTreeData = ref<UserTreeType[]>([]);
 const selectedUserIds = ref<string[]>([]);
 const expandedKeys = ref<string[]>([]);
+const coopDrawerVisible = ref(false);
 
 // 属性设置弹窗相关状态
 const propertyModalVisible = ref(false);
-const propertyForm = reactive({
-  shareOrdersEnabled: false, // 审核状态开关
-  auditStatus: 0, // 审核状态下拉值
-  ordersIntegration: 0, // 积分设置值
-
-  shareName: '', // 共享名称
-  projectStatusEnabled: false, // 项目状态开关
-  projectStatus: 0, // 项目状态值
-  important: false, // 重要项目
-  purchase: false, // 采购订单
-  lockMark: false, // 锁定状态
-});
-
-// 审核状态数组
-const shareStatus = [
-  '审核状态:(未设置)',
-  '审核状态:(已通过)',
-  '审核状态:(审核中)',
-  '审核状态:(驳回)',
-];
-
-// 积分选项数组
-const integrationOptions = [
-  { value: 0, label: '0积分' },
-  { value: 1, label: '1积分' },
-  { value: 2, label: '2积分' },
-  { value: 5, label: '5积分' },
-  { value: 8, label: '8积分' },
-  { value: 10, label: '10积分' },
-];
-
-// 项目状态数组
-const projectStatusOptions = [
-  { value: -1, label: '未选择' },
-  { value: 0, label: '已失败' },
-  { value: 1, label: '已中标' },
-  { value: 2, label: '进行中' },
-];
 
 // 计算审核状态显示文本
 const auditStatusText = computed(() => {
@@ -736,488 +703,12 @@ const goToChat = (row: QuotationListResponse) => {
 
 const showPriceColumns = ref(false);
 
-// 工具栏按钮事件处理函数
-const handleShowPrice = () => {
-  showPriceColumns.value = !showPriceColumns.value;
-  // 动态更新表格列的显示状态
-  columns.value.forEach((column) => {
-    if (column.key === 'priceSum' || column.key === 'purchasepriceSum') {
-      column.hide = !showPriceColumns.value;
-    }
-  });
-};
-
 const selectedKey = ref();
-
-const handleEdit = () => {
-  console.log(selectedKey.value);
-  if (!selectedKey.value) {
-    layer.msg('请先选择要修改的报价单', { icon: 2 });
-    return;
-  }
-  editModalVisible.value = true;
-};
-
-const handleEditSave = (data: any) => {
-  console.log('保存编辑数据:', data);
-  // TODO: 实现保存逻辑
-  editModalVisible.value = false;
-  layer.msg('保存成功', { icon: 1 });
-};
-
-const handleCopy = async () => {
-  // 检查是否有选中的行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要复制的订单', { icon: 2 });
-    return;
-  }
-
-  // 弹出确认对话框
-  layer.confirm('确定要复制选中的订单吗？', {
-    title: '确认复制',
-    icon: 3,
-    yes: async (index: number) => {
-      try {
-        // 调用复制API
-        await ordersApi.copyOrders(selectedKey.value);
-
-        // 操作成功提示
-        notify.success('订单复制成功');
-
-        // 刷新当前页面数据
-        const currentTab = tabItem.find(
-          (item) => item.title === current2.value,
-        );
-        const type = currentTab ? currentTab.type : undefined;
-        await getOrdersList(type === -1 ? undefined : type);
-
-        // 关闭确认对话框
-        layer.close(index);
-      } catch (error) {
-        console.error('复制订单失败:', error);
-        notify.error('复制订单失败，请重试');
-      }
-    },
-  });
-};
-
-const handleExport = () => {
-  // 检查是否有选中的行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要导出的报价单', { icon: 2 });
-    return;
-  }
-
-  // 重置导出选项
-  exportOptions.derivePrime = false;
-  exportOptions.isExplanation = false;
-  exportOptions.isSeal = false;
-
-  // 显示导出确认弹窗
-  exportModalVisible.value = true;
-};
-
-// 确认导出
-const handleExportConfirm = async () => {
-  try {
-    // 调用导出API
-    await ordersApi.exportQuotation(
-      selectedKey.value,
-      exportOptions.derivePrime,
-      exportOptions.isExplanation,
-      exportOptions.isSeal,
-    );
-
-    // 操作成功提示
-    notify.success('报价单成功导出');
-
-    // 关闭弹窗
-    exportModalVisible.value = false;
-  } catch (error) {
-    console.error('导出报价单失败:', error);
-    notify.error('导出报价单失败，请重试');
-  }
-};
-
-const handleImport = () => {
-  console.log('导入功能');
-  // TODO: 实现导入功能
-};
-
-const handleDelete = () => {
-  // 检查是否有选中的行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要删除的报价单', { icon: 2 });
-    return;
-  }
-
-  // 获取选中行的数据
-  const selectedRowData = dataSource.value.find(
-    (item) => item.ordersId === selectedKey.value,
-  );
-
-  if (selectedRowData) {
-    selectedRow.value = selectedRowData;
-    deleteConfirmInput.value = '';
-    deleteModalVisible.value = true;
-  }
-};
-
-// 删除确认处理
-const handleDeleteConfirm = async () => {
-  if (!selectedRow.value) return;
-
-  try {
-    // 调用删除API
-    await ordersApi.deleteOrders(selectedRow.value.ordersId);
-
-    // 操作成功提示
-    notify.success('删除成功');
-
-    // 关闭弹窗
-    deleteModalVisible.value = false;
-
-    // 刷新当前页面数据
-    const currentTab = tabItem.find((item) => item.title === current2.value);
-    const type = currentTab ? currentTab.type : undefined;
-    await getOrdersList(type === -1 ? undefined : type);
-  } catch (error) {
-    console.error('删除报价单失败:', error);
-    notify.error('删除失败，请重试');
-  }
-};
 
 // 计算删除按钮是否可用
 const isDeleteButtonEnabled = computed(() => {
   return deleteConfirmInput.value === 'DELETE';
 });
-
-const handleProperty = () => {
-  // 检查是否有选中的行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要设置属性的报价单', { icon: 2 });
-    return;
-  }
-
-  // 获取选中行的数据
-  const selectedRowData = dataSource.value.find(
-    (item) => item.ordersId === selectedKey.value,
-  );
-
-  if (!selectedRowData) {
-    layer.msg('未找到选中的报价单数据', { icon: 2 });
-    return;
-  }
-
-  // 初始化表单数据
-  // 审核状态：shareOrders为0时关闭，其他情况开启
-  propertyForm.shareOrdersEnabled = selectedRowData.shareOrders !== 0;
-  propertyForm.auditStatus = selectedRowData.shareOrders || 0;
-
-  propertyForm.ordersIntegration = selectedRowData.ordersIntegration || 0;
-  propertyForm.shareName = selectedRowData.shareName || '';
-  // 项目状态：type为-1时关闭，其他情况（0,1,2）开启
-  propertyForm.projectStatusEnabled = selectedRowData.type !== -1;
-  propertyForm.projectStatus = selectedRowData.type;
-  propertyForm.important = selectedRowData.important === 1;
-  propertyForm.purchase = selectedRowData.purchase === 1;
-  propertyForm.lockMark = Number(selectedRowData.lockMark) === 1;
-
-  // 显示属性设置弹窗
-  propertyModalVisible.value = true;
-};
-
-// 确认属性设置
-const handlePropertyConfirm = async () => {
-  try {
-    // 调用设置属性API
-    await ordersApi.setOrdersProperty(
-      propertyForm.projectStatus,
-      propertyForm.important,
-      propertyForm.purchase,
-      propertyForm.lockMark,
-      propertyForm.ordersIntegration,
-      propertyForm.shareName,
-      selectedKey.value,
-    );
-
-    // 操作成功提示
-    notify.success('属性设置成功');
-
-    // 刷新当前页面数据
-    const currentTab = tabItem.find((item) => item.title === current2.value);
-    const type = currentTab ? currentTab.type : undefined;
-    await getOrdersList(type === -1 ? undefined : type);
-
-    // 关闭弹窗
-    propertyModalVisible.value = false;
-  } catch (error) {
-    console.error('设置属性失败:', error);
-    notify.error('设置属性失败，请重试');
-  }
-};
-
-// 审核状态开关变化处理
-const handleAuditStatusChange = (value: boolean) => {
-  if (!value) {
-    // 关闭审核状态时，清空积分设置和共享名称
-    propertyForm.ordersIntegration = 0;
-    propertyForm.shareName = '';
-    propertyForm.auditStatus = 0;
-  }
-};
-
-// 项目状态开关变化处理
-const handleProjectStatusChange = (value: boolean) => {
-  if (!value) {
-    // 关闭项目状态时，重置项目状态为未选择状态
-    propertyForm.projectStatus = -1;
-  }
-};
-
-const handleSend = async () => {
-  // 1. 检查是否已选中当前行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要发送的订单', { icon: 2 });
-    return;
-  }
-
-  // 获取选中的订单数据
-  const selectedOrder = selectedRowData.value;
-  if (!selectedOrder) {
-    layer.msg('未找到选中的订单数据', { icon: 2 });
-    return;
-  }
-
-  // 确保获取到当前用户信息
-  if (!currentUser.value) {
-    await getCurrentUser();
-  }
-
-  if (!currentUser.value) {
-    layer.msg('获取用户信息失败，请重新登录', { icon: 2 });
-    return;
-  }
-
-  // 2. 验证当前用户是否为制单人
-  if (currentUser.value.id !== selectedOrder.uid) {
-    layer.msg('订单只能由制单人发送', { icon: 2 });
-    return;
-  }
-
-  // 3. 弹出选择发送对象的对话框
-  layer.confirm('请选择发送对象', {
-    btn: [
-      {
-        text: '客户',
-        callback: async (id) => {
-          await handleSendToClient(selectedOrder.ordersId);
-          layer.close(id);
-        },
-      },
-      {
-        text: '供应商',
-        callback: async (id) => {
-          await handleSendToSupplier(selectedOrder.ordersId);
-          layer.close(id);
-        },
-      },
-    ],
-  });
-};
-
-// 发送给客户
-const handleSendToClient = async (orderId: string) => {
-  try {
-    await ordersApi.sendOrdersClient(orderId);
-    notify.success('发送成功');
-  } catch (error) {
-    console.error('发送给客户失败:', error);
-    notify.error('发送失败，请重试');
-  }
-};
-
-// 发送给供应商
-const handleSendToSupplier = async (orderId: string) => {
-  try {
-    // 先调用queryOrdersStatus检查状态
-    const statusResponse = (await ordersApi.queryOrdersStatus(
-      orderId,
-    )) as unknown as {
-      code: string;
-      data: string;
-      msg: string;
-    };
-
-    // 检查返回的状态码
-    if (statusResponse.code === '404') {
-      // 显示返回的msg字段作为提示信息
-      layer.msg(statusResponse.msg || '订单状态检查失败', { icon: 2 });
-      return;
-    }
-
-    // 如果查询成功，继续执行供应商发送流程
-    // TODO: 添加具体的供应商发送逻辑
-  } catch (error: any) {
-    console.error('发送给供应商失败:', error);
-
-    // 如果是404错误，显示错误信息
-    if (error.response?.status === 404) {
-      layer.msg(error.response?.data?.msg || '订单状态检查失败', { icon: 2 });
-    } else {
-      notify.error('发送失败，请重试');
-    }
-  }
-};
-
-const handleCollaborate = async () => {
-  // 1. 检查是否有选中的行
-  if (!selectedKey.value) {
-    layer.msg('请先选择要协作的订单', { icon: 2 });
-    return;
-  }
-
-  try {
-    // 2. 调用getCoopState API检查是否可以协作
-    const coopStateResponse = (await ordersApi.getCoopState(
-      selectedKey.value,
-    )) as unknown as { code: string; msg: string };
-
-    // 检查返回的code是否为"200"（字符串类型）
-    if (coopStateResponse.code !== '200') {
-      const errorMsg = coopStateResponse.msg || '无法进行协作操作';
-      layer.msg(errorMsg, { icon: 2 });
-      return;
-    }
-
-    // 3. 如果可以协作，获取用户树数据
-    const userTreeResponse =
-      (await clientApi.userTree()) as unknown as UserTreeType[];
-    userTreeData.value = userTreeResponse;
-
-    // 4. 设置默认展开的节点
-    expandedKeys.value = userTreeData.value
-      .filter((item) => item.open)
-      .map((item) => item.id.toString());
-
-    // 5. 清空之前的选择
-    selectedUserIds.value = [];
-
-    // 6. 显示协作抽屉
-    layer.drawer({
-      title: '选择协作用户',
-      content: h(Tree, {
-        data: transformedUserTreeDataForTree.value,
-        multiple: true,
-        showCheckbox: true,
-        checkStrictly: false,
-        onSelect: handleCoopTreeSelect,
-      }),
-      btn: [
-        {
-          text: '确定',
-          callback() {
-            handleCoopConfirm();
-          },
-        },
-        {
-          text: '取消',
-          callback(idx) {
-            layer.close(idx);
-            selectedUserIds.value = [];
-          },
-        },
-      ],
-    });
-  } catch (error) {
-    console.error('协作操作失败:', error);
-    layer.msg('协作操作失败，请重试', { icon: 2 });
-  }
-};
-
-// 转换用户树数据为Tree组件需要的格式
-const transformedUserTreeDataForTree = computed(() => {
-  // 将层级数据转换为扁平化数据
-  const flattenData: any[] = [];
-
-  const flatten = (items: UserTreeType[]) => {
-    items.forEach((item) => {
-      if (item.id === '0') {
-        item.pId = '-1'; // 对总公司做特殊处理
-      }
-      flattenData.push({
-        id: item.id,
-        parentId: item.pId === '-1' ? null : item.pId,
-        name: item.name,
-        icon: item.isUser === 'true' ? 'user' : 'folder',
-        showCheckbox: !item.nocheck, // 根据nocheck属性控制checkbox显示
-        disabled: item.chkDisabled.toString() === 'true', // 暂时设置为false，允许所有节点可操作
-        selected: item.checked,
-        expanded: item.open, // 根据open属性控制默认展开状态
-      });
-    });
-  };
-
-  flatten(userTreeData.value);
-  return flattenData;
-});
-
-// 处理Tree组件的选择事件
-const handleCoopTreeSelect = (
-  selected: string | number | (string | number)[],
-) => {
-  if (Array.isArray(selected)) {
-    selectedUserIds.value = selected.map((id) => String(id));
-  } else {
-    selectedUserIds.value = [String(selected)];
-  }
-};
-
-// 确认协作操作
-const handleCoopConfirm = async () => {
-  if (selectedUserIds.value.length === 0) {
-    layer.msg('请选择要协作的用户', { icon: 2 });
-    return;
-  }
-
-  // 检查选择的用户数量
-  if (selectedUserIds.value.length > 1) {
-    layer.msg('每次只能选择一个用户进行协作', { icon: 2 });
-    return;
-  }
-
-  try {
-    // 获取当前选中行的信息
-    if (!selectedKey.value) {
-      layer.msg('请先选择要协作的报价单', { icon: 2 });
-      return;
-    }
-
-    // 获取选中行的数据
-    const selectedRowData = dataSource.value.find(
-      (item) => item.ordersId === selectedKey.value,
-    );
-
-    // 调用协作开始API
-    await ordersApi.coopStart(
-      selectedKey.value, // orderId
-      selectedUserIds.value[0], // coopUser
-      selectedRowData ? selectedRowData.projectName : '', // projectName
-    );
-
-    // 关闭抽屉
-    layer.closeAll();
-
-    // 清空选择
-    selectedUserIds.value = [];
-
-    // 成功提示
-    notify.success('协作开始');
-  } catch (error) {
-    console.error('开始协作失败:', error);
-    layer.msg('开始协作失败，请重试', { icon: 2 });
-  }
-};
 
 // 日期排序
 const sortChange = (key: string, sort: string) => {
@@ -1456,6 +947,80 @@ watch(
 watch(quotationNameSearch, () => {
   debouncedSearch();
 });
+
+// 初始化hooks
+const {
+  showPriceColumns: hookShowPriceColumns,
+  handleShowPrice,
+  handleEdit,
+  handleEditSave,
+  handleCopy,
+} = useQuotationActions({
+  selectedKey,
+  dataSource,
+  editModalVisible,
+  getOrdersList,
+  tabItem,
+  current2,
+  columns,
+});
+
+const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
+  {
+    selectedKey,
+    exportModalVisible,
+  },
+);
+
+const { handleDelete, handleDeleteConfirm } = useQuotationDelete({
+  selectedKey,
+  dataSource,
+  deleteModalVisible,
+  getOrdersList,
+  tabItem,
+  current2,
+});
+
+const {
+  propertyForm,
+  shareStatus,
+  integrationOptions,
+  projectStatusOptions,
+  selectedRowData: propertySelectedRowData,
+  auditStatusText: hookAuditStatusText,
+  handleProperty,
+  handlePropertyConfirm,
+  handleAuditStatusChange,
+  handleProjectStatusChange,
+} = useQuotationProperty({
+  selectedKey,
+  dataSource,
+  propertyModalVisible,
+  getOrdersList,
+  tabItem,
+  current2,
+});
+
+const { handleSend, handleSendToClient, handleSendToSupplier } =
+  useQuotationSend({
+    selectedKey,
+    dataSource,
+    currentUser,
+    getOrdersList,
+    tabItem,
+    current2,
+  });
+
+const { handleCollaborate } = useQuotationCollaborate({
+  selectedKey,
+  dataSource,
+  coopDrawerVisible,
+  userTreeData,
+  selectedUserIds,
+  expandedKeys,
+});
+
+const { handleImport } = useQuotationImport();
 
 onMounted(async () => {
   await Promise.all([
