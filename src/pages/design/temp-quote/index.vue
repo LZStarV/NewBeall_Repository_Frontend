@@ -77,9 +77,9 @@
               <button title="导出" @click="handleExport">
                 <SvgIcon name="export" width="1.1rem" />
               </button>
-              <!-- <button title="删除" @click="handleDelete">
+              <button title="删除" @click="handleDelete">
                 <SvgIcon name="cancel" width="1.1rem" />
-              </button> -->
+              </button>
               <button title="协作" @click="handleCollaborate">
                 <SvgIcon name="supply_chain" width="1.1rem" />
               </button>
@@ -124,6 +124,13 @@
       />
     </ModalWindow>
 
+    <!-- 删除确认弹窗 -->
+    <DeleteConfirmModal
+      v-model:visible="deleteModalVisible"
+      :item-name="selectedName"
+      @confirm="handleDeleteConfirm"
+    />
+
     <!-- 导出确认弹窗 -->
     <ExportQuotationModal
       v-model:visible="exportModalVisible"
@@ -134,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import type {
   TableColumn,
@@ -145,6 +152,7 @@ import ordersApi from '@/api/orders/ordersApi';
 import { useToolbarSearch } from '@/composables/useToolbarSearch';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
 import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import DeleteConfirmModal from '@/pages/design/components/DeleteConfirmModal.vue';
 import { useQuotationExport } from '@/composables/design/useQuotationExport';
 import { useQuotationActions } from '@/composables/design/useQuotationActions';
 import { useQuotationCollaborate } from '@/composables/design/useQuotationCollaborate';
@@ -156,6 +164,12 @@ const clientNameSearch = ref<string>('');
 const quoteTypeSearch = ref<string>('');
 const createDate = ref<string>('');
 const selectedKey = ref<string>(''); // 选中的报价单ID
+const selectedName = computed(() => {
+  const selectedItem = dataSource.value.find(
+    (item) => item.ordersId === selectedKey.value,
+  );
+  return selectedItem ? selectedItem.projectName : '';
+});
 
 interface TempQuotationListResponse extends QuotationListResponse {
   status: string;
@@ -170,7 +184,7 @@ const defaultToolbars: TableDefaultToolbar[] = [
   {
     icon: 'layui-icon-refresh',
     title: '刷新',
-    onClick: () => {},
+    onClick: () => handleRefresh(),
   },
   'filter',
 ];
@@ -290,7 +304,7 @@ const getStatus = (isAudit: number) => {
 };
 
 // 搜索相关
-const { data, loading, error, search, reset } = useToolbarSearch({
+const { data, loading, search, reset } = useToolbarSearch({
   searchParams: {
     projectName: quotationNameSearch,
     contacts: clientNameSearch,
@@ -343,8 +357,6 @@ const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
   },
 );
 
-// 删除相关
-
 // 协作相关
 const { handleCollaborate } = useQuotationCollaborate({
   selectedKey,
@@ -385,6 +397,15 @@ const handlePaginationChange = (e: { current: number; pageSize: number }) => {
   pagination.pageSize = e.pageSize;
   search();
 };
+
+// 删除相关
+const deleteModalVisible = ref(false);
+const { handleDelete, handleDeleteConfirm } = useQuotationDelete({
+  selectedKey,
+  dataSource,
+  deleteModalVisible,
+  refreshHandler: handleRefresh,
+});
 </script>
 
 <style scoped lang="scss">

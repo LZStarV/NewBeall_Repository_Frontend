@@ -171,7 +171,10 @@ export function useToolbarSearch<
    * @param forceSearch 是否强制搜索（忽略参数验证）
    * @param isInitial 是否为初始加载
    */
-  const executeSearch = async (forceSearch = false, isInitial = false): Promise<void> => {
+  const executeSearch = async (
+    forceSearch = false,
+    isInitial = false,
+  ): Promise<void> => {
     try {
       const currentParams = getCurrentParams();
 
@@ -194,7 +197,9 @@ export function useToolbarSearch<
       const result = await apiFunction(finalParams);
 
       // 转换结果格式
-      const processedResult = transformResult ? transformResult(result) : result;
+      const processedResult = transformResult
+        ? transformResult(result)
+        : result;
       data.value = processedResult;
 
       // 如果是初始加载，保存为初始数据
@@ -254,7 +259,7 @@ export function useToolbarSearch<
   /**
    * 重置搜索参数和结果
    */
-  const reset = (): void => {
+  const reset = async (): Promise<void> => {
     // 清除防抖定时器
     if (searchTimeout) {
       clearTimeout(searchTimeout);
@@ -278,10 +283,8 @@ export function useToolbarSearch<
       }
     });
 
-    // 恢复初始数据
-    data.value = initialData.value;
-    error.value = null;
-    loading.value = false;
+    // 重置后重新执行搜索以获取初始列表
+    await executeSearch(true, true);
   };
 
   // 设置监听器

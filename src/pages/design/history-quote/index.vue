@@ -208,48 +208,11 @@
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
-    <ModalWindow
-      :visible="deleteModalVisible"
-      title="删除确认"
-      :btn="[
-        {
-          text: '确认删除',
-          style: 'background-color: #ff4d4f; border-color: #ff4d4f;',
-          disabled: !isDeleteButtonEnabled,
-          callback: handleDeleteConfirm,
-        },
-        {
-          text: '取消',
-          callback: () => {
-            deleteModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :area="['400px', '350px']"
-      @close="deleteModalVisible = false"
-    >
-      <div class="delete-confirm-content">
-        <div class="warning-text">
-          正在删除报价 "<span class="project-name-red">{{
-            selectedRow?.projectName
-          }}</span
-          >"
-        </div>
-        <div class="warning-info">
-          报价删除后，报价内容无法恢复，请谨慎操作！
-        </div>
-        <div class="confirm-input-section">
-          <label>请输入 "DELETE" 确认删除：</label>
-          <lay-input
-            v-model="deleteConfirmInput"
-            placeholder="请输入 DELETE"
-            class="confirm-input"
-          />
-        </div>
-      </div>
-    </ModalWindow>
+    <DeleteConfirmModal
+      v-model:visible="deleteModalVisible"
+      :item-name="selectedName"
+      @confirm="handleDeleteConfirm"
+    />
 
     <!-- 导出确认弹窗 -->
     <ExportQuotationModal
@@ -387,6 +350,7 @@ import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
 import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import DeleteConfirmModal from '@/pages/design/components/DeleteConfirmModal.vue';
 import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
@@ -396,7 +360,6 @@ import type {
   OrderPrice,
   GetOrdersListParams,
 } from '@/api/orders/orderApi.type';
-import type { UserTreeType } from '@/api/client/clinetApi.type';
 import type {
   TableColumn,
   TableDefaultToolbar,
@@ -436,6 +399,12 @@ const chargePerson = ref<string>();
 const createUser = ref<string>();
 const createDate = ref<string>();
 const attribute = ref<string>();
+const selectedName = computed(() => {
+  const selectedItem = dataSource.value.find(
+    (item) => item.ordersId === selectedKey.value,
+  );
+  return selectedItem ? selectedItem.projectName : '';
+});
 
 // 表格数据
 const loading = ref(false);
@@ -446,7 +415,6 @@ const detailModalVisible = ref(false);
 const selectedRow = ref<QuotationListResponse | null>(null);
 const editModalVisible = ref(false);
 const deleteModalVisible = ref(false);
-const deleteConfirmInput = ref('');
 
 // 导出确认弹窗相关状态
 const exportModalVisible = ref(false);
@@ -640,11 +608,6 @@ const goToChat = (row: QuotationListResponse) => {
 };
 
 const selectedKey = ref();
-
-// 计算删除按钮是否可用
-const isDeleteButtonEnabled = computed(() => {
-  return deleteConfirmInput.value === 'DELETE';
-});
 
 // 日期排序
 const sortChange = (key: string, sort: string) => {
@@ -1052,45 +1015,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  // 删除确认弹窗样式
-  :deep(.delete-confirm-content) {
-    padding: 20px;
-
-    .warning-text {
-      font-size: 16px;
-      margin-bottom: 15px;
-      color: #333;
-
-      .project-name-red {
-        color: #ff4d4f;
-        font-weight: bold;
-      }
-    }
-
-    .warning-info {
-      background-color: #fff2f0;
-      border: 1px solid #ffccc7;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 20px;
-      color: #cf1322;
-      font-size: 14px;
-    }
-
-    .confirm-input-section {
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .confirm-input {
-        width: 100%;
-      }
-    }
   }
 
   @media (max-width: $desktop_layout_breakpoint) {
