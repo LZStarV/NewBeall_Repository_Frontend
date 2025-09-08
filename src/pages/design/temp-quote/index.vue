@@ -90,7 +90,11 @@
 
         <!-- 工程项目名称列自定义渲染 -->
         <template #projectName="{ row }">
-          <span class="project-name-link" :title="row.projectName">
+          <span
+            class="project-name-link"
+            :title="row.projectName"
+            @click="showDetailModal(row)"
+          >
             {{ row.projectName }}
           </span>
         </template>
@@ -114,6 +118,7 @@
     <ModalWindow
       :visible="editModalVisible"
       title="编辑报价单"
+      :is-teleport="true"
       @close="editModalVisible = false"
     >
       <QuotationEdit
@@ -137,6 +142,19 @@
       :export-options="exportOptions"
       @confirm="handleExportConfirm"
     />
+
+    <!-- 详细信息弹窗 -->
+    <ModalWindow
+      :visible="detailModalVisible"
+      :is-teleport="true"
+      title="详情"
+      @close="detailModalVisible = false"
+    >
+      <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
+      <div v-else>
+        <lay-empty />
+      </div>
+    </ModalWindow>
   </div>
 </template>
 
@@ -153,6 +171,7 @@ import { useToolbarSearch } from '@/composables/useToolbarSearch';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
 import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
 import DeleteConfirmModal from '@/pages/design/components/DeleteConfirmModal.vue';
+import QuotationInfo from '../components/QuotationInfo.vue';
 import { useQuotationExport } from '@/composables/design/useQuotationExport';
 import { useQuotationActions } from '@/composables/design/useQuotationActions';
 import { useQuotationCollaborate } from '@/composables/design/useQuotationCollaborate';
@@ -406,6 +425,15 @@ const { handleDelete, handleDeleteConfirm } = useQuotationDelete({
   deleteModalVisible,
   refreshHandler: handleRefresh,
 });
+
+// 显示详细信息弹窗
+const checkedRow = ref<QuotationListResponse | null>(null); // 用户点击的行数据（通过工程名称点击）
+const detailModalVisible = ref(false);
+
+const showDetailModal = (row: QuotationListResponse) => {
+  checkedRow.value = row;
+  detailModalVisible.value = true;
+};
 </script>
 
 <style scoped lang="scss">

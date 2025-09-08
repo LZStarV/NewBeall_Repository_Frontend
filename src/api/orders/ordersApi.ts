@@ -7,7 +7,7 @@ import type {
   Settle,
   QuotationListResponse,
   OrderPrice,
-  OrderListRow,
+  OrderLogsRecordResponse,
   Quotation,
   OrderChargePerson,
   OrderModuleListResponse,
@@ -163,15 +163,19 @@ export default {
     limit: number,
   ) {
     const formData = new FormData();
-    formData.append('orderId', orderId);
+    formData.append('ordersId', orderId);
     formData.append('phaseType', phaseType.toString());
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    return http.post<FormData>('/orders/orders_logs_record', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    return http.post<FormData, OrderLogsRecordResponse>(
+      '/orders/orders_logs_record',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    });
+    );
   },
 
   // 获取报价单详情
@@ -261,12 +265,12 @@ export default {
     ordersType7?: string,
   ) {
     const formData = new FormData();
-    
+
     // 必填参数
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    
+
     // 可选参数处理
     const optionalParams = {
       projectName,
@@ -278,14 +282,14 @@ export default {
       ordersType6,
       ordersType7,
     };
-    
+
     Object.entries(optionalParams).forEach(([key, value]) => {
       if (value !== undefined) {
         formData.append(key, String(value));
         formData.append(`query[${key}]`, String(value));
       }
     });
-    
+
     return http.post<
       FormData,
       { rows: OrderModuleListResponse[]; total: number }

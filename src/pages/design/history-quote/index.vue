@@ -184,10 +184,11 @@
     <!-- 详细信息弹窗 -->
     <ModalWindow
       :visible="detailModalVisible"
+      :is-teleport="true"
       title="详情"
       @close="detailModalVisible = false"
     >
-      <QuotationInfo v-if="selectedRow" :selected-row="selectedRow" />
+      <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
       <div v-else>
         <lay-empty />
       </div>
@@ -197,6 +198,7 @@
     <ModalWindow
       :visible="editModalVisible"
       title="编辑报价单"
+      :is-teleport="true"
       @close="editModalVisible = false"
     >
       <QuotationEdit
@@ -412,7 +414,7 @@ const dataSource = ref<QuotationListResponse[]>([]);
 
 // 弹窗相关
 const detailModalVisible = ref(false);
-const selectedRow = ref<QuotationListResponse | null>(null);
+const checkedRow = ref<QuotationListResponse | null>(null); // 用户点击的行数据（通过工程名称和客户单位点击）
 const editModalVisible = ref(false);
 const deleteModalVisible = ref(false);
 
@@ -591,7 +593,7 @@ const pagination = reactive({
 
 // 显示详细信息弹窗
 const showDetailModal = (row: QuotationListResponse) => {
-  selectedRow.value = row;
+  checkedRow.value = row;
   detailModalVisible.value = true;
 };
 

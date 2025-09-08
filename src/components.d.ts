@@ -20,6 +20,7 @@ declare module 'vue' {
     ImageCell: typeof import('./components/table-cells/ImageCell.vue')['default']
     ModalWindow: typeof import('./components/ModalWindow.vue')['default']
     NoticeBar: typeof import('./components/NoticeBar.vue')['default']
+    OperationLogPanel: typeof import('./components/OperationLogPanel.vue')['default']
     RightSideModal: typeof import('./components/RightSideModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
