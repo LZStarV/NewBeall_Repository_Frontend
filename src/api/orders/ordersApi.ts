@@ -7,7 +7,7 @@ import type {
   Settle,
   QuotationListResponse,
   OrderPrice,
-  OrderListRow,
+  OrderLogsRecordResponse,
   Quotation,
   OrderChargePerson,
   OrderModuleListResponse,
@@ -163,15 +163,19 @@ export default {
     limit: number,
   ) {
     const formData = new FormData();
-    formData.append('orderId', orderId);
+    formData.append('ordersId', orderId);
     formData.append('phaseType', phaseType.toString());
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
-    return http.post<FormData>('/orders/orders_logs_record', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    return http.post<FormData, OrderLogsRecordResponse>(
+      '/orders/orders_logs_record',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    });
+    );
   },
 
   // 获取报价单详情
@@ -211,11 +215,31 @@ export default {
   },
 
   // 获取临时报价列表
-  getQuotationList(order: string = 'desc', offset: number, limit: number) {
+  getQuotationList(
+    order: string = 'desc',
+    offset: number,
+    limit: number,
+    projectName?: string,
+    contacts?: string,
+    createDate?: string,
+    orderstype?: string,
+  ) {
     const formData = new FormData();
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
+    if (projectName) {
+      formData.append('projectName', projectName);
+    }
+    if (contacts) {
+      formData.append('contacts', contacts);
+    }
+    if (createDate) {
+      formData.append('createDate', createDate);
+    }
+    if (orderstype) {
+      formData.append('orderstype', orderstype);
+    }
     return http.post<
       FormData,
       { rows: QuotationListResponse[]; total: number }
@@ -231,11 +255,41 @@ export default {
     order: string = 'desc',
     offset: number = 0,
     limit: number = 50,
+    projectName?: string,
+    ordersType1?: string,
+    ordersType2?: string,
+    ordersType3?: string,
+    ordersType4?: string,
+    ordersType5?: string,
+    ordersType6?: string,
+    ordersType7?: string,
   ) {
     const formData = new FormData();
+
+    // 必填参数
     formData.append('order', order);
     formData.append('offset', offset.toString());
     formData.append('limit', limit.toString());
+
+    // 可选参数处理
+    const optionalParams = {
+      projectName,
+      ordersType1,
+      ordersType2,
+      ordersType3,
+      ordersType4,
+      ordersType5,
+      ordersType6,
+      ordersType7,
+    };
+
+    Object.entries(optionalParams).forEach(([key, value]) => {
+      if (value !== undefined) {
+        formData.append(key, String(value));
+        formData.append(`query[${key}]`, String(value));
+      }
+    });
+
     return http.post<
       FormData,
       { rows: OrderModuleListResponse[]; total: number }

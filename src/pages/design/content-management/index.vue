@@ -332,7 +332,6 @@ const handleExportCatalog = (catalogData: CatalogItem[]) => {
 <style lang="scss" scoped>
 .content-management-page {
   position: relative;
-  padding: 16px;
   min-height: 100%;
 
   .toolbar-card {

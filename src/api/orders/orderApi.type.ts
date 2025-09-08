@@ -337,3 +337,55 @@ type Exclusive =
 
 // 最终参数类型
 export type GetOrdersListParams = BaseParams & Exclusive;
+
+export interface OrderLogsRecord {
+  chainId: string;
+  chainNum: string;
+  clientAddress: string;
+  clientBankAccount: string;
+  clientBankName: string;
+  clientContactName: string;
+  clientContacts: string;
+  clientEmail: string;
+  clientId: string;
+  clientTel: string;
+  clientTexId: string;
+  companyAddres: string;
+  companyEmail: string;
+  companyName: string;
+  contactPhone: string;
+  contacts: string;
+  createTime: string;
+  createUser: string;
+  explanation: string;
+  id: string;
+  isCoop: number;
+  orderCharacter: string;
+  orderChargePerson: string;
+  orderDeliveryAddress: string;
+  orderDeliveryMethod: string;
+  orderDeliveryTime: string;
+  orderId: string;
+  orderLogPhase: number;
+  orderLogPhaseId: string;
+  orderLogState: string;
+  orderLogType: string;
+  orderProjectName: string;
+  orderProjectRemark: string;
+  orderProvinceCityArea: string;
+  orderSettleMethod: string;
+  orderType: string;
+}
+
+// 报价单操作记录
+export interface OrderLogsRecordResponse {
+  code: string;
+  data: {
+    current: number;
+    pages: number;
+    records: OrderLogsRecord[];
+    size: number;
+    total: number;
+  };
+  msg: string;
+}
