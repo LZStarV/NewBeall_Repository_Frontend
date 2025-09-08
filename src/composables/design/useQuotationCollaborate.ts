@@ -10,23 +10,16 @@ import type { UserTreeType } from '@/api/client/clinetApi.type';
 export interface UseQuotationCollaborateOptions {
   selectedKey: Ref<string | undefined>;
   dataSource: Ref<QuotationListResponse[]>;
-  coopDrawerVisible: Ref<boolean>;
-  userTreeData: Ref<UserTreeType[]>;
-  selectedUserIds: Ref<string[]>;
-  expandedKeys: Ref<string[]>;
 }
 
 export function useQuotationCollaborate(
   options: UseQuotationCollaborateOptions,
 ) {
-  const {
-    selectedKey,
-    dataSource,
-    coopDrawerVisible,
-    userTreeData,
-    selectedUserIds,
-    expandedKeys,
-  } = options;
+  const { selectedKey, dataSource } = options;
+
+  const userTreeData = ref<UserTreeType[]>([]);
+  const expandedKeys = ref<string[]>([]);
+  const selectedUserIds = ref<string[]>([]);
 
   /**
    * 协作功能
@@ -190,7 +183,6 @@ export function useQuotationCollaborate(
    * 取消协作
    */
   const handleCoopCancel = () => {
-    coopDrawerVisible.value = false;
     selectedUserIds.value = [];
   };
 

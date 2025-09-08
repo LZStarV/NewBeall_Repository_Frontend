@@ -252,62 +252,11 @@
     </ModalWindow>
 
     <!-- 导出确认弹窗 -->
-    <ModalWindow
-      :visible="exportModalVisible"
-      title="导出报价单"
-      :btn="[
-        {
-          text: '确认导出',
-          callback: handleExportConfirm,
-        },
-        {
-          text: '取消',
-          callback: () => {
-            exportModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :area="['400px', '320px']"
-      @close="exportModalVisible = false"
-    >
-      <div class="export-modal-content">
-        <div class="export-message">您是否要导出此报价单</div>
-        <div class="export-options">
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.derivePrime"
-              value="derivePrime"
-              size="lg"
-            >
-              同时导出成本价
-            </lay-checkbox>
-          </div>
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.isExplanation"
-              value="isExplanation"
-              size="lg"
-            >
-              导出报价说明
-            </lay-checkbox>
-          </div>
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.isSeal"
-              value="isSeal"
-              size="lg"
-            >
-              加盖印章
-            </lay-checkbox>
-          </div>
-        </div>
-      </div>
-    </ModalWindow>
+    <ExportQuotationModal
+      v-model:visible="exportModalVisible"
+      :export-options="exportOptions"
+      @confirm="handleExportConfirm"
+    />
 
     <!-- 属性设置弹窗 -->
     <ModalWindow
@@ -437,6 +386,7 @@
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
+import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
 import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
@@ -500,12 +450,6 @@ const deleteConfirmInput = ref('');
 
 // 导出确认弹窗相关状态
 const exportModalVisible = ref(false);
-
-// 协作相关状态
-const userTreeData = ref<UserTreeType[]>([]);
-const selectedUserIds = ref<string[]>([]);
-const expandedKeys = ref<string[]>([]);
-const coopDrawerVisible = ref(false);
 
 // 属性设置弹窗相关状态
 const propertyModalVisible = ref(false);
@@ -944,7 +888,6 @@ watch(quotationNameSearch, () => {
 const { handleShowPrice, handleEdit, handleEditSave, handleCopy } =
   useQuotationActions({
     selectedKey,
-    dataSource,
     editModalVisible,
     getOrdersList,
     tabItem,
@@ -998,10 +941,6 @@ const { handleSend } = useQuotationSend({
 const { handleCollaborate } = useQuotationCollaborate({
   selectedKey,
   dataSource,
-  coopDrawerVisible,
-  userTreeData,
-  selectedUserIds,
-  expandedKeys,
 });
 
 const { handleImport } = useQuotationImport();
@@ -1172,24 +1111,6 @@ onMounted(async () => {
 
       :deep(.layui-form-item) {
         margin-bottom: 0;
-      }
-    }
-  }
-
-  // 导出确认弹窗样式
-  .export-modal-content {
-    padding: 20px;
-
-    .export-message {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #333;
-      text-align: center;
-    }
-
-    .export-options {
-      .option-item {
-        margin-bottom: 15px;
       }
     }
   }

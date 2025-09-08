@@ -2,24 +2,21 @@ import { ref, type Ref } from 'vue';
 import { layer } from '@layui/layui-vue';
 import ordersApi from '@/api/orders/ordersApi';
 import notify from '@/utils/notify';
-import type { QuotationListResponse } from '@/api/orders/orderApi.type';
 import type { TableColumn } from '@layui/layui-vue/types/component/table/typing';
 
 export interface UseQuotationActionsOptions {
   selectedKey: Ref<string | undefined>;
-  columns: Ref<TableColumn[]>;
-  dataSource: Ref<QuotationListResponse[]>;
-  editModalVisible: Ref<boolean>;
-  getOrdersList: (type?: number) => Promise<void>;
-  tabItem: Array<{ title: string; type: number }>;
-  current2: Ref<string>;
+  columns?: Ref<TableColumn[]>;
+  editModalVisible?: Ref<boolean>;
+  getOrdersList?: (type?: number) => Promise<void>;
+  tabItem?: Array<{ title: string; type: number }>;
+  current2?: Ref<string>;
 }
 
 export function useQuotationActions(options: UseQuotationActionsOptions) {
   const {
     selectedKey,
     columns,
-    dataSource,
     editModalVisible,
     getOrdersList,
     tabItem,
@@ -32,6 +29,7 @@ export function useQuotationActions(options: UseQuotationActionsOptions) {
    * 显示/隐藏价格列
    */
   const handleShowPrice = () => {
+    if (!columns) return;
     showPriceColumns.value = !showPriceColumns.value;
     // 动态更新表格列的显示状态
     columns.value.forEach((column) => {
@@ -45,6 +43,7 @@ export function useQuotationActions(options: UseQuotationActionsOptions) {
    * 编辑报价单
    */
   const handleEdit = () => {
+    if (!editModalVisible) return;
     console.log(selectedKey.value);
     if (!selectedKey.value) {
       layer.msg('请先选择要修改的报价单', { icon: 2 });
@@ -57,6 +56,7 @@ export function useQuotationActions(options: UseQuotationActionsOptions) {
    * 编辑保存回调
    */
   const handleEditSave = (data: any) => {
+    if (!editModalVisible) return;
     console.log('保存编辑数据:', data);
     // TODO: 实现保存逻辑
     editModalVisible.value = false;
@@ -67,6 +67,7 @@ export function useQuotationActions(options: UseQuotationActionsOptions) {
    * 复制报价单
    */
   const handleCopy = async () => {
+    if (!getOrdersList || !tabItem || !current2) return;
     // 检查是否有选中的行
     if (!selectedKey.value) {
       layer.msg('请先选择要复制的订单', { icon: 2 });

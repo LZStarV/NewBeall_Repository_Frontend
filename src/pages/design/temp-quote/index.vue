@@ -62,10 +62,32 @@
         :default-toolbar="defaultToolbars"
         :loading="loading"
         :pagination="pagination"
+        v-model:selectedKey="selectedKey"
         even
         @pagination="handlePaginationChange"
         @sort-change="sortChange"
       >
+        <!-- 顶部工具栏按钮 -->
+        <template #toolbar>
+          <div class="toolbar">
+            <div class="btn-group">
+              <button title="修改" @click="handleEdit">
+                <SvgIcon name="edit" width="1.1rem" />
+              </button>
+              <button title="导出" @click="handleExport">
+                <SvgIcon name="export" width="1.1rem" />
+              </button>
+              <!-- <button title="删除" @click="handleDelete">
+                <SvgIcon name="cancel" width="1.1rem" />
+              </button> -->
+              <button title="协作" @click="handleCollaborate">
+                <SvgIcon name="supply_chain" width="1.1rem" />
+              </button>
+              <div class="split"></div>
+            </div>
+          </div>
+        </template>
+
         <!-- 工程项目名称列自定义渲染 -->
         <template #projectName="{ row }">
           <span class="project-name-link" :title="row.projectName">
@@ -87,6 +109,27 @@
         </span>
       </div>
     </lay-card>
+
+    <!-- 编辑弹窗 -->
+    <ModalWindow
+      :visible="editModalVisible"
+      title="编辑报价单"
+      @close="editModalVisible = false"
+    >
+      <QuotationEdit
+        :showCustomerInfoDefault="false"
+        :is-new-quotation="false"
+        @save="handleEditSave"
+        @cancel="editModalVisible = false"
+      />
+    </ModalWindow>
+
+    <!-- 导出确认弹窗 -->
+    <ExportQuotationModal
+      v-model:visible="exportModalVisible"
+      :export-options="exportOptions"
+      @confirm="handleExportConfirm"
+    />
   </div>
 </template>
 
@@ -100,12 +143,19 @@ import type {
 import SvgIcon from '@/components/SvgIcon.vue';
 import ordersApi from '@/api/orders/ordersApi';
 import { useToolbarSearch } from '@/composables/useToolbarSearch';
+import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
+import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import { useQuotationExport } from '@/composables/design/useQuotationExport';
+import { useQuotationActions } from '@/composables/design/useQuotationActions';
+import { useQuotationCollaborate } from '@/composables/design/useQuotationCollaborate';
+import { useQuotationDelete } from '@/composables/design/useQuotationDelete';
 
 // 工具栏响应式数据
 const quotationNameSearch = ref<string>('');
 const clientNameSearch = ref<string>('');
 const quoteTypeSearch = ref<string>('');
 const createDate = ref<string>('');
+const selectedKey = ref<string>(''); // 选中的报价单ID
 
 interface TempQuotationListResponse extends QuotationListResponse {
   status: string;
@@ -239,7 +289,7 @@ const getStatus = (isAudit: number) => {
   }
 };
 
-// 使用 useToolbarSearch hook
+// 搜索相关
 const { data, loading, error, search, reset } = useToolbarSearch({
   searchParams: {
     projectName: quotationNameSearch,
@@ -275,6 +325,30 @@ const { data, loading, error, search, reset } = useToolbarSearch({
   enableDebounce: true,
   debounceDelay: 100,
   immediate: true,
+});
+
+// 编辑弹窗相关状态
+const editModalVisible = ref(false);
+const { handleEdit, handleEditSave } = useQuotationActions({
+  selectedKey,
+  editModalVisible,
+});
+
+// 导出确认弹窗相关状态
+const exportModalVisible = ref(false);
+const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
+  {
+    selectedKey,
+    exportModalVisible,
+  },
+);
+
+// 删除相关
+
+// 协作相关
+const { handleCollaborate } = useQuotationCollaborate({
+  selectedKey,
+  dataSource,
 });
 
 // 监听搜索结果变化，更新表格数据
@@ -337,6 +411,29 @@ const handlePaginationChange = (e: { current: number; pageSize: number }) => {
 
     .price-sum {
       color: $danger-color;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-top: 4px;
+
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+
+        .split {
+          width: 1px;
+          height: 24px;
+          background-color: #e6e6e6;
+        }
+
+        button {
+          @include button-style($primary-color);
+        }
+      }
     }
   }
 
