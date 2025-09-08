@@ -13,7 +13,7 @@ import type {
   OrderModuleListResponse,
 } from './orderApi.type';
 import type { GetOrdersListParams } from './orderApi.type';
-import type { Product } from '../product/productApi.type';
+import type { Product } from '../../pages/product/library/Api/type/productApi.type';
 import env from '@/utils/env';
 // import { getExpiredAuth } from '@/api/auth/authApi';
 

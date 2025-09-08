@@ -1,12 +1,7 @@
 <template>
   <!-- 右侧参数详情弹窗 -->
-  <RightSideModal 
-    :visible="visible" 
-    :title="`${selectedProduct?.name || ''} - 产品详情`"
-    :width="rightModalWidth" 
-    :mask-closable="true" 
-    @close="handleClose"
-  >
+  <RightSideModal :visible="visible" :title="`${selectedProduct?.name || ''} - 产品详情`" :width="rightModalWidth"
+    :mask-closable="true" @close="handleClose">
     <div v-if="selectedProduct" class="parameters-detail">
       <!-- 产品基本信息 -->
       <div class="info-section">
@@ -43,12 +38,9 @@
         <div class="product-images">
           <div class="single-image-container"
             v-if="selectedProduct?.pictureaddress || selectedProduct?.pictureaddressOne">
-            <img 
+            <img
               :src="`https://yx.newbeall.com/softLink/${selectedProduct?.pictureaddress || selectedProduct?.pictureaddressOne}`"
-              :alt="selectedProduct?.name" 
-              class="product-image-full"
-              @error="handleImageError" 
-            />
+              :alt="selectedProduct?.name" class="product-image-full" @error="handleImageError" />
           </div>
           <div v-else class="single-image-container no-image">
             <lay-icon type="layui-icon-picture" />
@@ -76,8 +68,7 @@
         </h4>
         <div class="params-content">
           <div class="param-description">
-            <div class="param-text"
-              v-html="formatParamText(selectedProduct?.param || '暂无详细参数描述')">
+            <div class="param-text" v-html="formatParamText(selectedProduct?.param || '暂无详细参数描述')">
             </div>
           </div>
           <div class="params-grid">
@@ -113,37 +104,8 @@
 
 <script lang="ts" setup>
 import RightSideModal from '@/components/RightSideModal.vue'
+import type { Product } from './type'
 
-// 定义产品接口类型
-interface Product {
-  checked?: boolean
-  approved: boolean
-  area: string
-  autoHandle: boolean
-  brand: string
-  company: string
-  condition: string
-  createtime: string
-  defaultDiscount: number
-  getdate: string
-  inventory: number
-  isInventory: boolean
-  isOpen: number
-  model: string
-  name: string
-  param: string
-  pictureaddress: string
-  pictureaddressOne: string
-  price: number
-  proId: string
-  purchaseprice: number
-  marketprice: string
-  sales: number
-  trait: string
-  uname: string
-  unit: string
-  version: string
-}
 
 // 定义组件的props
 interface Props {
@@ -329,6 +291,7 @@ const formatParamText = (text: string) => {
 @media (max-width: 768px) {
   .parameters-detail {
     .info-section {
+
       .info-grid,
       .params-grid {
         grid-template-columns: 1fr;

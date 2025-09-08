@@ -2,12 +2,7 @@
   <div class="history-quote-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <lay-form
-        layout="inline"
-        :pane="true"
-        :label-width="80"
-        class="toolbar-form-items"
-      >
+      <lay-form layout="inline" :pane="true" :label-width="80" class="toolbar-form-items">
         <lay-form-item class="form-item-search">
           <template #label>
             <lay-select v-model="typeFilter">
@@ -20,22 +15,13 @@
               </lay-select-option>
             </lay-select>
           </template>
-          <lay-input
-            v-model="quotationNameSearch"
-            placeholder="请输入方案名称进行搜索"
-            class="search-input"
-            mode="block"
-          />
+          <lay-input v-model="quotationNameSearch" placeholder="请输入方案名称进行搜索" class="search-input" mode="block" />
         </lay-form-item>
 
         <lay-form-item label="属性">
           <lay-select v-model="attribute" placeholder="请输入">
             <lay-select-option value="">全部</lay-select-option>
-            <lay-select-option
-              v-for="attr in orderAttributeList"
-              :key="attr.id"
-              :value="attr.id"
-            >
+            <lay-select-option v-for="attr in orderAttributeList" :key="attr.id" :value="attr.id">
               {{ attr.name }}
             </lay-select-option>
           </lay-select>
@@ -44,11 +30,7 @@
         <lay-form-item label="负责人">
           <lay-select v-model="chargePerson" placeholder="请选择">
             <lay-select-option value="">全部</lay-select-option>
-            <lay-select-option
-              v-for="item in ordersChargePersonList"
-              :key="item.id"
-              :value="String(item.id)"
-            >
+            <lay-select-option v-for="item in ordersChargePersonList" :key="item.id" :value="String(item.id)">
               {{ item.name }}
             </lay-select-option>
           </lay-select>
@@ -57,22 +39,14 @@
         <lay-form-item label="制单人">
           <lay-select v-model="createUser" placeholder="请选择">
             <lay-select-option value="">全部</lay-select-option>
-            <lay-select-option
-              v-for="item in ordersCreateUserList"
-              :key="item"
-              :value="item"
-            >
+            <lay-select-option v-for="item in ordersCreateUserList" :key="item" :value="item">
               {{ item }}
             </lay-select-option>
           </lay-select>
         </lay-form-item>
 
         <lay-form-item label="制单日期">
-          <lay-date-picker
-            v-model="createDate"
-            placeholder="click me"
-            allow-clear
-          />
+          <lay-date-picker v-model="createDate" placeholder="click me" allow-clear />
         </lay-form-item>
 
         <div class="toolbar-btns">
@@ -88,27 +62,14 @@
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-        :columns="columns"
-        :data-source="dataSource"
-        :default-toolbar="defaultToolbars"
-        :loading="loading"
-        :pagination="pagination"
-        v-model:selectedKey="selectedKey"
-        even
-        @pagination="handlePagination"
-        @sort-change="sortChange"
-      >
+      <lay-table :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars" :loading="loading"
+        :pagination="pagination" v-model:selectedKey="selectedKey" even @pagination="handlePagination"
+        @sort-change="sortChange">
         <template #toolbar>
           <div class="toolbar">
             <lay-tab v-model="current2" type="brief" @change="handleTabChange">
-              <lay-tab-item
-                v-for="item in tabItem"
-                :id="item.title"
-                :key="item.title"
-                :title="item.title"
-                :icon="item.iconRenderFunction"
-              />
+              <lay-tab-item v-for="item in tabItem" :id="item.title" :key="item.title" :title="item.title"
+                :icon="item.iconRenderFunction" />
             </lay-tab>
 
             <div class="btn-group">
@@ -146,21 +107,13 @@
 
         <!-- 工程项目名称列自定义渲染 -->
         <template #projectName="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.projectName"
-            @click="showDetailModal(row)"
-          >
+          <span class="project-name-link" :title="row.projectName" @click="showDetailModal(row)">
             {{ row.projectName }}
           </span>
         </template>
         <!-- 客户单位列自定义渲染 -->
         <template #contacts="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.contacts"
-            @click="showDetailModal(row)"
-          >
+          <span class="project-name-link" :title="row.contacts" @click="showDetailModal(row)">
             {{ row.contacts }}
           </span>
         </template>
@@ -170,11 +123,7 @@
         </template>
         <!-- 评论列自定义渲染 -->
         <template #chat="{ row }">
-          <button
-            class="chat-button"
-            :title="'进入聊天室'"
-            @click="goToChat(row)"
-          >
+          <button class="chat-button" :title="'进入聊天室'" @click="goToChat(row)">
             <SvgIcon name="message_2" width="1rem" />
           </button>
         </template>
@@ -182,12 +131,7 @@
     </lay-card>
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow
-      :visible="detailModalVisible"
-      :is-teleport="true"
-      title="详情"
-      @close="detailModalVisible = false"
-    >
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="详情" @close="detailModalVisible = false">
       <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
       <div v-else>
         <lay-empty />
@@ -195,69 +139,40 @@
     </ModalWindow>
 
     <!-- 编辑弹窗 -->
-    <ModalWindow
-      :visible="editModalVisible"
-      title="编辑报价单"
-      :is-teleport="true"
-      @close="editModalVisible = false"
-    >
-      <QuotationEdit
-        :showCustomerInfoDefault="false"
-        :is-new-quotation="false"
-        @save="handleEditSave"
-        @cancel="editModalVisible = false"
-      />
+    <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
+      <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
+        @cancel="editModalVisible = false" />
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
-    <DeleteConfirmModal
-      v-model:visible="deleteModalVisible"
-      :item-name="selectedName"
-      @confirm="handleDeleteConfirm"
-    />
+    <DeleteConfirmModal v-model:visible="deleteModalVisible" :item-name="selectedName" @confirm="handleDeleteConfirm" />
 
     <!-- 导出确认弹窗 -->
-    <ExportQuotationModal
-      v-model:visible="exportModalVisible"
-      :export-options="exportOptions"
-      @confirm="handleExportConfirm"
-    />
+    <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
+      @confirm="handleExportConfirm" />
 
     <!-- 属性设置弹窗 -->
-    <ModalWindow
-      :visible="propertyModalVisible"
-      title="设置报价单属性"
-      :btn="[
-        {
-          text: '确定',
-          callback: handlePropertyConfirm,
+    <ModalWindow :visible="propertyModalVisible" title="设置报价单属性" :btn="[
+      {
+        text: '确定',
+        callback: handlePropertyConfirm,
+      },
+      {
+        text: '取消',
+        callback: () => {
+          propertyModalVisible = false;
         },
-        {
-          text: '取消',
-          callback: () => {
-            propertyModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :size-args="['400px', '500px']"
-      @close="propertyModalVisible = false"
-    >
+      },
+    ]" :maxmin="false" :resize="false" :size-args="['400px', '500px']" @close="propertyModalVisible = false">
       <div class="property-modal-content">
         <!-- 审核状态区域 -->
         <div class="property-section">
           <div class="section-header">
-            <lay-switch
-              v-model="propertyForm.shareOrdersEnabled"
-              @change="handleAuditStatusChange"
-            />
+            <lay-switch v-model="propertyForm.shareOrdersEnabled" @change="handleAuditStatusChange" />
             <div class="status-display">
-              <span
-                :class="{
-                  'status-auditing': selectedRowData?.shareOrders === 2,
-                }"
-              >
+              <span :class="{
+                'status-auditing': selectedRowData?.shareOrders === 2,
+              }">
                 {{ auditStatusText }}
               </span>
             </div>
@@ -265,16 +180,9 @@
             <!-- 积分设置下拉框 -->
             <div class="integration-setting">
               <div class="setting-label">积分设置：</div>
-              <lay-select
-                v-model="propertyForm.ordersIntegration"
-                placeholder="请选择积分"
-              >
-                <lay-select-option
-                  v-for="option in integrationOptions"
-                  :key="option.value"
-                  :value="option.value"
-                  :label="option.label"
-                />
+              <lay-select v-model="propertyForm.ordersIntegration" placeholder="请选择积分">
+                <lay-select-option v-for="option in integrationOptions" :key="option.value" :value="option.value"
+                  :label="option.label" />
               </lay-select>
             </div>
           </div>
@@ -283,32 +191,19 @@
         <!-- 共享名称输入框 -->
         <div class="property-section">
           <div class="section-title">共享名称</div>
-          <lay-input
-            v-model="propertyForm.shareName"
-            placeholder="项目名称请注意隐藏项目信息"
-          />
+          <lay-input v-model="propertyForm.shareName" placeholder="项目名称请注意隐藏项目信息" />
         </div>
 
         <!-- 项目状态区域 -->
         <div class="property-section">
           <div class="section-header">
-            <lay-switch
-              v-model="propertyForm.projectStatusEnabled"
-              @change="handleProjectStatusChange"
-            />
+            <lay-switch v-model="propertyForm.projectStatusEnabled" @change="handleProjectStatusChange" />
             <span class="section-title">项目状态</span>
           </div>
           <div class="section-content" v-if="propertyForm.projectStatusEnabled">
-            <lay-select
-              v-model="propertyForm.projectStatus"
-              placeholder="请选择项目状态"
-            >
-              <lay-select-option
-                v-for="option in projectStatusOptions"
-                :key="option.value"
-                :value="option.value"
-                :label="option.label"
-              />
+            <lay-select v-model="propertyForm.projectStatus" placeholder="请选择项目状态">
+              <lay-select-option v-for="option in projectStatusOptions" :key="option.value" :value="option.value"
+                :label="option.label" />
             </lay-select>
           </div>
         </div>
@@ -931,6 +826,7 @@ onMounted(async () => {
 
   .content-list-card {
     height: 100%;
+
     :deep(.layui-card-body) {
       padding: 0 0 10px 0 !important;
       overflow: hidden;
@@ -1044,6 +940,7 @@ onMounted(async () => {
   // 属性设置弹窗样式
   .property-modal-content {
     padding: 24px;
+
     .property-section {
       .section-header {
         display: flex;

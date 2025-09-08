@@ -57,7 +57,7 @@ export function useQuotationDelete(options: UseQuotationDeleteOptions) {
         const type = currentTab ? currentTab.type : undefined;
         await getOrdersList(type === -1 ? undefined : type);
       } else {
-        refreshHandler && refreshHandler();
+        refreshHandler?.();
       }
     } catch (error) {
       console.error('删除报价单失败:', error);
@@ -70,3 +70,4 @@ export function useQuotationDelete(options: UseQuotationDeleteOptions) {
     handleDeleteConfirm,
   };
 }
+
