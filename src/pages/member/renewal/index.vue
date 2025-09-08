@@ -4,22 +4,26 @@
         <div class="company-header">
             <div class="company-info">
                 <div class="company-logo">
-                    <img src="@/assets/image/default/cover_logo.png" alt="Newbeall Logo" />
+                    <img :src="logoImageUrl" alt="Company Logo" />
                 </div>
                 <div class="company-details">
-                    <h2>广州富新网络科技有限公司</h2>
+                    <h2>{{ companyInfo.companyName }}</h2>
                     <div class="company-stats">
                         <div class="stat-item">
                             <span class="label">会员有效期:</span>
-                            <span class="value">2025-08-31 22:38:34</span>
+                            <span class="value">{{ companyInfo.vipindate }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">AI服务有效期:</span>
+                            <span class="value">{{ formatAiServiceDate }}</span>
                         </div>
                         <div class="stat-item">
                             <span class="label">可用积分:</span>
-                            <span class="value">291</span>
+                            <span class="value">{{ companyInfo.integration }}</span>
                         </div>
                         <div class="stat-item">
                             <span class="label">剩余空间:</span>
-                            <span class="value">50.00 MB</span>
+                            <span class="value">{{ formatMemoryDisplay }}MB</span>
                         </div>
                     </div>
                 </div>
@@ -40,531 +44,296 @@
                 <lay-icon type="layui-icon-history" />
                 云空间购买
             </div>
+            <div class="tab-item" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'">
+                <lay-icon type="layui-icon-face-smile" />
+                AI服务
+            </div>
         </div>
 
         <!-- 内容区域 -->
         <div class="page-content">
             <!-- 积分充值 -->
-            <div v-if="activeTab === 'points'" class="points-recharge">
-                <div class="points-packages">
-                    <div class="package-grid">
-                        <!-- 充值50积分 -->
-                        <div class="package-card" :class="{ active: selectedPoints === '50' }"
-                            @click="selectPoints('50')">
-                            <div class="package-header">
-                                <h3>充值积分</h3>
-                                <div class="price">
-                                    <span class="amount">¥50.00</span>
-                                </div>
-                                <div class="info">
-                                    ¥50.00
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedPoints === '50'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-
-                        <!-- 充值110积分 -->
-                        <div class="package-card" :class="{ active: selectedPoints === '110' }"
-                            @click="selectPoints('110')">
-                            <div class="package-header">
-                                <h3>充值积分</h3>
-                                <div class="price">
-                                    <span class="amount">¥110.00</span>
-                                </div>
-                                <div class="info">
-                                    ¥110.00
-                                </div>
-                                <!-- 只在选中时显示激活图标 -->
-                                <div v-if="selectedPoints === '110'" class="active-icon">
-                                    <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 充值580积分 -->
-                        <div class="package-card" :class="{ active: selectedPoints === '580' }"
-                            @click="selectPoints('580')">
-                            <div class="package-header">
-                                <h3>充值积分</h3>
-                                <div class="price">
-                                    <span class="amount">¥580.00</span>
-                                </div>
-                                <div class="info">
-                                    ¥580.00
-                                </div>
-                                <!-- 只在选中时显示激活图标 -->
-                                <div v-if="selectedPoints === '580'" class="active-icon">
-                                    <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 充值1250积分 -->
-                        <div class="package-card" :class="{ active: selectedPoints === '1250' }"
-                            @click="selectPoints('1250')">
-                            <div class="package-header">
-                                <h3>充值积分</h3>
-                                <div class="price">
-                                    <span class="amount">¥1250.00</span>
-                                </div>
-                                <div class="info">
-                                    ¥1250.00
-                                </div>
-                                <!-- 只在选中时显示激活图标 -->
-                                <div v-if="selectedPoints === '1250'" class="active-icon">
-                                    <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 支付区域 -->
-                <div class="payment-section">
-                    <!-- 支付方式 -->
-                    <div class="payment-methods">
-                        <div class="payment-option" :class="{ active: paymentMethod === 'wechat' }"
-                            @click="selectPayment('wechat')">
-                            <div class="payment-icon wechat">
-                                <img src="@/assets/image/member/renewal/wechatpay.png" alt="微信支付"
-                                    class="payment-logo" />
-                            </div>
-                        </div>
-                        <div class="payment-option" :class="{ active: paymentMethod === 'alipay' }"
-                            @click="selectPayment('alipay')">
-                            <div class="payment-icon alipay">
-                                <img src="@/assets/image/member/renewal/alipay.png" alt="支付宝支付" class="payment-logo" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 支付信息 -->
-                    <div class="payment-info">
-                        <div class="amount-display">
-                            <span class="label">实付:</span>
-                            <span class="amount">{{ getPointsPrice() }}</span>
-                            <span class="currency">元</span>
-                        </div>
-
-                        <lay-button class="pay-button">
-                            支付
-                        </lay-button>
-                    </div>
-                </div>
-            </div>
+            <template v-if="activeTab === 'points'">
+                <PointsSection v-model="selectedPoints" />
+                <PaymentSection v-model="paymentMethod" :amount="pointsPrice" @pay="handlePay('points')" />
+            </template>
 
             <!-- 会员续费 -->
-            <div v-else-if="activeTab === 'renewal'" class="member-renewal">
-                <div class="membership-packages">
-                    <div class="package-grid">
-                        <!-- 续费一个月 -->
-                        <div class="package-card" :class="{ active: selectedPackage === 'month' }"
-                            @click="selectPackage('month')">
-                            <div class="package-header">
-                                <h3>续费一个月</h3>
-                                <div class="price">
-                                    <span class="amount">¥399.00</span>
-                                </div>
-                                <!-- 积分折扣信息一直显示 -->
-                                <div class="info">
-                                    积分抵扣率: 100.0% 最高可用100积分
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedPackage === 'month'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-
-                        <!-- 续费半年 -->
-                        <div class="package-card" :class="{ active: selectedPackage === 'halfYear' }"
-                            @click="selectPackage('halfYear')">
-                            <div class="package-header">
-                                <h3>续费半年</h3>
-                                <div class="price">
-                                    <span class="amount">¥2199.00</span>
-                                </div>
-                                <!-- 积分折扣信息一直显示 -->
-                                <div class="info">
-                                    积分抵扣率: 109.0% 最高可用600积分
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedPackage === 'halfYear'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-
-                        <!-- 续费一年 -->
-                        <div class="package-card" :class="{ active: selectedPackage === 'year' }"
-                            @click="selectPackage('year')">
-                            <div class="package-header">
-                                <h3>续费一年</h3>
-                                <div class="price">
-                                    <span class="currency"></span>
-                                    <span class="amount">¥4199.00</span>
-                                </div>
-                                <!-- 积分折扣信息一直显示 -->
-                                <div class="info">
-                                    积分抵扣率: 114.0% 最高可用1300积分
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedPackage === 'year'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-
-                        <!-- 续费三年 -->
-                        <div class="package-card" :class="{ active: selectedPackage === 'threeYears' }"
-                            @click="selectPackage('threeYears')">
-                            <div class="package-header">
-                                <h3>续费三年</h3>
-                                <div class="price">
-                                    <span class="amount">¥9999.00</span>
-                                </div>
-                                <!-- 积分折扣信息一直显示 -->
-                                <div class="info">
-                                    积分抵扣率: 144.0% 最高可用2600积分
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedPackage === 'threeYears'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 支付区域 -->
-                <div class="payment-section">
-                    <!-- 支付方式 -->
-                    <div class="payment-methods">
-                        <div class="payment-option" :class="{ active: paymentMethod === 'wechat' }"
-                            @click="selectPayment('wechat')">
-                            <div class="payment-icon wechat">
-                                <img src="@/assets/image/member/renewal/wechatpay.png" alt="微信支付"
-                                    class="payment-logo" />
-                            </div>
-                        </div>
-                        <div class="payment-option" :class="{ active: paymentMethod === 'alipay' }"
-                            @click="selectPayment('alipay')">
-                            <div class="payment-icon alipay">
-                                <img src="@/assets/image/member/renewal/alipay.png" alt="支付宝支付" class="payment-logo" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 会员续费的支付信息部分 -->
-                    <div class="payment-info">
-                        <div class="amount-display">
-                            <span class="label">实付:</span>
-                            <span class="amount">{{ finalAmount }}</span>
-                            <span class="currency">元</span>
-                        </div>
-
-                        <div class="points-usage">
-                            <label class="points-checkbox">
-                                <input type="checkbox" v-model="usePoints" class="checkbox-input" />
-                                <span class="checkbox-mark"></span>
-                                <span class="checkbox-text">
-                                    使用<span class="red-text">{{ availablePoints }}</span>积分 抵扣<span class="red-text">{{
-                                        pointsDeduction }}</span>元
-                                </span>
-                            </label>
-                        </div>
-
-                        <lay-button class="pay-button">
-                            支付
-                        </lay-button>
-                    </div>
-                </div>
-            </div>
+            <template v-else-if="activeTab === 'renewal'">
+                <RenewalSection v-model="selectedPackage" v-model:use-points="usePoints"
+                    :available-points="companyInfo.integration || 0" />
+                <PaymentSection v-model="paymentMethod" :amount="renewalPrice" @pay="handlePay('renewal')" />
+            </template>
 
             <!-- 云空间购买 -->
-            <div v-else-if="activeTab === 'storage'" class="storage-purchase">
-                <div class="storage-packages">
-                    <div class="package-grid">
-                        <!-- 500MB套餐 -->
-                        <div class="package-card" :class="{ active: selectedStorage === '500mb' }"
-                            @click="selectStorage('500mb')">
-                            <div class="package-header">
-                                <h3>云空间购买</h3>
-                                <div class="price">
-                                    <span class="amount">500MB</span>
-                                </div>
-                                <div class="info">
-                                    ¥120.00
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedStorage === '500mb'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
+            <template v-else-if="activeTab === 'storage'">
+                <StorageSection v-model="selectedStorage" />
+                <PaymentSection v-model="paymentMethod" :amount="storagePrice" @pay="handlePay('storage')" />
+            </template>
 
-                        <!-- 1GB套餐 -->
-                        <div class="package-card" :class="{ active: selectedStorage === '1gb' }"
-                            @click="selectStorage('1gb')">
-                            <div class="package-header">
-                                <h3>云空间购买</h3>
-                                <div class="price">
-                                    <span class="amount">1GB</span>
-                                </div>
-                                <div class="info">
-                                    ¥240.00
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedStorage === '1gb'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-
-                        <!-- 10GB套餐 -->
-                        <div class="package-card" :class="{ active: selectedStorage === '10gb' }"
-                            @click="selectStorage('10gb')">
-                            <div class="package-header">
-                                <h3>云空间购买</h3>
-                                <div class="price">
-                                    <span class="amount">10GB</span>
-                                </div>
-                                <div class="info">
-                                    ¥2307.00
-                                </div>
-                            </div>
-                            <!-- 只在选中时显示激活图标 -->
-                            <div v-if="selectedStorage === '10gb'" class="active-icon">
-                                <img src="@/assets/image/member/renewal/card-active-icon.png" alt="已选中" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 支付区域 -->
-                <div class="payment-section">
-                    <!-- 支付方式 -->
-                    <div class="payment-methods">
-                        <div class="payment-option" :class="{ active: paymentMethod === 'wechat' }"
-                            @click="selectPayment('wechat')">
-                            <div class="payment-icon wechat">
-                                <img src="@/assets/image/member/renewal/wechatpay.png" alt="微信支付"
-                                    class="payment-logo" />
-                            </div>
-                        </div>
-                        <div class="payment-option" :class="{ active: paymentMethod === 'alipay' }"
-                            @click="selectPayment('alipay')">
-                            <div class="payment-icon alipay">
-                                <img src="@/assets/image/member/renewal/alipay.png" alt="支付宝支付" class="payment-logo" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 支付信息 -->
-                    <div class="payment-info">
-                        <div class="amount-display">
-                            <span class="label">实付:</span>
-                            <span class="amount">{{ getStoragePrice() }}</span>
-                            <span class="currency">元</span>
-                        </div>
-
-                        <lay-button class="pay-button">
-                            支付
-                        </lay-button>
-                    </div>
-                </div>
-            </div>
+            <!-- AI服务 -->
+            <template v-else-if="activeTab === 'ai'">
+                <AiServiceSection v-model="selectedAiService" />
+                <PaymentSection v-model="paymentMethod" :amount="aiServicePrice" @pay="handlePay('ai')" />
+            </template>
         </div>
 
-        <!-- 积分会员规则 -->
-        <div class="points-rules">
-            <div class="rules-header" @click="toggleRules">
-                <div class="rules-title"><lay-icon type="layui-icon-util" />积分会员规则</div>
-            </div>
+        <!-- 积分规则 -->
+        <PointsRules />
 
-            <div class="rules-content">
-                <ol>
-                    <li>1.积分永不过期。</li>
-                    <li>2.云空间满额会员一起过期，会员过期积分可以保存今天。</li>
-                    <li>3.积分可通过充值积分，也可通过平台活动获取。</li>
-                    <li>4.会员续费时，可以用积分抵扣一定金额。</li>
-                    <li>5.用户可以直接使用积分下载其他供应商报价。</li>
-                    <li>6.成为会员，才能使用平台的核心功能。</li>
-                    <li>7.具体会员续费规则见上方【会员续费】</li>
-                    <li>8.本平台版权所有最终权。</li>
-                </ol>
-            </div>
-        </div>
+        <!-- 支付弹窗 -->
+        <PaymentModal :visible="showPaymentModal" :payment-url="paymentUrl" :amount="currentPaymentAmount"
+            :payment-type="currentPaymentType" @close="closePaymentModal" @payment-success="handlePaymentSuccess"
+            @payment-timeout="handlePaymentTimeout" />
     </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
-import Notify from '@/utils/notify';
-import { useRouter } from 'vue-router';
-import http from '@/utils/http';
-
-const router = useRouter();
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { companyInfo } from './type'
+import { ExpiredAuthApi, CompanyInfo } from './Api'
+import Notify from '@/utils/notify'
+import http from '@/utils/http'
+import PointsSection from './PointsSection.vue'
+import RenewalSection from './RenewalSection.vue'
+import StorageSection from './StorageSection.vue'
+import AiServiceSection from './AiServiceSection.vue'
+import PaymentSection from './PaymentSection.vue'
+import PointsRules from './PointsRules.vue'
+import PaymentModal from './PaymentModal.vue'
 
 // 响应式数据
-const activeTab = ref('points'); // 默认显示积分充值
-const selectedPoints = ref('50'); // 默认选择50积分
-const selectedPackage = ref('month'); // 默认选择续费一个月
-const selectedStorage = ref('500mb'); // 默认选择500MB
-const paymentMethod = ref('wechat');
-const usePoints = ref(false);
-const showRules = ref(false);
+const activeTab = ref('points')
+const selectedPoints = ref('50')
+const selectedPackage = ref('month')
+const selectedStorage = ref('500mb')
+const selectedAiService = ref('1month')
+const paymentMethod = ref('wechat')
+const usePoints = ref(false)
 
-// 用户当前可用积分（这里假设是291，实际应该从接口获取）
-const userAvailablePoints = ref(291);
+// 支付弹窗相关数据
+const showPaymentModal = ref(false)
+const paymentUrl = ref('')
+const currentPaymentAmount = ref('')
+const currentPaymentType = ref('')
 
-// 积分充值价格数据
-const pointsPrices = {
-    '50': '50.00',
-    '110': '100.00',
-    '580': '500.00',
-    '1250': '1000.00'
-};
+// 价格数据
+const prices = {
+    points: { '50': '50.00', '110': '100.00', '580': '500.00', '1250': '1000.00' },
+    renewal: { month: 399.00, halfYear: 2199.00, year: 4199.00, threeYears: 9999.00 },
+    storage: { '500mb': '120.00', '1gb': '240.00', '10gb': '2307.00' },
+    ai: { '1month': '100.00', '6months': '580.00', '12months': '1099.00' }
+}
 
-// 云空间价格数据
-const storagePrices = {
-    '500mb': '120.00',
-    '1gb': '240.00',
-    '10gb': '2307.00'
-};
+// 计算属性
+const logoImageUrl = computed(() => {
+    const logoUrl = companyInfo.value.logoUrl
+    return logoUrl ? `https://yx.newbeall.com/softLink/${logoUrl}` : '@/assets/image/default/cover_logo.png'
+})
 
-// 套餐价格数据
-const packagePrices = {
-    month: 399.00,
-    halfYear: 2199.00,
-    year: 4199.00,
-    threeYears: 9999.00
-};
+const formatAiServiceDate = computed(() => {
+    const aiindate = companyInfo.value.aiindate
+    return (!aiindate || aiindate.trim() === '') ? '未开通' : aiindate
+})
 
-// 可用积分抵扣配置
-const pointsDeductionRates = {
-    month: { rate: 1.0, maxPoints: 100 },
-    halfYear: { rate: 1.09, maxPoints: 600 },
-    year: { rate: 1.14, maxPoints: 1300 },
-    threeYears: { rate: 1.44, maxPoints: 2600 }
-};
+const formatMemoryDisplay = computed(() => {
+    const memory = companyInfo.value.memory
+    return memory ? Math.ceil(parseFloat(memory)) : 0
+})
 
-// 计算当前套餐可用的最大积分数（取用户积分和套餐限制的最小值）
-const availablePoints = computed(() => {
-    const maxPoints = pointsDeductionRates[selectedPackage.value as keyof typeof pointsDeductionRates]?.maxPoints || 100;
-    return Math.min(userAvailablePoints.value, maxPoints);
-});
+const pointsPrice = computed(() => prices.points[selectedPoints.value] || '50.00')
+const storagePrice = computed(() => prices.storage[selectedStorage.value] || '120.00')
+const aiServicePrice = computed(() => prices.ai[selectedAiService.value] || '100.00')
 
-// 计算积分抵扣率
-const pointsDeductionRate = computed(() => {
-    return pointsDeductionRates[selectedPackage.value as keyof typeof pointsDeductionRates]?.rate || 1.0;
-});
+const renewalPrice = computed(() => {
+    const basePrice = prices.renewal[selectedPackage.value] || 399.00
+    if (!usePoints.value) return basePrice.toFixed(2)
 
-// 计算积分抵扣金额 = 积分抵扣率 × 实际使用的积分数，向下取整
-const pointsDeduction = computed(() => {
-    const deductionAmount = availablePoints.value * pointsDeductionRate.value;
-    return Math.floor(deductionAmount); // 向下取整，不管是否勾选都计算显示
-});
+    const deductionRates = {
+        month: { rate: 1.0, maxPoints: 100 },
+        halfYear: { rate: 1.09, maxPoints: 600 },
+        year: { rate: 1.14, maxPoints: 1300 },
+        threeYears: { rate: 1.44, maxPoints: 2600 }
+    }
 
-// 计算最终支付金额
-const finalAmount = computed(() => {
-    const baseAmount = packagePrices[selectedPackage.value as keyof typeof packagePrices] || 399.00;
-    const deductionAmount = usePoints.value ? pointsDeduction.value : 0; // 只有勾选时才真正抵扣
-    const finalPrice = Math.max(0, baseAmount - deductionAmount);
-    return finalPrice.toFixed(2);
-});
+    const config = deductionRates[selectedPackage.value] || deductionRates.month
+    const availablePoints = companyInfo.value.integration || 0
+    const maxPoints = Math.min(availablePoints, config.maxPoints)
+    const deduction = Math.floor(maxPoints * config.rate)
 
-// 权限接口函数
-const ExpiredAuthApi = async () => {
+    return Math.max(0, basePrice - deduction).toFixed(2)
+})
+
+// 支付处理
+const handlePay = async (type) => {
+
     try {
-        const response = await http.get('auth/expiredAuth');
-        return response;
-    } catch {
+        const paymentData = {
+            type,
+            method: paymentMethod.value,
+            amount: type === 'points' ? pointsPrice.value :
+                type === 'renewal' ? renewalPrice.value :
+                    type === 'storage' ? storagePrice.value : aiServicePrice.value,
+            selection: type === 'points' ? selectedPoints.value :
+                type === 'renewal' ? selectedPackage.value :
+                    type === 'storage' ? selectedStorage.value : selectedAiService.value,
+            useIntegral: type === 'renewal' ? usePoints.value : false
+        }
+
+
+        if (paymentMethod.value === 'wechat') {
+            // 发起微信支付请求
+            // 微信支付调用，构建查询参数
+            const opt = getPaymentOpt(type)
+            const useIntegral = paymentData.useIntegral
+
+
+            // 发起微信支付请求，参数通过URL查询字符串传递
+            const result = await http.post(`wx/pay?opt=${opt}&useIntegral=${useIntegral}`)
+
+            if (result && result.code === '200') {
+                // 显示支付二维码
+                paymentUrl.value = result.data
+                currentPaymentAmount.value = paymentData.amount
+                currentPaymentType.value = type
+                showPaymentModal.value = true
+
+                Notify.success({
+                    title: '支付请求成功',
+                    content: '请使用微信扫码支付',
+                    time: 2000
+                })
+            } else {
+                throw new Error(result?.msg || '支付失败')
+            }
+
+
+        } else if (paymentMethod.value === 'alipay') {
+            // 支付宝支付逻辑
+            Notify.info({
+                title: '支付宝支付',
+                content: '支付宝支付功能开发中...',
+                time: 2000
+            })
+        }
+    } catch (error) {
+        console.error('支付错误:', error)
         Notify.error({
-            title: 'Session超时',
-            content: '页面session超时，请重新登录',
-            time: 2000
-        });
-        router.push('/login');
-        return;
+            title: '支付失败',
+            content: error.message || '支付过程中发生错误，请重试',
+            time: 3000
+        })
     }
-};
-onMounted(
-    async () => {
-        await ExpiredAuthApi();
+}
+
+// 获取支付选项参数
+const getPaymentOpt = (type) => {
+    const selection = type === 'points' ? selectedPoints.value :
+        type === 'renewal' ? selectedPackage.value :
+            type === 'storage' ? selectedStorage.value :
+                selectedAiService.value
+
+    // 积分充值映射：50->5, 110->6, 580->7, 1250->8
+    if (type === 'points') {
+        const pointsMap = { '50': 5, '110': 6, '580': 7, '1250': 8 }
+        return pointsMap[selection] || 5
     }
 
-);
+    // 会员续费映射：month->9, halfYear->10, year->11, threeYears->12
+    if (type === 'renewal') {
+        const renewalMap = { 'month': 9, 'halfYear': 10, 'year': 11, 'threeYears': 12 }
+        return renewalMap[selection] || 9
+    }
 
-// 方法
-const selectPoints = (points: string) => {
-    selectedPoints.value = points;
-};
+    // 云空间购买映射：500mb->13, 1gb->14, 10gb->15
+    if (type === 'storage') {
+        const storageMap = { '500mb': 13, '1gb': 14, '10gb': 15 }
+        return storageMap[selection] || 13
+    }
 
-const selectPackage = (packageType: string) => {
-    selectedPackage.value = packageType;
-};
+    // AI服务映射：1month->16, 6months->17, 12months->18
+    if (type === 'ai') {
+        const aiMap = { '1month': 16, '6months': 17, '12months': 18 }
+        return aiMap[selection] || 16
+    }
 
-const selectPayment = (method: string) => {
-    paymentMethod.value = method;
-};
+    return 5 // 默认值
+}
 
-const selectStorage = (storageType: string) => {
-    selectedStorage.value = storageType;
-};
+// 获取支付类型名称
+const getPaymentTypeName = (type) => {
+    switch (type) {
+        case 'points': return '积分充值'
+        case 'renewal': return '会员续费'
+        case 'storage': return '云空间购买'
+        case 'ai': return 'AI服务'
+        default: return '支付'
+    }
+}
 
-const toggleRules = () => {
-    showRules.value = !showRules.value;
-};
+// 支付弹窗处理函数
+const closePaymentModal = () => {
+    showPaymentModal.value = false
+    paymentUrl.value = ''
+    currentPaymentAmount.value = ''
+    currentPaymentType.value = ''
+}
 
-const getPointsPrice = () => {
-    return pointsPrices[selectedPoints.value as keyof typeof pointsPrices] || '50.00';
-};
+const handlePaymentSuccess = async () => {
+    Notify.success({
+        title: '支付成功',
+        content: `${getPaymentTypeName(currentPaymentType.value)}支付完成！`,
+        time: 3000
+    })
 
-const getStoragePrice = () => {
-    return storagePrices[selectedStorage.value as keyof typeof storagePrices] || '120.00';
-};
+    // 刷新公司信息
+    await CompanyInfo()
 
+    // 关闭弹窗
+    closePaymentModal()
+}
+
+const handlePaymentTimeout = () => {
+    Notify.warning({
+        title: '支付超时',
+        content: '支付已超时，请重新发起支付',
+        time: 3000
+    })
+
+    closePaymentModal()
+}
+
+onMounted(async () => {
+    await ExpiredAuthApi()
+    await CompanyInfo()
+})
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .member-renewal-page {
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
-    position: relative;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: 70%;
-    height: 92vh;
-    top: 1vh;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
 }
 
 .company-header {
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
-    background: url('@/assets/image/member/renewal/topBg.png');
-    background-size: 100% 100%;
-    color: white;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 
     .company-info {
-        max-width: 1200px;
-        margin: 0 auto;
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 30px;
 
-        .company-logo {
-            img {
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                background: white;
-                padding: 10px;
-            }
+        .company-logo img {
+            width: 100px;
+            height: 30px;
+            background: white;
+            border-radius: 4px;
         }
 
         .company-details {
@@ -573,6 +342,8 @@ const getStoragePrice = () => {
             h2 {
                 font-size: 24px;
                 font-weight: 600;
+                margin-bottom: 15px;
+                color: #333;
             }
 
             .company-stats {
@@ -582,11 +353,12 @@ const getStoragePrice = () => {
 
                 .stat-item {
                     .label {
-                        opacity: 0.8;
-                        margin-right: 5px;
+                        color: #666;
+                        margin-right: 8px;
                     }
 
                     .value {
+                        color: #333;
                         font-weight: 600;
                     }
                 }
@@ -596,361 +368,42 @@ const getStoragePrice = () => {
 }
 
 .function-tabs {
-    background: #e6e6e6;
     display: flex;
+    justify-content: center;
+    gap: 100px;
+    margin-bottom: 10px;
 
     .tab-item {
-        flex: 1;
-        font-size: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px 30px;
+        border-radius: 25px;
         cursor: pointer;
-        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
+        gap: 8px;
+        font-weight: 500;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
 
         &.active {
-            background: #fff;
-            border-bottom: 1px solid #009688;
-            color: #009688;
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
     }
 }
 
 .page-content {
-    position: relative;
-    width: 100%;
-}
-
-.points-recharge,
-.member-renewal,
-.storage-purchase {
-    position: absolute;
-    width: 100%;
-    padding: 0 10px;
-
-    .points-packages,
-    .membership-packages,
-    .storage-packages {
-        .package-grid {
-            width: 100%;
-            gap: 20px;
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: center;
-        }
-
-        .package-card {
-            top: 1vh;
-            width: 100%;
-            height: 80%;
-            text-align: center;
-            background: white;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid #fae8d0;
-            position: relative;
-
-            &.active {
-                border-color: #ffa500;
-            }
-
-            // 激活图标样式
-            .active-icon {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                width: 16px;
-                height: 16px;
-
-                img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                    display: block;
-                }
-            }
-
-            .package-header {
-                text-align: center;
-
-                h3 {
-                    margin-top: 10px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: #333;
-                }
-
-                .price {
-                    margin-bottom: 10px;
-
-                    .currency {
-                        font-size: 16px;
-                        color: #666;
-                    }
-
-                    .amount {
-                        font-size: 18px;
-                        font-weight: bold;
-                        color: #b87100;
-                    }
-                }
-
-                .info {
-                    background: #fae8d0;
-                    align-content: center;
-                    text-align: center;
-                    height: 20px;
-                    font-size: 12px;
-                    color: #666;
-                    line-height: 1.2;
-                    border-bottom-right-radius: 12px;
-                    border-bottom-left-radius: 12px;
-                }
-            }
-        }
-    }
-}
-
-.payment-section {
-    height: 26vh;
-    background: #f8f8f8;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    margin-top: 2vh;
-    position: relative;
-}
-
-.payment-methods {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 10px;
-
-    .payment-option {
-        display: inline-block;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        position: relative;
-        border: 0.5px solid transparent;
-
-        &:first-child {
-            border-color: #1aad19;
-        }
-
-        &:last-child {
-            border-color: #00a0e9;
-        }
-
-        // 微信支付勾选框
-        &.active:first-child .payment-icon::after {
-            content: "";
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            right: 0px;
-            bottom: 0px;
-            z-index: 10;
-            background: url("@/assets/image/member/renewal/checked2.png") center no-repeat;
-            background-size: contain;
-            display: block !important;
-        }
-
-        // 支付宝勾选框
-        &.active:last-child .payment-icon::after {
-            content: "";
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            right: 0px;
-            bottom: 0px;
-            z-index: 10;
-            background: url("@/assets/image/member/renewal/checked.png") center no-repeat;
-            background-size: contain;
-            display: block !important;
-        }
-
-        .payment-icon {
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-
-            .payment-logo {
-                width: 80px;
-                height: 40px;
-                object-fit: contain;
-            }
-        }
-    }
-}
-
-.payment-info {
-    text-align: center;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-
-    .amount-display {
-        height: 25px; // 固定高度
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .label {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: red; // 改为红色
-            margin: 0 5px;
-        }
-
-        .currency {
-            font-size: 14px;
-            color: #666;
-        }
-    }
-
-    .points-usage {
-        height: 20px; // 固定高度，无论是否有内容都占据这个空间
-        font-size: 12px;
-        color: #666;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1.2;
-
-        .points-checkbox {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-
-            .checkbox-input {
-                position: absolute;
-                opacity: 0;
-                cursor: pointer;
-
-                &:checked+.checkbox-mark {
-                    background-color: #1E9FFF;
-                    border-color: #1E9FFF;
-
-                    &::after {
-                        display: block;
-                    }
-                }
-            }
-
-            .checkbox-mark {
-                position: relative;
-                width: 14px;
-                height: 14px;
-                border: 1px solid #d9d9d9;
-                border-radius: 2px;
-                background-color: white;
-                margin-right: 6px;
-                transition: all 0.3s ease;
-
-                &::after {
-                    content: "";
-                    position: absolute;
-                    display: none;
-                    left: 4px;
-                    top: 1px;
-                    width: 4px;
-                    height: 8px;
-                    border: solid white;
-                    border-width: 0 2px 2px 0;
-                    transform: rotate(45deg);
-                }
-            }
-
-            .checkbox-text {
-                font-size: 12px;
-                color: #666;
-
-                .red-text {
-                    color: red;
-                    font-weight: bold; // 可选：让红色文字更突出
-                }
-            }
-
-            &:hover .checkbox-mark {
-                border-color: #1E9FFF;
-            }
-        }
-    }
-
-    .pay-button {
-        background: #1E9FFF;
-        color: #fff;
-        width: 80px;
-        height: 35px;
-        font-size: 14px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.3s ease;
-        flex-shrink: 0;
-
-        &:hover {
-            background: #1890ff;
-        }
-    }
-}
-
-// 积分会员规则样式
-.points-rules {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-
-    .rules-header {
-        position: relative;
-        padding: 15px 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #009688;
-
-        .rules-title {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-        }
-    }
-
-    .rules-content {
-        background: white;
-        padding: 20px;
-        border-radius: 0 0 8px 8px;
-        border-top: 1px solid #009688;
-
-        ol {
-            padding-left: 20px;
-
-            li {
-                line-height: 1.6;
-                color: #666;
-                font-size: 12px;
-            }
-        }
-    }
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 }
 
 @media (max-width: 768px) {
@@ -960,58 +413,12 @@ const getStoragePrice = () => {
     }
 
     .company-stats {
-        justify-content: center;
-        flex-wrap: unwrap;
-    }
-
-    .package-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .payment-methods {
         flex-direction: column;
-        align-items: center;
+        gap: 10px;
     }
 
     .function-tabs {
-        .tab-item {
-            padding: 15px 10px;
-            font-size: 14px;
-        }
+        flex-wrap: wrap;
     }
-}
-
-/* 支付样式 */
-.pay-box {
-    height: 280px;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.pay-box .left {
-    height: 280px;
-    box-sizing: border-box;
-    background: #f8f8f8;
-}
-
-.pay-way {
-    width: 130px;
-    height: 40px;
-    border-radius: 5px;
-    background: url("@/assets/image/member/renewal/wechatpay.png") center center no-repeat;
-    background-size: contain;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    position: relative;
-    cursor: pointer;
-}
-
-.pay-way-alipay {
-    background: url("@/assets/image/member/renewal/alipay.png") center center no-repeat;
-}
-
-.pay-way-info {
-    color: red;
-    margin-top: 10px;
 }
 </style>
