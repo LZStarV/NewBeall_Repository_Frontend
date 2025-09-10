@@ -151,6 +151,9 @@
     <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
       @confirm="handleExportConfirm" />
 
+    <!-- 导入报价单弹窗 -->
+    <ImportQuotationModal v-model:visible="importModalVisible" @confirm="handleImportConfirm" />
+
     <!-- 属性设置弹窗 -->
     <ModalWindow :visible="propertyModalVisible" title="设置报价单属性" :btn="[
       {
@@ -247,6 +250,7 @@ import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
 import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import ImportQuotationModal from '@/pages/design/components/ImportQuotationModal.vue';
 import DeleteConfirmModal from '@/pages/design/components/DeleteConfirmModal.vue';
 import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -803,7 +807,7 @@ const { handleCollaborate } = useQuotationCollaborate({
   dataSource,
 });
 
-const { handleImport } = useQuotationImport();
+const { importModalVisible, handleImport, handleImportConfirm } = useQuotationImport();
 
 onMounted(async () => {
   await Promise.all([

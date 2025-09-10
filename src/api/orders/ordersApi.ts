@@ -11,6 +11,7 @@ import type {
   Quotation,
   OrderChargePerson,
   OrderModuleListResponse,
+  OrderModuleDetail,
 } from './orderApi.type';
 import type { GetOrdersListParams } from './orderApi.type';
 import type { Product } from '../../pages/product/library/Api/type/productApi.type';
@@ -297,6 +298,13 @@ export default {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    });
+  },
+
+  // 获取报价单模块详情
+  getOrderModuleDetail(orderId: string) {
+    return http.get<OrderModuleDetail>('/orderModule/GetOrderModuleDetail', {
+      ordersId: orderId,
     });
   },
 
