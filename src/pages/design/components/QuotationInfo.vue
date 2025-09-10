@@ -17,6 +17,7 @@
           <label>报价单编号:</label> {{ localQuotationData.ordersId }}
         </div>
         <div class="head-info-right">
+          <lay-checkbox v-model="stampChecked" value="stamp" skin="primary" size="sm">盖章</lay-checkbox>
           <div class="head-info-item">
             <label>制单人:</label> {{ localQuotationData.createPerson }}
           </div>
@@ -24,6 +25,9 @@
             <label>制单时间:</label> {{ localQuotationData.createDate }}
           </div>
         </div>
+      </div>
+      <div class="seal-area" v-if="stampChecked">
+        <canvas ref="sealCanvasRef" width="240" height="240"></canvas>
       </div>
       <lay-col :xs="24" :md="12">
         <!-- 客户信息模块 -->
@@ -144,9 +148,11 @@
 
 <script setup lang="ts">
 import clinetApi from '@/api/client/clinetApi';
+import companyApi from '@/api/company/companyApi';
 import type { QuotationListResponse, OrderLogsRecord } from '@/api/orders/orderApi.type';
 import ordersApi from '@/api/orders/ordersApi';
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick } from 'vue';
+import { createSeal, clearSeal } from '@/utils/createSeal';
 import OperationLogPanel from './OperationLogPanel.vue';
 import ProductionList from './ProductionList.vue';
 
@@ -193,6 +199,8 @@ const emit = defineEmits<{
 
 // 本地数据，用于存储和同步 v-model 的值
 const localQuotationData = ref<QuotationFormData | null>(null);
+const stampChecked = ref(false);
+const sealCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 // 操作记录面板逻辑
 const showLogs = ref(false);
@@ -269,6 +277,34 @@ const updateQuotationData = async () => {
       clientEmail: clientRes.data.email,
       createDate: orderRes.data.createDate,
     });
+
+    // 如果订单详情未返回我司信息，回退到公司详情接口
+    if (!localQuotationData.value.companyName) {
+      try {
+        const myCompanyRes = await companyApi.getMyCompanyDetailed();
+        if (myCompanyRes?.data) {
+          Object.assign(localQuotationData.value, {
+            companyName:
+              myCompanyRes.data.company?.companyName ||
+              localQuotationData.value.companyName,
+            companyAddress:
+              myCompanyRes.data.company?.companyAddress ||
+              localQuotationData.value.companyAddress,
+            companyEmail:
+              myCompanyRes.data.company?.email ||
+              localQuotationData.value.companyEmail,
+            companyContact:
+              myCompanyRes.data.user?.name || localQuotationData.value.companyContact,
+            companyPhone:
+              myCompanyRes.data.company?.companyPhone ||
+              localQuotationData.value.companyPhone,
+          });
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('获取我司详情失败，已跳过回退数据填充');
+      }
+    }
   } catch (error) {
     console.error('Error updating quotation data:', error);
   }
@@ -295,6 +331,21 @@ watch(
   },
   { deep: true },
 );
+
+// 盖章勾选监听
+watch(stampChecked, async (checked) => {
+  if (checked) {
+    await nextTick();
+    const canvas = sealCanvasRef.value;
+    if (!canvas) return;
+    const company = localQuotationData.value?.companyName || '';
+    const name = '壹新平台专用章';
+    createSeal([canvas], company, name);
+  } else {
+    const canvas = sealCanvasRef.value;
+    if (canvas) clearSeal([canvas]);
+  }
+});
 </script>
 
 <style scoped lang="scss">
@@ -408,6 +459,7 @@ watch(
 
 .detail-content {
   padding: 20px;
+  position: relative;
 
   .detail-title {
     text-align: center;
@@ -466,5 +518,12 @@ watch(
       }
     }
   }
+}
+
+.seal-area {
+  z-index: 9999;
+  position: absolute;
+  right: 200px;
+  display: block;
 }
 </style>
