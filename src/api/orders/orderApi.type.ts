@@ -1,3 +1,6 @@
+import type { ClientType } from '../client/clinetApi.type';
+import type { CompanyData } from '../company/companyApi.type';
+
 // 文案类型
 export interface Instruction {
   companyId?: number;
@@ -147,7 +150,7 @@ export interface OrderDetail {
   profitprice: number;
   purchaseprice: number;
   receiveid: number;
-  recommend: true;
+  recommend: boolean;
   remark: string;
   sequence: number;
   subproject: string;
@@ -269,7 +272,7 @@ export interface OrderModuleListResponse {
   chargePerson: string;
   chargePersonInfo: string;
   clientId: string;
-  contacts: string;
+  contacts: string; // 供应商单位
   coopUser: string;
   coopUserId: string;
   createDate: string;
@@ -305,6 +308,108 @@ export interface OrderModuleListResponse {
   uid: number;
   updateDate: string;
   updateUser: string;
+}
+
+export interface OrderModuleRecord {
+  createtime: string;
+  createuserid: number;
+  id: number;
+  logcontent: string;
+  logtype: string;
+  opid: string;
+  receiveCId: number;
+  receiveId: number;
+  succeed: string;
+  ucid: number;
+  ucname: string;
+  uname: string;
+  version: number;
+}
+
+// 报价单模块返回的订单信息
+export interface ModuleOrderDetail {
+  acreage: string;
+  area: string;
+  budget: string;
+  chargePerson: number;
+  chargePersonInfo: string;
+  city: string;
+  clientBankAccount: string;
+  clientBankName: string;
+  clientId: number;
+  clientTexId: string;
+  companyAddres: string;
+  companyEmail: string;
+  companyId: number;
+  companyName: string;
+  config: string;
+  contactPhone: string;
+  contacts: string;
+  coopUser: string;
+  createDate: string;
+  createUser: number;
+  createrid: number;
+  delflag: number;
+  deliveryAddress: string;
+  deliveryMethod: string;
+  deliveryTime: string;
+  downloadsNum: number;
+  explanation: string;
+  formal: number;
+  gyClient: number;
+  id: number;
+  important: number;
+  isAudit: number;
+  isXJ: number;
+  lockMark: number;
+  lockOwner: number;
+  ordersCharacter: string;
+  ordersId: string;
+  ordersIntegration: number;
+  ordersType1: string;
+  ordersType2: string;
+  ordersType3: string;
+  projectName: string;
+  projectRemark: string;
+  province: string;
+  purchase: number;
+  selfBank: string;
+  selfId: number;
+  sendClient: number;
+  settleMethod: number;
+  shareName: string;
+  shareOrders: number;
+  shareTime: string;
+  type: number;
+  updateDate: string;
+  updateUser: number;
+  version: number;
+}
+
+// 报价单模块详情
+export interface OrderModuleDetail {
+  company: CompanyData;
+  createDate: string;
+  gyClient: ClientType;
+  isGyClient: boolean;
+  isXq: boolean;
+  orders: ModuleOrderDetail;
+  upDetail: {
+    asc: boolean;
+    ascs: string[];
+    condition: object;
+    current: number;
+    descs: string[];
+    limit: number;
+    offset: number;
+    openSort: boolean;
+    orderByField: string;
+    pages: number;
+    records: OrderModuleRecord[];
+    searchCount: boolean;
+    size: number;
+    total: number;
+  };
 }
 
 // 项目负责人数据

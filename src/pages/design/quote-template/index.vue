@@ -110,6 +110,15 @@
         even
         @sort-change="sortChange"
       >
+        <template #projectName="{ row }">
+          <span
+            class="project-name-link"
+            :title="row.projectName"
+            @click="showDetailModal(row)"
+          >
+            {{ row.projectName }}
+          </span>
+        </template>
         <template #purchasepriceSum="{ row }">
           <span style="color: red">{{ row.purchasepriceSum }}</span>
         </template>
@@ -124,6 +133,19 @@
         </span>
       </div>
     </lay-card>
+
+    <!-- 详细信息弹窗 -->
+    <ModalWindow
+      :visible="detailModalVisible"
+      :is-teleport="true"
+      title="详情"
+      @close="detailModalVisible = false"
+    >
+      <ModuleInfo v-if="selectedOrderId" :order-id="selectedOrderId" />
+      <div v-else>
+        <lay-empty />
+      </div>
+    </ModalWindow>
   </div>
 </template>
 
@@ -141,6 +163,8 @@ import type { SearchParams } from '@/composables/useToolbarSearch';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ordersApi from '@/api/orders/ordersApi';
 import { useToolbarSearch } from '@/composables/useToolbarSearch';
+import ModuleInfo from '../components/ModuleInfo.vue';
+import ModalWindow from '@/components/ModalWindow.vue';
 
 // 下拉框选项类型
 interface SelectOption {
@@ -233,6 +257,16 @@ const { data, loading, error, search, reset } = useToolbarSearch({
 // 表格数据
 const dataSource = ref<(OrderModuleListResponse & { ordersType: string })[]>();
 
+// 详情弹窗相关状态
+const detailModalVisible = ref<boolean>(false);
+const selectedOrderId = ref<string>('');
+
+// 显示详情弹窗
+const showDetailModal = (row: OrderModuleListResponse) => {
+  selectedOrderId.value = row.ordersId;
+  detailModalVisible.value = true;
+};
+
 // 监听搜索结果变化
 watch(
   data,
@@ -271,6 +305,7 @@ const columns = [
     width: '200px',
     key: 'projectName',
     ellipsisTooltip: true,
+    customSlot: 'projectName',
   },
   {
     title: '报价类型',
@@ -417,6 +452,12 @@ onMounted(() => {
       padding: 0 0 10px 0 !important;
       overflow: hidden;
       border-radius: var(--card-border-radius);
+    }
+
+    .project-name-link {
+      color: $primary-color;
+      cursor: pointer;
+      text-decoration: none;
     }
   }
 
