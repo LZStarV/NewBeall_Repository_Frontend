@@ -32,4 +32,29 @@ export default {
       data,
     );
   },
+
+  // 获取询价列表
+  getInqueryList(
+    viewName: string,
+    order: string,
+    offset: number,
+    limit: number,
+    queryParams?: Record<string, string>,
+  ) {
+    const formData = new FormData();
+    formData.append('order', order);
+    formData.append('offset', offset.toString());
+    formData.append('limit', limit.toString());
+    if (queryParams) {
+      Object.keys(queryParams).forEach((key) => {
+        formData.append(key, queryParams[key]);
+        formData.append(`query[${key}]`, queryParams[key]);
+      });
+    }
+    return http.post<FormData>(`/Inquery/list/${viewName}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
