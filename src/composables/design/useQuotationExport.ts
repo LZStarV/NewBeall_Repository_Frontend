@@ -46,14 +46,14 @@ export function useQuotationExport(options: UseQuotationExportOptions) {
   /**
    * 确认导出
    */
-  const handleExportConfirm = async () => {
+  const handleExportConfirm = async (confirmedOptions: ExportOptions) => {
     try {
       // 调用导出API
       await ordersApi.exportQuotation(
         selectedKey.value!,
-        exportOptions.derivePrime,
-        exportOptions.isExplanation,
-        exportOptions.isSeal,
+        confirmedOptions.derivePrime,
+        confirmedOptions.isExplanation,
+        confirmedOptions.isSeal,
       );
 
       // 操作成功提示
@@ -73,3 +73,4 @@ export function useQuotationExport(options: UseQuotationExportOptions) {
     handleExportConfirm,
   };
 }
+

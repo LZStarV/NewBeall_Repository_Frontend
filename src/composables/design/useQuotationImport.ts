@@ -1,16 +1,31 @@
 import { layer } from '@layui/layui-vue';
+import { ref } from 'vue';
+import ordersApi from '@/api/orders/ordersApi';
+import notify from '@/utils/notify';
+
+export type UseQuotationImportOptions = Record<string, never>;
 
 export function useQuotationImport() {
-  /**
-   * 导入功能
-   * 注意：此功能目前为占位符，待后续实现
-   */
+  const importModalVisible = ref(false);
+
   const handleImport = () => {
-    // TODO: 实现导入功能
-    layer.msg('导入功能待实现', { icon: 1 });
+    importModalVisible.value = true;
+  };
+
+  const handleImportConfirm = async (file: File) => {
+    try {
+      // await ordersApi.importQuotation(file); TODO
+      notify.success('导入成功');
+      importModalVisible.value = false;
+    } catch (error) {
+      console.error('导入失败:', error);
+      layer.msg('导入失败，请检查文件后重试', { icon: 2 });
+    }
   };
 
   return {
+    importModalVisible,
     handleImport,
+    handleImportConfirm,
   };
 }

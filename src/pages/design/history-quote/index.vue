@@ -2,115 +2,74 @@
   <div class="history-quote-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <div class="toolbar">
-        <lay-form
-          layout="inline"
-          :pane="true"
-          :label-width="80"
-          class="toolbar-form-items"
-        >
-          <lay-form-item class="form-item-search">
-            <template #label>
-              <lay-select v-model="typeFilter">
-                <lay-select-option value="projectName">
-                  工程项目名
-                </lay-select-option>
-                <lay-select-option value="contacts">客户单位</lay-select-option>
-                <lay-select-option value="orderstype">
-                  报价类型
-                </lay-select-option>
-              </lay-select>
-            </template>
-            <lay-input
-              v-model="quotationNameSearch"
-              placeholder="请输入方案名称进行搜索"
-              class="search-input"
-              mode="block"
-            />
-          </lay-form-item>
-
-          <lay-form-item label="属性">
-            <lay-select v-model="attribute" placeholder="请输入">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="attr in orderAttributeList"
-                :key="attr.id"
-                :value="attr.id"
-              >
-                {{ attr.name }}
+      <lay-form layout="inline" :pane="true" :label-width="80" class="toolbar-form-items">
+        <lay-form-item class="form-item-search">
+          <template #label>
+            <lay-select v-model="typeFilter">
+              <lay-select-option value="projectName">
+                工程项目名
+              </lay-select-option>
+              <lay-select-option value="contacts">客户单位</lay-select-option>
+              <lay-select-option value="orderstype">
+                报价类型
               </lay-select-option>
             </lay-select>
-          </lay-form-item>
+          </template>
+          <lay-input v-model="quotationNameSearch" placeholder="请输入方案名称进行搜索" class="search-input" mode="block" />
+        </lay-form-item>
 
-          <lay-form-item label="负责人">
-            <lay-select v-model="chargePerson" placeholder="请选择">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="item in ordersChargePersonList"
-                :key="item.id"
-                :value="String(item.id)"
-              >
-                {{ item.name }}
-              </lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="属性">
+          <lay-select v-model="attribute" placeholder="请输入">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option v-for="attr in orderAttributeList" :key="attr.id" :value="attr.id">
+              {{ attr.name }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="制单人">
-            <lay-select v-model="createUser" placeholder="请选择">
-              <lay-select-option value="">全部</lay-select-option>
-              <lay-select-option
-                v-for="item in ordersCreateUserList"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </lay-select-option>
-            </lay-select>
-          </lay-form-item>
+        <lay-form-item label="负责人">
+          <lay-select v-model="chargePerson" placeholder="请选择">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option v-for="item in ordersChargePersonList" :key="item.id" :value="String(item.id)">
+              {{ item.name }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <lay-form-item label="制单日期">
-            <lay-date-picker
-              v-model="createDate"
-              placeholder="click me"
-              allow-clear
-            />
-          </lay-form-item>
+        <lay-form-item label="制单人">
+          <lay-select v-model="createUser" placeholder="请选择">
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option v-for="item in ordersCreateUserList" :key="item" :value="item">
+              {{ item }}
+            </lay-select-option>
+          </lay-select>
+        </lay-form-item>
 
-          <div class="toolbar-btns">
-            <button title="搜索" @click="handleSearch">
-              <SvgIcon name="search" width="1.1rem" />
-            </button>
-            <button title="刷新" @click="handleRefresh">
-              <SvgIcon name="refresh" width="1.2rem" />
-            </button>
-          </div>
-        </lay-form>
-      </div>
+        <lay-form-item label="制单日期">
+          <lay-date-picker v-model="createDate" placeholder="click me" allow-clear />
+        </lay-form-item>
+
+        <div class="toolbar-btns">
+          <button title="搜索" @click="handleSearch">
+            <SvgIcon name="search" width="1.1rem" />
+          </button>
+          <button title="刷新" @click="handleRefresh">
+            <SvgIcon name="refresh" width="1.2rem" />
+          </button>
+        </div>
+      </lay-form>
     </lay-card>
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-        :columns="columns"
-        :data-source="dataSource"
-        :default-toolbar="defaultToolbars"
-        :loading="loading"
-        :pagination="pagination"
-        v-model:selectedKey="selectedKey"
-        even
-        @pagination="handlePagination"
-        @sort-change="sortChange"
-      >
+      <lay-table :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars" :loading="loading"
+        :pagination="pagination" v-model:selectedKey="selectedKey" even @pagination="handlePagination"
+        @sort-change="sortChange">
         <template #toolbar>
           <div class="toolbar">
             <lay-tab v-model="current2" type="brief" @change="handleTabChange">
-              <lay-tab-item
-                v-for="item in tabItem"
-                :id="item.title"
-                :key="item.title"
-                :title="item.title"
-                :icon="item.iconRenderFunction"
-              />
+              <lay-tab-item v-for="item in tabItem" :id="item.title" :key="item.title" :title="item.title"
+                :icon="item.iconRenderFunction" />
             </lay-tab>
 
             <div class="btn-group">
@@ -148,21 +107,13 @@
 
         <!-- 工程项目名称列自定义渲染 -->
         <template #projectName="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.projectName"
-            @click="showDetailModal(row)"
-          >
+          <span class="project-name-link" :title="row.projectName" @click="showDetailModal(row)">
             {{ row.projectName }}
           </span>
         </template>
         <!-- 客户单位列自定义渲染 -->
         <template #contacts="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.contacts"
-            @click="showDetailModal(row)"
-          >
+          <span class="project-name-link" :title="row.contacts" @click="showDetailModal(row)">
             {{ row.contacts }}
           </span>
         </template>
@@ -172,11 +123,7 @@
         </template>
         <!-- 评论列自定义渲染 -->
         <template #chat="{ row }">
-          <button
-            class="chat-button"
-            :title="'进入聊天室'"
-            @click="goToChat(row)"
-          >
+          <button class="chat-button" :title="'进入聊天室'" @click="goToChat(row)">
             <SvgIcon name="message_2" width="1rem" />
           </button>
         </template>
@@ -184,168 +131,51 @@
     </lay-card>
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow
-      :visible="detailModalVisible"
-      title="详情"
-      @close="detailModalVisible = false"
-    >
-      <QuotationInfo v-if="selectedRow" :selected-row="selectedRow" />
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="详情" @close="detailModalVisible = false">
+      <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
       <div v-else>
         <lay-empty />
       </div>
     </ModalWindow>
 
     <!-- 编辑弹窗 -->
-    <ModalWindow
-      :visible="editModalVisible"
-      title="编辑报价单"
-      @close="editModalVisible = false"
-    >
-      <QuotationEdit
-        :showCustomerInfoDefault="false"
-        :is-new-quotation="false"
-        @save="handleEditSave"
-        @cancel="editModalVisible = false"
-      />
+    <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
+      <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
+        @cancel="editModalVisible = false" />
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
-    <ModalWindow
-      :visible="deleteModalVisible"
-      title="删除确认"
-      :btn="[
-        {
-          text: '确认删除',
-          style: 'background-color: #ff4d4f; border-color: #ff4d4f;',
-          disabled: !isDeleteButtonEnabled,
-          callback: handleDeleteConfirm,
-        },
-        {
-          text: '取消',
-          callback: () => {
-            deleteModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :area="['400px', '350px']"
-      @close="deleteModalVisible = false"
-    >
-      <div class="delete-confirm-content">
-        <div class="warning-text">
-          正在删除报价 "<span class="project-name-red">{{
-            selectedRow?.projectName
-          }}</span
-          >"
-        </div>
-        <div class="warning-info">
-          报价删除后，报价内容无法恢复，请谨慎操作！
-        </div>
-        <div class="confirm-input-section">
-          <label>请输入 "DELETE" 确认删除：</label>
-          <lay-input
-            v-model="deleteConfirmInput"
-            placeholder="请输入 DELETE"
-            class="confirm-input"
-          />
-        </div>
-      </div>
-    </ModalWindow>
+    <DeleteConfirmModal v-model:visible="deleteModalVisible" :item-name="selectedName" @confirm="handleDeleteConfirm" />
 
     <!-- 导出确认弹窗 -->
-    <ModalWindow
-      :visible="exportModalVisible"
-      title="导出报价单"
-      :btn="[
-        {
-          text: '确认导出',
-          callback: handleExportConfirm,
-        },
-        {
-          text: '取消',
-          callback: () => {
-            exportModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :area="['400px', '320px']"
-      @close="exportModalVisible = false"
-    >
-      <div class="export-modal-content">
-        <div class="export-message">您是否要导出此报价单</div>
-        <div class="export-options">
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.derivePrime"
-              value="derivePrime"
-              size="lg"
-            >
-              同时导出成本价
-            </lay-checkbox>
-          </div>
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.isExplanation"
-              value="isExplanation"
-              size="lg"
-            >
-              导出报价说明
-            </lay-checkbox>
-          </div>
-          <div class="option-item">
-            <lay-checkbox
-              skin="primary"
-              v-model="exportOptions.isSeal"
-              value="isSeal"
-              size="lg"
-            >
-              加盖印章
-            </lay-checkbox>
-          </div>
-        </div>
-      </div>
-    </ModalWindow>
+    <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
+      @confirm="handleExportConfirm" />
+
+    <!-- 导入报价单弹窗 -->
+    <ImportQuotationModal v-model:visible="importModalVisible" @confirm="handleImportConfirm" />
 
     <!-- 属性设置弹窗 -->
-    <ModalWindow
-      :visible="propertyModalVisible"
-      title="设置报价单属性"
-      :btn="[
-        {
-          text: '确定',
-          callback: handlePropertyConfirm,
+    <ModalWindow :visible="propertyModalVisible" title="设置报价单属性" :btn="[
+      {
+        text: '确定',
+        callback: handlePropertyConfirm,
+      },
+      {
+        text: '取消',
+        callback: () => {
+          propertyModalVisible = false;
         },
-        {
-          text: '取消',
-          callback: () => {
-            propertyModalVisible = false;
-          },
-        },
-      ]"
-      :maxmin="false"
-      :resize="false"
-      :size-args="['400px', '500px']"
-      @close="propertyModalVisible = false"
-    >
+      },
+    ]" :maxmin="false" :resize="false" :size-args="['400px', '500px']" @close="propertyModalVisible = false">
       <div class="property-modal-content">
         <!-- 审核状态区域 -->
         <div class="property-section">
           <div class="section-header">
-            <lay-switch
-              v-model="propertyForm.shareOrdersEnabled"
-              @change="handleAuditStatusChange"
-            />
+            <lay-switch v-model="propertyForm.shareOrdersEnabled" @change="handleAuditStatusChange" />
             <div class="status-display">
-              <span
-                :class="{
-                  'status-auditing': selectedRowData?.shareOrders === 2,
-                }"
-              >
+              <span :class="{
+                'status-auditing': selectedRowData?.shareOrders === 2,
+              }">
                 {{ auditStatusText }}
               </span>
             </div>
@@ -353,16 +183,9 @@
             <!-- 积分设置下拉框 -->
             <div class="integration-setting">
               <div class="setting-label">积分设置：</div>
-              <lay-select
-                v-model="propertyForm.ordersIntegration"
-                placeholder="请选择积分"
-              >
-                <lay-select-option
-                  v-for="option in integrationOptions"
-                  :key="option.value"
-                  :value="option.value"
-                  :label="option.label"
-                />
+              <lay-select v-model="propertyForm.ordersIntegration" placeholder="请选择积分">
+                <lay-select-option v-for="option in integrationOptions" :key="option.value" :value="option.value"
+                  :label="option.label" />
               </lay-select>
             </div>
           </div>
@@ -371,32 +194,19 @@
         <!-- 共享名称输入框 -->
         <div class="property-section">
           <div class="section-title">共享名称</div>
-          <lay-input
-            v-model="propertyForm.shareName"
-            placeholder="项目名称请注意隐藏项目信息"
-          />
+          <lay-input v-model="propertyForm.shareName" placeholder="项目名称请注意隐藏项目信息" />
         </div>
 
         <!-- 项目状态区域 -->
         <div class="property-section">
           <div class="section-header">
-            <lay-switch
-              v-model="propertyForm.projectStatusEnabled"
-              @change="handleProjectStatusChange"
-            />
+            <lay-switch v-model="propertyForm.projectStatusEnabled" @change="handleProjectStatusChange" />
             <span class="section-title">项目状态</span>
           </div>
           <div class="section-content" v-if="propertyForm.projectStatusEnabled">
-            <lay-select
-              v-model="propertyForm.projectStatus"
-              placeholder="请选择项目状态"
-            >
-              <lay-select-option
-                v-for="option in projectStatusOptions"
-                :key="option.value"
-                :value="option.value"
-                :label="option.label"
-              />
+            <lay-select v-model="propertyForm.projectStatus" placeholder="请选择项目状态">
+              <lay-select-option v-for="option in projectStatusOptions" :key="option.value" :value="option.value"
+                :label="option.label" />
             </lay-select>
           </div>
         </div>
@@ -439,25 +249,23 @@
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
 import QuotationEdit from '@/pages/design/components/QuotationEdit.vue';
-import Tree from '@/components/Tree.vue';
+import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import ImportQuotationModal from '@/pages/design/components/ImportQuotationModal.vue';
+import DeleteConfirmModal from '@/pages/design/components/DeleteConfirmModal.vue';
 import { ref, onMounted, h, reactive, watch, computed, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ordersApi from '@/api/orders/ordersApi';
-import clientApi from '@/api/client/clinetApi';
 import type {
   OrderChargePerson,
   QuotationListResponse,
   OrderPrice,
   GetOrdersListParams,
 } from '@/api/orders/orderApi.type';
-import type { UserTreeType } from '@/api/client/clinetApi.type';
 import type {
   TableColumn,
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
 import QuotationInfo from '../components/QuotationInfo.vue';
-import { layer } from '@layui/layui-vue';
-import notify from '@/utils/notify';
 import { useChatStore } from '@/stores/chat';
 import type { UserInfo } from '@/pages/chat/Chat.type';
 
@@ -492,6 +300,12 @@ const chargePerson = ref<string>();
 const createUser = ref<string>();
 const createDate = ref<string>();
 const attribute = ref<string>();
+const selectedName = computed(() => {
+  const selectedItem = dataSource.value.find(
+    (item) => item.ordersId === selectedKey.value,
+  );
+  return selectedItem ? selectedItem.projectName : '';
+});
 
 // 表格数据
 const loading = ref(false);
@@ -499,19 +313,12 @@ const dataSource = ref<QuotationListResponse[]>([]);
 
 // 弹窗相关
 const detailModalVisible = ref(false);
-const selectedRow = ref<QuotationListResponse | null>(null);
+const checkedRow = ref<QuotationListResponse | null>(null); // 用户点击的行数据（通过工程名称和客户单位点击）
 const editModalVisible = ref(false);
 const deleteModalVisible = ref(false);
-const deleteConfirmInput = ref('');
 
 // 导出确认弹窗相关状态
 const exportModalVisible = ref(false);
-
-// 协作相关状态
-const userTreeData = ref<UserTreeType[]>([]);
-const selectedUserIds = ref<string[]>([]);
-const expandedKeys = ref<string[]>([]);
-const coopDrawerVisible = ref(false);
 
 // 属性设置弹窗相关状态
 const propertyModalVisible = ref(false);
@@ -685,7 +492,7 @@ const pagination = reactive({
 
 // 显示详细信息弹窗
 const showDetailModal = (row: QuotationListResponse) => {
-  selectedRow.value = row;
+  checkedRow.value = row;
   detailModalVisible.value = true;
 };
 
@@ -701,14 +508,7 @@ const goToChat = (row: QuotationListResponse) => {
   });
 };
 
-const showPriceColumns = ref(false);
-
 const selectedKey = ref();
-
-// 计算删除按钮是否可用
-const isDeleteButtonEnabled = computed(() => {
-  return deleteConfirmInput.value === 'DELETE';
-});
 
 // 日期排序
 const sortChange = (key: string, sort: string) => {
@@ -949,21 +749,15 @@ watch(quotationNameSearch, () => {
 });
 
 // 初始化hooks
-const {
-  showPriceColumns: hookShowPriceColumns,
-  handleShowPrice,
-  handleEdit,
-  handleEditSave,
-  handleCopy,
-} = useQuotationActions({
-  selectedKey,
-  dataSource,
-  editModalVisible,
-  getOrdersList,
-  tabItem,
-  current2,
-  columns,
-});
+const { handleShowPrice, handleEdit, handleEditSave, handleCopy } =
+  useQuotationActions({
+    selectedKey,
+    editModalVisible,
+    getOrdersList,
+    tabItem,
+    current2,
+    columns,
+  });
 
 const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
   {
@@ -986,8 +780,6 @@ const {
   shareStatus,
   integrationOptions,
   projectStatusOptions,
-  selectedRowData: propertySelectedRowData,
-  auditStatusText: hookAuditStatusText,
   handleProperty,
   handlePropertyConfirm,
   handleAuditStatusChange,
@@ -1001,26 +793,21 @@ const {
   current2,
 });
 
-const { handleSend, handleSendToClient, handleSendToSupplier } =
-  useQuotationSend({
-    selectedKey,
-    dataSource,
-    currentUser,
-    getOrdersList,
-    tabItem,
-    current2,
-  });
+const { handleSend } = useQuotationSend({
+  selectedKey,
+  dataSource,
+  currentUser,
+  getOrdersList,
+  tabItem,
+  current2,
+});
 
 const { handleCollaborate } = useQuotationCollaborate({
   selectedKey,
   dataSource,
-  coopDrawerVisible,
-  userTreeData,
-  selectedUserIds,
-  expandedKeys,
 });
 
-const { handleImport } = useQuotationImport();
+const { importModalVisible, handleImport, handleImportConfirm } = useQuotationImport();
 
 onMounted(async () => {
   await Promise.all([
@@ -1035,11 +822,19 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .history-quote-page {
-  padding: 24px;
-
   :deep(.layui-form-item) {
     label {
       width: 100px !important;
+    }
+  }
+
+  .content-list-card {
+    height: 100%;
+
+    :deep(.layui-card-body) {
+      padding: 0 0 10px 0 !important;
+      overflow: hidden;
+      border-radius: var(--card-border-radius);
     }
   }
 
@@ -1122,52 +917,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
-    height: 32px;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  // 删除确认弹窗样式
-  :deep(.delete-confirm-content) {
-    padding: 20px;
-
-    .warning-text {
-      font-size: 16px;
-      margin-bottom: 15px;
-      color: #333;
-
-      .project-name-red {
-        color: #ff4d4f;
-        font-weight: bold;
-      }
-    }
-
-    .warning-info {
-      background-color: #fff2f0;
-      border: 1px solid #ffccc7;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 20px;
-      color: #cf1322;
-      font-size: 14px;
-    }
-
-    .confirm-input-section {
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .confirm-input {
-        width: 100%;
-      }
-    }
   }
 
   @media (max-width: $desktop_layout_breakpoint) {
@@ -1192,27 +941,10 @@ onMounted(async () => {
     }
   }
 
-  // 导出确认弹窗样式
-  .export-modal-content {
-    padding: 20px;
-
-    .export-message {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #333;
-      text-align: center;
-    }
-
-    .export-options {
-      .option-item {
-        margin-bottom: 15px;
-      }
-    }
-  }
-
   // 属性设置弹窗样式
   .property-modal-content {
     padding: 24px;
+
     .property-section {
       .section-header {
         display: flex;

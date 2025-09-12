@@ -1,5 +1,5 @@
 import http from '@/utils/http';
-import type { Product } from '../product/productApi.type';
+import type { Product } from '../../pages/product/library/Api/type/productApi.type';
 
 // 询价接口
 export default {

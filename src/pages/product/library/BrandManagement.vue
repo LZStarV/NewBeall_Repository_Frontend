@@ -26,12 +26,9 @@
               <tr v-for="brand in brandList" :key="brand.id">
                 <td>{{ brand.name }}</td>
                 <td>
-                  <lay-switch
-                    :model-value="brand.isOpen === '1' || brand.isOpen === 1"
-                    @update:model-value="(value) => updateBrandCloudLibrary(brand, value)"
-                    onswitch-text="ON"
-                    offswitch-text="OFF"
-                  />
+                  <lay-switch :model-value="brand.isOpen === '1' || brand.isOpen === 1"
+                    @update:model-value="(value) => updateBrandCloudLibrary(brand, value)" onswitch-text="ON"
+                    offswitch-text="OFF" />
                 </td>
                 <td>
                   <span class="setting-link" @click="handleStarSetting(brand)">点击设置</span>
@@ -41,12 +38,9 @@
                 </td>
                 <td>{{ brand.defaultDiscount }}</td>
                 <td>
-                  <lay-switch
-                    :model-value="brand.autoPrice"
-                    @update:model-value="(value) => updateBrandAutoPrice(brand, value)"
-                    onswitch-text="ON"
-                    offswitch-text="OFF"
-                  />
+                  <lay-switch :model-value="brand.autoPrice"
+                    @update:model-value="(value) => updateBrandAutoPrice(brand, value)" onswitch-text="ON"
+                    offswitch-text="OFF" />
                 </td>
                 <td>
                   <button class="management-btn" @click="handleBrandPriceManagement(brand)">
@@ -147,7 +141,7 @@ const handleBrandPriceManagement = (brand: any) => {
 </script>
 
 <style lang="scss" scoped>
-// 品牌管理页面覆盖层样式
+// 品牌管理页面覆盖层
 .brand-management-overlay {
   position: absolute;
   top: 0;
