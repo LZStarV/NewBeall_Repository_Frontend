@@ -10,7 +10,7 @@
       >
         <lay-form-item class="panel-form-item">
           <template #label>
-            <lay-select v-model="queryField">
+            <lay-select v-model="queryField" class="search-select">
               <lay-select-option value="companyName">公司</lay-select-option>
               <lay-select-option value="createrName">发布者</lay-select-option>
               <lay-select-option value="phone">联系方式</lay-select-option>
@@ -63,6 +63,8 @@ import { ref, watch } from 'vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ordersNoticeApi from '@/api/orders/ordersNotice';
 import inqueryApi from '@/api/inquery/inqueryApi';
+import type { OrdersNoticeListResponse } from '@/api/orders/ordersNotice.type';
+import type { InqueryListResponse } from '@/api/inquery/inqueryApi.type';
 
 // 定义组件属性
 const props = defineProps({
@@ -138,13 +140,13 @@ const handleSearch = async () => {
         : inqueryApi.getInqueryList;
 
     // 调用API获取通知列表
-    const result = await apiFunction(
+    const result = (await apiFunction(
       props.viewName,
       'desc', // 默认降序排列
       (currentPage.value - 1) * props.pageSize,
       props.pageSize,
       queryParams,
-    );
+    )) as unknown as OrdersNoticeListResponse | InqueryListResponse;
 
     // 将结果发送给父组件
     emit('search-result', result);
@@ -202,6 +204,15 @@ defineExpose({
 
     :deep(.layui-form-label) {
       padding: 0;
+    }
+
+    .search-select {
+      :deep(.layui-input) {
+        border-color: transparent;
+        input {
+          text-align: center;
+        }
+      }
     }
 
     .layui-select {

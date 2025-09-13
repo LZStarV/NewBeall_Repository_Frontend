@@ -31,4 +31,14 @@ export default {
       },
     });
   },
+
+  deleteNotice: (ordersNoticeId: string) => {
+    const formData = new FormData();
+    formData.append('ordersNoticeIds[]', ordersNoticeId);
+    return http.post<FormData>(`/ordersNotice/delete`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
