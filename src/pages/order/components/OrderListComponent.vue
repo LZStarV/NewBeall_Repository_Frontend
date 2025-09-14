@@ -1,9 +1,9 @@
 <template>
   <div class="order-list-component">
     <SearchPanel
-      api-name="ordersNotice"
+      :api-name="isInquiryList ? 'inquery' : 'ordersNotice'"
       :view-name="viewName"
-      :page-size="pagination.pageSize"
+      :page-size="pagination.limit"
       v-model:selected-keys="selectedKeys"
       @search-result="handleSearchResult"
       @loading-change="handleLoadingChange"
@@ -18,17 +18,32 @@
         :data-source="dataSource"
         :default-toolbar="defaultToolbars"
         :loading="loading"
-        :pagination="pagination"
+        :page="pagination"
         even
         @sort-change="sortChange"
-        @page-change="handlePageChange"
         @row-click="handleRowClick"
         @checkbox-click="handleCheckboxClick"
       >
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
-          <div class="toolbar">
+          <div class="toolbar" :class="{ 'toolbar-inquiry': isInquiryList }">
+            <div v-if="isInquiryList" class="toolbar-inquiry-btns">
+              <lay-button type="normal" size="sm" @click="handleMarkAllRead"
+                >全部已读</lay-button
+              >
+              <lay-button size="sm" @click="handleMarkSelectedRead"
+                >选中已读</lay-button
+              >
+            </div>
             <div class="btn-group">
+              <div v-if="isInquiryList" style="display: flex; gap: 1rem">
+                <button title="对比" @click="">
+                  <SvgIcon name="money" width="1.1rem" />
+                </button>
+                <button title="分享" @click="">
+                  <SvgIcon name="share" width="1.1rem" />
+                </button>
+              </div>
               <button title="删除" @click="handleDelete">
                 <SvgIcon name="cancel" width="1.1rem" />
               </button>
@@ -39,13 +54,19 @@
 
         <!-- 项目名称列自定义插槽 -->
         <template #companyName="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.companyName"
-            @click="showDetailModal(row)"
-          >
-            {{ row.companyName }}
-          </span>
+          <div class="company-name">
+            <SvgIcon
+              :name="row.cgnoticetype === 0 ? 'mail_warning' : 'mail_open'"
+              color="#333"
+            />
+            <span
+              class="name-link"
+              :title="row.companyName"
+              @click="showDetailModal(row)"
+            >
+              {{ row.companyName }}
+            </span>
+          </div>
         </template>
 
         <!-- 订单状态列自定义插槽 -->
@@ -67,10 +88,10 @@
       <div class="page-info">
         <span>
           显示第
-          {{ (pagination.current - 1) * pagination.pageSize + 1 }}
+          {{ (pagination.current - 1) * pagination.limit + 1 }}
           到第
           {{
-            Math.min(pagination.current * pagination.pageSize, pagination.total)
+            Math.min(pagination.current * pagination.limit, pagination.total)
           }}
           条记录，总共 {{ pagination.total }} 条记录
         </span>
@@ -116,13 +137,18 @@ import ModalWindow from '@/components/ModalWindow.vue';
 import ordersNoticeApi from '@/api/orders/ordersNotice';
 import notify from '@/utils/notify';
 import { layer } from '@layui/layui-vue';
+import inqueryApi from '@/api/inquery/inqueryApi';
 
 // 定义组件属性
-defineProps({
+const props = defineProps({
   viewName: {
     type: String,
     required: true,
     validator: (value: string) => ['receive', 'send'].includes(value),
+  },
+  isInquiryList: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -136,8 +162,16 @@ const loading = ref<boolean>(false);
 // 分页参数
 const pagination = reactive({
   current: 1,
-  pageSize: 20,
+  limit: 20,
   total: 0,
+  // 处理分页变化
+  change: (page: { current: number; limit: number }) => {
+    pagination.current = page.current;
+
+    if (searchPanelRef.value) {
+      searchPanelRef.value.setPage(pagination.current);
+    }
+  },
 });
 
 // 详情弹窗相关状态
@@ -169,7 +203,7 @@ const defaultToolbars: TableDefaultToolbar[] = [
 const columns = [
   { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
-    title: '发送公司',
+    title: props.viewName === 'receive' ? '发送公司' : '接收公司',
     width: '180px',
     key: 'companyName',
     ellipsisTooltip: true,
@@ -239,14 +273,6 @@ const showDetailModal = (row: OrdersNoticeRow) => {
   selectedOrderId.value = row.orderid;
   selectedOrder.value = row;
   detailModalVisible.value = true;
-};
-
-// 处理分页变化
-const handlePageChange = (page: number) => {
-  pagination.current = page;
-  if (searchPanelRef.value) {
-    searchPanelRef.value.setPage(page);
-  }
 };
 
 // 排序
@@ -327,7 +353,11 @@ const handleDeleteConfirm = async (selectedRows: OrdersNoticeRow[]) => {
 
   try {
     // 调用删除API
-    await ordersNoticeApi.deleteNotice(String(noticeIds));
+    if (props.isInquiryList) {
+      await inqueryApi.deleteInquiry(noticeIds);
+    } else {
+      await ordersNoticeApi.deleteNotice(String(noticeIds));
+    }
 
     // 操作成功提示
     notify.success('删除操作已完成');
@@ -348,6 +378,65 @@ onMounted(() => {
     searchPanelRef.value.handleRefresh();
   }
 });
+// 处理全部已读
+const handleMarkAllRead = async () => {
+  try {
+    // 调用标记已读API，type=2表示全部已读，ids传空数组
+    await inqueryApi.markRead(props.viewName, [], 2);
+
+    // 操作成功提示
+    notify.success('已将全部消息标记为已读');
+
+    // 刷新当前页面数据
+    if (searchPanelRef.value) {
+      searchPanelRef.value.handleRefresh();
+    }
+  } catch (error) {
+    console.error('标记已读失败:', error);
+    notify.error('标记已读失败，请重试');
+  }
+};
+
+// 处理选中已读
+const handleMarkSelectedRead = () => {
+  const selectedRows = tableRef1.value.getCheckData();
+
+  // 检查是否有选中的行
+  if (selectedRows.length <= 0) {
+    layer.msg('请先选中表格中的某一记录！', { icon: 2 });
+    return;
+  }
+
+  // 执行标记已读操作
+  handleMarkSelectedReadConfirm(selectedRows);
+};
+
+// 选中已读确认处理
+const handleMarkSelectedReadConfirm = async (
+  selectedRows: OrdersNoticeRow[],
+) => {
+  const noticeIds: number[] = [];
+
+  selectedRows.forEach((row) => {
+    noticeIds.push(row.id);
+  });
+
+  try {
+    // 调用标记已读API，type=1表示标记选定数据
+    await inqueryApi.markRead(props.viewName, noticeIds, 1);
+
+    // 操作成功提示
+    notify.success('已将选中消息标记为已读');
+
+    // 刷新当前页面数据
+    if (searchPanelRef.value) {
+      searchPanelRef.value.handleRefresh();
+    }
+  } catch (error) {
+    console.error('标记已读失败:', error);
+    notify.error('标记已读失败，请重试');
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -368,6 +457,15 @@ onMounted(() => {
       align-items: center;
       padding-top: 4px;
 
+      &-inquiry {
+        justify-content: space-between;
+
+        .toolbar-inquiry-btns {
+          display: flex;
+          gap: 1rem;
+        }
+      }
+
       .btn-group {
         display: flex;
         gap: 1rem;
@@ -385,10 +483,16 @@ onMounted(() => {
       }
     }
 
-    .project-name-link {
-      color: $primary-color;
-      cursor: pointer;
-      text-decoration: none;
+    .company-name {
+      display: flex;
+      width: 100%;
+      gap: 0.5rem;
+      justify-content: space-between;
+      .name-link {
+        color: $primary-color;
+        cursor: pointer;
+        text-decoration: none;
+      }
     }
 
     .status-finished {

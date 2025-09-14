@@ -57,4 +57,29 @@ export default {
       },
     });
   },
+
+  // 标记已读
+  // type: 1为标记选定数据，2为所有
+  // viewName: 模式，询价方（send）或被询价方（其余）
+  markRead(viewName: string, ids: number[], type: number) {
+    return http.post<{ view: string; ids: number[]; type: number }, string>(
+      '/Inquery/markRead',
+      {
+        ids,
+        type,
+        view: viewName,
+      },
+    );
+  },
+
+  // 删除报价
+  deleteInquiry(noticeIds: number[]) {
+    const formData = new FormData();
+    formData.append('nIds[]', String(noticeIds));
+    return http.post<FormData, string>('/Inquery/deleteInquiry', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
