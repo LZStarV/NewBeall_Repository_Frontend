@@ -138,7 +138,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 24px;
   border-radius: 12px;
 
   @media (max-width: 768px) {

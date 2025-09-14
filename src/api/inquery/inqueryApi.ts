@@ -72,7 +72,7 @@ export default {
     );
   },
 
-  // 删除报价
+  // 删除询价
   deleteInquiry(noticeIds: number[]) {
     const formData = new FormData();
     formData.append('nIds[]', String(noticeIds));
@@ -81,5 +81,10 @@ export default {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+
+  // 分享询价
+  setInqueryShare(data: { inqueryIdList: number[]; userIdList: number[] }) {
+    return http.post<typeof data, string>('/Inquery/SetInqueryShare', data);
   },
 };

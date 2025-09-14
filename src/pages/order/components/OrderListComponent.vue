@@ -4,7 +4,6 @@
       :api-name="isInquiryList ? 'inquery' : 'ordersNotice'"
       :view-name="viewName"
       :page-size="pagination.limit"
-      v-model:selected-keys="selectedKeys"
       @search-result="handleSearchResult"
       @loading-change="handleLoadingChange"
       ref="searchPanelRef"
@@ -21,8 +20,6 @@
         :page="pagination"
         even
         @sort-change="sortChange"
-        @row-click="handleRowClick"
-        @checkbox-click="handleCheckboxClick"
       >
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
@@ -40,7 +37,7 @@
                 <button title="对比" @click="">
                   <SvgIcon name="money" width="1.1rem" />
                 </button>
-                <button title="分享" @click="">
+                <button title="分享" @click="handleShare">
                   <SvgIcon name="share" width="1.1rem" />
                 </button>
               </div>
@@ -123,7 +120,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed, h } from 'vue';
 import SearchPanel from '@/pages/order/components/SearchPanel.vue';
 import type {
   OrdersNoticeRow,
@@ -138,6 +135,9 @@ import ordersNoticeApi from '@/api/orders/ordersNotice';
 import notify from '@/utils/notify';
 import { layer } from '@layui/layui-vue';
 import inqueryApi from '@/api/inquery/inqueryApi';
+import clientApi from '@/api/client/clinetApi';
+import Tree from '@/components/Tree.vue';
+import type { UserTreeType } from '@/api/client/clinetApi.type';
 
 // 定义组件属性
 const props = defineProps({
@@ -178,12 +178,6 @@ const pagination = reactive({
 const detailModalVisible = ref<boolean>(false);
 const selectedOrderId = ref<string>('');
 const selectedOrder = ref<OrdersNoticeRow | null>(null);
-
-// 选中行id
-const selectedKeys = ref([]);
-
-// 选中行
-const selectedRow = ref<OrdersNoticeRow | null>(null);
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
@@ -308,17 +302,111 @@ const sortChange = (key: string, sort: string) => {
   });
 };
 
+// 表格引用
 const tableRef1 = ref();
 
-// 处理行点击事件
-const handleRowClick = (row: OrdersNoticeRow) => {
-  selectedRow.value = row;
+// 用户树相关状态
+const userTreeData = ref<UserTreeType[]>([]);
+const expandedKeys = ref<string[]>([]);
+const selectedUserIds = ref<number[]>([]);
+
+// 处理分享操作
+const handleShare = async () => {
+  const selectedRows = tableRef1.value.getCheckData();
+
+  // 检查是否有选中的行
+  if (selectedRows.length <= 0) {
+    layer.msg('请先选中表格中的某一记录！', { icon: 2 });
+    return;
+  }
+
+  try {
+    // 获取用户树数据
+    const userTreeResponse =
+      (await clientApi.userTree()) as unknown as UserTreeType[];
+    userTreeData.value = userTreeResponse;
+
+    // 设置默认展开的节点
+    expandedKeys.value = userTreeData.value
+      .filter((item) => item.open)
+      .map((item) => item.id.toString());
+
+    // 清空之前的选择
+    selectedUserIds.value = [];
+
+    // 显示分享抽屉
+    layer.drawer({
+      title: '选择分享用户',
+      content: h(Tree, {
+        data: transformedUserTreeDataForTree.value,
+        multiple: true,
+        showCheckbox: true,
+        checkStrictly: false,
+        onSelect: handleShareTreeSelect,
+      }),
+      btn: [
+        {
+          text: '确定',
+          callback() {
+            handleShareConfirm(selectedRows);
+          },
+        },
+        {
+          text: '取消',
+          callback(idx) {
+            layer.close(idx);
+            selectedUserIds.value = [];
+          },
+        },
+      ],
+    });
+  } catch (error) {
+    console.error('分享操作失败:', error);
+    layer.msg('分享操作失败，请重试', { icon: 2 });
+  }
 };
 
-// 处理复选框点击事件
-const handleCheckboxClick = (row: OrdersNoticeRow, checked: boolean) => {
-  selectedRow.value = checked ? row : null;
+/**
+ * 处理分享树组件的选择事件
+ */
+const handleShareTreeSelect = (
+  selected: string | number | (string | number)[],
+) => {
+  if (Array.isArray(selected)) {
+    selectedUserIds.value = selected.map((id) => Number(id));
+  } else {
+    selectedUserIds.value = [Number(selected)];
+  }
 };
+
+/**
+ * 转换用户树数据格式，用于Tree组件
+ */
+const transformedUserTreeDataForTree = computed(() => {
+  // 将层级数据转换为扁平化数据
+  const flattenData: any[] = [];
+
+  const flatten = (items: UserTreeType[]) => {
+    items.forEach((item) => {
+      if (item.id === '0') {
+        item.pId = '-1'; // 对总公司做特殊处理
+      }
+      flattenData.push({
+        id: item.id,
+        parentId: item.pId === '-1' ? null : item.pId,
+        name: item.name,
+        icon: item.isUser === 'true' ? 'user' : 'folder',
+        showCheckbox: !item.nocheck, // 根据nocheck属性控制checkbox显示
+        disabled: item.chkDisabled.toString() === 'true', // 根据chkDisabled属性控制是否禁用
+        selected: item.checked && item.isUser === 'true', // 只有用户节点可被选中
+        expanded: item.open, // 根据open属性控制默认展开状态
+      });
+    });
+  };
+
+  flatten(userTreeData.value);
+  return flattenData;
+});
 
 // 处理删除操作
 const handleDelete = () => {
@@ -334,12 +422,23 @@ const handleDelete = () => {
   layer.confirm('是否删除选中数据？', {
     icon: 3,
     title: '确认删除',
-    yes: (index: number) => {
-      // 用户点击确认后执行删除
-      handleDeleteConfirm(selectedRows);
-      // 关闭确认对话框
-      layer.close(index);
-    },
+    btn: [
+      {
+        text: '确定',
+        callback: (index: string) => {
+          // 用户点击确认后执行删除
+          handleDeleteConfirm(selectedRows);
+          // 关闭确认对话框
+          layer.close(index);
+        },
+      },
+      {
+        text: '取消',
+        callback: (index: string) => {
+          layer.close(index);
+        },
+      },
+    ],
   });
 };
 
@@ -435,6 +534,56 @@ const handleMarkSelectedReadConfirm = async (
   } catch (error) {
     console.error('标记已读失败:', error);
     notify.error('标记已读失败，请重试');
+  }
+};
+/**
+ * 确认分享操作
+ */
+const handleShareConfirm = async (selectedRows: OrdersNoticeRow[]) => {
+  if (selectedUserIds.value.length === 0) {
+    layer.msg('请选择要分享的用户', { icon: 2 });
+    return;
+  }
+
+  try {
+    // 获取用户树中isUser为'true'的节点ID列表
+    const userNodeIds = userTreeData.value
+      .filter((item) => item.isUser === 'true')
+      .map((item) => Number(item.id));
+
+    // 再次过滤selectedUserIds，确保只包含用户节点ID
+    const filteredUserIds = selectedUserIds.value.filter((id) =>
+      userNodeIds.includes(id),
+    );
+
+    if (filteredUserIds.length === 0) {
+      layer.msg('请选择有效的用户进行分享', { icon: 2 });
+      return;
+    }
+
+    // 获取选中的询价单ID列表
+    const inqueryIdList: number[] = [];
+    selectedRows.forEach((row) => {
+      inqueryIdList.push(row.id);
+    });
+    // 调用分享API
+    await inqueryApi.setInqueryShare({
+      inqueryIdList,
+      userIdList: filteredUserIds, // 使用过滤后的用户ID列表
+    });
+    // 关闭抽屉
+    layer.closeAll();
+    // 清空选择
+    selectedUserIds.value = [];
+    // 成功提示
+    notify.success('分享成功');
+    // 刷新当前页面数据
+    if (searchPanelRef.value) {
+      searchPanelRef.value.handleRefresh();
+    }
+  } catch (error) {
+    console.error('分享失败:', error);
+    layer.msg('分享失败，请重试', { icon: 2 });
   }
 };
 </script>
