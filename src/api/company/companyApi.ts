@@ -76,18 +76,8 @@ export default {
     });
   },
   // 更新公司业务信息
-  updateCompanyBusiness(
-    list: string,
-    moduleName: string,
-    paramMap: {
-      additionalProp1?: string;
-      additionalProp2?: string;
-      additionalProp3?: string;
-    },
-  ) {
-    return http.post(`/company/updateBusiness/${moduleName}`, paramMap, {
-      params: { list },
-    });
+  updateCompanyBusiness(list: any, moduleName: string) {
+    return http.post('/company/updateBusiness', { list, moduleName });
   },
   // 扣除积分20(只需要传入id)
   updateIntegration(id: string) {
