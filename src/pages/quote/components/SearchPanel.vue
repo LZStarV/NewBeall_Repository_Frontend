@@ -26,6 +26,24 @@
           />
         </lay-form-item>
 
+        <lay-form-item
+          v-if="props.isOrderRecord"
+          label="状态"
+          class="panel-form-item"
+        >
+          <lay-select
+            v-model="statusValue"
+            placeholder="请选择状态"
+            class="search-input"
+            mode="block"
+          >
+            <lay-select-option value="">全部</lay-select-option>
+            <lay-select-option value="0">待审批</lay-select-option>
+            <lay-select-option value="1">通过</lay-select-option>
+            <lay-select-option value="2">驳回</lay-select-option>
+          </lay-select>
+        </lay-form-item>
+
         <lay-form-item label="申请日期" class="panel-form-item">
           <lay-date-picker
             v-model="createTime"
@@ -46,9 +64,9 @@
           <button title="搜索" @click="handleSearch">
             <SvgIcon name="search" width="1.1rem" />
           </button>
-          <button title="刷新" @click="handleRefresh">
+          <!-- <button title="刷新" @click="handleRefresh">
             <SvgIcon name="refresh" width="1.2rem" />
-          </button>
+          </button> -->
         </div>
       </lay-form>
     </lay-card>
@@ -72,6 +90,10 @@ const props = defineProps({
     type: Number,
     default: 20,
   },
+  isOrderRecord: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // 定义事件
@@ -80,6 +102,7 @@ const emit = defineEmits(['search-result', 'loading-change']);
 // 搜索条件
 const projectNameValue = ref('');
 const submitterValue = ref('');
+const statusValue = ref('');
 const createTime = ref('');
 const approvalTime = ref('');
 
@@ -88,7 +111,7 @@ const currentPage = ref(1);
 
 // 监听搜索条件变化，自动触发搜索
 watch(
-  [projectNameValue, submitterValue, createTime, approvalTime],
+  [projectNameValue, submitterValue, statusValue, createTime, approvalTime],
   () => {
     // 搜索条件变化时，重置页码并执行搜索
     currentPage.value = 1;
@@ -116,6 +139,11 @@ const handleSearch = async () => {
       queryParams['uidorsuperiorid'] = submitterValue.value;
     }
 
+    // 添加状态
+    if (statusValue.value) {
+      queryParams['state'] = statusValue.value;
+    }
+
     // 添加申请日期
     if (createTime.value) {
       queryParams['createTime'] = createTime.value;
@@ -124,6 +152,19 @@ const handleSearch = async () => {
     // 添加审批日期
     if (approvalTime.value) {
       queryParams['approvalTime'] = approvalTime.value;
+    }
+
+    if (props.isOrderRecord) {
+      // 调用API获取审批记录列表
+      const result = (await approvalApi.getOrderListInfo(
+        'desc', // 默认降序排列
+        (currentPage.value - 1) * props.pageSize,
+        props.pageSize,
+        queryParams,
+      )) as unknown as ApprovalListResponse;
+      // 将结果发送给父组件
+      emit('search-result', result);
+      return;
     }
 
     // 调用API获取审批列表
@@ -150,6 +191,7 @@ const handleRefresh = () => {
   // 清空所有搜索条件
   projectNameValue.value = '';
   submitterValue.value = '';
+  statusValue.value = '';
   createTime.value = '';
   approvalTime.value = '';
 

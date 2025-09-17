@@ -3,6 +3,7 @@
     <SearchPanel
       :deleteordiscount="deleteordiscountValue"
       :page-size="pagination.limit"
+      :is-order-record="isOrderRecord"
       @search-result="handleSearchResult"
       @loading-change="handleLoadingChange"
       ref="searchPanelRef"
@@ -35,18 +36,25 @@
         <!-- 状态列自定义插槽 -->
         <template #status="{ row }">
           <span
+            v-if="isOrderRecord"
+            class="record-status"
+            :class="`${row.state === 1 ? 'status-pass' : row.state === 2 ? 'status-reject' : 'status-pending'}`"
+            >{{
+              row.state === 1 ? '通过' : row.state === 2 ? '驳回' : '待审批'
+            }}</span
+          >
+          <span
+            v-else
             :class="`${row.state === 1 ? 'status-finished' : 'status-unfinished'}`"
           >
-            {{
-              row.state === 1 ? '已通过' : row.state === 2 ? '已驳回' : '待审批'
-            }}
+            {{ row.state === 1 ? '通过' : row.state === 2 ? '驳回' : '待审批' }}
           </span>
         </template>
 
         <!-- 操作列自定义插槽 -->
         <template #operation="{ row }">
           <lay-button size="xs" type="primary" @click="showDetailModal(row)">
-            审阅
+            {{ isOrderRecord ? '审批' : '审阅' }}
           </lay-button>
         </template>
       </lay-table>
@@ -67,7 +75,7 @@
     <ModalWindow
       :visible="detailModalVisible"
       :is-teleport="true"
-      title="审批详情"
+      title="报价单信息审阅"
       @close="detailModalVisible = false"
     >
       <div v-if="selectedApprovalId" class="approval-detail">
@@ -96,13 +104,14 @@ import notify from '@/utils/notify';
 import { layer } from '@layui/layui-vue';
 
 // 定义组件属性
-const props = defineProps<{
-  type: 'delete' | 'discount';
+const { pageType, isOrderRecord } = defineProps<{
+  pageType: 'delete' | 'discount';
+  isOrderRecord?: boolean;
 }>();
 
-// 将type转换为对应的数值
+// 将pageType转换为对应的数值
 const deleteordiscountValue = computed(() => {
-  return props.type === 'delete' ? 0 : 1;
+  return pageType === 'delete' ? 0 : 1;
 });
 
 // 搜索面板引用
@@ -149,13 +158,20 @@ const defaultToolbars: TableDefaultToolbar[] = [
 // 表格列配置
 const columns = [
   { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
-  {
-    title: '提交ID',
-    width: '180px',
-    key: 'uid',
-    ellipsisTooltip: true,
-    hide: true,
-  },
+  isOrderRecord
+    ? {
+        title: 'aid',
+        width: '80px',
+        key: 'id',
+        hide: true,
+      }
+    : {
+        title: '提交ID',
+        width: '180px',
+        key: 'uid',
+        ellipsisTooltip: true,
+        hide: true,
+      },
   {
     title: '提交人',
     width: '120px',
@@ -163,11 +179,15 @@ const columns = [
     ellipsisTooltip: true,
   },
   {
-    title: props.type === 'discount' ? '订单id' : '报价单编号',
+    title: isOrderRecord
+      ? '报价单编号'
+      : pageType === 'discount'
+        ? '订单id'
+        : '报价单编号',
     width: '180px',
     key: 'oid',
     ellipsisTooltip: true,
-    hide: props.type === 'delete' ? true : false,
+    hide: isOrderRecord ? true : pageType === 'delete' ? true : false,
   },
   {
     title: '工程项目名称',
@@ -193,7 +213,6 @@ const columns = [
     key: 'state',
     ellipsisTooltip: true,
     customSlot: 'status',
-    sort: true,
   },
   {
     title: '审批时间',
@@ -211,7 +230,10 @@ const columns = [
 
 // 处理搜索结果
 const handleSearchResult = (result: ApprovalListResponse) => {
-  dataSource.value = result.rows;
+  dataSource.value = result.rows.map((item) => ({
+    ...item,
+    updateDate: item.updateDate ? item.updateDate : '-',
+  }));
   pagination.total = result.total;
 };
 
@@ -222,7 +244,7 @@ const handleLoadingChange = (isLoading: boolean) => {
 
 // 显示详情弹窗
 const showDetailModal = (row: ApprovalData) => {
-  selectedApprovalId.value = row.uid.toString();
+  selectedApprovalId.value = row.oid;
   selectedApproval.value = row;
   detailModalVisible.value = true;
 };
@@ -362,6 +384,22 @@ onMounted(() => {
 
     .status-finished {
       color: $primary-color;
+    }
+
+    .record-status {
+      font-weight: 800;
+    }
+
+    .status-pass {
+      color: #84d957;
+    }
+
+    .status-reject {
+      color: #ff2f00;
+    }
+
+    .status-pending {
+      color: $danger-color;
     }
 
     .status-unfinished {
