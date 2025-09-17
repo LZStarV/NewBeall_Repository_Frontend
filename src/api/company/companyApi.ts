@@ -79,6 +79,15 @@ export default {
   updateCompanyBusiness(list: any, moduleName: string) {
     return http.post('/company/updateBusiness', { list, moduleName });
   },
+
+  // 更新公司简介和区域
+  updateProfileOrWorkarea(profile: string) {
+    const formData = objectToFormData({ profile });
+    return http.post('/company/updateProfileOrWorkarea', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
   // 扣除积分20(只需要传入id)
   updateIntegration(id: string) {
     return http.post('/company/updateIntegration', null, {
