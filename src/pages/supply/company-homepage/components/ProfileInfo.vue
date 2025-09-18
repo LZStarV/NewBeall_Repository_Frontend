@@ -22,7 +22,7 @@
 import companyApi from '@/api/company/companyApi';
 import type { CompanyDetailResponseData } from '@/api/company/companyApi.type';
 import { layer } from '@layui/layui-vue';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 // 定义参数
 interface Props {
@@ -71,9 +71,6 @@ watch(
   },
   { immediate: true, deep: true },
 );
-onMounted(()=> {
-    initData();
-});
 </script>
 
 <style lang="scss" scoped>
