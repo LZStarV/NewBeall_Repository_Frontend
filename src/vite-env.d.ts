@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   readonly VITE_DEBUG: string;
   readonly VITE_PAD_LAYOUT_BREAKPOINT: number;
   readonly VITE_DESKTOP_LAYOUT_BREAKPOINT: number;
+  readonly VITE_BASE_STATIC_URL: string;
 }
 
 interface ImportMeta {
