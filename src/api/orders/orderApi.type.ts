@@ -185,39 +185,50 @@ export interface OrderInquiry {
   version: number;
 }
 
+// 子项目标题头
+export interface SubproductHeader {
+  encryptId: string;
+  productId: string; // 如果没有产品，就是EMPTY0000000000000
+  subproject: string; // 子项目名称
+  subprojectClass: string; // 子项目类型，如sprojects1、sprojects2、sprojects3
+  subprojectColor: string; // 子项目颜色样式CSS
+  subprojectLevel: 'oneColor' | 'secondColor' | 'threeColor';
+  subprojectParent: string; // 上级项目类名，如sprojects1
+}
+
 // 临时报价单类型
 export interface Quotation {
-  DeliveryAddress: string;
-  DeliveryTime: string;
+  DeliveryAddress: string; // 详细地址
+  DeliveryTime: string; // 交货时间
   approvalType?: number;
-  area: string;
+  area: string; // 区
   chargePerson: number;
   chargePersonInfo: string;
-  city: string;
-  clientBankAccount: string | null;
-  clientBankName: string | null;
-  clientId: number;
-  clientTexId: string | null;
-  companyAddres: string;
-  companyName: string;
-  contactPhone: string;
-  contacts: string;
-  deliveryMethod: string;
-  explanation: string | null;
-  orderdetailsList: OrderDetail[];
-  ordersCharacter: string;
+  city: string; // 市
+  clientBankAccount: string | null; // 客户-银行账号
+  clientBankName: string | null; // 客户-开户行
+  clientId: number; // 客户单位id
+  clientTexId: string | null; // 客户-税号
+  companyAddres: string; // 我司-企业地址
+  companyName: string; // 我司-设计单位
+  contactPhone: string; // 我司-联系电话
+  contacts: string; // 我司-联系人员
+  deliveryMethod: string; // 交货方式，如"货到付款"
+  explanation: string | null; // 报价单说明
+  orderdetailsList: (OrderDetail | SubproductHeader)[]; // 报价目录列表
+  ordersCharacter: string; // 报价单性质，如"初步建议阶段"
   ordersId?: string; // 新建报价单暂无id
   ordersInquiryList?: OrderInquiry[];
-  orderstype1: string;
-  orderstype2: string;
-  orderstype3: string;
+  orderstype1: string; // 报价单类型1
+  orderstype2: string; // 报价单类型2
+  orderstype3: string; // 报价单类型3
   param: string;
-  projectName: string;
-  projectRemark: string;
-  province: string;
-  selfBank: string;
+  projectName: string; // 项目名称
+  projectRemark: string; // 项目备注
+  province: string; // 省
+  selfBank: string; // 我司银行账号
   selfId: number;
-  settleMethod: number;
+  settleMethod: number; // 结算方式id，需要再调用API获取对于的类型
   shareOrders?: number; // 新建报价单暂无
   type?: number; // 新建报价单暂无
   version?: number; // 新建报价单暂无
@@ -332,7 +343,7 @@ export interface ModuleOrderDetail {
   area: string;
   budget: string;
   chargePerson: number;
-  chargePersonInfo: string;
+  chargePersonInfo: string; // 项目负责人名称
   city: string;
   clientBankAccount: string;
   clientBankName: string;
@@ -346,7 +357,7 @@ export interface ModuleOrderDetail {
   contactPhone: string;
   contacts: string;
   coopUser: string;
-  createDate: string;
+  createDate: string; // 创建日期
   createUser: number;
   createrid: number;
   delflag: number;
@@ -369,7 +380,7 @@ export interface ModuleOrderDetail {
   ordersType1: string;
   ordersType2: string;
   ordersType3: string;
-  projectName: string;
+  projectName: string; // 项目名称
   projectRemark: string;
   province: string;
   purchase: number;
