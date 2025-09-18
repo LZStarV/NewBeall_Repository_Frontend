@@ -61,9 +61,9 @@
     <!-- 产品列表 -->
     <lay-table
       ref="tableRef1"
-      :columns="columns"
-      :data-source="dataSource"
-      :loading="loading"
+      :columns="productColumns"
+      :data-source="productDataSource"
+      :loading="productLoading"
       even
     >
       <!-- 折后单价 -->
@@ -101,6 +101,21 @@
         }}</span>
       </div>
     </div>
+    <!-- 状态日志列表 -->
+    <h5>状态日志</h5>
+    <lay-table
+      ref="tableRef2"
+      :columns="logColumns"
+      :data-source="logDataSource"
+      :loading="logLoading"
+      :expand-index="1"
+      even
+    >
+      <!-- 日志内容 -->
+      <template #logcontent="{ row }">
+        <div v-dompurify-html="row.logcontent"></div>
+      </template>
+    </lay-table>
   </div>
 </template>
 
@@ -112,6 +127,7 @@ import type {
   OrdersNoticeRow,
   OrdersNoticeDeatilData,
   ProductData,
+  UplogData,
 } from '@/api/orders/ordersNotice.type';
 
 const props = defineProps<{
@@ -120,7 +136,7 @@ const props = defineProps<{
 }>();
 
 // 表格列配置
-const columns = [
+const productColumns = [
   { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '编号',
@@ -189,15 +205,41 @@ const columns = [
     : { width: '0px' },
 ] as TableColumn[];
 
+const logColumns = [
+  {
+    title: '时间',
+    width: '120px',
+    key: 'createtime',
+  },
+  {
+    title: '处理阶段',
+    width: '100 px',
+    key: 'state',
+  },
+  {
+    title: '内容',
+    width: '400px',
+    key: 'logcontent',
+    customSlot: 'logcontent',
+  },
+  {
+    title: '处理者',
+    width: '100px',
+    key: 'uname',
+  },
+] as TableColumn[];
+
 // 表格数据
-const dataSource = ref<ProductData[]>([]);
-const loading = ref<boolean>(false);
+const productDataSource = ref<ProductData[]>([]);
+const logDataSource = ref<UplogData[]>([]);
+const productLoading = ref<boolean>(false);
+const logLoading = ref<boolean>(false);
 
 const detail = ref<OrdersNoticeDeatilData | null>(null);
 
 // 订单总合计
 const totalAmount = computed(() => {
-  return (dataSource.value || []).reduce((sum, row) => {
+  return (productDataSource.value || []).reduce((sum, row) => {
     const toPayPrice = Number(
       row.modifyprice.length > 0 ? row.modifyprice : row.price,
     );
@@ -208,7 +250,7 @@ const totalAmount = computed(() => {
 
 // 订单总利润（仅receive显示）
 const totalProfit = computed(() => {
-  return (dataSource.value || []).reduce((sum, row) => {
+  return (productDataSource.value || []).reduce((sum, row) => {
     const toPayPrice = Number(
       row.modifyprice.length > 0 ? row.modifyprice : row.price,
     );
@@ -238,10 +280,43 @@ const fetchDetail = async () => {
     const res = await ordersNoticeApi.getNoticeDetail(params);
     console.log(res.data);
     detail.value = res.data;
-    dataSource.value = res.data.productList.map((item, index) => ({
+    productDataSource.value = res.data.productList.map((item, index) => ({
       ...item,
       row_id: index + 1,
     }));
+    // 兼容可折叠表格的数据转换
+    const convertLogData = (rawData: UplogData[]) => {
+      const result: (UplogData & { children?: UplogData[]; state: string })[] =
+        [];
+      for (const [index, item] of rawData.entries()) {
+        if (item.logtype === '工程集成商接收订单日志') {
+          result.push({
+            ...item,
+            id: item.id.length > 0 ? item.id : index.toString(),
+            state: `第${item.version}次阶段处理`,
+          });
+        } else {
+          const parent = result.find(
+            (parent) =>
+              item.version === parent.version &&
+              parent.logtype === '工程集成商接收订单日志',
+          );
+          const child = {
+            ...item,
+            id: item.id.length > 0 ? item.id : index.toString(),
+            state: `第${item.version}次处理`,
+          };
+          if (parent) {
+            parent.children = parent.children || [];
+            parent.children.push(child);
+          } else {
+            result.push(child);
+          }
+        }
+      }
+      return result;
+    };
+    logDataSource.value = convertLogData(res.data.uplogList);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('获取通知详情失败', error);
@@ -301,9 +376,10 @@ watch(
     display: flex;
     gap: 24px;
     margin-top: 12px;
+    margin-bottom: 32px;
 
     .total-item {
-      font-weight: 600;
+      font-weight: 500;
 
       .price {
         color: $danger-color;
@@ -370,4 +446,3 @@ watch(
   color: $danger-color;
 }
 </style>
-

@@ -18,8 +18,12 @@ import BaseBreadcrumb from '@/components/Breadcrumb.vue';
 // svg图标插件
 import 'virtual:svg-icons-register';
 
+// 引入HTML安全插件
+import VueDOMPurifyHTML from 'vue-dompurify-html';
+
 const pinia = createPinia();
 const app = createApp(App);
 app.component('BaseBreadcrumb', BaseBreadcrumb);
 
+app.use(VueDOMPurifyHTML);
 app.use(router).use(pinia).use(Layui).mount('#app');
