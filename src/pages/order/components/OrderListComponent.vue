@@ -102,15 +102,8 @@
       title="订单详情"
       @close="detailModalVisible = false"
     >
-      <div v-if="selectedOrderId" class="order-detail">
-        <!-- 这里可以根据实际需求添加订单详情组件 -->
-        <p>订单ID: {{ selectedOrderId }}</p>
-        <p>项目名称: {{ selectedOrder?.projectName }}</p>
-        <p>发送公司: {{ selectedOrder?.companyName }}</p>
-        <p>发布者: {{ selectedOrder?.uname }}</p>
-        <p>联系方式: {{ selectedOrder?.phone }}</p>
-        <p>通知时间: {{ selectedOrder?.createtime }}</p>
-        <p>订单状态: {{ selectedOrder?.typeName }}</p>
+      <div v-if="selectedOrder">
+        <OrderDetail :row="selectedOrder" :view-name="props.viewName" />
       </div>
       <div v-else>
         <lay-empty />
@@ -138,6 +131,7 @@ import inqueryApi from '@/api/inquery/inqueryApi';
 import clientApi from '@/api/client/clinetApi';
 import Tree from '@/components/Tree.vue';
 import type { UserTreeType } from '@/api/client/clinetApi.type';
+import OrderDetail from '@/pages/order/components/OrderDetail.vue';
 
 // 定义组件属性
 const props = defineProps({

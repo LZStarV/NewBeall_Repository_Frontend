@@ -1,7 +1,7 @@
 <template>
   <!-- 订单折率申请页面 -->
   <div class="order-discount-application-page">
-    <ApprovalOrderListComponent type="discount" />
+    <ApprovalOrderListComponent page-type="discount" />
   </div>
 </template>
 

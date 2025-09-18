@@ -2,7 +2,7 @@
   <!-- 删除申请页面 -->
   <div class="delete-application-page">
     <!-- <SearchPanel ref="searchPanelRef" :deleteordiscount="0" /> -->
-    <ApprovalOrderListComponent type="delete" />
+    <ApprovalOrderListComponent page-type="delete" />
   </div>
 </template>
 

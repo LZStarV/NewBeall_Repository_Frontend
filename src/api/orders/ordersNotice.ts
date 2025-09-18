@@ -1,6 +1,7 @@
 // 订单控制器 Orders Notice Controller
 
 import http from '@/utils/http';
+import type { OrdersNoticeDeatilData } from './ordersNotice.type';
 
 export default {
   /**
@@ -40,5 +41,12 @@ export default {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+
+  getNoticeDetail: (params: Record<string, string | number>) => {
+    return http.get<OrdersNoticeDeatilData>(
+      `/ordersNotice/ordersNoticeDetails`,
+      params,
+    );
   },
 };

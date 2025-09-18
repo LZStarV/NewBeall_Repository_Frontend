@@ -5,3 +5,10 @@ import http from '@/utils/http';
 export function getExpiredAuth() {
   return http.get<{ code: number }>('/auth/expiredAuth');
 }
+
+// 订单审批记录处理信息
+export function getOrdersNoticeHandlerAuth() {
+  return http.post<{ code: string; data: string; msg: string }>(
+    '/auth/ordersNoticeHandlerAuth',
+  );
+}
