@@ -1,10 +1,10 @@
 export interface CompanyBusiness {
   businessName: string;
-  businessType: string;
-  cid: number;
+  businessType?: string;
+  cid?: number;
   icon: string;
-  id: number;
-  summary: string;
+  id?: number;
+  summary?: string;
 }
 
 export interface CompanyData {

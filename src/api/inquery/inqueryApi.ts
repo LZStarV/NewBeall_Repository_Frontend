@@ -32,4 +32,59 @@ export default {
       data,
     );
   },
+
+  // 获取询价列表
+  getInqueryList(
+    viewName: string,
+    order: string,
+    offset: number,
+    limit: number,
+    queryParams?: Record<string, string>,
+  ) {
+    const formData = new FormData();
+    formData.append('order', order);
+    formData.append('offset', offset.toString());
+    formData.append('limit', limit.toString());
+    if (queryParams) {
+      Object.keys(queryParams).forEach((key) => {
+        formData.append(key, queryParams[key]);
+        formData.append(`query[${key}]`, queryParams[key]);
+      });
+    }
+    return http.post<FormData>(`/Inquery/list/${viewName}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 标记已读
+  // type: 1为标记选定数据，2为所有
+  // viewName: 模式，询价方（send）或被询价方（其余）
+  markRead(viewName: string, ids: number[], type: number) {
+    return http.post<{ view: string; ids: number[]; type: number }, string>(
+      '/Inquery/markRead',
+      {
+        ids,
+        type,
+        view: viewName,
+      },
+    );
+  },
+
+  // 删除询价
+  deleteInquiry(noticeIds: number[]) {
+    const formData = new FormData();
+    formData.append('nIds[]', String(noticeIds));
+    return http.post<FormData, string>('/Inquery/deleteInquiry', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 分享询价
+  setInqueryShare(data: { inqueryIdList: number[]; userIdList: number[] }) {
+    return http.post<typeof data, string>('/Inquery/SetInqueryShare', data);
+  },
 };

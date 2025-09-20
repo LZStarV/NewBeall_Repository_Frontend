@@ -8,7 +8,7 @@
       </div>
       <div class="companyBus">
         <lay-row space="20">
-          <lay-col md="6" sm="8" xs="12" v-for="item in companyBusList">
+          <lay-col md="6" sm="8" xs="12" v-for="item in companyBusList" :key="item.businessName">
             <div class="companyBusItem">
               <div class="icon">
                 <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
@@ -16,7 +16,7 @@
               <div class="businessName">
                 {{ item.businessName }}
               </div>
-              <div class="delete-icon">
+              <div class="delete-icon" @click="handleDelete(item)">
                 <lay-icon type="layui-icon-delete"></lay-icon>
               </div>
             </div>
@@ -36,21 +36,12 @@
       <lay-button type="normal" @click="handleSave">保存</lay-button>
     </div>
   </div>
-  <lay-layer
-    v-model="visiable"
-    title="选择业务"
-    :area="['80%', '80%']"
-    @close="handleClose"
-  >
+  <lay-layer v-model="visiable" title="选择业务" :area="['80%', '80%']" @close="handleClose">
     <div class="modal-content">
       <h4>智能化</h4>
       <lay-row space="20" style="padding: 20px 0">
-        <lay-col md="8" sm="12" xs="24" v-for="item in iconMap">
-          <div
-            class="modalItem"
-            :class="{ active: isSelected(item.businessName) }"
-            @click="toggleSelection(item)"
-          >
+        <lay-col md="8" sm="12" xs="24" v-for="item in iconMap" :key="item.businessName">
+          <div class="modalItem" :class="{ active: isSelected(item.businessName) }" @click="toggleSelection(item)">
             <div class="icon">
               <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
             </div>
@@ -62,19 +53,9 @@
       </lay-row>
       <h4>自定义添加</h4>
       <lay-row space="20" style="padding: 20px 0">
-        <lay-col
-          md="8"
-          sm="12"
-          xs="24"
-          v-for="item in companyBusList?.filter(
-            (m) => m.businessType === '自定义添加',
-          )"
-        >
-          <div
-            class="modalItem"
-            :class="{ active: isSelected(item.businessName) }"
-            @click="toggleSelection(item)"
-          >
+        <lay-col md="8" sm="12" xs="24" v-for="item in selectedList?.filter(
+          (m) => m.businessType === '自定义添加')" :key="item.businessName">
+          <div class="modalItem" :class="{ active: isSelected(item.businessName) }" @click="toggleSelection(item)">
             <div class="icon">
               <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
             </div>
@@ -85,26 +66,24 @@
         </lay-col>
         <lay-col md="8" sm="12" xs="24">
           <div class="modalItem">
-            <lay-tooltip trigger="click">
+            <lay-tooltip trigger="hover">
               <div class="add">
-                <lay-icon type="layui-icon-addition"></lay-icon>
+                <lay-icon type="layui-icon-addition" v-if="!addItem?.icon"></lay-icon>
+                <img v-else :src="getIconSrc(addItem.icon)" style="width: 20px"></img>
               </div>
               <template #content>
                 <div class="changeIcon">
                   <p>更换图标</p>
-                  <div class="png" v-for="item in iconMap">
-                    <img  :src="getIconSrc(item.icon)" style="width: 16px"></img>
+                  <div class="png" v-for="(value, key) in businessIconModules" :key="key">
+                    <img :src="value as string" style="width: 20px" @click="setAddIcon(key)"></img>
                   </div>
                 </div>
               </template>
             </lay-tooltip>
 
-            <lay-input
-              size="sm"
-              placeholder="请输入业务名称"
-              style="margin: 0 10px"
-            ></lay-input>
-            <div class="confirm">确定</div>
+            <lay-input v-model="addItem.businessName" size="sm" placeholder="请输入业务名称"
+              style="margin: 0 10px"></lay-input>
+            <div class="confirm" @click="handleCustomAdd">确定</div>
           </div>
         </lay-col>
       </lay-row>
@@ -113,14 +92,8 @@
       <div class="footer">
         <span>已选择：</span>
         <div class="selected-tags">
-          <lay-tag
-            v-for="name in selectedList"
-            :key="name"
-            variant="light"
-            :color="getPrimaryColor()"
-            closable
-            @close="handleUnselect(name)"
-          >
+          <lay-tag v-for="name in selectedList.map(m => m.businessName)" :key="name" variant="light"
+            :color="getPrimaryColor()" closable @close="handleUnselect(name)">
             {{ name }}
           </lay-tag>
         </div>
@@ -130,6 +103,7 @@
   </lay-layer>
 </template>
 <script setup lang="ts">
+import companyApi from '@/api/company/companyApi';
 import type {
   CompanyBusiness,
   CompanyDetailResponseData,
@@ -144,6 +118,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   companyData: undefined,
 });
+
+const emits = defineEmits(['dataUpdated']);
 
 // 导入所有的业务图标
 const businessIconModules = import.meta.glob(
@@ -163,7 +139,7 @@ const getPrimaryColor = () => {
   );
 };
 
-// 映射关系
+// 智能化图标映射关系
 const iconMap = [
   { businessName: '智慧城市', icon: 'smartCity' },
   { businessName: '智慧社区', icon: 'smartcommunity' },
@@ -180,8 +156,15 @@ const iconMap = [
 ];
 
 // 业务数据
-const companyBusList = ref<CompanyBusiness[]>();
-const selectedList = ref();
+const companyBusList = ref<CompanyBusiness[]>([]);
+const selectedList = ref<CompanyBusiness[]>([]);
+const addItem = ref<CompanyBusiness>(
+  {
+    businessType: '自定义添加',
+    businessName: '',
+    icon: '',
+  }
+);
 
 const visiable = ref(false);
 
@@ -196,21 +179,23 @@ const getIconSrc = (iconPath: string) => {
   }
 };
 
+const setAddIcon = (iconPath: string) => {
+  addItem.value!.icon = iconPath.replace('/src/assets', '');
+};
+
 // 切换选择状态
 const toggleSelection = (item: CompanyBusiness | any) => {
-  console.log('已选中', selectedList.value);
-  const index = selectedList.value.indexOf(item.businessName);
+  const index = selectedList.value!.findIndex(selected => selected.businessName === item.businessName);
   if (index > -1) {
     selectedList.value.splice(index, 1);
   } else {
-    selectedList.value.push(item.businessName);
+    selectedList.value.push(item);
   }
-  console.log('已选中', selectedList.value);
 };
 
 // 判断是否选中
 const isSelected = (name: string) => {
-  return selectedList.value.includes(name);
+  return selectedList.value?.some(item => item.businessName === name);
 };
 
 const handleClickNotice = () => {
@@ -253,26 +238,75 @@ const handleClickNotice = () => {
 };
 const handleOpen = () => {
   visiable.value = true;
-  selectedList.value = companyBusList.value?.map((m) => m.businessName);
+  selectedList.value = [...companyBusList.value];
 };
 const handleUnselect = (name: string) => {
-  const index = selectedList.value.indexOf(name);
+  const index = selectedList.value.findIndex(item => item.businessName === name);
   if (index > -1) {
     selectedList.value.splice(index, 1);
   }
 };
-const handleAdd = () => {};
-
-const handleClose = () => {
-  visiable.value = false;
+const handleCustomAdd = () => {
+  if (!addItem.value.icon) {
+    layer.msg('请选择业务图标', { icon: 2 });
+    return;
+  }
+  if (!addItem.value.businessName) {
+    layer.msg('请输入业务名称', { icon: 2 });
+    return;
+  }
+  const indexI = iconMap.findIndex(m => m.businessName === addItem.value.businessName);
+  const indexC = selectedList.value.findIndex(m => m.businessName === addItem.value.businessName);
+  if (indexI > -1 || indexC > -1) {
+    layer.msg('该业务名称已存在', { icon: 2 });
+    return;
+  }
+  selectedList.value.push({ ...addItem.value });
+  addItem.value.businessName = '';
+  addItem.value.icon = '';
 };
 
-const handleSave = () => {};
+const handleAdd = () => {
+  companyBusList.value = [...selectedList.value];
+  handleClose();
+};
+const handleClose = () => {
+  visiable.value = false;
+  addItem.value.businessName = '';
+  addItem.value.icon = '';
+};
+
+const handleDelete = (item: CompanyBusiness | any) => {
+  const index = companyBusList.value.findIndex(m => m.businessName === item.businessName);
+  if (index > -1) {
+    companyBusList.value.splice(index, 1);
+  }
+};
+
+const handleSave = async () => {
+  try {
+    const saveData = companyBusList.value.map(({ businessName, icon }) => ({
+      businessName,
+      icon
+    }));
+    await companyApi.updateCompanyBusiness(saveData, 'businessInfo');
+    layer.msg('保存成功', { icon: 1 });
+    emits('dataUpdated');
+  } catch (error) {
+    console.error('保存失败:', error);
+    layer.msg('保存失败，请重试', { icon: 2 });
+  }
+};
 
 // 初始化表单数据的函数
 const initData = async (companyData?: CompanyDetailResponseData) => {
-  if (companyData) {
-    companyBusList.value = companyData.companyBusList;
+  try {
+    if (companyData?.companyBusList) {
+      companyBusList.value = [...companyData.companyBusList];
+    }
+  } catch (error) {
+    console.error('初始化数据失败:', error);
+    layer.msg('数据加载失败', { icon: 2 });
   }
 };
 
@@ -302,20 +336,24 @@ h4 {
   border-left: 3px solid var(--global-primary-color);
   padding-left: 15px;
 }
+
 .businessInfoPage {
   .info {
     padding: 20px;
+
     .notice {
       color: red;
       font-size: 12px;
       margin-bottom: 10px;
       cursor: pointer;
+
       .layui-icon {
         font-size: 12px;
       }
     }
   }
 }
+
 .companyBusItem {
   @include flex(column, center, center);
   padding: 30px 0 20px;
@@ -329,28 +367,31 @@ h4 {
     font-weight: 600;
     color: var(--global-primary-color);
   }
+
   .add {
     @include flex-center();
     height: 32px;
     width: 60px;
-    background-color: color-mix(
-      in srgb,
-      var(--global-primary-color),
-      transparent 90%
-    );
+    background-color: color-mix(in srgb,
+        var(--global-primary-color),
+        transparent 90%);
     border-radius: 5px;
     cursor: pointer;
+
     .layui-icon {
       color: var(--global-primary-color);
       font-size: 16px;
       font-weight: 600;
     }
   }
+
   .delete-icon {
     display: none;
   }
+
   &:hover {
     border-color: var(--global-primary-color);
+
     .delete-icon {
       display: block;
       position: absolute;
@@ -361,14 +402,17 @@ h4 {
     }
   }
 }
+
 .modal-content {
   padding: 20px;
+
   .modalItem {
     @include flex(row, flex-start, center);
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 15px;
     cursor: pointer;
+
     .itemName {
       margin-left: 15px;
       line-height: 1;
@@ -378,11 +422,9 @@ h4 {
       @include flex-center();
       height: 32px;
       width: 42px;
-      background-color: color-mix(
-        in srgb,
-        var(--global-primary-color),
-        transparent 80%
-      );
+      background-color: color-mix(in srgb,
+          var(--global-primary-color),
+          transparent 80%);
       color: var(--global-primary-color);
       font-size: 16px;
       font-weight: 600;
@@ -394,11 +436,9 @@ h4 {
     }
 
     &.active {
-      background-color: color-mix(
-        in srgb,
-        var(--global-primary-color),
-        transparent 85%
-      );
+      background-color: color-mix(in srgb,
+          var(--global-primary-color),
+          transparent 85%);
     }
 
     &:hover {
@@ -406,21 +446,28 @@ h4 {
     }
   }
 }
+
 .changeIcon {
-  width: 200px;
+  width: 240px;
 
   .png {
     display: inline-block;
-    padding: 30px;
-    width: 16px;
+    padding: 20px;
+
+    img {
+      cursor: pointer;
+    }
   }
 }
+
 .footer {
   @include flex(row, space-between, center);
   padding: 20px;
   border-top: 1px solid #ddd;
+
   .selected-tags {
     flex: 1;
+
     .layui-tag {
       margin: 0 5px;
     }
