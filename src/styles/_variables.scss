@@ -6,6 +6,7 @@ $primary-color-light: color.adjust(
   $primary-color,
   $lightness: 30%
 ); // 主色调浅色版本，用于边框等
+$primary-background-color: mix($primary-color, #fff, 10%); // 主色调背景色
 $success-color: #67c23a; // 成功色
 $warning-color: #e6a23c; // 警告色
 $danger-color: #f56c6c; // 危险色
