@@ -6,7 +6,7 @@
                 <h3>会员续费</h3>
                 <div class="duration">{{ item.duration }}</div>
                 <div class="price">¥{{ item.price }}</div>
-                <div v-if="item.savings" class="savings">节省 ¥{{ item.savings }}</div>
+                <div class="points-info">积分折扣率{{ getPointsRate(item.key) }}%，最高可用{{ getMaxPoints(item.key) }}积分</div>
                 <div v-if="modelValue === item.key" class="active-icon">✓</div>
             </div>
         </div>
@@ -30,16 +30,16 @@ const usePointsLocal = ref(props.usePoints)
 
 const packages = [
     { key: 'month', duration: '1个月', price: '399.00' },
-    { key: 'halfYear', duration: '6个月', price: '2199.00', savings: '195.00' },
-    { key: 'year', duration: '12个月', price: '4199.00', savings: '589.00' },
-    { key: 'threeYears', duration: '36个月', price: '9999.00', savings: '4365.00' }
+    { key: 'halfYear', duration: '半年', price: '2199.00' },
+    { key: 'year', duration: '一年', price: '4199.00' },
+    { key: 'threeYears', duration: '三年', price: '9999.00' }
 ]
 
 const deductionRates = {
     month: { rate: 1.0, maxPoints: 100 },
     halfYear: { rate: 1.09, maxPoints: 600 },
     year: { rate: 1.14, maxPoints: 1300 },
-    threeYears: { rate: 1.44, maxPoints: 2600 }
+    threeYears: { rate: 1.44, maxPoints: 2800 }
 }
 
 const deductionAmount = computed(() => {
@@ -47,6 +47,18 @@ const deductionAmount = computed(() => {
     const maxPoints = Math.min(props.availablePoints || 0, config.maxPoints)
     return Math.floor(maxPoints * config.rate)
 })
+
+// 获取积分折扣率（百分比）
+const getPointsRate = (key) => {
+    const config = deductionRates[key] || deductionRates.month
+    return Math.round(config.rate * 100)
+}
+
+// 获取最高可用积分
+const getMaxPoints = (key) => {
+    const config = deductionRates[key] || deductionRates.month
+    return config.maxPoints
+}
 </script>
 
 <style lang="scss" scoped>
@@ -97,7 +109,7 @@ const deductionAmount = computed(() => {
         margin-bottom: 5px;
     }
 
-    .savings {
+    .points-info {
         font-size: 12px;
         color: #27ae60;
     }

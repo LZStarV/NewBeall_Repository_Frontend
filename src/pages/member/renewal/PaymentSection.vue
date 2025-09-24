@@ -58,7 +58,7 @@ const handlePayClick = () => {
             height: 20px;
             position: absolute;
             right: 0;
-            top: 0;
+            bottom: 0;
             background: url("@/assets/image/member/renewal/checked.png") center no-repeat;
             background-size: contain;
         }
@@ -90,7 +90,7 @@ const handlePayClick = () => {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
         color: white;
-        padding: 12px 40px;
+        padding: 0 40px;
         border-radius: 25px;
         font-weight: 600;
     }

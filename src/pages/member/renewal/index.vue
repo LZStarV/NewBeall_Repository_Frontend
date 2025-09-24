@@ -153,7 +153,7 @@ const renewalPrice = computed(() => {
         month: { rate: 1.0, maxPoints: 100 },
         halfYear: { rate: 1.09, maxPoints: 600 },
         year: { rate: 1.14, maxPoints: 1300 },
-        threeYears: { rate: 1.44, maxPoints: 2600 }
+        threeYears: { rate: 1.44, maxPoints: 2800 }
     }
 
     const config = deductionRates[selectedPackage.value] || deductionRates.month
@@ -186,7 +186,6 @@ const handlePay = async (type) => {
             // 微信支付调用，构建查询参数
             const opt = getPaymentOpt(type)
             const useIntegral = paymentData.useIntegral
-
 
             // 发起微信支付请求，参数通过URL查询字符串传递
             const result = await http.post(`wx/pay?opt=${opt}&useIntegral=${useIntegral}`)
@@ -239,10 +238,10 @@ const getPaymentOpt = (type) => {
         return pointsMap[selection] || 5
     }
 
-    // 会员续费映射：month->9, halfYear->10, year->11, threeYears->12
+    // 会员续费映射：month->9, halfYear->2, year->11, threeYears->12
     if (type === 'renewal') {
-        const renewalMap = { 'month': 9, 'halfYear': 10, 'year': 11, 'threeYears': 12 }
-        return renewalMap[selection] || 9
+        const renewalMap = { 'month': 1, 'halfYear': 2, 'year': 3, 'threeYears': 4 }
+        return renewalMap[selection] || 1
     }
 
     // 云空间购买映射：500mb->13, 1gb->14, 10gb->15

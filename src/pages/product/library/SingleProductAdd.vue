@@ -99,16 +99,30 @@
           <!-- 产品图片 -->
           <div class="custom-form-item full-width">
             <label class="form-label">产品图片</label>
-            <div class="upload-area">
-              <lay-input v-model="productForm.pictureaddress" placeholder="请输入图片URL或点击上传" />
-              <lay-button type="primary" style="margin-left: 10px;">
-                <lay-icon type="layui-icon-upload" /> 上传图片
-              </lay-button>
-            </div>
-          </div>
+            <div class="image-upload-container">
+              <!-- 图片上传区域 -->
+              <div class="image-upload-area" @click="triggerFileUpload">
+                <input ref="fileInputRef" type="file" accept="image/*" style="display: none;"
+                  @change="handleFileUpload" />
 
-          <div class="image-preview" v-if="productForm.pictureaddress">
-            <img :src="productForm.pictureaddress" alt="产品图片预览" @error="handleImageError" />
+                <!-- 如果已上传图片，显示图片预览 -->
+                <div v-if="uploadedImageData" class="image-preview-container">
+                  <img :src="uploadedImageData" alt="产品图片预览" @error="handleImageError" />
+                  <div class="image-overlay">
+                    <lay-icon type="layui-icon-upload" />
+                    <span>重新上传</span>
+                  </div>
+                </div>
+
+                <!-- 如果未上传图片，显示占位符 -->
+                <div v-else class="image-placeholder">
+                  <div class="plus-icon">+</div>
+                </div>
+              </div>
+
+              <!-- 推荐文本 -->
+              <div class="upload-tip">推荐上传无底透明的png格式</div>
+            </div>
           </div>
         </lay-form>
       </div>
@@ -144,6 +158,12 @@ const emit = defineEmits<{
 
 // 表单引用
 const formRef = ref()
+
+// 文件输入框引用
+const fileInputRef = ref<HTMLInputElement>()
+
+// 存储上传的图片 base64 数据
+const uploadedImageData = ref<string>('')
 
 // 分类相关的响应式数据
 const mainCategories = ref<ProductCategory[]>([])
@@ -195,6 +215,8 @@ const resetForm = () => {
   // 重置分类数据
   subCategories.value = []
   subCategoryGroups.value = []
+  // 重置上传的图片数据
+  uploadedImageData.value = ''
 }
 
 // 生成产品编号
@@ -242,7 +264,7 @@ const validateForm = (): boolean => {
     const cost = parseFloat(productForm.purchaseprice)
     const sellPrice = parseFloat(productForm.price)
     if (cost > sellPrice) {
-      Notify.warning({
+      Notify.error({
         title: '价格提醒',
         content: '成本价高于参考售价，请检查价格设置',
         time: 4000
@@ -261,11 +283,13 @@ const handleSubmit = async () => {
     // 这里调用新增产品API
     const response = await http.post('/product/addProduct', {
       ...productForm,
+      // 如果有上传的图片数据，使用 base64 数据，否则使用输入的 URL
+      pictureaddress: uploadedImageData.value || productForm.pictureaddress,
       createtime: new Date().toISOString(),
       uname: '当前用户' // 这里应该从用户状态获取
     })
 
-    if (response && (response.status === 200 || response.code === 200)) {
+    if (response && (response.status === 200 || (response as any).code === 200)) {
       Notify.success({
         title: '新增成功',
         content: `产品 "${productForm.name}" 已成功添加`,
@@ -275,7 +299,7 @@ const handleSubmit = async () => {
       emit('success', { ...productForm })
       handleClose()
     } else {
-      throw new Error(response?.message || '新增产品失败')
+      throw new Error('新增产品失败')
     }
   } catch (error) {
     console.error('新增产品失败:', error)
@@ -295,11 +319,13 @@ const handleSaveAndContinue = async () => {
     // 先保存当前产品
     const response = await http.post('/product/addProduct', {
       ...productForm,
+      // 如果有上传的图片数据，使用 base64 数据，否则使用输入的 URL
+      pictureaddress: uploadedImageData.value || productForm.pictureaddress,
       createtime: new Date().toISOString(),
       uname: '当前用户'
     })
 
-    if (response && (response.status === 200 || response.code === 200)) {
+    if (response && (response.status === 200 || (response as any).code === 200)) {
       Notify.success({
         title: '新增成功',
         content: `产品 "${productForm.name}" 已成功添加，继续新增下一个产品`,
@@ -312,7 +338,7 @@ const handleSaveAndContinue = async () => {
       resetForm()
       productForm.proId = generateProductId()
     } else {
-      throw new Error(response?.message || '新增产品失败')
+      throw new Error('新增产品失败')
     }
   } catch (error) {
     console.error('新增产品失败:', error)
@@ -367,10 +393,97 @@ const fetchSubCategories = async (parentId: string) => {
 const onMainCategoryChange = async () => {
   productForm.subCategoryId = '' // 重置子分类选择
   subCategories.value = [] // 清空子分类列表
-  subCategoryGroups.value = [] // 清空分组数据
+  subCategoryGroups.value =[] // 清空分组数据
 
   if (productForm.mainCategoryId) {
     await fetchSubCategories(productForm.mainCategoryId)
+  }
+}
+
+// 触发文件选择
+const triggerFileUpload = () => {
+  fileInputRef.value?.click()
+}
+
+// 处理文件上传
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+
+  if (!file) return
+
+  console.log('选择的文件:', {
+    name: file.name,
+    type: file.type,
+    size: file.size
+  })
+
+  // 验证文件类型
+  if (!file.type.startsWith('image/')) {
+    Notify.error({
+      title: '文件类型错误',
+      content: '请选择图片文件',
+      time: 3000
+    })
+    return
+  }
+
+  // 验证文件大小 (限制为5MB)
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (file.size > maxSize) {
+    Notify.error({
+      title: '文件过大',
+      content: '图片大小不能超过5MB',
+      time: 3000
+    })
+    return
+  }
+
+  try {
+    // 使用 FileReader 读取文件并转换为 base64 或 blob URL
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      const result = e.target?.result as string
+      if (result) {
+        // 将 base64 数据存储到单独变量中
+        uploadedImageData.value = result
+        // 设置一个简单的预览标识，不显示 base64 数据
+        productForm.pictureaddress = '已选择图片'
+
+        Notify.success({
+          title: '图片选择成功',
+          content: '图片已选择，可以预览',
+          time: 2000
+        })
+
+        console.log('图片已加载到预览区域')
+      }
+    }
+
+    reader.onerror = () => {
+      Notify.error({
+        title: '图片读取失败',
+        content: '无法读取选择的图片文件',
+        time: 3000
+      })
+    }
+
+    // 读取为 Data URL (base64)
+    reader.readAsDataURL(file)
+
+  } catch (error) {
+    console.error('图片处理失败:', error)
+    Notify.error({
+      title: '图片处理失败',
+      content: '处理图片时发生错误',
+      time: 3000
+    })
+  } finally {
+    // 清空文件输入框
+    if (target) {
+      target.value = ''
+    }
   }
 }
 
@@ -631,15 +744,98 @@ onMounted(async () => {
   }
 }
 
-// 上传区域样式
-.upload-area {
+// 图片上传容器样式
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+// 图片上传区域样式
+.image-upload-area {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  cursor:pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+
+  &:hover {
+    border-color: #1890ff;
+    background-color: #f0f8ff;
+  }
+}
+
+// 图片占位符样式
+.image-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  flex: 1;
+  justify-content: center;
+  background-color: #f5f5f5;
 
-  .layui-input {
-    flex: 1;
+  .plus-icon {
+    font-size: 32px;
+    color: #999;
+    font-weight: 300;
+    line-height: 1;
   }
+}
+
+// 图片预览容器样式
+.image-preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 6px;
+    color: white;
+
+    .layui-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    span {
+      font-size: 12px;
+    }
+  }
+
+  &:hover .image-overlay {
+    opacity: 1;
+  }
+}
+
+// 上传提示文本样式
+.upload-tip {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 4px;
 }
 
 // 响应式设计
