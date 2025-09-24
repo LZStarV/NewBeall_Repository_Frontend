@@ -72,3 +72,9 @@ export interface UserTreeType {
   open: boolean;
   pId: string;
 }
+
+export interface ClientCategoryNameRes {
+  clientCategory: string;
+  id: number;
+  type: number;
+}
