@@ -103,6 +103,19 @@ export default {
       },
     });
   },
+  /**
+   * 图片上传（multipart/form-data）
+   * 使用代理的 API 基础路径（/api），避免跨域。
+   * 后端若需要 moduleName，请传入；否则可省略。
+   */
+  uploadFile(file: File, moduleName?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (moduleName) formData.append('moduleName', moduleName);
+    return http.post('/company/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   // 上传宣传资料 id: 宣传质料id
   uploadData(companyId: string, file: string, id: string) {
     return http.post('/company/uploadData', null, {

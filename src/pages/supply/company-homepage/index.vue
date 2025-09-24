@@ -1,8 +1,6 @@
 <template>
   <div class="company-homepage-page">
-    <lay-row space="20">
-      <!-- 左侧固定导航区域 -->
-      <lay-col md="8" sm="8" xs="24">
+
         <section class="left-sidebar">
           <header class="sidebar-header">
             <h4>企业信息管理</h4>
@@ -96,10 +94,8 @@
             </div>
           </div>
         </section>
-      </lay-col>
       <!-- 右侧内容区域 -->
 
-      <lay-col md="16" sm="16" xs="24">
         <section class="right-content">
           <div class="view-count">
             <i class="layui-icon layui-icon-eye"></i>
@@ -112,8 +108,6 @@
             @data-updated="getMyCompanyDetails"
           />
         </section>
-      </lay-col>
-    </lay-row>
   </div>
 </template>
 
@@ -298,13 +292,23 @@ const handleClickNotice = () => {
   });
 };
 
+// 获取业务覆盖信息
+const getAreaInfo = async ()=> {
+  const res = await companyApi.getWorkarea('99');
+  console.log(res);
+}
+
+
 onMounted(async () => {
   await getMyCompanyDetails();
+  await getAreaInfo();
 });
 </script>
 
 <style scoped lang="scss">
 .company-homepage-page {
+  @include flex(row, center, flex-start);
+  gap: 20px;
   height: 100%;
 }
 
@@ -318,6 +322,8 @@ h4 {
 }
 
 .left-sidebar {
+  width: 30%;
+  height: 800px;
   background: white;
   border-radius: 12px;
   padding: 20px 0;
@@ -475,6 +481,8 @@ h4 {
 }
 
 .right-content {
+  width: 70%;
+  height: 800px;
   background: white;
   border-radius: 12px;
   position: relative;
