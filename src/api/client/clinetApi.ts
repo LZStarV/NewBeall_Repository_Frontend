@@ -4,6 +4,7 @@ import type {
   ClientType,
   UserTreeType,
   GyClientQueryListType,
+  ClientCategoryNameRes,
 } from './clinetApi.type';
 
 // 客户控制器 Client Controller
@@ -38,7 +39,8 @@ export default {
   flushPinyin: () => http.get('/client/flushPinyin'),
 
   // 获取客户类型列表
-  getClientCategoryName: () => http.get('/client/getClientCategoryName'),
+  getClientCategoryName: () =>
+    http.get<ClientCategoryNameRes[]>('/client/getClientCategoryName'),
 
   // 获取客户详情
   getClientDetailed: (clientId: string | number) =>
@@ -52,7 +54,7 @@ export default {
     Object.entries(params).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    return http.post<FormData, { rows: ClientType[] }>(
+    return http.post<FormData, { rows: ClientType[]; total: number }>(
       '/client/list',
       formData,
       {

@@ -1019,17 +1019,6 @@ const loadSearchHistory = () => {
 }
 </style>
 <style lang="scss">
-.layui-select-content,
-.layui-this {
-    min-width: 120px;
-    max-height: 200px;
-    background-color: #fff;
-    padding: 5px 0;
-    overflow: auto;
-    font-size: 12px;
-    color: #333;
-}
-
 .layui-input-suffix {
     display: flex;
     flex: none;

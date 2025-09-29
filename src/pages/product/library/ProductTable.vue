@@ -184,6 +184,10 @@
 
   <!-- 单个新增弹窗 -->
   <SingleProductAdd :visible="singleAddVisible" @close="closeSingleAdd" @success="handleAddSuccess" />
+
+  <!-- 询价弹窗 -->
+  <InquiryModal :visible="inquiryModalVisible" :selected-products="selectedProductsForInquiry"
+    @close="closeInquiryModal" @success="handleInquirySuccess" />
 </template>
 
 <script lang="ts" setup>
@@ -193,6 +197,7 @@ import http from '@/utils/http'
 import Notify from '@/utils/notify'
 import env from '@/utils/env'
 import SingleProductAdd from './SingleProductAdd.vue'
+import InquiryModal from './InquiryModal.vue'
 import type { Product } from './type'
 import { allColumns } from './type'
 
@@ -259,6 +264,10 @@ const originalTableData = ref<Product[]>([])
 
 // 单个新增弹窗状态
 const singleAddVisible = ref(false)
+
+// 询价弹窗状态
+const inquiryModalVisible = ref(false)
+const selectedProductsForInquiry = ref<Product[]>([])
 
 // 获取产品数据
 const fetchProductList = async (searchParams?: any) => {
@@ -464,17 +473,47 @@ const handleCopy = () => {
     copyText += rowData.join('\t') + '\n'
   })
 
-  // 复制到剪贴板
-  navigator.clipboard.writeText(copyText).then(() => {
+  const copyToClipboard = (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text)
+    } else {
+      return new Promise<void>((resolve, reject) => {
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+
+        try {
+          const successful = document.execCommand('copy')
+          document.body.removeChild(textArea)
+          if (successful) {
+            resolve()
+          } else {
+            reject(new Error('复制失败'))
+          }
+        } catch (err) {
+          document.body.removeChild(textArea)
+          reject(err)
+        }
+      })
+    }
+  }
+
+  copyToClipboard(copyText).then(() => {
     Notify.success({
       title: '复制成功',
       content: `已复制 ${selectedRows.length} 条产品数据`,
       time: 3000
     })
-  }).catch(() => {
+  }).catch((error) => {
+    console.error('复制失败:', error)
     Notify.error({
       title: '复制失败',
-      content: '请手动复制',
+      content: '请手动复制或检查浏览器权限',
       time: 3000
     })
   })
@@ -491,7 +530,24 @@ const handleInquiry = () => {
     })
     return
   }
-  console.log('询价产品:', selectedRows)
+  // 弹出积分扣除确认提示
+  const confirmed = confirm(
+    `• 产品名称：${selectedRows.map(row => row.name).join(', ')}\n` +
+    `• 产品型号：${selectedRows.map(row => row.model).join(', ')}\n` +
+    `• 产品数量：${selectedRows.map(row => row.num).join(', ')}\n` +
+    `• 是否继续提交询价？`
+  )
+  if (!confirmed) {
+    return // 用户选择取消，直接返回
+  }
+  // 保存选中的产品
+  selectedProductsForInquiry.value = [...selectedRows]
+
+  //点击确认后，弹出询价弹窗
+  console.log('准备显示询价弹窗，当前状态:', inquiryModalVisible.value)
+  inquiryModalVisible.value = true
+  console.log('弹窗状态已设置为:', inquiryModalVisible.value)
+
 }
 
 // 显示重复产品
@@ -553,6 +609,24 @@ const handleSingleAdd = () => {
 // 关闭单个新增弹窗
 const closeSingleAdd = () => {
   singleAddVisible.value = false
+}
+
+// 关闭询价弹窗
+const closeInquiryModal = () => {
+  inquiryModalVisible.value = false
+  selectedProductsForInquiry.value = []
+}
+
+// 处理询价成功
+const handleInquirySuccess = (data: any) => {
+  console.log('询价表单数据:', data)
+
+  // 显示询价成功提示
+  Notify.success({
+    title: '询价成功',
+    content: '询价请求已提交',
+    time: 3000
+  })
 }
 
 // 处理新增成功
@@ -659,12 +733,69 @@ const handleBatchExport = () => {
     '供应商公司': row.gyCompany || ''
   }))
 
-  console.log('导出数据:', exportData)
+  // 将数据转换为CSV格式
+  const csvContent = convertToCSV(exportData)
+
+  // 下载CSV文件
+  downloadCSV(csvContent, `产品数据_${new Date().toISOString().slice(0, 10)}.csv`)
+
   Notify.success({
     title: '导出成功',
     content: `已导出 ${selectedRows.length} 条产品数据`,
     time: 3000
   })
+}
+
+// 将数据转换为CSV格式
+const convertToCSV = (data: any[]) => {
+  if (data.length === 0) return ''
+
+  // 获取表头
+  const headers = Object.keys(data[0])
+
+  // 构建CSV内容
+  const csvRows = []
+
+  // 添加表头
+  csvRows.push(headers.join(','))
+
+  // 添加数据行
+  data.forEach(row => {
+    const values = headers.map(header => {
+      const value = row[header] || ''
+      // 处理包含逗号、引号或换行符的值
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value
+    })
+    csvRows.push(values.join(','))
+  })
+
+  return csvRows.join('\n')
+}
+
+// 下载CSV文件
+const downloadCSV = (csvContent: string, filename: string) => {
+  // 添加BOM以支持中文
+  const BOM = '\uFEFF'
+  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+
+  // 创建下载链接
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+
+  link.setAttribute('href', url)
+  link.setAttribute('download', filename)
+  link.style.visibility = 'hidden'
+
+  // 触发下载
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  // 释放URL对象
+  URL.revokeObjectURL(url)
 }
 
 // 全库备份

@@ -1,339 +1,702 @@
 <template>
   <div class="customer-management-page">
-    <!-- 顶部字母索引 -->
-    <div class="alphabet-nav">
-      <span class="nav-label">按姓名字母搜索</span>
-      <div class="alphabet-list">
-        <span
-          v-for="letter in alphabetList"
-          :key="letter"
-          class="alphabet-item"
-          :class="{ active: activeLetter === letter }"
-          @click="selectLetter(letter)"
-        >
-          {{ letter }}
-        </span>
-      </div>
-      <lay-button type="normal" size="sm" @click="clearFilter">清除</lay-button>
-    </div>
-
-    <!-- 搜索筛选区域 -->
-    <div class="search-section">
-      <div class="search-row">
-        <div class="search-item">
-          <lay-input
-            v-model="searchForm.company"
-            placeholder="客户单位"
-            allow-clear
-          />
+    <div class="header">
+      <!-- 顶部字母索引 -->
+      <section class="alphabet-nav">
+        <span class="nav-label">按姓名字母搜索</span>
+        <div class="alphabet-list">
+          <span
+            v-for="letter in alphabetList"
+            :key="letter"
+            class="alphabet-item"
+            :class="{ active: searchParams.pinyin === letter }"
+            @click="selectLetter(letter)"
+          >
+            {{ letter }}
+          </span>
         </div>
+        <lay-button type="normal" size="sm" @click="clearFilter"
+          >清除</lay-button
+        >
+      </section>
+      <!-- 搜索筛选区域 -->
+      <section class="search-section">
         <div class="search-item">
           <lay-input
-            v-model="searchForm.contact"
-            placeholder="联系人"
+            v-model="searchParams.contacts"
+            placeholder="综合搜索"
             allow-clear
           />
         </div>
         <div class="search-item">
           <lay-select
-            v-model="searchForm.status"
+            v-model="searchParams.clientStatus"
             placeholder="跟进状态"
             allow-clear
           >
-            <lay-select-option value="待跟进">待跟进</lay-select-option>
-            <lay-select-option value="跟进中">跟进中</lay-select-option>
-            <lay-select-option value="已成交">已成交</lay-select-option>
-            <lay-select-option value="已暂停">已暂停</lay-select-option>
+            <lay-select-option value="初访">初访</lay-select-option>
+            <lay-select-option value="意向">意向</lay-select-option>
+            <lay-select-option value="报价">报价</lay-select-option>
+            <lay-select-option value="成交">成交</lay-select-option>
+            <lay-select-option value="暂时搁置">暂时搁置</lay-select-option>
           </lay-select>
         </div>
         <div class="search-item">
           <lay-select
-            v-model="searchForm.source"
+            v-model="searchParams.clientSource"
             placeholder="客户来源"
             allow-clear
           >
-            <lay-select-option value="线上推广">线上推广</lay-select-option>
-            <lay-select-option value="线下推广">线下推广</lay-select-option>
-            <lay-select-option value="客户推荐">客户推荐</lay-select-option>
-            <lay-select-option value="展会">展会</lay-select-option>
+            <lay-select-option value="广告">广告</lay-select-option>
+            <lay-select-option value="社交推广">社交推广</lay-select-option>
+            <lay-select-option value="研讨会">研讨会</lay-select-option>
+            <lay-select-option value="搜索引擎">搜索引擎</lay-select-option>
+            <lay-select-option value="客户介绍">客户介绍</lay-select-option>
+            <lay-select-option value="独立开发">独立开发</lay-select-option>
+            <lay-select-option value="代理商">代理商</lay-select-option>
+            <lay-select-option value="其他">其他</lay-select-option>
           </lay-select>
         </div>
         <div class="search-item">
           <lay-select
-            v-model="searchForm.type"
+            v-model="searchParams.categoryName"
             placeholder="客户类型"
             allow-clear
+            :options="CategoryOptions"
           >
-            <lay-select-option value="重点客户">重点客户</lay-select-option>
-            <lay-select-option value="普通客户">普通客户</lay-select-option>
-            <lay-select-option value="潜在客户">潜在客户</lay-select-option>
           </lay-select>
         </div>
         <lay-button type="primary" @click="searchCustomers">
           <i class="layui-icon layui-icon-search"></i>
           查询
         </lay-button>
-      </div>
+      </section>
     </div>
 
-    <!-- 工具栏 -->
-    <!-- <div class="toolbar">
-      <div class="toolbar-left">
-        <lay-button type="primary" size="sm" @click="addCustomer">
-          <i class="layui-icon layui-icon-add-1"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="editCustomer">
-          <i class="layui-icon layui-icon-edit"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="sortCustomers">
-          <i class="layui-icon layui-icon-up-down"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="exportCustomers">
-          <i class="layui-icon layui-icon-download-circle"></i>
-        </lay-button>
-        <lay-button type="danger" size="sm" @click="deleteCustomers">
-          <i class="layui-icon layui-icon-delete"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="shareCustomers">
-          <i class="layui-icon layui-icon-share"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="viewCustomers">
-          <i class="layui-icon layui-icon-survey"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="refreshCustomers">
-          <i class="layui-icon layui-icon-refresh-3"></i>
-        </lay-button>
-        <lay-button type="normal" size="sm" @click="configColumns">
-          <i class="layui-icon layui-icon-set"></i>
-        </lay-button>
+    <div class="details">
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <lay-tooltip content="获取复制的名片消息" trigger="hover">
+          <SvgIcon name="order_receive_order"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="显示重复用户" trigger="hover">
+          <SvgIcon name="group_chat"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="复制" trigger="hover">
+          <SvgIcon name="copy"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="新增" trigger="hover">
+          <SvgIcon name="add_to" @click="addCustomer"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="编辑" trigger="hover">
+          <SvgIcon name="edit" @click="editCustomer"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="导入" trigger="hover">
+          <SvgIcon name="download"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="导出" trigger="hover">
+          <SvgIcon name="export"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="删除" trigger="hover">
+          <SvgIcon name="garbage"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="共享" trigger="hover">
+          <SvgIcon name="share"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="切换视图" trigger="hover">
+          <SvgIcon name="eye"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="刷新" trigger="hover">
+          <SvgIcon name="refresh"></SvgIcon>
+        </lay-tooltip>
+        <lay-tooltip content="列表" trigger="hover">
+          <SvgIcon name="menu"></SvgIcon>
+        </lay-tooltip>
       </div>
-    </div> -->
-
-    <!-- 客户列表 -->
-    <div class="customer-list">
-      <div class="layui-row layui-col-space20">
-        <div
-          v-for="customer in customerList"
-          :key="customer.id"
-          class="layui-col-md12 layui-col-lg6 layui-col-xl4"
+      <!-- 客户列表 -->
+      <div class="customer-list">
+        <lay-row
+          space="30"
+          class="customer-list"
+          v-if="customerList.length > 0"
         >
-          <div class="customer-card">
-            <div class="card-header">
-              <h4 class="company-name">{{ customer.companyName }}</h4>
-              <div class="card-actions">
-                <!-- <i class="layui-icon layui-icon-edit" @click="editCustomer(customer)"></i> -->
+          <lay-col md="6" sm="12" xs="24" v-for="customer in customerList">
+            <div
+              class="customer-card"
+              :class="{ active: activeCustomers.includes(customer.id) }"
+              :key="customer.id"
+              @click="toggleCustomerSelection(customer.id)"
+            >
+              <div class="card-header">
+                <div class="name" @click.stop="showDetais(customer)">
+                  {{ customer.contacts || '无' }}
+                </div>
+                <i class="layui-icon layui-icon-share"></i>
+              </div>
+
+              <div class="card-body">
+                <div class="contact-info">
+                  <div class="contact-name">
+                    <span class="name">{{ customer.contactUser || '无' }}</span>
+                    <span class="position" v-if="customer.job">{{
+                      customer.job
+                    }}</span>
+                  </div>
+
+                  <div class="contact-details">
+                    <div class="detail-item">
+                      <i class="layui-icon layui-icon-cellphone"></i>
+                      <span>{{ customer.tel || '无' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class="layui-icon layui-icon-login-qq"></i>
+                      <span>{{ customer.qq || '无' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class="layui-icon layui-icon-email"></i>
+                      <span>{{ customer.email || '无' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class="layui-icon layui-icon-location"></i>
+                      <span>{{ customer.address || '无' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class="layui-icon layui-icon-website"></i>
+                      <span>{{ customer.clientWebsite || '无' }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div class="card-body">
-              <div class="contact-info">
-                <div class="contact-name">
-                  <span class="name">{{ customer.contactName }}</span>
-                  <span class="position">{{ customer.position }}</span>
-                </div>
-
-                <div class="contact-details">
-                  <div class="detail-item">
-                    <i class="layui-icon layui-icon-cellphone"></i>
-                    <span>{{ customer.phone }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <i class="layui-icon layui-icon-login-qq"></i>
-                    <span>{{ customer.qq }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <i class="layui-icon layui-icon-email"></i>
-                    <span>{{ customer.email }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <i class="layui-icon layui-icon-location"></i>
-                    <span>{{ customer.address }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <i class="layui-icon layui-icon-website"></i>
-                    <span>{{ customer.website }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          </lay-col>
+        </lay-row>
+        <lay-empty v-else style="margin: 100px auto"></lay-empty>
+      </div>
+      <!-- 分页 -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span class="page-stats">
+            显示第 {{ listParams.offset + 1 }} 到第
+            {{
+              Math.min(pagination.current * pagination.limit, pagination.total)
+            }}
+            条记录，总共 {{ pagination.total }} 条记录
+          </span>
+          <span class="selection-stats">
+            已选中 {{ activeCustomers.length }} 条数据
+          </span>
         </div>
-      </div>
-    </div>
 
-    <!-- 分页 -->
-    <div class="pagination-wrapper">
-      <div class="pagination-info">
-        显示第 {{ pagination.current }} 到第 {{ Math.min(pagination.current * pagination.limit, pagination.total) }} 条记录，总共 {{ pagination.total }} 条记录 每页显示
-        <lay-select v-model="pagination.limit" size="sm" style="width: 80px; margin: 0 5px">
-          <lay-select-option value="10">10</lay-select-option>
-          <lay-select-option value="20">20</lay-select-option>
-          <lay-select-option value="50">50</lay-select-option>
-        </lay-select>
-        条记录
+        <lay-page
+          v-model="pagination.current"
+          :total="pagination.total"
+          :limit="pagination.limit"
+          ellipsis-tooltip
+          @change="handlePageChange"
+        />
       </div>
-
-      <lay-page
-        v-model="pagination.current"
-        :total="pagination.total"
-        :limit="pagination.limit"
-        :show-count="true"
-        :show-skip="true"
-        :show-limits="false"
-        @change="handlePageChange"
-      />
     </div>
   </div>
+  <ModalWindow
+    :title="
+      modalMode === 'add'
+        ? '新增客户'
+        : modalMode === 'edit'
+          ? '编辑客户'
+          : '客户详情'
+    "
+    :visible="detailsVisiable"
+    :btn="modalButtons"
+    isTeleport
+    :sizeArgs="['80%', '80%']"
+    @close="detailsVisiable = false"
+  >
+    <lay-form :model="formData" class="customer-detail-form">
+      <lay-row :space="20">
+        <!-- 基本信息 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="客户单位" prop="contacts">
+            <lay-input
+              v-model="formData.contacts"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="联系人" prop="contactUser">
+            <lay-input
+              v-model="formData.contactUser"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 联系方式 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="手机号" prop="tel">
+            <lay-input
+              v-model="formData.tel"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="职务" prop="job">
+            <lay-input
+              v-model="formData.job"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="邮箱" prop="email">
+            <lay-input
+              v-model="formData.email"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="QQ" prop="qq">
+            <lay-input v-model="formData.qq" :disabled="modalMode === 'view'" />
+          </lay-form-item>
+        </lay-col>
+
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="微信" prop="wechat">
+            <lay-input
+              v-model="formData.wechat"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="座机" prop="fax">
+            <lay-input
+              v-model="formData.fax"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="详细地址" prop="address">
+            <lay-input
+              v-model="formData.address"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="客户网站" prop="clientWebsite">
+            <lay-input
+              v-model="formData.clientWebsite"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 业务信息 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="客户类型" prop="clientSource">
+            <lay-select
+              v-model="formData.clientSource"
+              placeholder="请选择客户来源"
+              :options="CategoryOptions"
+              :disabled="modalMode === 'view'"
+            >
+            </lay-select>
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="跟进状态" prop="clientStatus">
+            <lay-select
+              v-model="formData.clientStatus"
+              placeholder="请选择跟进状态"
+              :disabled="modalMode === 'view'"
+            >
+              <lay-select-option value="初访">初访</lay-select-option>
+              <lay-select-option value="意向">意向</lay-select-option>
+              <lay-select-option value="报价">报价</lay-select-option>
+              <lay-select-option value="成交">成交</lay-select-option>
+              <lay-select-option value="暂时搁置">暂时搁置</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="客户来源" prop="clientSource">
+            <lay-select
+              v-model="formData.clientSource"
+              placeholder="请选择客户来源"
+              :disabled="modalMode === 'view'"
+            >
+              <lay-select-option value="广告">广告</lay-select-option>
+              <lay-select-option value="社交推广">社交推广</lay-select-option>
+              <lay-select-option value="研讨会">研讨会</lay-select-option>
+              <lay-select-option value="搜索引擎">搜索引擎</lay-select-option>
+              <lay-select-option value="客户介绍">客户介绍</lay-select-option>
+              <lay-select-option value="独立开发">独立开发</lay-select-option>
+              <lay-select-option value="代理商">代理商</lay-select-option>
+              <lay-select-option value="其他">其他</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 备注信息 -->
+        <lay-col :md="24" :sm="24" :xs="24">
+          <lay-form-item label="备注" prop="note">
+            <lay-textarea
+              v-model="formData.note"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+        <lay-col :md="24" :sm="24" :xs="24">
+          <lay-form-item label="其他备注" prop="remark">
+            <lay-textarea
+              v-model="formData.remark"
+              :disabled="modalMode === 'view'"
+            />
+          </lay-form-item>
+        </lay-col>
+      </lay-row>
+    </lay-form>
+  </ModalWindow>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import clinetApi from '@/api/client/clinetApi';
+import type {
+  ClientQueryListType,
+  ClientType,
+} from '@/api/client/clinetApi.type';
+import SvgIcon from '@/components/SvgIcon.vue';
+import ModalWindow from '@/components/ModalWindow.vue';
+import { ref, reactive, onMounted, computed } from 'vue';
+import { layer } from '@layui/layui-vue';
 
 // 字母表
-const alphabetList = ref(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
-const activeLetter = ref('A');
-
-// 搜索表单
-const searchForm = reactive({
-  company: '',
-  contact: '',
-  status: '',
-  source: '',
-  type: ''
-});
+const alphabetList = ref([
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+]);
 
 // 分页信息
 const pagination = reactive({
   current: 1,
-  total: 238,
-  limit: 10
+  total: 0,
+  limit: 10,
+});
+// 搜索参数
+const searchParams = ref({
+  contacts: '', // 综合查询
+  clientStatus: '', // 跟进状态
+  clientSource: '', // 客户来源
+  categoryName: '', // 客户类型
+  sort: '', // 筛选方式
+  pinyin: '', // 拼音查询
 });
 
+// 列表参数
+const listParams = computed<ClientQueryListType>(() => ({
+  order: 'desc', // 排序
+  limit: pagination.limit, // 每页数量
+  offset: (pagination.current - 1) * pagination.limit, // 偏移量
+  ...searchParams.value, // 展开搜索参数
+}));
+
+// 客户类型选项
+const CategoryOptions = ref();
+
 // 客户列表数据
-const customerList = ref([
+const customerList = ref<ClientType[]>([]);
+
+// 已选择客户
+const activeCustomers = ref<number[]>([]);
+
+// 模态框相关
+const detailsVisiable = ref(false);
+const modalMode = ref<'view' | 'add' | 'edit'>('view'); // 模态框模式
+
+// 表单数据
+const formData = ref<Partial<ClientType>>({
+  contacts: '',
+  contactUser: '',
+  tel: '',
+  job: '',
+  qq: '',
+  email: '',
+  wechat: '',
+  fax: '',
+  clientProvince: '',
+  clientCity: '',
+  clientArea: '',
+  address: '',
+  clientWebsite: '',
+  clientStatus: '',
+  clientSource: '',
+  note: '',
+  remark: '',
+});
+
+// 模态框按钮配置
+const modalButtons = ref([
   {
-    id: 1,
-    companyName: '广州创益信息技术有限公司',
-    contactName: '颜福如',
-    position: '总经理',
-    phone: '18664767123',
-    qq: '02032030561',
-    email: 'yanfuru@126.com',
-    address: '科学城展月明60号科技楼创新基地6C区304-310单元',
-    website: 'www.gzcyi.com.cn'
+    text: '取消',
+    style: 'default',
+    callback: () => {
+      closeModal();
+    },
   },
   {
-    id: 2,
-    companyName: '广州创益信息技术有限公司',
-    contactName: '颜福如',
-    position: '总经理',
-    phone: '18664767123',
-    qq: '02032030561',
-    email: 'yanfuru@126.com',
-    address: '科学城展月明60号科技楼创新基地6C区304-310单元',
-    website: 'www.gzcyi.com.cn'
-  }
+    text: modalMode.value === 'view' ? '关闭' : '提交',
+    style: 'primary',
+    callback: () => {
+      if (modalMode.value === 'view') {
+        closeModal();
+      } else {
+        handleSubmit();
+      }
+    },
+  },
 ]);
 
 // 选择字母
-const selectLetter = (letter: string) => {
-  activeLetter.value = letter;
-  // 这里可以添加按字母筛选的逻辑
+const selectLetter = async (letter: string) => {
+  searchParams.value.pinyin = letter;
+  searchParams.value.sort = 'pinyin';
+  // 重置分页到第一页
+  pagination.current = 1;
+  await handler.getClientList();
 };
 
 // 清除筛选
-const clearFilter = () => {
-  activeLetter.value = '';
-  Object.keys(searchForm).forEach(key => {
-    // searchForm[key] = '';
-  });
+const clearFilter = async () => {
+  searchParams.value.contacts = '';
+  searchParams.value.clientStatus = '';
+  searchParams.value.clientSource = '';
+  searchParams.value.categoryName = '';
+  searchParams.value.pinyin = '';
+  searchParams.value.sort = '';
+  // 重置分页到第一页
+  pagination.current = 1;
+  await handler.getClientList();
 };
 
 // 搜索客户
-const searchCustomers = () => {
-  console.log('搜索客户', searchForm);
-  // 实现搜索逻辑
+const searchCustomers = async () => {
+  // 搜索时重置分页到第一页
+  pagination.current = 1;
+  await handler.getClientList();
 };
 
-// // 工具栏操作
-// const addCustomer = () => {
-//   console.log('添加客户');
-// };
-
-// const editCustomer = (customer?: any) => {
-//   console.log('编辑客户', customer);
-// };
-
-// const sortCustomers = () => {
-//   console.log('排序客户');
-// };
-
-// const exportCustomers = () => {
-//   console.log('导出客户');
-// };
-
-// const deleteCustomers = () => {
-//   console.log('删除客户');
-// };
-
-// const shareCustomers = () => {
-//   console.log('分享客户');
-// };
-
-// const viewCustomers = () => {
-//   console.log('查看客户');
-// };
-
-// const refreshCustomers = () => {
-//   console.log('刷新客户');
-// };
-
-// const configColumns = () => {
-//   console.log('配置列');
-// };
-
-// 分页变化
-const handlePageChange = (current: number) => {
-  pagination.current = current;
-  // 加载对应页码的数据
+// 切换客户选中状态
+const toggleCustomerSelection = (customerId: number) => {
+  const index = activeCustomers.value.indexOf(customerId);
+  if (index > -1) {
+    // 如果已选中，则取消选中
+    activeCustomers.value.splice(index, 1);
+  } else {
+    // 如果未选中，则添加到选中列表
+    activeCustomers.value.push(customerId);
+  }
 };
 
-onMounted(() => {
+// 关闭模态框
+const closeModal = () => {
+  detailsVisiable.value = false;
+  modalMode.value = 'view';
+  resetFormData();
+};
+
+// 重置表单数据
+const resetFormData = () => {
+  formData.value = {
+    contacts: '',
+    contactUser: '',
+    tel: '',
+    job: '',
+    qq: '',
+    email: '',
+    wechat: '',
+    fax: '',
+    clientProvince: '',
+    clientCity: '',
+    clientArea: '',
+    address: '',
+    clientWebsite: '',
+    clientStatus: '',
+    clientSource: '',
+    note: '',
+    remark: '',
+  };
+};
+
+// 显示客户详情
+const showDetais = (customer: ClientType) => {
+  modalMode.value = 'view';
+  formData.value = { ...customer };
+  updateModalButtons();
+  detailsVisiable.value = true;
+};
+
+// 新增客户
+const addCustomer = () => {
+  modalMode.value = 'add';
+  resetFormData();
+  updateModalButtons();
+  detailsVisiable.value = true;
+};
+
+// 编辑客户
+const editCustomer = () => {
+  if (activeCustomers.value.length !== 1) {
+    layer.msg('请选择一个客户进行编辑');
+    return;
+  }
+
+  const customer = customerList.value.find(
+    (c) => c.id === activeCustomers.value[0],
+  );
+  if (customer) {
+    modalMode.value = 'edit';
+    formData.value = { ...customer };
+    updateModalButtons();
+    detailsVisiable.value = true;
+  }
+};
+
+// 更新模态框按钮
+const updateModalButtons = () => {
+  modalButtons.value = [
+    {
+      text: '取消',
+      style: 'default',
+      callback: () => {
+        closeModal();
+      },
+    },
+    {
+      text: modalMode.value === 'view' ? '关闭' : '提交',
+      style: 'primary',
+      callback: () => {
+        if (modalMode.value === 'view') {
+          closeModal();
+        } else {
+          handleSubmit();
+        }
+      },
+    },
+  ];
+};
+
+// 处理表单提交
+const handleSubmit = () => {
+  console.log('提交表单数据:', formData.value);
+
+  // 这里可以添加表单验证和API调用
+  if (modalMode.value === 'add') {
+    // 调用新增客户API
+    console.log('新增客户');
+  } else if (modalMode.value === 'edit') {
+    // 调用编辑客户API
+    console.log('编辑客户');
+  }
+
+  // 提交成功后关闭模态框并刷新数据
+  closeModal();
+  handler.getClientList();
+};
+
+// 分页器处理
+const handlePageChange = async (pageInfo: {
+  current: number;
+  limit: number;
+}) => {
+  pagination.current = pageInfo.current;
+  pagination.limit = pageInfo.limit;
+  await handler.getClientList();
+};
+
+const handler = {
+  // 获取客户列表
+  async getClientList() {
+    const res = (await clinetApi.clientList(listParams.value)) as unknown as {
+      rows: ClientType[];
+      total: number;
+    };
+    customerList.value = res.rows;
+    pagination.total = res.total;
+  },
+
+  // 获取客户类型列表
+  async getClientCategoryName() {
+    const res = await clinetApi.getClientCategoryName();
+    CategoryOptions.value = res.data.map((m) => ({
+      label: m.clientCategory,
+      value: m.clientCategory,
+    }));
+  },
+};
+
+onMounted(async () => {
   // 初始化加载数据
+  await handler.getClientList();
+  await handler.getClientCategoryName();
 });
 </script>
 
 <style scoped lang="scss">
-.customer-management-page {
-  height: 100vh;
-  padding: 0;
-  background-color: #f5f5f5;
+.header {
+  background-color: #fff;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  padding: 20px;
 }
 
 .alphabet-nav {
-  background: white;
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
+  @include flex(row, space-between, center);
   gap: 15px;
-  border-bottom: 1px solid #e8e8e8;
 
   .nav-label {
     font-size: 14px;
-    color: #333;
+    color: #666;
     white-space: nowrap;
   }
 
   .alphabet-list {
-    display: flex;
+    @include flex(row, flex-start, center);
     gap: 5px;
     flex-wrap: wrap;
     flex: 1;
 
     .alphabet-item {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      @include flex-center();
       width: 28px;
       height: 28px;
       border: 1px solid #d9d9d9;
@@ -348,7 +711,6 @@ onMounted(() => {
       &:hover {
         border-color: var(--global-primary-color);
         color: var(--global-primary-color);
-        background: #f0f8ff;
       }
 
       &.active {
@@ -361,103 +723,92 @@ onMounted(() => {
 }
 
 .search-section {
-  background: white;
-  padding: 20px;
-  border-bottom: 1px solid #e8e8e8;
+  @include flex-center();
+  padding-top: 15px;
+  gap: 15px;
+  flex-wrap: wrap;
 
-  .search-row {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .search-item {
-      min-width: 200px;
-      flex: 1;
-    }
+  .search-item {
+    min-width: 300px;
+    flex: 1;
   }
 }
-
+.details {
+  background-color: #fff;
+  border-radius: 16px;
+  min-height: 60vh;
+}
 .toolbar {
-  background: white;
+  @include flex(row, flex-end, center);
+  gap: 13px;
   padding: 15px 20px;
   border-bottom: 1px solid #e8e8e8;
-
-  .toolbar-left {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
 }
 
 .customer-list {
-  background: #f5f5f5;
-  padding: 20px;
-  min-height: calc(100vh - 300px);
+  padding: 10px 20px;
+  min-height: 60vh;
 
   .customer-card {
     border: 1px solid #e8e8e8;
     border-radius: 8px;
     overflow: hidden;
     transition: all 0.2s ease;
-    height: 280px;
-    background: white;
-    margin-bottom: 20px;
+    height: 250px;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background-color: var(--primary-background-color);
+    }
+
+    &.active {
       border-color: var(--global-primary-color);
-      transform: translateY(-2px);
+      background-color: var(--primary-background-color);
     }
 
     .card-header {
-      background: linear-gradient(135deg, var(--global-primary-color), #40a9ff);
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 60px;
-
-      .company-name {
-        font-size: 16px;
+      @include flex(row, space-between, center);
+      gap: 20px;
+      color: #fff;
+      font-size: 15px;
+      padding: 12px 20px;
+      margin: 0;
+      // 定制背景色
+      background-image:
+        linear-gradient(15deg, #6bf6d8, transparent),
+        linear-gradient(
+          135deg,
+          var(--global-primary-color),
+          var(--global-primary-color)
+        );
+      background-blend-mode: screen;
+      .name {
+        @include text-ellipsis();
         font-weight: 600;
-        margin: 0;
         flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
 
-      .card-actions {
-        i {
+        &:hover {
           cursor: pointer;
-          font-size: 16px;
-          opacity: 0.8;
-          transition: opacity 0.2s ease;
-
-          &:hover {
-            opacity: 1;
-          }
         }
+      }
+      i:hover {
+        cursor: pointer;
       }
     }
 
     .card-body {
       padding: 20px;
-      height: 220px;
       overflow: hidden;
 
       .contact-info {
         .contact-name {
-          display: flex;
-          align-items: center;
+          @include flex(row, flex-start, flex-end);
           gap: 10px;
-          margin-bottom: 15px;
+          margin-bottom: 20px;
 
           .name {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
+            line-height: 1.1;
             color: #333;
           }
 
@@ -465,33 +816,28 @@ onMounted(() => {
             font-size: 12px;
             color: #666;
             padding: 2px 8px;
-            background: #f0f8ff;
+            background: #dedede;
             border-radius: 12px;
           }
         }
 
         .contact-details {
           .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 13px;
+            @include flex(row, flex-start, center);
+            gap: 12px;
+            font-size: 12px;
             color: #666;
-            line-height: 1.4;
+            line-height: 1.6;
 
             i {
               color: var(--global-primary-color);
-              width: 16px;
               text-align: center;
               font-size: 14px;
             }
 
             span {
+              @include text-ellipsis();
               flex: 1;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
             }
           }
         }
@@ -501,18 +847,24 @@ onMounted(() => {
 }
 
 .pagination-wrapper {
-  background: white;
+  @include flex(row, space-between, center);
   padding: 15px 20px;
   border-top: 1px solid #e8e8e8;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 
   .pagination-info {
-    display: flex;
-    align-items: center;
     font-size: 14px;
-    color: #666;
+
+    .page-stats {
+      color: #666;
+      margin-right: 10px;
+    }
+
+    .selection-stats {
+      color: var(--global-primary-color);
+    }
   }
+}
+.customer-detail-form {
+  padding: 20px;
 }
 </style>
