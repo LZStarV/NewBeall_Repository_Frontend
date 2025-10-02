@@ -7,7 +7,6 @@ import router from '@/routers/index.ts';
 // 引入全局样式
 import '@layui/layui-vue/lib/index.css';
 import '@/styles/index.scss';
-
 // 引入Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
