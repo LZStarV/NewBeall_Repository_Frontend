@@ -21,3 +21,10 @@ export interface InqueryListResponse {
   rows: InqueryRow[];
   total: number;
 }
+
+export interface SendProduct {
+  proId: string;
+  oldProId: string;
+  num: number;
+  productPrice: number;
+}

@@ -1,36 +1,19 @@
 <template>
   <div class="order-list-component">
-    <SearchPanel
-      :api-name="isInquiryList ? 'inquery' : 'ordersNotice'"
-      :view-name="viewName"
-      :page-size="pagination.limit"
-      @search-result="handleSearchResult"
-      @loading-change="handleLoadingChange"
-      ref="searchPanelRef"
-    />
+    <SearchPanel :api-name="isInquiryList ? 'inquery' : 'ordersNotice'" :view-name="viewName"
+      :page-size="pagination.limit" @search-result="handleSearchResult" @loading-change="handleLoadingChange"
+      ref="searchPanelRef" />
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-        ref="tableRef1"
-        :columns="columns"
-        :data-source="dataSource"
-        :default-toolbar="defaultToolbars"
-        :loading="loading"
-        :page="pagination"
-        even
-        @sort-change="sortChange"
-      >
+      <lay-table ref="tableRef1" :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars"
+        :loading="loading" :page="pagination" even @sort-change="sortChange">
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
           <div class="toolbar" :class="{ 'toolbar-inquiry': isInquiryList }">
             <div v-if="isInquiryList" class="toolbar-inquiry-btns">
-              <lay-button type="normal" size="sm" @click="handleMarkAllRead"
-                >全部已读</lay-button
-              >
-              <lay-button size="sm" @click="handleMarkSelectedRead"
-                >选中已读</lay-button
-              >
+              <lay-button type="normal" size="sm" @click="handleMarkAllRead">全部已读</lay-button>
+              <lay-button size="sm" @click="handleMarkSelectedRead">选中已读</lay-button>
             </div>
             <div class="btn-group">
               <div v-if="isInquiryList" style="display: flex; gap: 1rem">
@@ -52,15 +35,8 @@
         <!-- 项目名称列自定义插槽 -->
         <template #companyName="{ row }">
           <div class="company-name">
-            <SvgIcon
-              :name="row.cgnoticetype === 0 ? 'mail_warning' : 'mail_open'"
-              color="#333"
-            />
-            <span
-              class="name-link"
-              :title="row.companyName"
-              @click="showDetailModal(row)"
-            >
+            <SvgIcon :name="row.cgnoticetype === 0 ? 'mail_warning' : 'mail_open'" color="#333" />
+            <span class="name-link" :title="row.companyName" @click="showDetailModal(row)">
               {{ row.companyName }}
             </span>
           </div>
@@ -68,9 +44,7 @@
 
         <!-- 订单状态列自定义插槽 -->
         <template #typeName="{ row }">
-          <span
-            :class="`${row.typeName === '已处理' ? 'status-finished' : 'status-unfinished'}`"
-          >
+          <span :class="`${row.typeName === '已处理' ? 'status-finished' : 'status-unfinished'}`">
             {{ row.typeName }}
           </span>
         </template>
@@ -96,14 +70,11 @@
     </lay-card>
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow
-      :visible="detailModalVisible"
-      :is-teleport="true"
-      title="订单详情"
-      @close="detailModalVisible = false"
-    >
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="订单详情" @close="detailModalVisible = false">
       <div v-if="selectedOrder">
-        <OrderDetail :row="selectedOrder" :view-name="props.viewName" />
+        <InqueryOrderDetail v-if="isInquiryList" :row="selectedOrder" :view-name="props.viewName"
+          :is-unhandled="selectedOrder.typeName === '未处理'" @close="handleRefreshClose" />
+        <OrderDetail v-else :row="selectedOrder" :view-name="props.viewName" />
       </div>
       <div v-else>
         <lay-empty />
@@ -132,6 +103,7 @@ import clientApi from '@/api/client/clinetApi';
 import Tree from '@/components/Tree.vue';
 import type { UserTreeType } from '@/api/client/clinetApi.type';
 import OrderDetail from '@/pages/order/components/OrderDetail.vue';
+import InqueryOrderDetail from '@/pages/order/components/InqueryOrderDetail.vue';
 
 // 定义组件属性
 const props = defineProps({
@@ -261,6 +233,15 @@ const showDetailModal = (row: OrdersNoticeRow) => {
   selectedOrderId.value = row.orderid;
   selectedOrder.value = row;
   detailModalVisible.value = true;
+};
+
+// 处理弹窗关闭事件，刷新搜索结果
+const handleRefreshClose = () => {
+  // 关闭详情弹窗
+  detailModalVisible.value = false;
+  if (searchPanelRef.value) {
+    searchPanelRef.value.handleRefresh();
+  }
 };
 
 // 排序
@@ -631,6 +612,7 @@ const handleShareConfirm = async (selectedRows: OrdersNoticeRow[]) => {
       width: 100%;
       gap: 0.5rem;
       justify-content: space-between;
+
       .name-link {
         color: $primary-color;
         cursor: pointer;
