@@ -17,7 +17,7 @@
             </div>
             <div class="btn-group">
               <div v-if="isInquiryList" style="display: flex; gap: 1rem">
-                <button title="对比" @click="">
+                <button title="对比" @click="handleInqueryCompare">
                   <SvgIcon name="money" width="1.1rem" />
                 </button>
                 <button title="分享" @click="handleShare">
@@ -80,6 +80,13 @@
         <lay-empty />
       </div>
     </ModalWindow>
+
+    <!-- 询价对比弹窗 -->
+    <ModalWindow :visible="inqueryCompareModalVisible" :is-teleport="true" title="询价对比"
+      @close="inqueryCompareModalVisible = false">
+      <InqueryPage v-if="inqueryCompareModalVisible" :order-id="inqueryCompareData.orderId"
+        :product-data="inqueryCompareData.productData" @close="inqueryCompareModalVisible = false" />
+    </ModalWindow>
   </div>
 </template>
 
@@ -104,6 +111,7 @@ import Tree from '@/components/Tree.vue';
 import type { UserTreeType } from '@/api/client/clinetApi.type';
 import OrderDetail from '@/pages/order/components/OrderDetail.vue';
 import InqueryOrderDetail from '@/pages/order/components/InqueryOrderDetail.vue';
+import InqueryPage from '@/pages/order/components/InqueryPage.vue';
 
 // 定义组件属性
 const props = defineProps({
@@ -144,6 +152,13 @@ const pagination = reactive({
 const detailModalVisible = ref<boolean>(false);
 const selectedOrderId = ref<string>('');
 const selectedOrder = ref<OrdersNoticeRow | null>(null);
+
+// 询价对比弹窗相关状态
+const inqueryCompareModalVisible = ref<boolean>(false);
+const inqueryCompareData = ref<any>({
+  orderId: '',
+  productData: []
+});
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
@@ -279,6 +294,41 @@ const sortChange = (key: string, sort: string) => {
 
 // 表格引用
 const tableRef1 = ref();
+
+// 处理对比询价
+const handleInqueryCompare = async () => {
+  const selectedRows = tableRef1.value.getCheckData();
+
+  // 检查是否有选中的行
+  if (selectedRows.length <= 0) {
+    layer.msg('请先选中表格中的某一记录！', { icon: 2 });
+    return;
+  }
+
+  try {
+    const res = await inqueryApi.compareInquery(
+      selectedRows.map((item: OrdersNoticeRow) => String(item.id)),
+    );
+
+    // 处理对比询价结果
+    if (res.data.inquryProductData && res.data.inquryProductData.length > 0) {
+      // 设置询价对比数据
+      inqueryCompareData.value = {
+        orderId: selectedRows[0].orderid, // 使用第一个选中行的订单ID
+        productData: res.data.inquryProductData
+      };
+
+      // 显示对比询价结果弹窗
+      inqueryCompareModalVisible.value = true;
+      notify.success(res.data.msg);
+    } else {
+      notify.error(res.data.msg || '没有可对比的询价数据');
+    }
+  } catch (error) {
+    console.error('对比询价失败:', error);
+    notify.error('对比询价失败，请重试');
+  }
+}
 
 // 用户树相关状态
 const userTreeData = ref<UserTreeType[]>([]);

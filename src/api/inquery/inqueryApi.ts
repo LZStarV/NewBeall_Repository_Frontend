@@ -1,7 +1,7 @@
 import http from '@/utils/http';
 import type { Product } from '../../pages/product/library/Api/type/productApi.type';
 import type { OrdersNoticeDeatilData } from '../orders/ordersNotice.type';
-import type { SendProduct } from './inqueryApi.type';
+import type { InquryProductData, SendProduct } from './inqueryApi.type';
 
 // 询价接口
 export default {
@@ -123,5 +123,21 @@ export default {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+
+  // 对比询价
+  compareInquery(iIds: string[]) {
+    return http.post<
+      { iIds: string[] },
+      { inquryProductData: InquryProductData[]; msg: string; orderId: string }
+    >('/Inquery/getInquryContrast', { iIds });
+  },
+
+  // 替换报价单
+  replaceInqueryProduct(replaceInquryProductData: unknown) {
+    return http.post<typeof replaceInquryProductData, string>(
+      '/Inquery/InquryProductReplacement',
+      replaceInquryProductData,
+    );
   },
 };
