@@ -211,19 +211,26 @@
     :sizeArgs="['80%', '80%']"
     @close="detailsVisiable = false"
   >
-    <lay-form :model="formData" class="customer-detail-form">
+    <lay-form
+      :model="formData"
+      ref="formRef"
+      :rules="formRules"
+      class="customer-detail-form"
+    >
       <lay-row :space="20">
-        <!-- 基本信息 -->
+        <!-- 1. 客户单位 -->
         <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="客户单位" prop="contacts">
+          <lay-form-item label="客户单位" prop="contacts" required>
             <lay-input
               v-model="formData.contacts"
               :disabled="modalMode === 'view'"
             />
           </lay-form-item>
         </lay-col>
+
+        <!-- 2. 联系人 -->
         <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="联系人" prop="contactUser">
+          <lay-form-item label="联系人" prop="contactUser" required>
             <lay-input
               v-model="formData.contactUser"
               :disabled="modalMode === 'view'"
@@ -231,15 +238,17 @@
           </lay-form-item>
         </lay-col>
 
-        <!-- 联系方式 -->
+        <!-- 3. 手机号 -->
         <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="手机号" prop="tel">
+          <lay-form-item label="手机号" prop="tel" required>
             <lay-input
               v-model="formData.tel"
               :disabled="modalMode === 'view'"
             />
           </lay-form-item>
         </lay-col>
+
+        <!-- 4. 职务 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="职务" prop="job">
             <lay-input
@@ -248,6 +257,15 @@
             />
           </lay-form-item>
         </lay-col>
+
+        <!-- 5. QQ -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="QQ" prop="qq">
+            <lay-input v-model="formData.qq" :disabled="modalMode === 'view'" />
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 6. 邮箱 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="邮箱" prop="email">
             <lay-input
@@ -257,12 +275,7 @@
           </lay-form-item>
         </lay-col>
 
-        <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="QQ" prop="qq">
-            <lay-input v-model="formData.qq" :disabled="modalMode === 'view'" />
-          </lay-form-item>
-        </lay-col>
-
+        <!-- 7. 微信 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="微信" prop="wechat">
             <lay-input
@@ -271,6 +284,8 @@
             />
           </lay-form-item>
         </lay-col>
+
+        <!-- 8. 座机 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="座机" prop="fax">
             <lay-input
@@ -279,6 +294,8 @@
             />
           </lay-form-item>
         </lay-col>
+
+        <!-- 9. 详细地址 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="详细地址" prop="address">
             <lay-input
@@ -288,6 +305,7 @@
           </lay-form-item>
         </lay-col>
 
+        <!-- 10. 客户网站 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="客户网站" prop="clientWebsite">
             <lay-input
@@ -297,33 +315,20 @@
           </lay-form-item>
         </lay-col>
 
-        <!-- 业务信息 -->
+        <!-- 11. 客户类型 -->
         <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="客户类型" prop="clientSource">
+          <lay-form-item label="客户类型" prop="categoryName">
             <lay-select
-              v-model="formData.clientSource"
-              placeholder="请选择客户来源"
+              v-model="formData.categoryName"
+              placeholder="请选择客户类型"
               :options="CategoryOptions"
               :disabled="modalMode === 'view'"
             >
             </lay-select>
           </lay-form-item>
         </lay-col>
-        <lay-col :md="12" :sm="24" :xs="24">
-          <lay-form-item label="跟进状态" prop="clientStatus">
-            <lay-select
-              v-model="formData.clientStatus"
-              placeholder="请选择跟进状态"
-              :disabled="modalMode === 'view'"
-            >
-              <lay-select-option value="初访">初访</lay-select-option>
-              <lay-select-option value="意向">意向</lay-select-option>
-              <lay-select-option value="报价">报价</lay-select-option>
-              <lay-select-option value="成交">成交</lay-select-option>
-              <lay-select-option value="暂时搁置">暂时搁置</lay-select-option>
-            </lay-select>
-          </lay-form-item>
-        </lay-col>
+
+        <!-- 12. 客户来源 -->
         <lay-col :md="12" :sm="24" :xs="24">
           <lay-form-item label="客户来源" prop="clientSource">
             <lay-select
@@ -343,21 +348,54 @@
           </lay-form-item>
         </lay-col>
 
-        <!-- 备注信息 -->
-        <lay-col :md="24" :sm="24" :xs="24">
-          <lay-form-item label="备注" prop="note">
-            <lay-textarea
-              v-model="formData.note"
+        <!-- 13. 人员规模 -->
+        <lay-col :md="12" :sm="24" :xs="24" v-if="formData.clientSize">
+          <lay-form-item label="人员规模" prop="clientSize">
+            <lay-input
+              v-model="formData.clientSize"
               :disabled="modalMode === 'view'"
             />
           </lay-form-item>
         </lay-col>
-        <lay-col :md="24" :sm="24" :xs="24">
-          <lay-form-item label="其他备注" prop="remark">
-            <lay-textarea
+
+        <!-- 14. 跟进状态 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="跟进状态" prop="clientStatus">
+            <lay-select
+              v-model="formData.clientStatus"
+              placeholder="请选择跟进状态"
+              :disabled="modalMode === 'view'"
+            >
+              <lay-select-option value="初访">初访</lay-select-option>
+              <lay-select-option value="意向">意向</lay-select-option>
+              <lay-select-option value="报价">报价</lay-select-option>
+              <lay-select-option value="成交">成交</lay-select-option>
+              <lay-select-option value="暂时搁置">暂时搁置</lay-select-option>
+            </lay-select>
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 15. 备注 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="备注" prop="remark">
+            <lay-input
               v-model="formData.remark"
               :disabled="modalMode === 'view'"
             />
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 16. 创建时间 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="创建时间" prop="createtime">
+            <lay-input v-model="formData.createtime" disabled />
+          </lay-form-item>
+        </lay-col>
+
+        <!-- 17. 创建人 -->
+        <lay-col :md="12" :sm="24" :xs="24">
+          <lay-form-item label="创建人" prop="uname">
+            <lay-input v-model="formData.uname" disabled />
           </lay-form-item>
         </lay-col>
       </lay-row>
@@ -442,9 +480,11 @@ const activeCustomers = ref<number[]>([]);
 // 模态框相关
 const detailsVisiable = ref(false);
 const modalMode = ref<'view' | 'add' | 'edit'>('view'); // 模态框模式
+const formRef = ref(); // 表单引用
 
-// 表单数据
-const formData = ref<Partial<ClientType>>({
+// 表单数据 - 定义需要提交的字段
+const formData = ref({
+  id: '',
   contacts: '',
   contactUser: '',
   tel: '',
@@ -453,16 +493,32 @@ const formData = ref<Partial<ClientType>>({
   email: '',
   wechat: '',
   fax: '',
-  clientProvince: '',
-  clientCity: '',
-  clientArea: '',
   address: '',
   clientWebsite: '',
-  clientStatus: '',
+  categoryName: '',
+  clientCategory: '',
   clientSource: '',
-  note: '',
+  clientSize: '',
+  clientStatus: '',
   remark: '',
+  note: '',
+  createtime: '', // 仅用于显示，提交时会被排除
+  uname: '', // 仅用于显示，提交时会被排除
 });
+
+// 表单校验规则
+const formRules = {
+  contacts: [{ required: true, message: '请输入客户单位', trigger: 'blur' }],
+  contactUser: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
+  tel: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号',
+      trigger: 'blur',
+    },
+  ],
+};
 
 // 模态框按钮配置
 const modalButtons = ref([
@@ -486,34 +542,29 @@ const modalButtons = ref([
   },
 ]);
 
+// 重置分页并刷新列表
+const resetPaginationAndRefresh = async () => {
+  pagination.current = 1;
+  await handler.getClientList();
+};
+
 // 选择字母
 const selectLetter = async (letter: string) => {
   searchParams.value.pinyin = letter;
   searchParams.value.sort = 'pinyin';
-  // 重置分页到第一页
-  pagination.current = 1;
-  await handler.getClientList();
+  await resetPaginationAndRefresh();
 };
 
 // 清除筛选
 const clearFilter = async () => {
-  searchParams.value.contacts = '';
-  searchParams.value.clientStatus = '';
-  searchParams.value.clientSource = '';
-  searchParams.value.categoryName = '';
-  searchParams.value.pinyin = '';
-  searchParams.value.sort = '';
-  // 重置分页到第一页
-  pagination.current = 1;
-  await handler.getClientList();
+  Object.keys(searchParams.value).forEach((key) => {
+    searchParams.value[key as keyof typeof searchParams.value] = '';
+  });
+  await resetPaginationAndRefresh();
 };
 
 // 搜索客户
-const searchCustomers = async () => {
-  // 搜索时重置分页到第一页
-  pagination.current = 1;
-  await handler.getClientList();
-};
+const searchCustomers = resetPaginationAndRefresh;
 
 // 切换客户选中状态
 const toggleCustomerSelection = (customerId: number) => {
@@ -536,41 +587,44 @@ const closeModal = () => {
 
 // 重置表单数据
 const resetFormData = () => {
-  formData.value = {
-    contacts: '',
-    contactUser: '',
-    tel: '',
-    job: '',
-    qq: '',
-    email: '',
-    wechat: '',
-    fax: '',
-    clientProvince: '',
-    clientCity: '',
-    clientArea: '',
-    address: '',
-    clientWebsite: '',
-    clientStatus: '',
-    clientSource: '',
-    note: '',
-    remark: '',
-  };
+  Object.keys(formData.value).forEach((key) => {
+    formData.value[key as keyof typeof formData.value] = '';
+  });
+};
+
+// 从客户对象中提取表单字段
+const extractFormFields = (customer: ClientType) => {
+  const fields: any = {};
+  Object.keys(formData.value).forEach((key) => {
+    fields[key] = String(customer[key as keyof ClientType] || '');
+  });
+  return fields as typeof formData.value;
+};
+
+// 打开模态框 - 统一处理查看、新增、编辑
+const openModal = (mode: 'view' | 'add' | 'edit', customer?: ClientType) => {
+  modalMode.value = mode;
+
+  if (mode === 'add') {
+    resetFormData();
+  } else if (customer) {
+    formData.value = extractFormFields(customer);
+  }
+
+  updateModalButtons();
+  detailsVisiable.value = true;
 };
 
 // 显示客户详情
 const showDetais = (customer: ClientType) => {
-  modalMode.value = 'view';
-  formData.value = { ...customer };
-  updateModalButtons();
-  detailsVisiable.value = true;
+  openModal('view', customer);
 };
 
 // 新增客户
 const addCustomer = () => {
-  modalMode.value = 'add';
-  resetFormData();
-  updateModalButtons();
-  detailsVisiable.value = true;
+  openModal('add');
+  // 设置默认值
+  formData.value.clientStatus = '初访';
 };
 
 // 编辑客户
@@ -583,11 +637,9 @@ const editCustomer = () => {
   const customer = customerList.value.find(
     (c) => c.id === activeCustomers.value[0],
   );
+
   if (customer) {
-    modalMode.value = 'edit';
-    formData.value = { ...customer };
-    updateModalButtons();
-    detailsVisiable.value = true;
+    openModal('edit', customer);
   }
 };
 
@@ -616,21 +668,44 @@ const updateModalButtons = () => {
 };
 
 // 处理表单提交
-const handleSubmit = () => {
-  console.log('提交表单数据:', formData.value);
+const handleSubmit = async () => {
+  if (!formRef.value) return;
 
-  // 这里可以添加表单验证和API调用
-  if (modalMode.value === 'add') {
-    // 调用新增客户API
-    console.log('新增客户');
-  } else if (modalMode.value === 'edit') {
-    // 调用编辑客户API
-    console.log('编辑客户');
+  try {
+    await formRef.value.validate();
+
+    const jstime = new Date().getTime();
+    const isEdit = modalMode.value === 'edit';
+
+    // 排除系统字段(createtime, uname)和准备提交数据
+    const { createtime, uname, id, ...editableFields } = formData.value;
+    const submitData = {
+      ...editableFields,
+      ...(isEdit && {
+        id: Number(id),
+        nowdate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      }),
+    };
+
+    const api = isEdit
+      ? clinetApi.updateClient(submitData, jstime)
+      : clinetApi.addClient(submitData, jstime);
+
+    await api;
+
+    layer.msg(`${isEdit ? '更新' : '新增'}客户成功`, { icon: 1 });
+    closeModal();
+    await handler.getClientList();
+  } catch (error: any) {
+    if (error?.message) {
+      layer.msg('请完善必填信息', { icon: 2 });
+    } else {
+      layer.msg(`${modalMode.value === 'edit' ? '更新' : '新增'}客户失败`, {
+        icon: 2,
+      });
+      console.error('操作失败:', error);
+    }
   }
-
-  // 提交成功后关闭模态框并刷新数据
-  closeModal();
-  handler.getClientList();
 };
 
 // 分页器处理

@@ -1,4 +1,5 @@
 import http from '@/utils/http';
+import { objectToFormData } from '@/utils/formData';
 import type {
   ClientQueryListType,
   ClientType,
@@ -10,7 +11,14 @@ import type {
 // 客户控制器 Client Controller
 export default {
   // 新增客户
-  addClient: (params: ClientType) => http.post('/client/add', null, { params }),
+  addClient: (data: any, jstime: number) => {
+    const formData = objectToFormData(data);
+    return http.post(`/client/add?jstime=${jstime}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // 共享客户
   clientShare: (clients: number[], uIds: number[]) =>
@@ -72,8 +80,14 @@ export default {
     }),
 
   // 修改客户 nowdate: 2020-03-06 11:35:14
-  updateClient: (params: unknown | { nowdate: string }) =>
-    http.post('/client/update', null, { params }),
+  updateClient: (data: any, jstime: number) => {
+    const formData = objectToFormData(data);
+    return http.post(`/client/update?jstime=${jstime}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // 客户与产品供应商界面所用的用户树
   userTree: () => http.post<null, UserTreeType[]>('/client/userTree'),
