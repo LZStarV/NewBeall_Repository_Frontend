@@ -1,5 +1,7 @@
 import http from '@/utils/http';
 import type { Product } from '../../pages/product/library/Api/type/productApi.type';
+import type { OrdersNoticeDeatilData } from '../orders/ordersNotice.type';
+import type { SendProduct } from './inqueryApi.type';
 
 // 询价接口
 export default {
@@ -86,5 +88,40 @@ export default {
   // 分享询价
   setInqueryShare(data: { inqueryIdList: number[]; userIdList: number[] }) {
     return http.post<typeof data, string>('/Inquery/SetInqueryShare', data);
+  },
+
+  // 询价订单详情
+  getInqueryNoticeDetails: (params: Record<string, string | number>) => {
+    return http.get<OrdersNoticeDeatilData>(
+      `/Inquery/InquryNoticeDetails`,
+      params,
+    );
+  },
+
+  // 导入历史报价
+  setHistoryQuote(nid: number) {
+    return http.get(`/Inquery/setHistoryQuote?nid=${nid}`);
+  },
+
+  // 发送询价订单
+  sendInquery(
+    inquiryId: number,
+    sendProducts: SendProduct[],
+    ordersId: string,
+  ) {
+    const formData = new FormData();
+    formData.append('inquiryId', inquiryId.toString());
+    formData.append('ordersId', ordersId);
+    sendProducts.forEach((sendProduct) => {
+      formData.append('num[]', sendProduct.num.toString());
+      formData.append('proId[]', sendProduct.proId);
+      formData.append('oldProId[]', sendProduct.oldProId);
+      formData.append('productPrice[]', sendProduct.productPrice.toString());
+    });
+    return http.post<FormData, string>('/Inquery/sendOrdersClient', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };
