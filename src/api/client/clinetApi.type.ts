@@ -2,11 +2,12 @@
 export interface ClientType {
   address: string;
   assignUser: number;
+  categoryName: string;
   clientArea: string;
-  clientCategory: number;
+  clientCategory: string;
   clientCity: string;
   clientProvince: string;
-  clientSize: number;
+  clientSize: string;
   clientSizeMsg: string;
   clientSource: string;
   clientStatus: string;
@@ -28,6 +29,7 @@ export interface ClientType {
   remark: string;
   revisitTime: string;
   tel: string;
+  uname: string;
   wechat: string;
 }
 
