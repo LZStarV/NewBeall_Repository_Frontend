@@ -1,40 +1,23 @@
 <template>
   <div class="order-list-component">
-    <SearchPanel
-      :api-name="isInquiryList ? 'inquery' : 'ordersNotice'"
-      :view-name="viewName"
-      :page-size="pagination.limit"
-      @search-result="handleSearchResult"
-      @loading-change="handleLoadingChange"
-      ref="searchPanelRef"
-    />
+    <SearchPanel :api-name="isInquiryList ? 'inquery' : 'ordersNotice'" :view-name="viewName"
+      :page-size="pagination.limit" @search-result="handleSearchResult" @loading-change="handleLoadingChange"
+      ref="searchPanelRef" />
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-        ref="tableRef1"
-        :columns="columns"
-        :data-source="dataSource"
-        :default-toolbar="defaultToolbars"
-        :loading="loading"
-        :page="pagination"
-        even
-        @sort-change="sortChange"
-      >
+      <lay-table ref="tableRef1" :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars"
+        :loading="loading" :page="pagination" even @sort-change="sortChange">
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
           <div class="toolbar" :class="{ 'toolbar-inquiry': isInquiryList }">
             <div v-if="isInquiryList" class="toolbar-inquiry-btns">
-              <lay-button type="normal" size="sm" @click="handleMarkAllRead"
-                >全部已读</lay-button
-              >
-              <lay-button size="sm" @click="handleMarkSelectedRead"
-                >选中已读</lay-button
-              >
+              <lay-button type="normal" size="sm" @click="handleMarkAllRead">全部已读</lay-button>
+              <lay-button size="sm" @click="handleMarkSelectedRead">选中已读</lay-button>
             </div>
             <div class="btn-group">
               <div v-if="isInquiryList" style="display: flex; gap: 1rem">
-                <button title="对比" @click="">
+                <button title="对比" @click="handleInqueryCompare">
                   <SvgIcon name="money" width="1.1rem" />
                 </button>
                 <button title="分享" @click="handleShare">
@@ -52,15 +35,8 @@
         <!-- 项目名称列自定义插槽 -->
         <template #companyName="{ row }">
           <div class="company-name">
-            <SvgIcon
-              :name="row.cgnoticetype === 0 ? 'mail_warning' : 'mail_open'"
-              color="#333"
-            />
-            <span
-              class="name-link"
-              :title="row.companyName"
-              @click="showDetailModal(row)"
-            >
+            <SvgIcon :name="row.cgnoticetype === 0 ? 'mail_warning' : 'mail_open'" color="#333" />
+            <span class="name-link" :title="row.companyName" @click="showDetailModal(row)">
               {{ row.companyName }}
             </span>
           </div>
@@ -68,9 +44,7 @@
 
         <!-- 订单状态列自定义插槽 -->
         <template #typeName="{ row }">
-          <span
-            :class="`${row.typeName === '已处理' ? 'status-finished' : 'status-unfinished'}`"
-          >
+          <span :class="`${row.typeName === '已处理' ? 'status-finished' : 'status-unfinished'}`">
             {{ row.typeName }}
           </span>
         </template>
@@ -96,18 +70,22 @@
     </lay-card>
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow
-      :visible="detailModalVisible"
-      :is-teleport="true"
-      title="订单详情"
-      @close="detailModalVisible = false"
-    >
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="订单详情" @close="detailModalVisible = false">
       <div v-if="selectedOrder">
-        <OrderDetail :row="selectedOrder" :view-name="props.viewName" />
+        <InqueryOrderDetail v-if="isInquiryList" :row="selectedOrder" :view-name="props.viewName"
+          :is-unhandled="selectedOrder.typeName === '未处理'" @close="handleRefreshClose" />
+        <OrderDetail v-else :row="selectedOrder" :view-name="props.viewName" />
       </div>
       <div v-else>
         <lay-empty />
       </div>
+    </ModalWindow>
+
+    <!-- 询价对比弹窗 -->
+    <ModalWindow :visible="inqueryCompareModalVisible" :is-teleport="true" title="询价对比"
+      @close="inqueryCompareModalVisible = false">
+      <InqueryPage v-if="inqueryCompareModalVisible" :order-id="inqueryCompareData.orderId"
+        :product-data="inqueryCompareData.productData" @close="inqueryCompareModalVisible = false" />
     </ModalWindow>
   </div>
 </template>
@@ -132,6 +110,8 @@ import clientApi from '@/api/client/clinetApi';
 import Tree from '@/components/Tree.vue';
 import type { UserTreeType } from '@/api/client/clinetApi.type';
 import OrderDetail from '@/pages/order/components/OrderDetail.vue';
+import InqueryOrderDetail from '@/pages/order/components/InqueryOrderDetail.vue';
+import InqueryPage from '@/pages/order/components/InqueryPage.vue';
 
 // 定义组件属性
 const props = defineProps({
@@ -172,6 +152,13 @@ const pagination = reactive({
 const detailModalVisible = ref<boolean>(false);
 const selectedOrderId = ref<string>('');
 const selectedOrder = ref<OrdersNoticeRow | null>(null);
+
+// 询价对比弹窗相关状态
+const inqueryCompareModalVisible = ref<boolean>(false);
+const inqueryCompareData = ref<any>({
+  orderId: '',
+  productData: []
+});
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
@@ -263,6 +250,15 @@ const showDetailModal = (row: OrdersNoticeRow) => {
   detailModalVisible.value = true;
 };
 
+// 处理弹窗关闭事件，刷新搜索结果
+const handleRefreshClose = () => {
+  // 关闭详情弹窗
+  detailModalVisible.value = false;
+  if (searchPanelRef.value) {
+    searchPanelRef.value.handleRefresh();
+  }
+};
+
 // 排序
 const sortChange = (key: string, sort: string) => {
   if (!dataSource.value) return;
@@ -298,6 +294,41 @@ const sortChange = (key: string, sort: string) => {
 
 // 表格引用
 const tableRef1 = ref();
+
+// 处理对比询价
+const handleInqueryCompare = async () => {
+  const selectedRows = tableRef1.value.getCheckData();
+
+  // 检查是否有选中的行
+  if (selectedRows.length <= 0) {
+    layer.msg('请先选中表格中的某一记录！', { icon: 2 });
+    return;
+  }
+
+  try {
+    const res = await inqueryApi.compareInquery(
+      selectedRows.map((item: OrdersNoticeRow) => String(item.id)),
+    );
+
+    // 处理对比询价结果
+    if (res.data.inquryProductData && res.data.inquryProductData.length > 0) {
+      // 设置询价对比数据
+      inqueryCompareData.value = {
+        orderId: selectedRows[0].orderid, // 使用第一个选中行的订单ID
+        productData: res.data.inquryProductData
+      };
+
+      // 显示对比询价结果弹窗
+      inqueryCompareModalVisible.value = true;
+      notify.success(res.data.msg);
+    } else {
+      notify.error(res.data.msg || '没有可对比的询价数据');
+    }
+  } catch (error) {
+    console.error('对比询价失败:', error);
+    notify.error('对比询价失败，请重试');
+  }
+}
 
 // 用户树相关状态
 const userTreeData = ref<UserTreeType[]>([]);
@@ -631,6 +662,7 @@ const handleShareConfirm = async (selectedRows: OrdersNoticeRow[]) => {
       width: 100%;
       gap: 0.5rem;
       justify-content: space-between;
+
       .name-link {
         color: $primary-color;
         cursor: pointer;

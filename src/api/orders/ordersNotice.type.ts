@@ -22,7 +22,7 @@ export interface OrdersNoticeListResponse {
 }
 
 export interface OrdersNoticeDeatilData {
-  cglogList: [];
+  cglogList: LogData[];
   company: string; // 接收公司
   discount: string;
   distinctBrand: string[]; // 品牌名称合集（供筛选用）
@@ -36,11 +36,11 @@ export interface OrdersNoticeDeatilData {
   projectAddress: string;
   receiveName: (string | null)[];
   sureDisplay: boolean;
-  uplogList: UplogData[];
+  uplogList: LogData[];
   viewName: string;
 }
 
-export interface UplogData {
+export interface LogData {
   createtime: string; // 审批时间
   createuserid: string;
   id: string;
