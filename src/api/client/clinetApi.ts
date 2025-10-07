@@ -31,13 +31,20 @@ export default {
     http.post<null, UserTreeType>(`/client/clientShareTree/${clientId}`),
 
   // 复制客户信息
-  copyClient: (id: string | number) => http.get(`/client/codyClient/${id}`),
+  copyClient: (id: string | number) => http.get(`/client/codyClient?id=${id}`),
 
   // 删除客户
-  deleteClient: (clientIds: number[], lientIds: number[]) =>
-    http.post(
-      `/client/delete?clientIds[]=${clientIds}&lientIds[]=${JSON.stringify(lientIds)}`,
-    ),
+  deleteClient: (clientIds: number[], jstime: number) => {
+    const formData = new FormData();
+    clientIds.forEach((id) => {
+      formData.append('clientIds[]', id.toString());
+    });
+    return http.post(`/client/delete?jstime=${jstime}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // 获取客户信息
   clientDetail: (clientId: string | number) =>
@@ -74,10 +81,21 @@ export default {
   },
 
   // 获取重复客户列表
-  clientDuplicateList: (params: ClientQueryListType) =>
-    http.post<null, { rows: ClientType[] }>('/client/list_dup', null, {
-      params,
-    }),
+  clientDuplicateList: (params: ClientQueryListType) => {
+    const formData = new FormData();
+    Object.entries(params).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    return http.post<FormData, { rows: ClientType[]; total: number }>(
+      '/client/list_dup',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  },
 
   // 修改客户 nowdate: 2020-03-06 11:35:14
   updateClient: (data: any, jstime: number) => {

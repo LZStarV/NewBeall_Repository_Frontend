@@ -6,4 +6,12 @@ export default {
   getAiChat(aiInstructionContextDTO: { context: string; title: string }) {
     return http.post('/AI/AiInstructionContext', aiInstructionContextDTO);
   },
+  getCompanyInformation(companyName: string) {
+    return http.get(
+      `/AI/getCompanyInformationByCompanyName?companyName=${companyName}`,
+    );
+  },
+  businessCard(base64: string, type: number) {
+    return http.post('/AI/businessCard', { base64, type });
+  },
 };
