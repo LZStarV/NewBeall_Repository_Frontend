@@ -4,7 +4,6 @@ import type {
   ClientQueryListType,
   ClientType,
   UserTreeType,
-  GyClientQueryListType,
   ClientCategoryNameRes,
 } from './clinetApi.type';
 
@@ -21,10 +20,22 @@ export default {
   },
 
   // 共享客户
-  clientShare: (clients: number[], uIds: number[]) =>
-    http.post(
-      `/client/clientShare?clients[]=${JSON.stringify(clients)}&uIds[]=${JSON.stringify(uIds)}`,
-    ),
+  clientShare: (clientIds: number[], uIds: number[], jstime: number) => {
+    const formData = new FormData();
+    // 添加客户ID数组
+    clientIds.forEach((id) => {
+      formData.append('clients[]', id.toString());
+    });
+    // 添加用户ID数组
+    uIds.forEach((id) => {
+      formData.append('uIds[]', id.toString());
+    });
+    return http.post(`/client/clientShare?jstime=${jstime}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // 单个客户回显树
   clientShareTree: (clientId: string | number) =>
@@ -109,21 +120,4 @@ export default {
 
   // 客户与产品供应商界面所用的用户树
   userTree: () => http.post<null, UserTreeType[]>('/client/userTree'),
-
-  // 获取供应商客户列表
-  gyClientList: (params: GyClientQueryListType) => {
-    const formData = new FormData();
-    Object.entries(params).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-    return http.post<FormData, { rows: ClientType[] }>(
-      '/client/gyClientList',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    );
-  },
 };

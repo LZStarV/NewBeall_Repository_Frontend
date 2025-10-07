@@ -57,11 +57,6 @@ export interface ClientQueryListType {
   sort?: string;
 }
 
-// 查询供应商客户列表类型
-export interface GyClientQueryListType extends ClientQueryListType {
-  gyType?: string;
-}
-
 // 用户树类型
 export interface UserTreeType {
   checked: boolean;

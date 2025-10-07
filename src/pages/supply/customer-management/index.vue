@@ -107,7 +107,7 @@
           <SvgIcon name="garbage" @click="deleteCustomer"></SvgIcon>
         </lay-tooltip>
         <lay-tooltip content="共享" trigger="hover">
-          <SvgIcon name="share"></SvgIcon>
+          <SvgIcon name="share" @click="shareCustomer"></SvgIcon>
         </lay-tooltip>
         <lay-tooltip content="切换视图" trigger="hover">
           <SvgIcon name="eye"></SvgIcon>
@@ -135,15 +135,19 @@
             >
               <div class="card-header">
                 <div class="name" @click.stop="showDetais(customer)">
-                  {{ customer.contacts || '无' }}
+                  {{ customer.contacts || '未命名单位' }}
                 </div>
-                <i class="layui-icon layui-icon-share"></i>
+                <i
+                  class="layui-icon layui-icon-share"
+                  @click.stop="shareCard(customer.id)"
+                  title="分享"
+                ></i>
               </div>
 
               <div class="card-body">
                 <div class="contact-info">
                   <div class="contact-name">
-                    <span class="name">{{ customer.contactUser || '无' }}</span>
+                    <span class="name">{{ customer.contactUser || '-' }}</span>
                     <span class="position" v-if="customer.job">{{
                       customer.job
                     }}</span>
@@ -152,23 +156,23 @@
                   <div class="contact-details">
                     <div class="detail-item">
                       <i class="layui-icon layui-icon-cellphone"></i>
-                      <span>{{ customer.tel || '无' }}</span>
+                      <span>{{ customer.tel || '-' }}</span>
                     </div>
                     <div class="detail-item">
                       <i class="layui-icon layui-icon-login-qq"></i>
-                      <span>{{ customer.qq || '无' }}</span>
+                      <span>{{ customer.qq || '-' }}</span>
                     </div>
                     <div class="detail-item">
                       <i class="layui-icon layui-icon-email"></i>
-                      <span>{{ customer.email || '无' }}</span>
+                      <span>{{ customer.email || '-' }}</span>
                     </div>
                     <div class="detail-item">
                       <i class="layui-icon layui-icon-location"></i>
-                      <span>{{ customer.address || '无' }}</span>
+                      <span>{{ customer.address || '-' }}</span>
                     </div>
                     <div class="detail-item">
                       <i class="layui-icon layui-icon-website"></i>
-                      <span>{{ customer.clientWebsite || '无' }}</span>
+                      <span>{{ customer.clientWebsite || '-' }}</span>
                     </div>
                   </div>
                 </div>
@@ -447,10 +451,12 @@ import aiApi from '@/api/ai/aiApi';
 import type {
   ClientQueryListType,
   ClientType,
+  UserTreeType,
 } from '@/api/client/clinetApi.type';
 import SvgIcon from '@/components/SvgIcon.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
-import { ref, reactive, onMounted, computed } from 'vue';
+import Tree from '@/components/Tree.vue';
+import { ref, reactive, onMounted, computed, h } from 'vue';
 import { layer } from '@layui/layui-vue';
 
 // 加载状态
@@ -463,6 +469,11 @@ const showDuplicateOnly = ref(false);
 // 名片识别弹窗
 const cardImageVisible = ref(false);
 const cardImageBase64 = ref('');
+
+// 用户树相关状态
+const userTreeData = ref<UserTreeType[]>([]);
+const expandedKeys = ref<(string | number)[]>([]);
+const selectedUserIds = ref<(string | number)[]>([]);
 
 // 字母表
 const alphabetList = ref([
@@ -837,6 +848,165 @@ const getClipboardCard = async () => {
     layer.msg('剪贴板中没有图片', { icon: 3 });
   } catch (error) {
     layer.msg('读取剪贴板失败,请确保已授予权限', { icon: 2 });
+  }
+};
+
+// 分享客户
+const shareCustomer = async () => {
+  if (activeCustomers.value.length === 0) {
+    layer.msg('请至少选择一个客户进行分享');
+    return;
+  }
+
+  try {
+    // 获取用户树数据
+    const userTreeResponse =
+      (await clinetApi.userTree()) as unknown as UserTreeType[];
+    userTreeData.value = userTreeResponse;
+
+    // 设置默认展开的节点
+    expandedKeys.value = userTreeData.value
+      .filter((item) => item.open)
+      .map((item) => item.id);
+
+    // 清空之前的选择
+    selectedUserIds.value = [];
+
+    // 显示分享抽屉
+    layer.drawer({
+      title: '选择分享用户',
+      content: h(Tree, {
+        data: transformedUserTreeDataForTree.value,
+        multiple: true,
+        showCheckbox: true,
+        checkStrictly: false,
+        defaultExpandedIds: expandedKeys.value,
+        defaultSelectedIds: selectedUserIds.value,
+        onSelect: handleShareTreeSelect,
+        onExpand: (expandedIds: (string | number)[]) => {
+          expandedKeys.value = expandedIds.map(String);
+        },
+      }),
+      btn: [
+        {
+          text: '取消',
+          style: 'default',
+          callback(id: string) {
+            layer.close(id);
+            selectedUserIds.value = [];
+          },
+        },
+        {
+          text: '确定',
+          style: 'primary',
+          callback(id: string) {
+            handleShareConfirm(id);
+          },
+        },
+      ],
+      area: '30%',
+    });
+  } catch (error) {
+    console.error('获取用户树失败:', error);
+    layer.msg('获取用户树失败，请重试', { icon: 2 });
+  }
+};
+
+/**
+ * 处理分享树组件的选择事件
+ */
+const handleShareTreeSelect = (
+  selected: string | number | (string | number)[],
+) => {
+  if (Array.isArray(selected)) {
+    selectedUserIds.value = selected;
+  } else {
+    selectedUserIds.value = [selected];
+  }
+};
+
+/**
+ * 转换用户树数据格式，用于Tree组件
+ */
+const transformedUserTreeDataForTree = computed(() => {
+  // 将层级数据转换为扁平化数据
+  const flattenData: any[] = [];
+
+  const flatten = (items: UserTreeType[]) => {
+    items.forEach((item) => {
+      if (item.id === '0') {
+        item.pId = '-1'; // 对总公司做特殊处理
+      }
+      flattenData.push({
+        id: item.id,
+        parentId: item.pId === '-1' ? null : item.pId,
+        name: item.name,
+        icon: item.isUser === 'true' ? 'user' : 'folder',
+        showCheckbox: !item.nocheck, // 根据nocheck属性控制checkbox显示
+        disabled: item.chkDisabled.toString() === 'true', // 根据chkDisabled属性控制是否禁用
+        selected: item.checked && item.isUser === 'true', // 只有用户节点可被选中
+        expanded: item.open, // 根据open属性控制默认展开状态
+      });
+    });
+  };
+
+  flatten(userTreeData.value);
+  return flattenData;
+});
+
+/**
+ * 确认分享操作
+ */
+const handleShareConfirm = async (drawerId: string) => {
+  if (selectedUserIds.value.length === 0) {
+    layer.msg('请选择要分享的用户', { icon: 2 });
+    return;
+  }
+
+  try {
+    // 获取用户树中isUser为'true'的节点ID列表
+    const userNodeIds = userTreeData.value
+      .filter((item) => item.isUser === 'true')
+      .map((item) => Number(item.id));
+
+    // 再次过滤selectedUserIds，确保只包含用户节点ID
+    const filteredUserIds = selectedUserIds.value
+      .map((id) => Number(id)) // 转换为数字类型
+      .filter((id) => userNodeIds.includes(id));
+
+    if (filteredUserIds.length === 0) {
+      layer.msg('请选择有效的用户进行分享', { icon: 2 });
+      return;
+    }
+
+    const jstime = new Date().getTime();
+    // 调用分享API
+    await clinetApi.clientShare(activeCustomers.value, filteredUserIds, jstime);
+
+    layer.msg('分享成功', { icon: 1 });
+
+    // 关闭抽屉
+    layer.close(drawerId);
+
+    // 清空选中状态
+    selectedUserIds.value = [];
+  } catch (error) {
+    console.error('分享失败:', error);
+    layer.msg('分享失败，请重试', { icon: 2 });
+  }
+};
+
+// 单个卡片分享
+const shareCard = async (customerId: number) => {
+  // 临时设置选中的客户ID
+  const originalSelection = [...activeCustomers.value];
+  activeCustomers.value = [customerId];
+
+  await shareCustomer();
+
+  // 恢复原来的选中状态
+  if (!activeCustomers.value.includes(customerId)) {
+    activeCustomers.value = originalSelection;
   }
 };
 
