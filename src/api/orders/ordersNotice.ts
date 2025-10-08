@@ -49,4 +49,17 @@ export default {
       params,
     );
   },
+
+  /** 产品供应商保存订单通知（入参关于产品信息的都是列表[]格式，各个列表数据一一对应） */
+  closeAndSaveNotice: (params: Record<string, string | number>) => {
+    const formData = new FormData();
+    Object.keys(params).forEach((key) => {
+      formData.append(key, String(params[key]));
+    });
+    return http.post<FormData>('/ordersNotice/close', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };

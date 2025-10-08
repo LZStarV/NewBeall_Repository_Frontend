@@ -655,6 +655,23 @@ const handleSubProjectSubmit = (subProjectData: {
   color: string;
   parentId?: string;
 }) => {
+  type LevelType = 'level1' | 'level2' | 'level3'
+
+  const getSubprojectClass = (level: LevelType) => {
+    return `sprojects${level.slice(-1)}`
+  }
+
+  const getSubprojectLevel = (level: LevelType) => {
+    switch (level) {
+      case 'level1':
+        return 'oneColor';
+      case 'level2':
+        return 'secondColor';
+      case 'level3':
+        return 'threeColor';
+    }
+  };
+
   // 添加子项目到表格
   const subProjectRow = {
     id: `sub_${Date.now()}`,
@@ -673,6 +690,13 @@ const handleSubProjectSubmit = (subProjectData: {
     isSubProject: true,
     subProjectData: subProjectData,
     backgroundColor: subProjectData.color, // 用于背景色显示
+    encryptId: '',
+    productId: 'EMPTY0000000000000',
+    subproject: subProjectData.name,
+    subprojectClass: getSubprojectClass(subProjectData.level as LevelType),
+    subprojectColor: subProjectData.color,
+    subprojectLevel: getSubprojectLevel(subProjectData.level as LevelType),
+    subprojectParent: subProjectData.parentId || '',
   };
 
   quotationData.value.push(subProjectRow as unknown as QuotationItem);
@@ -756,6 +780,7 @@ const initEmptyRow = () => {
     pic: undefined,
     company: '',
     isSubProject: true, // 设置为子项目行，这样编号列会显示新增按钮
+    isUtilRow: true, // 标识为工具行，用于处理删除等操作，不会被提交
   };
   return emptyRow as unknown as QuotationItem;
 };
@@ -911,6 +936,7 @@ const emit = defineEmits<{
 // 通过type获取param类型
 const getFormParam = () => {
   // if 新建设计报价 return 'orderCreatSave'
+  if (isNewQuotation) return 'orderCreatSave';
   if (orderData.type === 0) return 'orderModify';
   else return 'orderTemModify';
 };
@@ -942,22 +968,22 @@ const collectFormData = async (): Promise<Quotation> => {
     DeliveryAddress: tradeInfo.value.address,
     DeliveryTime: tradeInfo.value.deliveryTime,
     area: areaNames.area, // 使用获取到的区县名称
-    chargePerson: parseInt(projectInfo.value.manager),
-    chargePersonInfo:
-      projectManagerList.value?.find(
-        (item) => item.id === parseInt(projectInfo.value.manager),
-      )?.name || '',
+    chargePerson: String(projectInfo.value.manager),
+    // chargePersonInfo:
+    //   projectManagerList.value?.find(
+    //     (item) => item.id === parseInt(projectInfo.value.manager),
+    //   )?.name || '',
     city: areaNames.city, // 使用获取到的城市名称
     clientBankAccount: customerInfo.value.bankAccount || null,
     clientBankName: customerInfo.value.bankName || null,
-    clientId: customerData.id,
+    clientId: customerData.id, // TODO: 待确认客户单位id
     clientTexId: customerInfo.value.taxNumber || null,
     companyAddres: companyInfo.value.address,
     companyName: companyInfo.value.name,
     contactPhone: companyInfo.value.phone,
     contacts: companyInfo.value.contact,
     deliveryMethod: tradeInfo.value.deliveryMethod,
-    explanation: null,
+    explanation: null, // TODO待放入报价单说明信息
     orderdetailsList: quotationItemsToOrderDetails(quotationData.value),
     ordersCharacter: projectInfo.value.nature?.toString(),
     orderstype1: quoteType1Name, // 使用获取到的报价类型名称
@@ -968,10 +994,10 @@ const collectFormData = async (): Promise<Quotation> => {
     projectRemark: projectInfo.value.remark,
     province: areaNames.province, // 使用获取到的省份名称
     selfBank: companyInfo.value.bankName || '',
-    selfId: myCompanyInfo.value?.id || 0, // myCompanyId
+    selfId: String(myCompanyInfo.value?.id) || '0', // myCompanyId
     settleMethod: tradeInfo.value.paymentMethod // 结算方式id
-      ? parseInt(tradeInfo.value.paymentMethod)
-      : 0,
+      ? String(tradeInfo.value.paymentMethod)
+      : '0',
   };
 
   // 如果不是新建报价，添加编辑报价特有的字段
@@ -1005,6 +1031,7 @@ defineExpose({
   triggerSubmit,
   triggerTempSave,
   collectFormData,
+  showSubProjectDrawer,
 });
 
 onMounted(() => {

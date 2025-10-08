@@ -1,4 +1,4 @@
-import type { OrderDetail } from '@/api/orders/orderApi.type';
+import type { OrderDetail, SubproductHeader } from '@/api/orders/orderApi.type';
 
 // QuotationItem 接口定义（从 QuotationEdit.vue 中提取）
 export interface QuotationItem {
@@ -123,60 +123,79 @@ export function orderDetailToQuotationItem(
  * @returns OrderDetail 对象
  */
 export function quotationItemToOrderDetail(
-  quotationItem: QuotationItem,
+  quotationItem:
+    | QuotationItem
+    | (SubproductHeader & {
+        isSubProject?: boolean;
+        isUtilRow?: boolean;
+      }),
   index: number = 0,
-): OrderDetail {
-  return {
-    brand: quotationItem.brand,
-    changeState: 0,
-    companyId: 0,
-    costprice: quotationItem.cost,
-    createrid: 0,
-    discountprice: 0,
-    encryptId: `temp_${Date.now()}_${index}`,
-    gyCompany: 0,
-    gysource: '',
-    id: quotationItem.id,
-    interestrateprice: 0,
-    inventoryPrice: 0,
-    inventoryRemark: '',
-    isInventory: 0,
-    isTemporary: 1,
-    marketprice: quotationItem.price,
-    model: quotationItem.model,
-    modifyprice: 0,
-    name: Array.isArray(quotationItem.name)
-      ? quotationItem.name[0]?.label || ''
-      : (quotationItem.name as any) || '',
-    num: quotationItem.quantity,
-    oldEncryptId: '',
-    orderId: '',
-    param: Array.isArray(quotationItem.feature)
-      ? quotationItem.feature.map((f) => f.label).join(',')
-      : '',
-    pictureaddress: quotationItem.pic,
-    pictureaddressOne: '',
-    price: quotationItem.price,
-    productCurrChainId: '',
-    productCurrState: 0,
-    productId: '',
-    profitprice: 0,
-    purchaseprice: quotationItem.cost,
-    receiveid: 0,
-    recommend: true,
-    remark: '',
-    sequence: index + 1,
-    subproject: '',
-    subprojectClass: '',
-    subprojectColor: '',
-    subprojectLevel: '',
-    subprojectParent: '',
-    trait: Array.isArray(quotationItem.feature)
-      ? quotationItem.feature.map((f) => f.label).join(',')
-      : '',
-    unit: quotationItem.unit,
-    xjProductId: '',
-  };
+): OrderDetail | SubproductHeader {
+  if ('isSubProject' in quotationItem && quotationItem.isSubProject) {
+    const item = quotationItem as SubproductHeader;
+    return {
+      encryptId: item.encryptId,
+      productId: item.productId,
+      subproject: item.subproject,
+      subprojectClass: item.subprojectClass,
+      subprojectColor: item.subprojectColor,
+      subprojectLevel: item.subprojectLevel,
+      subprojectParent: item.subprojectParent,
+    };
+  } else {
+    const item = quotationItem as QuotationItem;
+    return {
+      brand: item.brand,
+      changeState: 0,
+      companyId: 0,
+      costprice: item.cost,
+      createrid: 0,
+      discountprice: 0,
+      encryptId: `temp_${Date.now()}_${index}`,
+      gyCompany: 0,
+      gysource: '',
+      id: item.id,
+      interestrateprice: 0,
+      inventoryPrice: 0,
+      inventoryRemark: '',
+      isInventory: 0,
+      isTemporary: 1,
+      marketprice: item.price,
+      model: item.model,
+      modifyprice: 0,
+      name: Array.isArray(item.name)
+        ? item.name[0]?.label || ''
+        : (item.name as any) || '',
+      num: item.quantity,
+      oldEncryptId: '',
+      orderId: '',
+      param: Array.isArray(item.feature)
+        ? item.feature.map((f) => f.label).join(',')
+        : '',
+      pictureaddress: item.pic,
+      pictureaddressOne: '',
+      price: item.price,
+      productCurrChainId: '',
+      productCurrState: 0,
+      productId: '',
+      profitprice: 0,
+      purchaseprice: item.cost,
+      receiveid: 0,
+      recommend: true,
+      remark: '',
+      sequence: index + 1,
+      subproject: '',
+      subprojectClass: '',
+      subprojectColor: '',
+      subprojectLevel: '',
+      subprojectParent: '',
+      trait: Array.isArray(item.feature)
+        ? item.feature.map((f) => f.label).join(',')
+        : '',
+      unit: item.unit,
+      xjProductId: '',
+    };
+  }
 }
 
 /**
@@ -199,10 +218,10 @@ export function orderDetailsToQuotationItems(
  */
 export function quotationItemsToOrderDetails(
   quotationItems: QuotationItem[],
-): OrderDetail[] {
-  return quotationItems.map((item, index) =>
-    quotationItemToOrderDetail(item, index),
-  );
+): (OrderDetail | SubproductHeader)[] {
+  return quotationItems
+    .slice(1) // 忽略第一行工具行
+    .map((item, index) => quotationItemToOrderDetail(item, index));
 }
 
 /**

@@ -202,8 +202,8 @@ export interface Quotation {
   DeliveryTime: string; // 交货时间
   approvalType?: number;
   area: string; // 区
-  chargePerson: number;
-  chargePersonInfo: string;
+  chargePerson: number | string;
+  chargePersonInfo?: string;
   city: string; // 市
   clientBankAccount: string | null; // 客户-银行账号
   clientBankName: string | null; // 客户-开户行
@@ -227,8 +227,8 @@ export interface Quotation {
   projectRemark: string; // 项目备注
   province: string; // 省
   selfBank: string; // 我司银行账号
-  selfId: number;
-  settleMethod: number; // 结算方式id，需要再调用API获取对于的类型
+  selfId: number | string;
+  settleMethod: number | string; // 结算方式id，需要再调用API获取对于的类型
   shareOrders?: number; // 新建报价单暂无
   type?: number; // 新建报价单暂无
   version?: number; // 新建报价单暂无

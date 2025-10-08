@@ -1,18 +1,7 @@
 <template>
   <div class="new-quote-page">
-    <QuotationEdit
-      ref="quotationEditRef"
-      :quotation-menu-config="quotationMenuConfig"
-      :is-new-quotation="true"
-      @data-submit="handleDataSubmit"
-      @temp-save="handleTempSave"
-    />
-
-    <!-- 新建子项目 drawer -->
-    <SubProjectDrawer
-      v-model:visible="showSubProjectDrawer"
-      @submit="handleSubProjectSubmit"
-    />
+    <QuotationEdit ref="quotationEditRef" :quotation-menu-config="quotationMenuConfig" :is-new-quotation="true"
+      @data-submit="handleDataSubmit" @temp-save="handleTempSave" />
   </div>
 </template>
 
@@ -20,16 +9,13 @@
 import { ref } from 'vue';
 import { layer } from '@layui/layui-vue';
 import QuotationEdit from '../components/QuotationEdit.vue';
-import SubProjectDrawer from '../components/SubProjectDrawer.vue';
 import ordersApi from '@/api/orders/ordersApi';
 import notify from '@/utils/notify';
 import type { Quotation } from '@/api/orders/orderApi.type';
+import { useRouter } from 'vue-router';
 
 // 报价说明文本
 const quotationExplanation = ref('');
-
-// 控制 drawer 显示
-const showSubProjectDrawer = ref(false);
 
 // 按钮配置
 const quotationMenuConfig = [
@@ -38,7 +24,7 @@ const quotationMenuConfig = [
     name: '新建子项目',
     btnAction: () => {
       // 打开新建子项目 drawer
-      showSubProjectDrawer.value = true;
+      quotationEditRef.value.showSubProjectDrawer = true;
     },
   },
   {
@@ -136,23 +122,13 @@ const quotationMenuConfig = [
 // QuotationEdit 组件引用
 const quotationEditRef = ref();
 
-// 处理子项目提交
-const handleSubProjectSubmit = (data: {
-  name: string;
-  level: string;
-  color: string;
-  parentId?: string;
-}) => {
-  console.log('新建子项目数据:', data);
-  // 这里可以处理子项目的创建逻辑
-  notify.success('子项目创建成功');
-};
-
 // 处理数据提交
 const handleDataSubmit = (data: Quotation) => {
   console.log('报价单数据:', data);
   notify.success('报价单提交成功');
 };
+
+const router = useRouter();
 
 // 处理临时保存
 const handleTempSave = async (data: Quotation) => {
@@ -162,6 +138,7 @@ const handleTempSave = async (data: Quotation) => {
 
     await ordersApi.writeQuotation(data);
     notify.success('临时保存成功');
+    router.push('/design/temp-quote');
   } catch (error) {
     console.error('临时保存失败:', error);
     notify.error('临时保存失败');
