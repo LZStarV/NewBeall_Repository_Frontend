@@ -16,17 +16,12 @@ export interface ConnectedDemand {
 
 // 表格列配置
 export const tableColumns = [
-  {
-    title: '',
-    key: 'checkbox',
-    width: '50px',
-    customSlot: 'checkbox',
-    type: 'text',
-  },
+  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '客户公司',
     key: 'company',
     width: '200px',
+    customSlot: 'company',
     sortable: true,
     type: 'text',
   },
@@ -43,6 +38,7 @@ export const tableColumns = [
     key: 'demandDetails',
     width: '300px',
     type: 'text',
+    ellipsisTooltip: true,
   },
   {
     title: '发布时间',

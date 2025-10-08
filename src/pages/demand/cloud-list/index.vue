@@ -4,16 +4,12 @@
         <lay-card>
             <div class="table-container">
                 <!-- 数据表格 -->
-                <lay-table :columns="tableColumns" :data-source="tableData" :page="pagination"
-                    @change="handleTableChange" :loading="loading">
-                    <!-- 复选框列 -->
-                    <template #checkbox="{ row }">
-                        <input type="checkbox" v-model="row.selected" @change="handleSelectChange(row)">
-                    </template>
-
+                <lay-table ref="tableRef" :columns="tableColumns" :data-source="tableData" :page="pagination"
+                    @change="handleTableChange" :loading="loading" :default-toolbar="defaultToolbars">
                     <!-- 需求名称列 -->
                     <template #demandName="{ row }">
-                        <a href="#" class="demand-link" @click.prevent="handleViewDemand(row)">{{ row.demandName }}</a>
+                        <span @click.prevent="handleViewDemand(row)">{{ row.demandName
+                            }}</span>
                     </template>
 
                     <!-- 状态列 -->
@@ -23,7 +19,7 @@
 
                     <!-- 操作列 -->
                     <template #action="{ row }">
-                        <button class="action-link" @click="handleViewDemand(row)">查看</button>
+                        <span class="action-link" @click="handleViewDemand(row)">查看</span>
                     </template>
                 </lay-table>
             </div>
@@ -36,6 +32,7 @@ import { ref, reactive, onMounted } from 'vue'
 import Notify from '@/utils/notify'
 import { getDemandList } from './Api/Api'
 import { tableColumns, tableData, type Demand } from './type'
+import type { TableDefaultToolbar } from '@layui/layui-vue/types/component/table/typing'
 
 // 分页配置
 const pagination = reactive({
@@ -48,6 +45,21 @@ const pagination = reactive({
 
 // 加载状态
 const loading = ref(false)
+
+// 表格引用
+const tableRef = ref()
+
+// 表头配置
+const defaultToolbars: TableDefaultToolbar[] = [
+    {
+        icon: 'layui-icon-refresh',
+        title: '刷新',
+        onClick: () => {
+            fetchTableData()
+        },
+    },
+    'filter',
+]
 
 // 表格变化处理
 const handleTableChange = async (pageData: { order: string; offset: number; limit: number }) => {
@@ -82,12 +94,6 @@ const getStatusClass = (status: string) => {
 }
 
 
-
-// 选择变化处理
-const handleSelectChange = (row: Demand) => {
-    console.log('选择变化:', row)
-    // 这里可以添加选择变化的逻辑，比如批量操作
-}
 
 // 获取表格数据
 const fetchTableData = async (searchParams?: any) => {
@@ -164,22 +170,12 @@ onMounted(async () => {
 .table-container {
     position: relative;
 
-    .demand-link,
-    .action-link {
-        color: #1890ff;
-        text-decoration: none;
-        cursor: pointer;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
     .action-link {
         background: none;
         border: none;
         font-size: 14px;
         padding: 0;
+        cursor: pointer;
     }
 
     .status-tag {

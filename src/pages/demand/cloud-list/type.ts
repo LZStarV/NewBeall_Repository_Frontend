@@ -2,13 +2,7 @@ import { ref } from 'vue';
 
 // 表格列配置
 export const tableColumns = [
-  {
-    title: '',
-    key: 'checkbox',
-    width: '50px',
-    customSlot: 'checkbox',
-    type: 'text',
-  },
+  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '所属公司',
     key: 'company',
