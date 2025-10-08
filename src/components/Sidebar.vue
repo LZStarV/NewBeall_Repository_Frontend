@@ -4,7 +4,7 @@
     <div class="sidebar-menu">
       <!-- 用户信息盒子 -->
       <div class="user-info-box">
-        <div class="user-avatar">
+        <div class="user-avatar" @click="navigateTo('/user')">
           <lay-avatar
             :src="defaultAvatar"
             radius
@@ -264,6 +264,7 @@ const navigateTo = (path: string) => {
 
   .user-avatar {
     flex-shrink: 0;
+    cursor: pointer;
   }
 
   .user-details {

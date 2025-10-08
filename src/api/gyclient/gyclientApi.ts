@@ -32,15 +32,7 @@ export default {
 
   // 删除供应商
   deleteSupplier: (supplierIds: number[], jstime: number) => {
-    const formData = new FormData();
-    supplierIds.forEach((id) => {
-      formData.append('clientIds[]', id.toString());
-    });
-    return http.post(`/gyclient/delete?jstime=${jstime}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    return http.post(`/gyclient/delete?jstime=${jstime}`, supplierIds);
   },
 
   // 获取供应商详情
