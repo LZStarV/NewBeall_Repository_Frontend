@@ -52,37 +52,24 @@
       </div>
       <div class="btns">
         <lay-button size="md" type="primary" @click="">打折</lay-button>
-        <lay-button size="md" type="primary" @click="" disabled
-          >未处理</lay-button
-        >
+        <lay-button size="md" type="primary" @click="" disabled>未处理</lay-button>
         <lay-button size="md" type="primary" @click="">沟通</lay-button>
       </div>
     </div>
     <!-- 产品列表 -->
-    <lay-table
-      ref="tableRef1"
-      :columns="productColumns"
-      :data-source="productDataSource"
-      :loading="productLoading"
-      even
-    >
+    <lay-table ref="tableRef1" :columns="productColumns" :data-source="productDataSource" :loading="productLoading"
+      even>
       <!-- 折后单价 -->
       <template #modifyprice="{ row }">
-        <span
-          :class="
-            row.modifyprice - row.price === 0
-              ? ''
-              : row.modifyprice - row.price > 0
-                ? 'price-up'
-                : 'price-down'
-          "
-          >{{ row.modifyprice ? row.modifyprice : '0.00' }}</span
-        >
+        <span :class="row.modifyprice - row.price === 0
+          ? ''
+          : row.modifyprice - row.price > 0
+            ? 'price-up'
+            : 'price-down'
+          ">{{ row.modifyprice ? row.modifyprice : '0.00' }}</span>
       </template>
       <!-- 折后单价编辑框modifypriceEdit -->
-      <template #modifypriceEdit="{ row }"
-        ><lay-input v-model="row.modifyprice"
-      /></template>
+      <template #modifypriceEdit="{ row }"><lay-input v-model="row.modifyprice" /></template>
       <!-- 成本单价 -->
       <template #purchaseprice="{ row }">
         <span class="purchaseprice">{{ row.purchaseprice }}</span>
@@ -103,14 +90,8 @@
     </div>
     <!-- 状态日志列表 -->
     <h5>状态日志</h5>
-    <lay-table
-      ref="tableRef2"
-      :columns="logColumns"
-      :data-source="logDataSource"
-      :loading="logLoading"
-      :expand-index="1"
-      even
-    >
+    <lay-table ref="tableRef2" :columns="logColumns" :data-source="logDataSource" :loading="logLoading"
+      :expand-index="1" even>
       <!-- 日志内容 -->
       <template #logcontent="{ row }">
         <div v-dompurify-html="row.logcontent"></div>
@@ -168,11 +149,11 @@ const productColumns = [
   },
   props.viewName === 'receive'
     ? {
-        title: '成本单价',
-        width: '80px',
-        key: 'purchaseprice',
-        customSlot: 'purchaseprice',
-      }
+      title: '成本单价',
+      width: '80px',
+      key: 'purchaseprice',
+      customSlot: 'purchaseprice',
+    }
     : { width: '0px' },
   {
     title: '原单价',
@@ -198,10 +179,10 @@ const productColumns = [
   },
   props.viewName === 'receive'
     ? {
-        title: '审批人',
-        width: '120px',
-        key: 'receiveName',
-      }
+      title: '审批人',
+      width: '120px',
+      key: 'receiveName',
+    }
     : { width: '0px' },
 ] as TableColumn[];
 

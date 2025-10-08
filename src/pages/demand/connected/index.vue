@@ -50,9 +50,14 @@
                         <input type="checkbox" v-model="row.selected" @change="handleSelectChange(row)">
                     </template>
 
+                    <!-- 客户公司列 -->
+                    <template #company="{ row }">
+                        <a href="#" class="company-link" @click.prevent="handleViewCompany(row)">{{ row.company }}</a>
+                    </template>
+
                     <!-- 方案名称列 -->
                     <template #demandName="{ row }">
-                        <a href="#" class="demand-link" @click.prevent="handleViewDemand(row)">{{ row.demandName }}</a>
+                        <span class="demand-name">{{ row.demandName }}</span>
                     </template>
 
                     <!-- 状态列 -->
@@ -62,7 +67,7 @@
 
                     <!-- 操作列 -->
                     <template #action="{ row }">
-                        <button class="action-link" @click="handleViewDemand(row)">查看详情</button>
+                        <button class="action-link" @click="handleViewCompany(row)">查看详情</button>
                         <button v-if="row.status === '已报价'" class="action-link"
                             @click="handleViewQuote(row)">查看报价</button>
                         <button v-else class="action-link" @click="handleQuote(row)">报价</button>
@@ -70,6 +75,10 @@
                 </lay-table>
             </div>
         </lay-card>
+
+        <!-- 公司详情弹窗 -->
+        <CompanyDetail :visible="companyDetailVisible" :selected-company="selectedCompany"
+            @close="closeCompanyDetail" />
     </div>
 </template>
 
@@ -78,6 +87,7 @@ import { ref, reactive, onMounted } from 'vue'
 import Notify from '@/utils/notify'
 import { getConnectedDemandList } from './Api/Api'
 import { tableColumns, tableData, type ConnectedDemand } from './type'
+import CompanyDetail from './CompanyDetail.vue'
 
 // 搜索表单
 const filterForm = reactive({
@@ -96,6 +106,10 @@ const pagination = reactive({
 // 加载状态
 const loading = ref(false)
 const searchLoading = ref(false)
+
+// 公司详情弹窗状态
+const companyDetailVisible = ref(false)
+const selectedCompany = ref<ConnectedDemand | null>(null)
 
 // 表格变化处理
 const handleTableChange = async (pageData: { order: string; current: number; limit: number }) => {
@@ -152,10 +166,16 @@ const handleQuickSearch = (event: KeyboardEvent) => {
     }
 }
 
-// 查看需求详情
-const handleViewDemand = (demand: ConnectedDemand) => {
-    console.log('查看需求详情:', demand)
-    // 这里可以添加查看需求详情的逻辑
+// 查看公司详情
+const handleViewCompany = (demand: ConnectedDemand) => {
+    selectedCompany.value = demand
+    companyDetailVisible.value = true
+}
+
+// 关闭公司详情弹窗
+const closeCompanyDetail = () => {
+    companyDetailVisible.value = false
+    selectedCompany.value = null
 }
 
 // 查看报价
@@ -466,7 +486,7 @@ onMounted(async () => {
         }
     }
 
-    .demand-link,
+    .company-link,
     .action-link {
         color: #1890ff;
         text-decoration: none;
@@ -476,6 +496,11 @@ onMounted(async () => {
         &:hover {
             text-decoration: underline;
         }
+    }
+
+    .demand-name {
+        color: #333;
+        cursor: default;
     }
 
     .action-link {
