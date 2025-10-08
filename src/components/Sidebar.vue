@@ -1,5 +1,10 @@
 <template>
-  <div class="sidebar-container" :class="{ collapsed }">
+  <div
+    class="sidebar-container"
+    :class="{ collapsed: collapsedStatus }"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  >
     <!-- 侧边栏菜单 -->
     <div class="sidebar-menu">
       <!-- 用户信息盒子 -->
@@ -9,13 +14,13 @@
             :src="defaultAvatar"
             radius
             :style="
-              collapsed
+              collapsedStatus
                 ? 'width: 30px; height: 30px'
                 : 'width: 50px; height: 50px'
             "
           />
         </div>
-        <div v-show="!collapsed" class="user-details">
+        <div v-show="!collapsedStatus" class="user-details">
           <div class="dropdown-display-name">张三</div>
           <div class="user-role">产品供应商</div>
         </div>
@@ -34,17 +39,17 @@
             >
               <!-- 只在折叠状态下显示图标 -->
               <lay-icon
-                v-if="collapsed && getRouteConfig(menuItem.key).icon"
+                v-if="collapsedStatus && getRouteConfig(menuItem.key).icon"
                 :type="getRouteConfig(menuItem.key).icon"
                 class="menu-icon"
               />
-              <span v-show="!collapsed" class="menu-text">{{
+              <span v-show="!collapsedStatus" class="menu-text">{{
                 getRouteConfig(menuItem.key).title
               }}</span>
               <!-- 新订单提示（仅订单审批记录显示） -->
               <div
                 v-show="
-                  !collapsed &&
+                  !collapsedStatus &&
                   menuItem.key === 'order-approval' &&
                   hasNewOrders
                 "
@@ -62,17 +67,17 @@
               >
                 <!-- 只在折叠状态下显示图标 -->
                 <lay-icon
-                  v-if="collapsed && getRouteConfig(menuItem.key).icon"
+                  v-if="collapsedStatus && getRouteConfig(menuItem.key).icon"
                   :type="getRouteConfig(menuItem.key).icon"
                   class="menu-icon"
                 />
-                <span v-show="!collapsed" class="menu-text">{{
+                <span v-show="!collapsedStatus" class="menu-text">{{
                   getRouteConfig(menuItem.key).title
                 }}</span>
                 <!-- 新订单提示（仅订单审批记录显示） -->
                 <div
                   v-show="
-                    !collapsed &&
+                    !collapsedStatus &&
                     menuItem.key === 'order-approval' &&
                     hasNewOrders
                   "
@@ -81,7 +86,7 @@
                   1
                 </div>
                 <lay-icon
-                  v-show="!collapsed"
+                  v-show="!collapsedStatus"
                   type="layui-icon-right"
                   class="arrow-icon"
                   :class="{
@@ -90,7 +95,9 @@
                 />
               </div>
               <div
-                v-show="!collapsed && submenuOpen[getSubmenuKey(menuItem.key)]"
+                v-show="
+                  !collapsedStatus && submenuOpen[getSubmenuKey(menuItem.key)]
+                "
                 class="submenu"
               >
                 <div
@@ -114,7 +121,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useTabsStore } from '@/stores/tabs';
 import {
@@ -131,11 +138,14 @@ const props = defineProps<{
   collapsed: boolean;
 }>();
 
+// 用于临时显示侧边栏内容的状态
+const isHovered = ref(false);
+
 const router = useRouter();
 const route = useRoute();
 const tabsStore = useTabsStore();
 const routeNavigator = new RouteNavigator(router, tabsStore);
-
+const collapsedStatus = ref(props.collapsed);
 const hasNewOrders = ref(true); // 是否有新订单需要审批
 
 // 当前选中的菜单key
@@ -180,7 +190,8 @@ const getSubmenuKey = (menuKey: string): string => {
 
 // 切换子菜单 - 修改为互斥展开
 const toggleSubmenu = (menuKey: string) => {
-  if (props.collapsed) return;
+  // 使用collapsedStatus而不是props.collapsed，确保鼠标悬浮时也能展开子菜单
+  if (collapsedStatus.value) return;
 
   const submenuKey = getSubmenuKey(menuKey) as keyof typeof submenuOpen;
 
@@ -199,6 +210,34 @@ const toggleSubmenu = (menuKey: string) => {
   }
 };
 
+// 处理鼠标进入事件
+const handleMouseEnter = () => {
+  if (props.collapsed) {
+    isHovered.value = true;
+    collapsedStatus.value = false; // 鼠标悬浮时展开侧边栏
+  }
+};
+
+// 处理鼠标离开事件
+const handleMouseLeave = () => {
+  if (props.collapsed) {
+    isHovered.value = false;
+    // 确保在鼠标离开时恢复到原始折叠状态
+    collapsedStatus.value = true;
+  }
+};
+
+// 监听props.collapsed的变化，确保在鼠标未悬浮时同步状态
+watch(
+  () => props.collapsed,
+  (newCollapsed) => {
+    if (!isHovered.value) {
+      collapsedStatus.value = newCollapsed;
+    }
+  },
+  { immediate: true },
+);
+
 // 导航到指定路由
 const navigateTo = (path: string) => {
   // 特殊处理会员续费，在新标签页打开
@@ -215,15 +254,16 @@ const navigateTo = (path: string) => {
   box-shadow: $box-shadow-base;
   border-radius: $border-radius-extra-large;
   height: 100%;
-  width: 100%;
+  width: 180px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  overflow: hidden;
   position: relative;
   z-index: 100;
 
   &.collapsed {
+    width: 50px;
+
     .menu-item {
       justify-content: center;
       padding: 12px 0;
@@ -248,6 +288,7 @@ const navigateTo = (path: string) => {
   flex-direction: column;
   overflow: hidden; // 防止整个菜单区域滚动
   min-height: 0; // 确保flex子项能正确收缩
+  max-height: calc(100vh - 130px); // 设置最大高度，确保不会超出视口
 }
 
 // 用户信息盒子样式
@@ -299,6 +340,7 @@ const navigateTo = (path: string) => {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; // 确保能正确收缩
+  height: 100%; // 确保占据所有可用空间
 
   // 自定义滚动条样式
   &::-webkit-scrollbar {
@@ -321,7 +363,7 @@ const navigateTo = (path: string) => {
   }
 
   // 滚动条隐藏在折叠状态
-  .sidebar-container.collapsed & {
+  :deep(.sidebar-container.collapsed) & {
     &::-webkit-scrollbar {
       width: 0;
     }
