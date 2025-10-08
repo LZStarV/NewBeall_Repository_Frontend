@@ -21,3 +21,33 @@ export interface InqueryListResponse {
   rows: InqueryRow[];
   total: number;
 }
+
+export interface SendProduct {
+  proId: string;
+  oldProId: string;
+  num: number;
+  productPrice: number;
+}
+
+// 询价商品数据
+export interface InquryProductData {
+  pName: string; // 产品名称
+  proId: string; // 产品id
+  productDataList: ProductData[];
+}
+
+// 询价商品数据
+export interface ProductData {
+  brand: string; // 品牌
+  companyName: string; // 报价公司
+  id: number;
+  isLowestPrice: boolean; // 更低价，显示大拇指
+  model: string; // 规格/型号
+  name: string; // 产品名称
+  nub: number; // 数量
+  ordersId: string; // 订单id
+  param: string[];
+  price: string; // 单价
+  proId: string; // 产品id
+  trait: string; // 参数特征
+}

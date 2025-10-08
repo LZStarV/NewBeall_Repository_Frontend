@@ -162,15 +162,15 @@
 
         <!-- 开放星标列 -->
         <template #openUpdate="{ row }">
-          <span :style="{ color: '#5FB878' }" class="action-text" @click="handleOpenPermissionManagement(row)">
-            点击设置
+          <span class="action-icon" @click="handleOpenPermissionManagement(row)" title="点击设置">
+            <SvgIcon name="set_up" width="20" height="20" />
           </span>
         </template>
 
         <!-- 指定开放列 -->
         <template #designatedOpen="{ row }">
-          <span :style="{ color: '#5FB878' }" class="action-text" @click="handleOpenDesignatedOpenManagement(row)">
-            点击设置
+          <span class="action-icon" @click="handleOpenDesignatedOpenManagement(row)" title="点击设置">
+            <SvgIcon name="set_up" width="20" height="20" />
           </span>
         </template>
 
@@ -198,6 +198,7 @@ import Notify from '@/utils/notify'
 import env from '@/utils/env'
 import SingleProductAdd from './SingleProductAdd.vue'
 import InquiryModal from './InquiryModal.vue'
+import SvgIcon from '@/components/SvgIcon.vue'
 import type { Product } from './type'
 import { allColumns } from './type'
 
@@ -1054,6 +1055,24 @@ fetchProductList()
 
   &:hover {
     opacity: 0.8;
+  }
+}
+
+// 操作图标样式
+.action-icon {
+  cursor: pointer;
+  color: #5FB878;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: rgba(95, 184, 120, 0.1);
+    transform: scale(1.1);
+  }
+
+  svg {
+    fill: currentColor;
   }
 }
 

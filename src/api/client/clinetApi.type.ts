@@ -2,11 +2,12 @@
 export interface ClientType {
   address: string;
   assignUser: number;
+  categoryName: string;
   clientArea: string;
-  clientCategory: number;
+  clientCategory: string;
   clientCity: string;
   clientProvince: string;
-  clientSize: number;
+  clientSize: string;
   clientSizeMsg: string;
   clientSource: string;
   clientStatus: string;
@@ -28,6 +29,7 @@ export interface ClientType {
   remark: string;
   revisitTime: string;
   tel: string;
+  uname: string;
   wechat: string;
 }
 
@@ -53,11 +55,6 @@ export interface ClientQueryListType {
   pinyin?: string;
   // 排序类型，根据创建时间排序或者拼音（可为空，revisitTime或pinyin）
   sort?: string;
-}
-
-// 查询供应商客户列表类型
-export interface GyClientQueryListType extends ClientQueryListType {
-  gyType?: string;
 }
 
 // 用户树类型

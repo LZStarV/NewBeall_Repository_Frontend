@@ -1,10 +1,5 @@
 <template>
     <div class="company-disk-page">
-        <div class="page-header">
-            <h1>公司云盘</h1>
-            <p>企业文件存储与共享空间</p>
-        </div>
-
         <div class="content-area">
             <lay-card title="文件管理">
                 <p>企业级文件存储服务，支持权限管理和文件共享。</p>
