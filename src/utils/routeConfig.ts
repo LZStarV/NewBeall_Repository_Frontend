@@ -204,6 +204,12 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
     title: '视频演示',
     icon: 'layui-icon-play',
   },
+  // 个人中心
+  'user-center': {
+    path: '/user',
+    title: '个人中心',
+    icon: 'layui-icon-user',
+  },
 };
 
 /**
