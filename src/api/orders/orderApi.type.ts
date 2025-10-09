@@ -207,11 +207,12 @@ export interface Quotation {
   city: string; // 市
   clientBankAccount: string | null; // 客户-银行账号
   clientBankName: string | null; // 客户-开户行
-  clientId: number; // 客户单位id
+  clientId: string; // 客户单位id
   clientTexId: string | null; // 客户-税号
   companyAddres: string; // 我司-企业地址
   companyName: string; // 我司-设计单位
   contactPhone: string; // 我司-联系电话
+  companyEmail: string; // 我司-企业邮箱
   contacts: string; // 我司-联系人员
   deliveryMethod: string; // 交货方式，如"货到付款"
   explanation: string | null; // 报价单说明
@@ -238,7 +239,7 @@ export interface Quotation {
 export interface QuotationListResponse extends Quotation {
   chargePerson: number;
   chargePersonInfo: string;
-  clientId: number;
+  clientId: string;
   companyEmail: string;
   contacts: string;
   coopUser: string;

@@ -134,7 +134,7 @@
                 <lay-input v-model="companyInfo.phone" disabled />
               </div>
               <div class="form-row">
-                <label class="form-head-label">客户邮箱</label>
+                <label class="form-head-label">邮箱地址</label>
                 <lay-input v-model="companyInfo.email" disabled />
                 <lay-button type="normal" size="md" class="info-button"
                   @click="showCompanyBankInfo = !showCompanyBankInfo">
@@ -939,7 +939,7 @@ const emit = defineEmits<{
 // 通过type获取param类型
 const getFormParam = () => {
   // if 新建设计报价 return 'orderCreatSave'
-  if (isNewQuotation) return 'orderCreatSave';
+  if (isNewQuotation) return 'orderCreatSave'; // 临时报价，正式创建为orderCreat
   if (orderData.type === 0) return 'orderModify';
   else return 'orderTemModify';
 };
@@ -979,11 +979,12 @@ const collectFormData = async (): Promise<Quotation> => {
     city: areaNames.city, // 使用获取到的城市名称
     clientBankAccount: customerInfo.value.bankAccount || null,
     clientBankName: customerInfo.value.bankName || null,
-    clientId: Number(customerInfo.value.id),
+    clientId: String(customerInfo.value.id),
     clientTexId: customerInfo.value.taxNumber || null,
     companyAddres: companyInfo.value.address,
     companyName: companyInfo.value.name,
     contactPhone: companyInfo.value.phone,
+    companyEmail: companyInfo.value.email,
     contacts: companyInfo.value.contact,
     deliveryMethod: tradeInfo.value.deliveryMethod,
     explanation: null, // TODO待放入报价单说明信息
@@ -1007,7 +1008,7 @@ const collectFormData = async (): Promise<Quotation> => {
   if (!isNewQuotation && orderData) {
     return {
       ...baseData,
-      clientId: Number(customerInfo.value.id),
+      clientId: String(customerInfo.value.id),
       ordersId: orderData.ordersId,
       shareOrders: orderData.shareOrders,
       type: orderData.type,
