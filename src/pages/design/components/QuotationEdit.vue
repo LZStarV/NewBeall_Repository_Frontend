@@ -346,6 +346,7 @@ const customerInfo = ref({
   bankAccount: '',
   bankName: '',
   taxNumber: '',
+  id: ''
 });
 
 // 我司信息数据
@@ -839,6 +840,7 @@ const handleClientChange = ((value: ClientType) => {
     contact: value.contactUser,
     phone: value.tel,
     email: value.email,
+    id: String(value.id),
     bankAccount: '', // 预留
     bankName: '',    // 预留
     taxNumber: '',   // 预留
@@ -887,6 +889,7 @@ const transformCustomerData = () => {
       contact: customerData.contactUser,
       phone: customerData.tel,
       email: customerData.email,
+      id: String(customerData.id),
       bankAccount: '',
       bankName: '',
       taxNumber: '',
@@ -976,7 +979,7 @@ const collectFormData = async (): Promise<Quotation> => {
     city: areaNames.city, // 使用获取到的城市名称
     clientBankAccount: customerInfo.value.bankAccount || null,
     clientBankName: customerInfo.value.bankName || null,
-    clientId: customerData.id, // TODO: 待确认客户单位id
+    clientId: Number(customerInfo.value.id),
     clientTexId: customerInfo.value.taxNumber || null,
     companyAddres: companyInfo.value.address,
     companyName: companyInfo.value.name,
@@ -1004,6 +1007,7 @@ const collectFormData = async (): Promise<Quotation> => {
   if (!isNewQuotation && orderData) {
     return {
       ...baseData,
+      clientId: Number(customerInfo.value.id),
       ordersId: orderData.ordersId,
       shareOrders: orderData.shareOrders,
       type: orderData.type,
