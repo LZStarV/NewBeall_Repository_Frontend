@@ -1,53 +1,46 @@
 <template>
-  <div v-if="visible" class="feedback-panel-overlay" @click.self="handleClose">
-    <div class="feedback-panel">
-      <h3>提交建议给壹新</h3>
-      <div class="form-group">
-        <label for="feedbackContent">建议内容 (5-200字):</label>
-        <textarea
-          id="feedbackContent"
-          v-model="feedbackContent"
-          :class="{ 'input-error': feedbackError }"
-          placeholder="请输入您的建议"
-          @input="validateFeedback"
-        ></textarea>
-        <p v-if="feedbackError" class="error-message">{{ feedbackError }}</p>
+  <!-- 使用lay-layer组件作为模板调用 -->
+  <lay-layer v-model="visible" :shade="true" :area="modalArea" :btn="actionBtns" title="提交建议给壹新">
+    <div style="padding: 20px;">
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px;">建议内容 (5-200字):</label>
+        <textarea v-model="feedbackContent" :class="{ 'input-error': feedbackError }" placeholder="请输入建议内容，5到200字"
+          @input="validateFeedback" style="
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e6e6e6;
+            border-radius: 4px;
+            min-height: 100px;
+            resize: vertical;
+            font-size: 14px;
+            box-sizing: border-box;
+          "></textarea>
+        <p v-if="feedbackError" style="color: #ff5722; margin-top: 4px; font-size: 12px;">{{ feedbackError }}</p>
       </div>
-      <div class="form-group">
-        <label for="phoneNumber">电话号码:</label>
-        <input
-          id="phoneNumber"
-          v-model="phoneNumber"
-          type="tel"
-          :class="{ 'input-error': phoneError }"
-          placeholder="请输入您的手机号码"
-          @input="validatePhone"
-        />
-        <p v-if="phoneError" class="error-message">{{ phoneError }}</p>
-      </div>
-      <div class="panel-actions">
-        <button class="cancel-btn" @click="handleClose">取消</button>
-        <button
-          class="submit-btn"
-          :disabled="
-            !feedbackContent ||
-            !phoneNumber ||
-            feedbackError.length > 0 ||
-            phoneError.length > 0
-          "
-          @click="handleSubmit"
-        >
-          提交
-        </button>
+
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px;">联系电话:</label>
+        <input v-model="phoneNumber" type="tel" :class="{ 'input-error': phoneError }" placeholder="输入联系电话"
+          @input="validatePhone" style="
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e6e6e6;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+          " />
+        <p v-if="phoneError" style="color: #ff5722; margin-top: 4px; font-size: 12px;">{{ phoneError }}</p>
       </div>
     </div>
-  </div>
+  </lay-layer>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { submitFeedback } from '@/api/chat/chatApi';
 import notify from '@/utils/notify';
+import { debounce } from '@/utils/debounce';
+import env from '@/utils/env';
 
 // Props
 interface Props {
@@ -66,6 +59,66 @@ const feedbackContent = ref('');
 const phoneNumber = ref('');
 const feedbackError = ref('');
 const phoneError = ref('');
+
+// 绑定到lay-layer的visible属性
+const visible = computed({
+  get: () => props.visible,
+  set: (value) => emit('update:visible', value)
+});
+
+// 获取当前屏幕宽度
+const getScreenWidth = () => {
+  return window.innerWidth;
+};
+
+// 根据屏幕宽度设置弹窗大小
+const getModalSize = () => {
+  const screenWidth = getScreenWidth();
+  if (screenWidth < env.getPadLayoutBreakpoint()) {
+    // 移动端 - 宽度90%
+    return ['90%', 'auto'];
+  } else if (screenWidth < env.getDesktopLayoutBreakpoint()) {
+    // 平板端 - 宽度70%
+    return ['70%', 'auto'];
+  } else {
+    // 桌面端 - 固定宽度500px
+    return ['500px', 'auto'];
+  }
+};
+
+// 响应式弹窗大小
+const modalArea = ref(getModalSize());
+
+// 监听窗口大小变化，更新弹窗大小
+const handleResize = debounce(() => {
+  modalArea.value = getModalSize();
+}, 200);
+
+// 组件挂载时添加窗口大小变化监听
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+// 组件卸载时移除窗口大小变化监听
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+// 定义弹窗按钮
+const actionBtns = ref([
+  {
+    text: "取消",
+    callback: () => {
+      handleClose();
+    }
+  },
+  {
+    text: "提交",
+    callback: () => {
+      handleSubmit();
+    }
+  }
+]);
 
 // 验证建议内容
 const validateFeedback = () => {
@@ -95,7 +148,7 @@ const handleSubmit = async () => {
 
   if (isFeedbackValid && isPhoneValid) {
     try {
-      await submitFeedback(feedbackContent.value, phoneNumber.value);
+      console.log(feedbackContent.value + phoneNumber.value);
       notify.success('意见提交成功！感谢您的宝贵建议。');
       handleClose();
     } catch (error) {
@@ -115,7 +168,7 @@ const handleClose = () => {
   phoneError.value = '';
 };
 
-// 监听 visible 变化，当组件显示时重置表单
+// 监听visible变化，当组件显示时重置表单
 watch(
   () => props.visible,
   (newVal) => {
@@ -126,130 +179,13 @@ watch(
       feedbackError.value = '';
       phoneError.value = '';
     }
-  },
+  }
 );
 </script>
 
-<style scoped lang="scss">
-@use 'sass:color';
-
-/* 意见反馈面板样式 */
-.feedback-panel-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.feedback-panel {
-  background-color: white;
-  padding: 2rem;
-  border-radius: $border-radius-large;
-  box-shadow: $box-shadow-base;
-  width: 90%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: $font-size-large;
-    color: $text-primary;
-    text-align: center;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    label {
-      font-size: $font-size-base;
-      color: $text-regular;
-    }
-
-    textarea,
-    input[type='tel'] {
-      padding: 0.75rem;
-      border: 1px solid $border-color-base;
-      border-radius: $border-radius-base;
-      font-size: $font-size-base;
-      resize: vertical;
-      min-height: 20px;
-
-      &:focus {
-        outline: none;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
-      }
-
-      &.input-error {
-        border-color: $danger-color;
-      }
-    }
-
-    .error-message {
-      color: $danger-color;
-      font-size: $font-size-small;
-      margin-top: 0.25rem;
-      margin-bottom: 0;
-    }
-  }
-
-  .panel-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1rem;
-
-    button {
-      padding: 0.5rem 1.5rem;
-      border-radius: $border-radius-middle;
-      cursor: pointer;
-      font-size: $font-size-base;
-      transition: background-color 0.2s ease;
-
-      &.cancel-btn {
-        background-color: #e0e0e0;
-        color: #333;
-        border: none;
-
-        &:hover {
-          background-color: #c0c0c0;
-        }
-      }
-
-      &.submit-btn {
-        background-color: $primary-color;
-        color: white;
-        border: none;
-
-        &:hover {
-          background-color: color.adjust($primary-color, $lightness: -5%);
-        }
-
-        &:disabled {
-          background-color: #cbd5e1;
-          cursor: not-allowed;
-        }
-      }
-    }
-  }
-}
-
-/* 移动端样式调整 */
-@media (max-width: 768px) {
-  .feedback-panel {
-    width: 95%;
-    padding: 1.5rem;
-  }
+<style scoped>
+/* 错误输入样式 */
+.input-error {
+  border-color: #ff5722 !important;
 }
 </style>

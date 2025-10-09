@@ -5,22 +5,15 @@
       <!-- 品牌标题区域 -->
       <div class="brand-content">
         <div class="brand-info">
-          <img
-            src="@/assets/image/default/cover_logo.png"
-            alt="Newbeall Logo"
-            class="brand-logo-img"
-          />
+          <img src="@/assets/image/default/cover_logo.png" alt="Newbeall Logo" class="brand-logo-img" />
           <span class="brand-subtitle">-设计报价管理平台-</span>
         </div>
         <div class="header-actions">
           <div class="collapse-btn" @click="toggleSidebar">
-            <lay-icon
-              :type="
-                sidebarCollapsed
-                  ? 'layui-icon-spread-left'
-                  : 'layui-icon-shrink-right'
-              "
-            />
+            <lay-icon :type="sidebarCollapsed
+                ? 'layui-icon-spread-left'
+                : 'layui-icon-shrink-right'
+              " />
           </div>
           <!-- 刷新按钮 -->
           <div class="collapse-btn" @click="refreshPage">
@@ -68,28 +61,25 @@
             </lay-button>
           </lay-tooltip>
 
+
           <!-- 消息通知 -->
-          <lay-dropdown>
-            <lay-button class="toolbar-btn">
-              <lay-badge :count="messageCount" dot>
-                <lay-icon type="layui-icon-notice" />
-              </lay-badge>
+          <lay-tooltip content="消息">
+            <lay-button class="toolbar-btn" @click="openNotice">
+              <lay-icon type="layui-icon-notice" />
             </lay-button>
-            <template #content>
-              <lay-dropdown-menu>
-                <lay-dropdown-menu-item>系统通知 (3)</lay-dropdown-menu-item>
-                <lay-dropdown-menu-item>待办事项 (2)</lay-dropdown-menu-item>
-                <lay-dropdown-menu-item>查看全部</lay-dropdown-menu-item>
-              </lay-dropdown-menu>
-            </template>
-          </lay-dropdown>
+          </lay-tooltip>
+
+          <!-- 签到 -->
+          <lay-tooltip content="签到">
+            <lay-button class="toolbar-btn" @click="checkout">
+              <lay-icon type="layui-icon-gift" />
+            </lay-button>
+          </lay-tooltip>
 
           <!-- 主题切换 -->
           <lay-tooltip content="主题">
             <lay-button class="toolbar-btn" @click="toggleTheme">
-              <lay-icon
-                :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'"
-              />
+              <lay-icon :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'" />
             </lay-button>
           </lay-tooltip>
 
@@ -132,11 +122,8 @@
                     <lay-badge :count="messageCount" style="margin-left: 8px" />
                   </lay-dropdown-menu-item>
                   <lay-dropdown-menu-item @click="toggleTheme">
-                    <lay-icon
-                      :type="
-                        isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'
-                      "
-                    />
+                    <lay-icon :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'
+                      " />
                     <span style="margin-left: 8px">主题切换</span>
                   </lay-dropdown-menu-item>
                   <lay-dropdown-menu-item @click="toggleFullscreen">
@@ -176,18 +163,25 @@
     </div>
   </div>
   <!-- 用户建议组件 -->
-  <FeedbackPanel v-model:visible="showFeedbackPanel" />
+  <feedback-panel v-model:visible="showFeedbackPanel" />
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { layer } from "@layui/layui-vue";
 import NoticeBar from '@/components/NoticeBar.vue';
 import FeedbackPanel from '@/components/FeedbackPanel.vue';
 import defaultAvatar from '@/assets/image/default/defaultAvatar.png';
 import { debounce } from '@/utils/debounce';
+import Notify from '@/utils/notify.ts';
+import headerApi from '@/api/header/headerApi.ts';
+import { RouteNavigator } from '@/utils/routeUtils.ts';
+import { useTabsStore } from '@stores/tabs.ts';
 
+const tabsStore = useTabsStore();
 const router = useRouter();
+const routeNavigator = new RouteNavigator(router, tabsStore);
 
 // 定义 emit
 const emit = defineEmits<{
@@ -203,6 +197,7 @@ const noticeList = ref([
 // 通知栏宽度
 const noticeBarWidth = ref(200);
 const headerMiddleDOM = ref<HTMLElement>();
+const wechatAccountURL = ref<string | null>();
 
 // 计算通知栏宽度函数 - 获取header-middle元素的实际宽度
 const calculateNoticeBarWidth = () => {
@@ -249,20 +244,49 @@ const inviteFriends = () => {
 
 // 用户建议
 const userSuggestion = () => {
-  console.log('用户建议');
   showFeedbackPanel.value = true;
 };
 
 // 微信公众号
-const wechatPublic = () => {
-  console.log('微信公众号');
-  // 这里可以显示二维码或跳转到公众号
+const wechatPublic = async () => {
+  try {
+    wechatAccountURL.value = await headerApi.getWechatAccount();
+    layer.open({
+      title: '壹新微信公众号',
+      isHtmlFragment: true,
+      content: `<img src="${wechatAccountURL.value}" alt="图片"></img>`
+    });
+  } catch (err) {
+    Notify.error('获取失败，请稍后重试！');
+    console.error(err);
+  }
 };
 
 // 便签
 const notepad = () => {
   console.log('便签');
   // 这里可以打开便签功能
+};
+
+// 打开消息通知
+const openNotice = () => {
+  routeNavigator.navigateTo('/notice');
+};
+
+// 签到
+const checkout = async () => {
+  try {
+    const res = await headerApi.checkout();
+    if (res.msg) {
+      Notify.success(res.msg);
+    } else {
+      console.error('收到响应：' + res);
+      Notify.error('签到失败，请稍后再试！');
+    }
+  } catch (err) {
+    console.error('签到异常：', err);
+    Notify.error('签到失败，请稍后再试！');
+  }
 };
 
 // 主题切换

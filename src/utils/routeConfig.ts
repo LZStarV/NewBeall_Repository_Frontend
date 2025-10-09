@@ -31,7 +31,11 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
     title: '公司云盘',
     parentPath: '/cloud',
   },
-
+  // 消息通知
+  'notice': {
+    path: '/notice',
+    title: '消息通知'
+  },
   // 自建产品库
   'product-library': {
     path: '/product/library',
