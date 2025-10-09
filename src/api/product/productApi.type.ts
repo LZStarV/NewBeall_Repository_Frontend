@@ -1,36 +1,15 @@
-export interface Product {
-  brand: string;
+import type { Product } from '@/pages/product/library/type';
+
+export interface OrderProduct extends Product {
   changeState: number;
-  companyId: number;
-  costprice: string;
   createrid: string;
-  discountprice: string;
   encryptId: string;
-  gyCompany: string;
-  gysource: string;
-  id: string;
-  interestrateprice: string;
-  inventoryPrice: string;
-  inventoryRemark: string;
-  isInventory: number;
-  isTemporary: number;
-  marketprice: string;
-  model: string;
-  modifyprice: string;
-  name: string;
-  num: number;
   oldEncryptId: string;
   orderId: string;
-  param: string;
-  pictureaddress: string;
-  pictureaddressOne: string;
-  price: number;
   productCurrChainId: string;
   productCurrState: string;
   productId: string;
   profitprice: string;
-  purchaseprice: string;
-  receiveid: string;
   recommend: false;
   remark: string;
   sequence: string;
@@ -39,7 +18,5 @@ export interface Product {
   subprojectColor: string;
   subprojectLevel: string;
   subprojectParent: string;
-  trait: string;
-  unit: string;
   xjProductId: string;
 }

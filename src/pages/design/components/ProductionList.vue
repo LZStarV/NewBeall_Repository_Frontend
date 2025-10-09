@@ -58,7 +58,7 @@ import type {
   TableDefaultToolbar,
 } from '@layui/layui-vue/types/component/table/typing';
 import ordersApi from '@/api/orders/ordersApi';
-import type { Product } from '@/api/product/productApi.type';
+import type { OrderProduct } from '@/api/product/productApi.type';
 import env from '@/utils/env';
 import { layer } from '@layui/layui-vue';
 
@@ -67,8 +67,8 @@ const props = defineProps<{
   orderId?: string;
 }>();
 
-// 产品数据类型定义 - 扩展Product类型，添加totalAmount属性
-type ProductionItem = Product & {
+// 产品数据类型定义 - 扩展OrderProduct类型，添加totalAmount属性
+type ProductionItem = OrderProduct & {
   totalAmount: string;
 };
 
@@ -320,7 +320,7 @@ const getProductionList = async () => {
       props.orderId,
       pagination.current,
       pagination.pageSize
-    ) as unknown as { count: number; data: Product[] };
+    ) as unknown as { count: number; data: OrderProduct[] };
 
     console.log(response.data);
 
