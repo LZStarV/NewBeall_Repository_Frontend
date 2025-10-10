@@ -73,8 +73,8 @@
         :default-toolbar="defaultToolbars"
         :loading="loading"
         even
-        @sort-change="sortChange"
         v-model:selected-keys="selectedKeys"
+        @row="selectNotice"
       >
         <template #titleContent="{ row }">
           <span :class="{ 'unread-title': !row.isRead }">
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import type {
   TableColumn,
   TableDefaultToolbar,
@@ -151,18 +151,10 @@ const activityUnreadCount = ref(0);
 const userUnreadCount = ref(0);
 // 表格选中行
 const selectedKeys = ref(0);
+// 表格选中的数据列表（修复未定义的问题）
+const selectedRows = ref<NoticeItem[]>([]);
 
-// 将API返回的通知数据转换为前端需要的格式
-const transformApiData = (apiData: ApiNoticeItem[]): NoticeItem[] => {
-  return apiData.map((item) => ({
-    id: item.id.toString(),
-    titleContent: item.title,
-    time: item.createtime,
-    type: item.typeMsg,
-  }));
-};
-
-// 表头配置
+// 表头工具栏配置
 const defaultToolbars: TableDefaultToolbar[] = [
   {
     icon: 'layui-icon-refresh',
@@ -171,7 +163,6 @@ const defaultToolbars: TableDefaultToolbar[] = [
       loadNotices();
     },
   },
-  'filter',
 ];
 
 // 分页器配置
@@ -215,7 +206,6 @@ const columns = [
     title: '时间',
     width: '150px',
     key: 'time',
-    sort: true,
     align: 'left',
   },
   {
@@ -226,11 +216,14 @@ const columns = [
   },
 ] as TableColumn[];
 
-// 切换标签
-const switchTab = (tabId: number) => {
-  activeTab.value = tabId;
-  paginator.current = 1;
-  loadNotices();
+// 将API返回的通知数据转换为前端需要的格式
+const transformApiData = (apiData: ApiNoticeItem[]): NoticeItem[] => {
+  return apiData.map((item) => ({
+    id: item.id.toString(),
+    titleContent: item.title,
+    time: item.createtime,
+    type: item.typeMsg,
+  }));
 };
 
 // 获取标签类型样式类名
@@ -243,18 +236,12 @@ const getLogtypeClass = (logtype: string) => {
   return typeMap[logtype] || 'default';
 };
 
-// 排序处理
-const sortChange = (key: string, sort: string) => {
-  // 实际项目中应该调用API进行排序
-  console.log(`排序：${key} ${sort}`);
-};
-
 // 加载通知数据
 const loadNotices = async () => {
   loading.value = true;
   try {
     // 调用API获取通知数据
-    const response = await noticeApi.getAllNotices(
+    const response = await noticeApi.getNotices(
       paginator.current,
       paginator.limit,
       activeTab.value,
@@ -269,6 +256,7 @@ const loadNotices = async () => {
 
     // 转换API数据
     noticeList.value = transformApiData(responseData);
+    selectedRows.value = []; // 清空选中状态
 
     paginator.total = response.count;
 
@@ -279,6 +267,7 @@ const loadNotices = async () => {
   } catch (error) {
     Notify.warn('加载通知失败，请重试');
     noticeList.value = [];
+    selectedRows.value = [];
     // 打印错误信息到控制台
     console.error('API调用错误:', error);
   } finally {
@@ -286,29 +275,47 @@ const loadNotices = async () => {
   }
 };
 
-// 标记已读
+// 切换标签页
+const switchTab = (tabId: number) => {
+  activeTab.value = tabId;
+  paginator.current = 1;
+  loadNotices();
+};
+
+// 标记已读操作
 const markAsRead = () => {
+  // 检查是否有选中的通知
   if (msgTable.value.getCheckData().length === 0) {
     Notify.warn('请先选择要标记的通知');
     return;
   }
+
+  // 显示确认对话框
   layer.confirm(
     `是否将标记的 ${msgTable.value.getCheckData().length} 条消息设为已读？`,
     {
+      title: '提示',
       btn: [
         {
           text: '确定',
           callback: async (id) => {
             loading.value = true;
             try {
+              // 获取选中的通知ID
               const selectedIds = msgTable.value
                 .getCheckData()
                 .map((item) => Number(item.id));
+
+              // 调用API标记已读
               await noticeApi.clearNotice(selectedIds);
+
+              // 重新加载数据
               await loadNotices();
+
               Notify.success('已成功标记为已读');
             } catch (error) {
               Notify.warn('标记已读失败，请重试');
+              console.error(error);
             } finally {
               loading.value = false;
               layer.close(id);
@@ -326,74 +333,142 @@ const markAsRead = () => {
   );
 };
 
-// 全部已读
+// 全部已读操作
 const markAllAsRead = async () => {
-  loading.value = true;
-  try {
-    // TODO:实际项目中应该调用API
+  layer.confirm('是否要将所有消息都设为已读？', {
+    title: '提示',
+    btn: [
+      {
+        text: '确定',
+        callback: async (id) => {
+          loading.value = true;
 
-    // 清空选中状态
-    selectedRows.value = [];
+          try {
+            // 调用API标记已读
+            await noticeApi.clearAllNotice();
 
-    Notify.success('已全部标记为已读');
-  } catch (error) {
-    Notify.warn('标记全部已读失败，请重试');
-  } finally {
-    loading.value = false;
-  }
+            // 重新加载数据
+            await loadNotices();
+
+            Notify.success('设置成功！');
+          } catch (error) {
+            Notify.warn('设置失败，请重试');
+            console.error(error);
+          } finally {
+            loading.value = false;
+            layer.close(id);
+          }
+        },
+      },
+      {
+        text: '取消',
+        callback: (id) => {
+          layer.close(id);
+        },
+      },
+    ],
+  });
 };
 
-// 删除选中
+// 删除选中操作
 const deleteSelected = async () => {
-  if (selectedRows.value.length === 0) {
+  // 检查是否有选中的通知
+  if (msgTable.value.getCheckData().length === 0) {
     Notify.warn('请先选择要删除的通知');
     return;
   }
 
-  loading.value = true;
-  try {
-    // TODO: 实际项目中应该调用API
-    const selectedIds = selectedRows.value.map((item) => item.id);
+  // 显示确认对话框
+  layer.confirm(`是否删除这 ${msgTable.value.getCheckData().length} 条消息？`, {
+    title: '提示',
+    btn: [
+      {
+        text: '确定',
+        callback: async (id) => {
+          loading.value = true;
+          try {
+            // 获取选中的通知ID
+            const selectedIds = msgTable.value
+              .getCheckData()
+              .map((item) => Number(item.id));
 
-    // 直接处理成功
+            // 调用API标记已读
+            await noticeApi.deleteNotice(selectedIds);
 
-    // 清空选中状态
-    selectedRows.value = [];
+            // 重新加载数据
+            await loadNotices();
 
-    // 重新加载数据以更新分页
-    loadNotices();
-
-    Notify.success('已成功删除选中通知');
-  } catch (error) {
-    Notify.warn('删除通知失败，请重试');
-  } finally {
-    loading.value = false;
-  }
+            Notify.success('已成功删除该通知');
+          } catch (error) {
+            Notify.warn('删除失败，请重试');
+            console.error(error);
+          } finally {
+            loading.value = false;
+            layer.close(id);
+          }
+        },
+      },
+      {
+        text: '取消',
+        callback: (id) => {
+          layer.close(id);
+        },
+      },
+    ],
+  });
 };
 
-// 删除全部
+// 删除全部操作
 const deleteAll = async () => {
-  loading.value = true;
+  // 显示确认对话框
+  layer.confirm('是否删除全部消息？', {
+    title: '提示',
+    btn: [
+      {
+        text: '确定',
+        callback: async (id) => {
+          loading.value = true;
+          try {
+            // 调用API标记已读
+            await noticeApi.deleteAllNotice();
+
+            // 重新加载数据
+            await loadNotices();
+
+            Notify.success('删除成功！');
+          } catch (error) {
+            Notify.warn('删除失败，请重试');
+            console.error(error);
+          } finally {
+            loading.value = false;
+            layer.close(id);
+          }
+        },
+      },
+      {
+        text: '取消',
+        callback: (id) => {
+          layer.close(id);
+        },
+      },
+    ],
+  });
+};
+
+// 获取选中消息详情
+const selectNotice = async (row) => {
+  // TODO: 等待接口更新以修改此处逻辑
+  const noticeId = row.id;
   try {
-    // TODO: 实际项目中应该调用API
-
-    // 直接处理成功
-
-    // 清空选中状态
-    selectedRows.value = [];
-
-    // 重新加载数据以更新分页
-    loadNotices();
-
-    Notify.success('已成功删除全部通知');
+    const res = await noticeApi.getNoticeDetail(noticeId);
+    console.log(res);
   } catch (error) {
-    Notify.warn('删除全部通知失败，请重试');
-  } finally {
-    loading.value = false;
+    Notify.error('获取消息失败，请稍后再试！');
+    console.error(error);
   }
 };
 
-// 页面加载时
+// 页面加载时初始化数据
 onMounted(() => {
   loadNotices();
 });

@@ -17,7 +17,16 @@ export default {
     return URL.createObjectURL(res);
   },
 
+  // 每日打卡
   async checkout() {
     return await http.get('/mgr/everyDaySignIn');
-  }
+  },
+
+  // 用户建议
+  async userSuggest(sugtext: string, phone: string) {
+    return await http.get('/suggest/add', {
+      sugtext,
+      phone,
+    });
+  },
 };
