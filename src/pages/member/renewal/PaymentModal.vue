@@ -1,5 +1,5 @@
 <template>
-    <div class="payment-modal" v-if="visible" @click.self="closeModal">
+    <div v-if="visible" class="payment-modal" @click.self="closeModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>{{ paymentTitle }}</h3>
@@ -25,7 +25,7 @@
 
                 <div class="payment-status">
                     <div class="status-text">{{ statusText }}</div>
-                    <div class="countdown" v-if="countdown > 0">
+                    <div v-if="countdown > 0" class="countdown">
                         支付剩余时间：{{ formatTime(countdown) }}
                     </div>
                 </div>
@@ -40,23 +40,23 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed, onUnmounted } from 'vue'
-import QRCode from 'qrcode'
-import http from '@/utils/http'
+import { ref, watch, nextTick, computed, onUnmounted } from 'vue';
+import QRCode from 'qrcode';
+import http from '@/utils/http';
 
 const props = defineProps({
     visible: Boolean,
     paymentUrl: String,
     amount: String,
     paymentType: String
-})
+});
 
-const emit = defineEmits(['close', 'payment-success', 'payment-timeout'])
+const emit = defineEmits(['close', 'payment-success', 'payment-timeout']);
 
-const qrcodeRef = ref(null)
-const countdown = ref(300) // 5分钟
-const statusText = ref('等待支付...')
-const timer = ref(null)
+const qrcodeRef = ref(null);
+const countdown = ref(300); // 5分钟
+const statusText = ref('等待支付...');
+const timer = ref(null);
 
 const paymentTitle = computed(() => {
     const typeMap = {
@@ -64,21 +64,21 @@ const paymentTitle = computed(() => {
         'renewal': '会员续费',
         'storage': '云空间购买',
         'ai': 'AI服务'
-    }
-    return typeMap[props.paymentType] || '支付'
-})
+    };
+    return typeMap[props.paymentType] || '支付';
+});
 
 const generateQRCode = async (url) => {
     if (!qrcodeRef.value || !url) {
-        return
+        return;
     }
 
     try {
         // 清空容器
-        qrcodeRef.value.innerHTML = ''
+        qrcodeRef.value.innerHTML = '';
 
         // 创建一个canvas元素
-        const canvas = document.createElement('canvas')
+        const canvas = document.createElement('canvas');
 
         // 生成二维码到canvas
         await QRCode.toCanvas(canvas, url, {
@@ -89,95 +89,95 @@ const generateQRCode = async (url) => {
                 dark: '#000000',
                 light: '#FFFFFF'
             }
-        })
+        });
 
         // 将canvas添加到容器中
-        qrcodeRef.value.appendChild(canvas)
+        qrcodeRef.value.appendChild(canvas);
     } catch (error) {
-        console.error('生成二维码失败:', error)
-        qrcodeRef.value.innerHTML = '<p style="text-align:center;color:#666;">二维码生成失败</p>'
+        console.error('生成二维码失败:', error);
+        qrcodeRef.value.innerHTML = '<p style="text-align:center;color:#666;">二维码生成失败</p>';
     }
-}
+};
 
 const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-}
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
 
 const startCountdown = () => {
-    if (timer.value) clearInterval(timer.value)
+    if (timer.value) clearInterval(timer.value);
 
     timer.value = setInterval(() => {
-        countdown.value--
+        countdown.value--;
 
         if (countdown.value <= 0) {
-            clearInterval(timer.value)
-            statusText.value = '支付超时，请重新发起支付'
-            emit('payment-timeout')
+            clearInterval(timer.value);
+            statusText.value = '支付超时，请重新发起支付';
+            emit('payment-timeout');
         }
-    }, 1000)
-}
+    }, 1000);
+};
 
 const checkPaymentStatus = async () => {
-    statusText.value = '检查支付状态中...'
+    statusText.value = '检查支付状态中...';
 
     try {
-        const response = await http.get('wx/checkPayStatus')
+        const response = await http.get('wx/checkPayStatus');
 
         if (response.code === '200' && response.data.status === 'success') {
-            statusText.value = '支付成功！'
-            clearInterval(timer.value)
-            emit('payment-success')
+            statusText.value = '支付成功！';
+            clearInterval(timer.value);
+            emit('payment-success');
             setTimeout(() => {
-                closeModal()
-            }, 1500)
+                closeModal();
+            }, 1500);
         } else {
-            statusText.value = '等待支付...'
+            statusText.value = '等待支付...';
         }
     } catch (error) {
-        statusText.value = '检查支付状态失败'
+        statusText.value = '检查支付状态失败';
         setTimeout(() => {
-            statusText.value = '等待支付...'
-        }, 2000)
+            statusText.value = '等待支付...';
+        }, 2000);
     }
-}
+};
 
 const closeModal = () => {
     if (timer.value) {
-        clearInterval(timer.value)
-        timer.value = null
+        clearInterval(timer.value);
+        timer.value = null;
     }
-    emit('close')
-}
+    emit('close');
+};
 
 // 监听支付URL和弹窗可见性的组合变化
 watch([() => props.paymentUrl, () => props.visible], async ([newUrl, visible]) => {
     if (newUrl && visible) {
-        await nextTick()
-        await generateQRCode(newUrl)
-        startCountdown()
-        statusText.value = '等待支付...'
+        await nextTick();
+        await generateQRCode(newUrl);
+        startCountdown();
+        statusText.value = '等待支付...';
     }
-}, { immediate: true })
+}, { immediate: true });
 
 
 watch(() => props.visible, (visible) => {
     if (visible) {
-        countdown.value = 300
+        countdown.value = 300;
     } else {
         if (timer.value) {
-            clearInterval(timer.value)
-            timer.value = null
+            clearInterval(timer.value);
+            timer.value = null;
         }
     }
-})
+});
 
 onUnmounted(() => {
     if (timer.value) {
-        clearInterval(timer.value)
+        clearInterval(timer.value);
     }
-})
+});
 </script>
 
 <style lang="scss" scoped>

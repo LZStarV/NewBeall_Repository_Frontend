@@ -1,7 +1,6 @@
 <template>
   <div class="company-homepage-page">
-
-        <section class="left-sidebar">
+<section class="left-sidebar">
           <header class="sidebar-header">
             <h4>企业信息管理</h4>
           </header>
@@ -14,7 +13,7 @@
               请认真阅读并遵守《
               <span style="color: red">公司信息填写须知</span>
               》
-              <lay-icon type="layui-icon-question"></lay-icon>
+              <lay-icon type="layui-icon-question" />
             </div>
 
             <!-- 审核状态 -->
@@ -45,7 +44,7 @@
                   :percent="companyDetails?.perfection || 0"
                   size="big"
                   :show-text="true"
-                ></lay-progress>
+                />
               </div>
               <div class="rate-tip">
                 <i class="layui-icon layui-icon-star"></i>
@@ -86,7 +85,7 @@
                         unswitch-text="隐藏"
                         @change="handleSwitchChange(item)"
                         @click.stop
-                      ></lay-switch>
+                      />
                     </lay-form-item>
                   </div>
                 </div>
@@ -296,7 +295,7 @@ const handleClickNotice = () => {
 const getAreaInfo = async ()=> {
   const res = await companyApi.getWorkarea('99');
   console.log(res);
-}
+};
 
 
 onMounted(async () => {

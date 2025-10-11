@@ -76,6 +76,6 @@ export default {
 
   // 查询消息详情
   async getNoticeDetail(id: number) {
-    return await http.get(`/notice/detail/${id}`);
+    return await http.get(`/notice/GetDetail`, { id });
   },
 };

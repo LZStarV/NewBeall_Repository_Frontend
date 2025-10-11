@@ -14,11 +14,11 @@
 
           <p class="welcome-text">找回密码</p>
           <lay-form
+            ref="loginFormRef"
             class="login-form"
             :model="form"
             :rule="rules"
-            ref="loginFormRef"
-            isLabelTooltip
+            is-label-tooltip
           >
             <lay-form-item
               label="电话"
@@ -55,8 +55,8 @@
                 <lay-button
                   type="normal"
                   class="captcha-button"
-                  @click="getMessageCaptcha"
                   :disabled="isCaptchaDisabled"
+                  @click="getMessageCaptcha"
                 >
                   {{ captchaButtonText }}
                 </lay-button>
@@ -98,7 +98,9 @@
             </lay-form-item>
             <lay-form-item style="text-align: center">
               <lay-button class="submit-btn" type="primary" @click="submit"
-                >提交</lay-button
+                >
+提交
+</lay-button
               >
             </lay-form-item>
           </lay-form>

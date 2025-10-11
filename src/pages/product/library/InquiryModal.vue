@@ -13,7 +13,8 @@
                 <div class="form-group">
                     <label>有效期:</label>
                     <div class="validity-inputs">
-                        <lay-date-picker v-model="inquiryForm.validityDateTime" type="datetime" placeholder="选择日期时间"
+                        <lay-date-picker
+v-model="inquiryForm.validityDateTime" type="datetime" placeholder="选择日期时间"
                             style="width: 200px;" />
                         <lay-select v-model="inquiryForm.validityPeriod" style="width: 80px;">
                             <lay-select-option value="1天">1天</lay-select-option>
@@ -39,29 +40,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import Notify from '@/utils/notify'
-import http from '@/utils/http'
-import type { Product } from './type'
+import { ref, watch } from 'vue';
+import Notify from '@/utils/notify';
+import http from '@/utils/http';
+import type { Product } from './type';
 
 // 定义组件的props
 const props = defineProps<{
     visible: boolean
     selectedProducts: Product[]
-}>()
+}>();
 
 // 定义组件的emits
 const emit = defineEmits<{
     close: []
     success: [data: any]
-}>()
+}>();
 
 // 询价表单数据
 const inquiryForm = ref({
     validityDateTime: '',
     validityPeriod: '3天',
     message: '广州壹新网络科技有限公司的张三发的询价链接:{此处会替换成链接}'
-})
+});
 
 // 监听visible变化，重置表单
 watch(() => props.visible, (newVal) => {
@@ -71,40 +72,40 @@ watch(() => props.visible, (newVal) => {
             validityDateTime: '',
             validityPeriod: '3天',
             message: '广州壹新网络科技有限公司的张三发的询价链接:{此处会替换成链接}'
-        }
+        };
     }
-})
+});
 
 // 关闭弹窗
 const handleClose = () => {
-    emit('close')
-}
+    emit('close');
+};
 
 // 复制到剪贴板
 const copyToClipboard = async (text: string) => {
     try {
         if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(text)
+            await navigator.clipboard.writeText(text);
         } else {
             // 降级到传统方法
-            const textArea = document.createElement('textarea')
-            textArea.value = text
-            textArea.style.position = 'fixed'
-            textArea.style.left = '-999999px'
-            textArea.style.top = '-999999px'
-            textArea.style.opacity = '0'
-            textArea.style.pointerEvents = 'none'
-            textArea.setAttribute('readonly', '')
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            textArea.style.opacity = '0';
+            textArea.style.pointerEvents = 'none';
+            textArea.setAttribute('readonly', '');
 
-            document.body.appendChild(textArea)
+            document.body.appendChild(textArea);
 
             // 选择文本
-            textArea.select()
-            textArea.setSelectionRange(0, 99999) // 对于移动设备
-            const successful = document.execCommand('copy')
-            document.body.removeChild(textArea)
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // 对于移动设备
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
             if (!successful) {
-                throw new Error('document.execCommand 复制失败')
+                throw new Error('document.execCommand 复制失败');
             }
         }
 
@@ -112,15 +113,15 @@ const copyToClipboard = async (text: string) => {
             title: '复制成功',
             content: '链接已复制到剪贴板',
             time: 2000
-        })
+        });
     } catch (error: any) {
         Notify.error({
             title: '复制失败',
             content: '请手动复制链接',
             time: 3000
-        })
+        });
     }
-}
+};
 
 // 确认询价
 const handleConfirm = async () => {
@@ -130,8 +131,8 @@ const handleConfirm = async () => {
             title: '提示',
             content: '请选择有效期日期时间',
             time: 3000
-        })
-        return
+        });
+        return;
     }
 
     try {
@@ -156,15 +157,15 @@ const handleConfirm = async () => {
             })),
             expiryDate: new Date(inquiryForm.value.validityDateTime).getTime(),
             projectName: "自键库产品项目"
-        }
+        };
 
-        console.log('发送询价请求:', requestData)
+        console.log('发送询价请求:', requestData);
 
         // 调用API
-        const response = await http.post('/Inquery/notOrderCreateInquiryLink', requestData)
+        const response = await http.post('/Inquery/notOrderCreateInquiryLink', requestData);
 
         // 由于http工具已经处理了响应拦截器，直接使用响应数据
-        const responseData = response as any
+        const responseData = response as any;
         // 检查响应是否成功
         if (responseData && responseData.code === '200' && responseData.data && responseData.data.link) {
             // 显示成功提示
@@ -172,14 +173,14 @@ const handleConfirm = async () => {
                 title: '询价成功',
                 content: responseData.msg || '询价链接已生成',
                 time: 3000
-            })
+            });
 
             // 询问用户是否复制链接
-            const fullLink = `https://newbeall.com${responseData.data.link}`
-            const shouldCopy = confirm(`询价链接已生成！\n\n完整链接：\n${fullLink}\n\n是否复制到剪贴板？`)
+            const fullLink = `https://newbeall.com${responseData.data.link}`;
+            const shouldCopy = confirm(`询价链接已生成！\n\n完整链接：\n${fullLink}\n\n是否复制到剪贴板？`);
 
             if (shouldCopy) {
-                await copyToClipboard(fullLink)
+                await copyToClipboard(fullLink);
             }
 
             // 发送成功事件
@@ -188,29 +189,29 @@ const handleConfirm = async () => {
                 response: responseData,
                 requestData: requestData,
                 link: responseData.data.link
-            })
+            });
         } else {
             // API返回错误
             Notify.error({
                 title: '询价失败',
                 content: responseData?.msg || '询价链接生成失败',
                 time: 3000
-            })
-            return
+            });
+            return;
         }
 
         // 关闭弹窗
-        handleClose()
+        handleClose();
 
     } catch (error: any) {
-        console.error('询价失败:', error)
+        console.error('询价失败:', error);
         Notify.error({
             title: '询价失败',
             content: error.message || '询价过程中发生错误，请重试',
             time: 3000
-        })
+        });
     }
-}
+};
 </script>
 
 <style lang="scss" scoped>

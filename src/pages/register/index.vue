@@ -14,19 +14,19 @@
 
           <p class="welcome-text">用户注册</p>
           <lay-tab v-model="activeTab" type="brief" class="register-tabs">
-            <lay-tab-item id="personal" title="个人注册"></lay-tab-item>
-            <lay-tab-item id="enterprise" title="企业注册"></lay-tab-item>
+            <lay-tab-item id="personal" title="个人注册" />
+            <lay-tab-item id="enterprise" title="企业注册" />
           </lay-tab>
 
           <!-- Step component -->
-          <lay-step v-model="currentStep" :steps="steps" class="step-component"></lay-step>
+          <lay-step v-model="currentStep" :steps="steps" class="step-component" />
 
           <lay-form
-            class="login-form"
+            ref="registerFormRef"
+              class="login-form"
               :model="form"
               :rules="rules"
-              ref="registerFormRef"
-              isLabelTooltip
+              is-label-tooltip
             >
               <!-- 个人注册表单 -->
               <div v-if="activeTab === 'personal'">
@@ -124,10 +124,14 @@
               >
                 <div class="gender-options">
                   <lay-radio v-model="form.gender" name="gender" value="male"
-                    >男</lay-radio
+                    >
+男
+</lay-radio
                   >
                   <lay-radio v-model="form.gender" name="gender" value="female"
-                    >女</lay-radio
+                    >
+女
+</lay-radio
                   >
                 </div>
               </lay-form-item>
@@ -160,17 +164,17 @@
                 <div class="col-xs-9 ShrinkInside">
                   <div class="col-xs-3">
                     <lay-select v-model="form.province" placeholder="请选择省" @change="handleProvinceChange">
-                      <lay-option v-for="province in provinces" :value="province.code" :label="province.name"></lay-option>
+                      <lay-option v-for="province in provinces" :value="province.code" :label="province.name" />
                     </lay-select>
                   </div>
                   <div class="col-xs-3">
                     <lay-select v-model="form.city" placeholder="请选择市" @change="handleCityChange">
-                      <lay-option v-for="city in cities" :value="city.code" :label="city.name"></lay-option>
+                      <lay-option v-for="city in cities" :value="city.code" :label="city.name" />
                     </lay-select>
                   </div>
                   <div class="col-xs-3">
                     <lay-select v-model="form.district" placeholder="请选择区">
-                      <lay-option v-for="district in districts" :value="district.code" :label="district.name"></lay-option>
+                      <lay-option v-for="district in districts" :value="district.code" :label="district.name" />
                     </lay-select>
                   </div>
                 <!-- 注册成功步骤 -->
@@ -215,8 +219,8 @@
                   <lay-button
                     type="normal"
                     class="captcha-button"
-                    @click="sendCaptcha"
                     :disabled="isCaptchaDisabled"
+                    @click="sendCaptcha"
                   >
                     {{ captchaButtonText }}
                   </lay-button>
@@ -262,8 +266,8 @@
               <lay-form-item style="text-align: center">
                   <lay-button
                     type="default"
-                    @click="prevStep"
                     class="prev-btn"
+                    @click="prevStep"
                   >
                     上一步
                   </lay-button>
@@ -427,8 +431,8 @@
                   <lay-button
                     type="normal"
                     class="captcha-button"
-                    @click="sendCaptcha"
                     :disabled="isCaptchaDisabled"
+                    @click="sendCaptcha"
                   >
                     {{ captchaButtonText }}
                   </lay-button>
@@ -453,8 +457,8 @@
 
               <div class="agreement">
                 <lay-checkbox
-                  value="agreed"
                   v-model="form.agreed"
+                  value="agreed"
                   skin="primary"
                   name="agreed"
                   required
@@ -481,7 +485,9 @@
                 </lay-button>
               </lay-form-item>
             </div>
-          </lay-form>
+          </div>
+</div>
+</lay-form>
         </section>
       </div>
     </template>

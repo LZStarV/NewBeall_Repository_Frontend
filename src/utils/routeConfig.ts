@@ -31,11 +31,6 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
     title: '公司云盘',
     parentPath: '/cloud',
   },
-  // 消息通知
-  'notice': {
-    path: '/notice',
-    title: '消息通知'
-  },
   // 自建产品库
   'product-library': {
     path: '/product/library',
@@ -214,6 +209,18 @@ export const ROUTE_CONFIG_MAP: Record<string, RouteConfig> = {
     title: '个人中心',
     icon: 'layui-icon-user',
   },
+  // 消息通知
+  'notice': {
+    path: '/notice',
+    title: '消息通知',
+    icon: 'layui-icon-notice'
+  },
+  // 邀请好友
+  'invite': {
+    path: '/invite',
+    title: '邀请好友',
+    icon: 'layui-icon-user'
+  }
 };
 
 /**

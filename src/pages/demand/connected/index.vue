@@ -9,16 +9,18 @@
                         <div class="layui-inline">
                             <label class="layui-form-label productName">需求名称</label>
                             <div class="layui-input-inline">
-                                <input v-model="filterForm.schemeName" autocomplete="off" class="layui-input"
-                                    name="schemeName" type="text" placeholder="输入需求名称" @keydown="handleQuickSearch">
+                                <input
+v-model="filterForm.schemeName" autocomplete="off" class="layui-input"
+                                    name="schemeName" type="text" placeholder="输入需求名称" @keydown="handleQuickSearch" />
                             </div>
                         </div>
                     </div>
 
                     <!-- 搜索按钮区域 -->
                     <div class="inventorySearchBtn">
-                        <button class="btnIcon invite-but" data-title="搜索" @click="handleSearch"
-                            :disabled="searchLoading" type="button">
+                        <button
+class="btnIcon invite-but" data-title="搜索" :disabled="searchLoading"
+                            type="button" @click="handleSearch">
                             <i class="layui-icon layui-icon-search"></i>
                         </button>
                         <span data-title="重置" class="btnIcon invite-but" @click="handleRefreshForm">
@@ -43,11 +45,12 @@
                 </div>
 
                 <!-- 数据表格 -->
-                <lay-table :columns="tableColumns" :data-source="tableData" :page="pagination"
-                    @change="handleTableChange" :loading="loading">
+                <lay-table
+:columns="tableColumns" :data-source="tableData" :page="pagination"
+                    :loading="loading" @change="handleTableChange">
                     <!-- 复选框列 -->
                     <template #checkbox="{ row }">
-                        <input type="checkbox" v-model="row.selected" @change="handleSelectChange(row)">
+                        <input v-model="row.selected" type="checkbox" @change="handleSelectChange(row)" />
                     </template>
 
                     <!-- 客户公司列 -->
@@ -68,8 +71,11 @@
                     <!-- 操作列 -->
                     <template #action="{ row }">
                         <button class="action-link" @click="handleViewCompany(row)">查看详情</button>
-                        <button v-if="row.status === '已报价'" class="action-link"
-                            @click="handleViewQuote(row)">查看报价</button>
+                        <button
+v-if="row.status === '已报价'" class="action-link"
+                            @click="handleViewQuote(row)">
+查看报价
+</button>
                         <button v-else class="action-link" @click="handleQuote(row)">报价</button>
                     </template>
                 </lay-table>
@@ -77,22 +83,23 @@
         </lay-card>
 
         <!-- 公司详情弹窗 -->
-        <CompanyDetail :visible="companyDetailVisible" :selected-company="selectedCompany"
+        <CompanyDetail
+:visible="companyDetailVisible" :selected-company="selectedCompany"
             @close="closeCompanyDetail" />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
-import Notify from '@/utils/notify'
-import { getConnectedDemandList } from './Api/Api'
-import { tableColumns, tableData, type ConnectedDemand } from './type'
-import CompanyDetail from './CompanyDetail.vue'
+import { ref, reactive, onMounted } from 'vue';
+import Notify from '@/utils/notify';
+import { getConnectedDemandList } from './Api/Api';
+import { tableColumns, tableData, type ConnectedDemand } from './type';
+import CompanyDetail from './CompanyDetail.vue';
 
 // 搜索表单
 const filterForm = reactive({
     schemeName: ''
-})
+});
 
 // 分页配置
 const pagination = reactive({
@@ -101,117 +108,117 @@ const pagination = reactive({
     offset: 0,
     limit: 50,
     total: 0
-})
+});
 
 // 加载状态
-const loading = ref(false)
-const searchLoading = ref(false)
+const loading = ref(false);
+const searchLoading = ref(false);
 
 // 公司详情弹窗状态
-const companyDetailVisible = ref(false)
-const selectedCompany = ref<ConnectedDemand | null>(null)
+const companyDetailVisible = ref(false);
+const selectedCompany = ref<ConnectedDemand | null>(null);
 
 // 表格变化处理
 const handleTableChange = async (pageData: { order: string; current: number; limit: number }) => {
-    pagination.order = pageData.order
-    pagination.current = pageData.current
-    pagination.limit = pageData.limit
-    await fetchTableData()
-}
+    pagination.order = pageData.order;
+    pagination.current = pageData.current;
+    pagination.limit = pageData.limit;
+    await fetchTableData();
+};
 // 刷新表格
 const handleRefreshTable = async () => {
     try {
-        loading.value = true
-        await fetchTableData()
+        loading.value = true;
+        await fetchTableData();
         Notify.success({
             title: '刷新成功',
             content: '表格数据已更新',
             time: 2000
-        })
+        });
     } catch (error: any) {
-        console.error('刷新失败:', error)
+        console.error('刷新失败:', error);
         Notify.error({
             title: '刷新失败',
             content: '刷新过程中发生错误，请稍后重试',
             time: 3000
-        })
+        });
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 // 搜索处理
 const handleSearch = async () => {
     try {
-        searchLoading.value = true
-        pagination.current = 1
-        await fetchTableData()
+        searchLoading.value = true;
+        pagination.current = 1;
+        await fetchTableData();
     } catch (error) {
-        console.error('搜索失败:', error)
+        console.error('搜索失败:', error);
     } finally {
-        searchLoading.value = false
+        searchLoading.value = false;
     }
-}
+};
 
 // 重置表单
 const handleRefreshForm = () => {
-    filterForm.schemeName = ''
-    handleSearch()
-}
+    filterForm.schemeName = '';
+    handleSearch();
+};
 
 // 快速搜索（回车键）
 const handleQuickSearch = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-        handleSearch()
+        handleSearch();
     }
-}
+};
 
 // 查看公司详情
 const handleViewCompany = (demand: ConnectedDemand) => {
-    selectedCompany.value = demand
-    companyDetailVisible.value = true
-}
+    selectedCompany.value = demand;
+    companyDetailVisible.value = true;
+};
 
 // 关闭公司详情弹窗
 const closeCompanyDetail = () => {
-    companyDetailVisible.value = false
-    selectedCompany.value = null
-}
+    companyDetailVisible.value = false;
+    selectedCompany.value = null;
+};
 
 // 查看报价
 const handleViewQuote = (demand: ConnectedDemand) => {
-    console.log('查看报价:', demand)
+    console.log('查看报价:', demand);
     // 这里可以添加查看报价的逻辑
-}
+};
 
 // 报价
 const handleQuote = (demand: ConnectedDemand) => {
-    console.log('报价:', demand)
+    console.log('报价:', demand);
     // 这里可以添加报价的逻辑
-}
+};
 
 // 获取状态样式类
 const getStatusClass = (status: string) => {
     switch (status) {
         case '未完成':
-            return 'status-pending'
+            return 'status-pending';
         case '已报价':
-            return 'status-completed'
+            return 'status-completed';
         default:
-            return 'status-default'
+            return 'status-default';
     }
-}
+};
 
 // 选择变化处理
 const handleSelectChange = (row: ConnectedDemand) => {
-    console.log('选择变化:', row)
+    console.log('选择变化:', row);
     // 这里可以添加选择变化的逻辑，比如批量操作
-}
+};
 
 // 获取表格数据
 const fetchTableData = async () => {
     try {
-        loading.value = true
+        loading.value = true;
 
         // 构建请求参数
         const requestParams = {
@@ -221,10 +228,10 @@ const fetchTableData = async () => {
             queryParams: {
                 schemeName: filterForm.schemeName
             }
-        }
+        };
 
-        const response = await getConnectedDemandList(requestParams)
-        const responseData = response.data || response
+        const response = await getConnectedDemandList(requestParams);
+        const responseData = response.data || response;
 
         if (responseData && responseData.rows && Array.isArray(responseData.rows)) {
             tableData.value = responseData.rows.map((item: any) => ({
@@ -238,8 +245,8 @@ const fetchTableData = async () => {
                 price: item.price || '',
                 contacts: item.contacts || '',
                 tel: item.tel || ''
-            }))
-            pagination.total = responseData.total || responseData.rows.length
+            }));
+            pagination.total = responseData.total || responseData.rows.length;
         } else if (Array.isArray(responseData)) {
             tableData.value = responseData.map((item: any) => ({
                 id: item.id?.toString() || '',
@@ -252,32 +259,32 @@ const fetchTableData = async () => {
                 price: item.price || '',
                 contacts: item.contacts || '',
                 tel: item.tel || ''
-            }))
-            pagination.total = responseData.length
+            }));
+            pagination.total = responseData.length;
         } else {
             // 没有数据时显示空列表
-            tableData.value = []
-            pagination.total = 0
+            tableData.value = [];
+            pagination.total = 0;
         }
 
     } catch (error) {
-        console.error('获取已对接需求列表失败:', error)
+        console.error('获取已对接需求列表失败:', error);
         Notify.error({
             title: '错误',
             content: '获取已对接需求列表失败，请稍后重试',
             time: 3000
-        })
-        tableData.value = []
-        pagination.total = 0
+        });
+        tableData.value = [];
+        pagination.total = 0;
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 // 组件挂载时获取数据
 onMounted(async () => {
-    await fetchTableData()
-})
+    await fetchTableData();
+});
 </script>
 
 <style scoped lang="scss">

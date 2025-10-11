@@ -22,9 +22,11 @@
               </div>
             </li>
           </ul>
-          <div class="panel-footer" v-if="hasMore">
-            <lay-button :disabled="isLoadingMore" @click="loadMore" size="sm">{{ isLoadingMore ? '加载中...' : '加载更多'
-              }}</lay-button>
+          <div v-if="hasMore" class="panel-footer">
+            <lay-button :disabled="isLoadingMore" size="sm" @click="loadMore">
+{{ isLoadingMore ? '加载中...' : '加载更多'
+              }}
+</lay-button>
           </div>
         </div>
       </div>
@@ -101,7 +103,7 @@ const fetchLogs = async (append = false) => {
     }
     offset.value += 1;
   } catch (e) {
-    // eslint-disable-next-line no-console
+     
     console.error('获取操作记录失败', e);
   } finally {
     isLoading.value = false;

@@ -3,9 +3,9 @@
     <h4>企业工程业绩</h4>
     <div class="performance">
       <div
-        class="performanceItem"
         v-for="(item, index) in performanceList"
         :key="index"
+        class="performanceItem"
       >
         <ImageUpload v-model="item.img" :size="100" alt="业绩图片" />
 
@@ -16,8 +16,7 @@
             show-count
             :maxlength="90"
             :autosize="{ minHeight: 100, maxHeight: 100 }"
-          >
-          </lay-textarea>
+          />
         </div>
         <div class="btn">
           <lay-button v-if="!item.text" type="primary">保存上传</lay-button>

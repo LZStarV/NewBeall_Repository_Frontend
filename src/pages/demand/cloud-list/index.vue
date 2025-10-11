@@ -4,8 +4,9 @@
         <lay-card>
             <div class="table-container">
                 <!-- 数据表格 -->
-                <lay-table ref="tableRef" :columns="tableColumns" :data-source="tableData" :page="pagination"
-                    @change="handleTableChange" :loading="loading" :default-toolbar="defaultToolbars">
+                <lay-table
+ref="tableRef" :columns="tableColumns" :data-source="tableData" :page="pagination"
+                    :loading="loading" :default-toolbar="defaultToolbars" @change="handleTableChange">
                     <!-- 需求名称列 -->
                     <template #demandName="{ row }">
                         <span @click.prevent="handleViewDemand(row)">{{ row.demandName
@@ -28,11 +29,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
-import Notify from '@/utils/notify'
-import { getDemandList } from './Api/Api'
-import { tableColumns, tableData, type Demand } from './type'
-import type { TableDefaultToolbar } from '@layui/layui-vue/types/component/table/typing'
+import { ref, reactive, onMounted } from 'vue';
+import Notify from '@/utils/notify';
+import { getDemandList } from './Api/Api';
+import { tableColumns, tableData, type Demand } from './type';
+import type { TableDefaultToolbar } from '@layui/layui-vue/types/component/table/typing';
 
 // 分页配置
 const pagination = reactive({
@@ -41,13 +42,13 @@ const pagination = reactive({
     offset: 0,
     limit: 50,
     total: 0
-})
+});
 
 // 加载状态
-const loading = ref(false)
+const loading = ref(false);
 
 // 表格引用
-const tableRef = ref()
+const tableRef = ref();
 
 // 表头配置
 const defaultToolbars: TableDefaultToolbar[] = [
@@ -55,50 +56,50 @@ const defaultToolbars: TableDefaultToolbar[] = [
         icon: 'layui-icon-refresh',
         title: '刷新',
         onClick: () => {
-            fetchTableData()
+            fetchTableData();
         },
     },
     'filter',
-]
+];
 
 // 表格变化处理
 const handleTableChange = async (pageData: { order: string; offset: number; limit: number }) => {
-    pagination.order = pageData.order
-    pagination.offset = pageData.offset
-    pagination.limit = pageData.limit
-    await fetchTableData()
-}
+    pagination.order = pageData.order;
+    pagination.offset = pageData.offset;
+    pagination.limit = pageData.limit;
+    await fetchTableData();
+};
 
 
 
 // 查看需求详情
 const handleViewDemand = (demand: Demand) => {
-    console.log('查看需求详情:', demand)
+    console.log('查看需求详情:', demand);
     // 这里可以添加查看需求详情的逻辑
-}
+};
 
 // 获取状态样式类
 const getStatusClass = (status: string) => {
     switch (status) {
         case '未有投标':
-            return 'status-pending'
+            return 'status-pending';
         case '已有投标':
-            return 'status-processing'
+            return 'status-processing';
         case '已完成':
-            return 'status-completed'
+            return 'status-completed';
         case '已取消':
-            return 'status-cancelled'
+            return 'status-cancelled';
         default:
-            return 'status-default'
+            return 'status-default';
     }
-}
+};
 
 
 
 // 获取表格数据
 const fetchTableData = async (searchParams?: any) => {
     try {
-        loading.value = true
+        loading.value = true;
 
         // 构建请求参数
         const requestParams = {
@@ -106,10 +107,10 @@ const fetchTableData = async (searchParams?: any) => {
             offset: pagination.offset,
             limit: pagination.limit,
             queryParams: searchParams || {}
-        }
+        };
 
-        const response = await getDemandList(requestParams)
-        const responseData = response.data || response
+        const response = await getDemandList(requestParams);
+        const responseData = response.data || response;
 
         if (responseData && responseData.rows && Array.isArray(responseData.rows)) {
             tableData.value = responseData.rows.map((item: any) => ({
@@ -120,8 +121,8 @@ const fetchTableData = async (searchParams?: any) => {
                 demandDetails: item.details || '',
                 releaseTime: item.creatDate || '',
                 status: item.state === 0 ? '未有投标' : '已有投标'
-            }))
-            pagination.total = responseData.total || responseData.rows.length
+            }));
+            pagination.total = responseData.total || responseData.rows.length;
         } else if (Array.isArray(responseData)) {
             tableData.value = responseData.map((item: any) => ({
                 id: item.id?.toString() || '',
@@ -131,32 +132,32 @@ const fetchTableData = async (searchParams?: any) => {
                 demandDetails: item.details || '',
                 releaseTime: item.creatDate || '',
                 status: item.state === 0 ? '未有投标' : '已有投标'
-            }))
-            pagination.total = responseData.length
+            }));
+            pagination.total = responseData.length;
         } else {
             // 没有数据时显示空列表
-            tableData.value = []
-            pagination.total = 0
+            tableData.value = [];
+            pagination.total = 0;
         }
 
     } catch (error) {
-        console.error('获取需求列表失败:', error)
+        console.error('获取需求列表失败:', error);
         Notify.error({
             title: '错误',
             content: '获取需求列表失败，请稍后重试',
             time: 3000
-        })
-        tableData.value = []
-        pagination.total = 0
+        });
+        tableData.value = [];
+        pagination.total = 0;
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 // 组件挂载时获取数据
 onMounted(async () => {
-    await fetchTableData()
-})
+    await fetchTableData();
+});
 </script>
 
 <style scoped lang="scss">

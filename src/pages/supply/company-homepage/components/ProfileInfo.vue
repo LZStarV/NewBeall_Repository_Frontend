@@ -3,17 +3,18 @@
     <h4>企业简介</h4>
     <div class="profile">
       <lay-textarea
-        placeholder="请输入企业简介"
         v-model="profileData"
+        placeholder="请输入企业简介"
         show-count
         :maxlength="1000"
         :autosize="{ minHeight: 500, maxHeight: 500 }"
-      >
-      </lay-textarea>
+      />
     </div>
     <div class="savebtn">
-      <lay-button type="normal" @click="handleSave" :loading="saving"
-        >保存</lay-button
+      <lay-button type="normal" :loading="saving" @click="handleSave"
+        >
+保存
+</lay-button
       >
     </div>
   </div>

@@ -57,12 +57,12 @@
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
       <lay-table
+        v-model:selected-key="selectedKey"
         :columns="columns"
         :data-source="dataSource"
         :default-toolbar="defaultToolbars"
         :loading="loading"
         :pagination="pagination"
-        v-model:selectedKey="selectedKey"
         even
         @pagination="handlePaginationChange"
         @sort-change="sortChange"
@@ -122,7 +122,7 @@
       @close="editModalVisible = false"
     >
       <QuotationEdit
-        :showCustomerInfoDefault="false"
+        :show-customer-info-default="false"
         :is-new-quotation="false"
         @save="handleEditSave"
         @cancel="editModalVisible = false"

@@ -4,72 +4,81 @@
             <lay-card>
                 <!-- 工具栏区域 -->
                 <div class="fixed-table-toolbar">
-                    <span data-title="产品分配" @click="handleProductAssign" class="btnIcon invite-but">
+                    <span data-title="产品分配" class="btnIcon invite-but" @click="handleProductAssign">
                         <lay-icon type="layui-icon-component" />
                     </span>
-                    <span data-title="品牌分配" @click="handleBrandAssign" class="btnIcon invite-but">
+                    <span data-title="品牌分配" class="btnIcon invite-but" @click="handleBrandAssign">
                         <lay-icon type="layui-icon-diamond" />
                     </span>
-                    <span data-title="地区分配" @click="handleRegionAssign" class="btnIcon invite-but">
+                    <span data-title="地区分配" class="btnIcon invite-but" @click="handleRegionAssign">
                         <lay-icon type="layui-icon-location" />
                     </span>
-                    <span data-title="客户分配" @click="handleCustomerAssign" class="btnIcon invite-but">
+                    <span data-title="客户分配" class="btnIcon invite-but" @click="handleCustomerAssign">
                         <lay-icon type="layui-icon-group" />
                     </span>
-                    <span data-title="打折权限" @click="handleDiscountPermission" class="btnIcon invite-but">
+                    <span data-title="打折权限" class="btnIcon invite-but" @click="handleDiscountPermission">
                         <lay-icon type="layui-icon-dollar" />
                     </span>
 
-                    <button class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh"
+                    <button
+class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh"
                         title="刷新" @click="handleRefresh">
                         <lay-icon type="layui-icon-refresh" />
                     </button>
 
                     <div class="dropdown-container">
-                        <button type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
+                        <button
+type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
                             @click="toggleColumnsDropdown">
                             <lay-icon type="layui-icon-shrink-right" />
                         </button>
                         <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.account"
+                                    <input
+v-model="columnVisibility.account" type="checkbox"
                                         @change="updateVisibleColumns" /> 账号
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.name"
+                                    <input
+v-model="columnVisibility.name" type="checkbox"
                                         @change="updateVisibleColumns" /> 姓名
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.sex"
+                                    <input
+v-model="columnVisibility.sex" type="checkbox"
                                         @change="updateVisibleColumns" /> 性别
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.roleName"
+                                    <input
+v-model="columnVisibility.roleName" type="checkbox"
                                         @change="updateVisibleColumns" /> 角色
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.deptName"
+                                    <input
+v-model="columnVisibility.deptName" type="checkbox"
                                         @change="updateVisibleColumns" /> 部门
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.discount"
+                                    <input
+v-model="columnVisibility.discount" type="checkbox"
                                         @change="updateVisibleColumns" /> 最低折扣(%)
                                 </label>
                             </li>
                             <li role="menuitem">
                                 <label>
-                                    <input type="checkbox" v-model="columnVisibility.phone"
+                                    <input
+v-model="columnVisibility.phone" type="checkbox"
                                         @change="updateVisibleColumns" /> 电话
                                 </label>
                             </li>
@@ -79,7 +88,8 @@
 
                 <!-- 销售权限配置列表表格 -->
                 <div class="table-container">
-                    <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
+                    <lay-table
+:columns="visibleColumns" :data-source="tableData" :page="pagination"
                         @change="handleTableChange">
                         <!-- 选择框列 -->
                         <template #checkbox="{ row }">

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="() => toggleFullscreen()" :disabled="!isSupported" class="fullscreen-btn" :title="titleText">
+    <button :disabled="!isSupported" class="fullscreen-btn" :title="titleText" @click="() => toggleFullscreen()">
       <span class="btn-text">{{ buttonText }}</span>
     </button>
   </div>

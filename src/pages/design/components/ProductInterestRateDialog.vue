@@ -50,7 +50,7 @@
       <!-- 按钮区域 -->
       <div class="dialog-footer">
         <lay-button @click="handleClose">取消</lay-button>
-        <lay-button type="primary" @click="handleConfirm" :disabled="!isValid">
+        <lay-button type="primary" :disabled="!isValid" @click="handleConfirm">
           确认
         </lay-button>
       </div>

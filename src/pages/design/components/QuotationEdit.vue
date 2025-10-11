@@ -14,8 +14,9 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">客户单位</label>
-                <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange">
-                  <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
+                <lay-select v-model="customerName" placeholder="请选择" @change="handleClientChange">
+                  <lay-select-option
+v-for="client of clientInfoList" :key="client.id" :value="client"
                     :label="client.contacts" />
                 </lay-select>
                 <lay-button type="normal" size="md" class="info-button">
@@ -38,7 +39,8 @@
               <div class="form-row">
                 <label class="form-head-label">客户邮箱</label>
                 <lay-input v-model="customerInfo.email" disabled />
-                <lay-button type="normal" size="md" class="info-button"
+                <lay-button
+type="normal" size="md" class="info-button"
                   @click="showCustomerBankInfo = !showCustomerBankInfo">
                   {{ showCustomerBankInfo ? '收起信息' : '账户信息' }}
                 </lay-button>
@@ -73,7 +75,8 @@
               <div class="form-row">
                 <label class="form-head-label required">项目负责人</label>
                 <lay-select v-model="projectInfo.manager" placeholder="请选择">
-                  <lay-select-option v-for="item in projectManagerList" :key="item.id" :value="item.id"
+                  <lay-select-option
+v-for="item in projectManagerList" :key="item.id" :value="item.id"
                     :label="item.name" />
                 </lay-select>
               </div>
@@ -136,7 +139,8 @@
               <div class="form-row">
                 <label class="form-head-label">客户邮箱</label>
                 <lay-input v-model="companyInfo.email" disabled />
-                <lay-button type="normal" size="md" class="info-button"
+                <lay-button
+type="normal" size="md" class="info-button"
                   @click="showCompanyBankInfo = !showCompanyBankInfo">
                   {{ showCompanyBankInfo ? '收起信息' : '账户信息' }}
                 </lay-button>
@@ -231,9 +235,11 @@
           <div class="module-card">
             <div class="module-content">
               <div class="form-row">
-                <QuoteTypeSelect v-model="modelInfo.ordersType1" :category="1"
+                <QuoteTypeSelect
+v-model="modelInfo.ordersType1" :category="1"
                   :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
-                <QuoteTypeSelect v-model="modelInfo.ordersType3" :category="3"
+                <QuoteTypeSelect
+v-model="modelInfo.ordersType3" :category="3"
                   :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
               </div>
             </div>
@@ -246,7 +252,8 @@
         <div class="module-header">
           <h5>报价目录</h5>
           <div class="module-header-toolbar">
-            <button v-for="btn of quotationMenuConfig" :key="btn.name" class="toolbar-btn" :title="btn.name"
+            <button
+v-for="btn of quotationMenuConfig" :key="btn.name" class="toolbar-btn" :title="btn.name"
               @click="btn.btnAction">
               <SvgIcon :name="btn.iconName" width="1.25rem" height="1.25rem" />
             </button>
@@ -254,7 +261,8 @@
         </div>
         <div class="module-content">
           <!-- 表格区域 -->
-          <AdvancedTable :columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
+          <AdvancedTable
+:columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
             :enable-drag="true" :pagination="false" :show-toolbar="false" :row-key="'id'" :responsive="true"
             :clickable="true" @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate"
             @row-drag="handleRowDrag" @button-click="handleButtonClick" @row-click="handleRowClick" />
@@ -283,7 +291,8 @@
   <SubProjectDrawer v-model:visible="showSubProjectDrawer" @submit="handleSubProjectSubmit" />
 
   <!-- 产品利率输入弹窗 -->
-  <ProductInterestRateDialog v-model:visible="showProductInterestRateDialog"
+  <ProductInterestRateDialog
+v-model:visible="showProductInterestRateDialog"
     @confirm="handleProductInterestRateConfirm" />
 </template>
 
@@ -658,8 +667,8 @@ const handleSubProjectSubmit = (subProjectData: {
   type LevelType = 'level1' | 'level2' | 'level3'
 
   const getSubprojectClass = (level: LevelType) => {
-    return `sprojects${level.slice(-1)}`
-  }
+    return `sprojects${level.slice(-1)}`;
+  };
 
   const getSubprojectLevel = (level: LevelType) => {
     switch (level) {

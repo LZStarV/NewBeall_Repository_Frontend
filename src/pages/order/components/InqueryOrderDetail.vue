@@ -1,5 +1,5 @@
 <template>
-  <div class="detail-content" v-if="detail">
+  <div v-if="detail" class="detail-content">
     <!-- 顶部信息 -->
     <lay-row :gutter="20">
       <lay-col :xs="24" :md="12">
@@ -32,11 +32,13 @@
       </lay-col>
     </lay-row>
     <!-- 产品列表 -->
-    <lay-table ref="tableRef1" :columns="productColumns" :data-source="productDataSource" :loading="productLoading"
+    <lay-table
+ref="tableRef1" :columns="productColumns" :data-source="productDataSource" :loading="productLoading"
       even>
       <!-- 折后单价 -->
       <template #modifyprice="{ row }">
-        <span :class="row.modifyprice - row.price === 0
+        <span
+:class="row.modifyprice - row.price === 0
           ? ''
           : row.modifyprice - row.price > 0
             ? 'price-up'
@@ -44,12 +46,15 @@
           ">{{ row.modifyprice ? row.modifyprice : '0.00' }}</span>
       </template>
       <!-- 数量编辑框numEdit -->
-      <template #numEdit="{ row }"><lay-input-number v-if="props.isUnhandled" v-model="row.num" size="xs"
+      <template #numEdit="{ row }">
+<lay-input-number
+v-if="props.isUnhandled" v-model="row.num" size="xs"
           position="right" />
         <span v-else>{{ row.num }}</span>
       </template>
       <!-- 单价编辑框priceEdit -->
-      <template #priceEdit="{ row }"><lay-input v-if="props.isUnhandled" v-model="row.price" size="xs" />
+      <template #priceEdit="{ row }">
+<lay-input v-if="props.isUnhandled" v-model="row.price" size="xs" />
         <span v-else>{{ row.price }}</span>
       </template>
       <!-- 小计 -->
@@ -57,13 +62,16 @@
         <span class="priceTotal">{{ (row.price * row.num).toFixed(2) }}</span>
       </template>
       <!-- 操作下拉选择框 -->
-      <template #operation="{ row }"><lay-select v-model="row.operation" placeholder="操作"
+      <template #operation="{ row }">
+<lay-select
+v-model="row.operation" placeholder="操作"
           :change="handleOperationChange(row)" size="xs">
-          <lay-select-option :value="1" label="删除"></lay-select-option>
-          <lay-select-option :value="2" label="替换"></lay-select-option>
-          <lay-select-option :value="3" label="插入"></lay-select-option>
-          <lay-select-option :value="4" label="备注"></lay-select-option>
-        </lay-select></template>
+          <lay-select-option :value="1" label="删除" />
+          <lay-select-option :value="2" label="替换" />
+          <lay-select-option :value="3" label="插入" />
+          <lay-select-option :value="4" label="备注" />
+        </lay-select>
+</template>
     </lay-table>
     <!-- 产品价格小计 -->
     <div class="totals">
@@ -200,7 +208,7 @@ const fetchDetail = async () => {
       row_id: index + 1,
     }));
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('获取通知详情失败', error);
   }
 };

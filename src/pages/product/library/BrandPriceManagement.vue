@@ -13,8 +13,8 @@
         <div class="search-row">
           <label>请输入公司名称</label>
           <input 
-            type="text" 
             v-model="formData.companyName" 
+            type="text" 
             placeholder="请输入公司名称"
             class="search-input" 
           />
@@ -34,11 +34,11 @@
             <div v-if="showColumnsDropdown" class="columns-dropdown">
               <div class="dropdown-header">
                 <span>选择显示列</span>
-                <button @click="toggleColumnsDropdown" class="close-dropdown">×</button>
+                <button class="close-dropdown" @click="toggleColumnsDropdown">×</button>
               </div>
               <div class="column-options">
                 <label v-for="column in allColumns" :key="column.key">
-                  <input type="checkbox" v-model="columnVisibility[column.key]" />
+                  <input v-model="columnVisibility[column.key]" type="checkbox" />
                   {{ column.title }}
                 </label>
               </div>
@@ -88,8 +88,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed } from 'vue'
-import RightSideModal from '@/components/RightSideModal.vue'
+import { ref, reactive, computed } from 'vue';
+import RightSideModal from '@/components/RightSideModal.vue';
 import http from '@/utils/http';
 import Notify from '@/utils/notify';
 
@@ -102,73 +102,73 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   rightModalWidth: '35%'
-})
+});
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
-}>()
+}>();
 
 // 表单数据
 const formData = reactive({
   companyName: ''
-})
+});
 
 // 显示当前操作的品牌
 const brandDisplayText = computed(() => {
-  return props.selectedBrand ? `当前操作品牌${props.selectedBrand.name}` : '当前操作品牌自产优质'
-})
+  return props.selectedBrand ? `当前操作品牌${props.selectedBrand.name}` : '当前操作品牌自产优质';
+});
 
 // 表格列配置
 const allColumns = ref([
   { key: 'companyName', title: '公司名称' },
   { key: 'entryTime', title: '载至时间' },
   { key: 'defaultPrice', title: '默认折率' }
-])
+]);
 
 // 表格列显示控制
 const columnVisibility = reactive<Record<string, boolean>>({
   companyName: true,
   entryTime: true,
   defaultPrice: true
-})
+});
 
 // 表格数据（模拟数据）
 const companyList = ref([
   { id: 1, name: '公司A', entryTime: '2023-01-01', defaultPrice: '80%' },
   { id: 2, name: '公司B', entryTime: '2023-01-02', defaultPrice: '75%' },
   { id: 3, name: '公司C', entryTime: '2023-01-03', defaultPrice: '70%' }
-])
+]);
 
 // 总条数
-const totalCount = computed(() => companyList.value.length)
+const totalCount = computed(() => companyList.value.length);
 
 // 分页配置
 const pagination = reactive({
   pageSize: 10,
   currentPage: 1
-})
+});
 
 // 控制列显示下拉框
-const showColumnsDropdown = ref(false)
+const showColumnsDropdown = ref(false);
 
 // 关闭弹窗
 const handleClose = () => {
-  formData.companyName = ''
-  showColumnsDropdown.value = false
-  emit('close')
-}
+  formData.companyName = '';
+  showColumnsDropdown.value = false;
+  emit('close');
+};
 
 // 添加公司
 const handleAddCompany = () => {
-  console.log('添加公司')
+  console.log('添加公司');
   // 这里可以添加添加公司的逻辑
-}
+};
 
 // 切换列显示下拉框
 const toggleColumnsDropdown = () => {
-  showColumnsDropdown.value = !showColumnsDropdown.value
-}
+  showColumnsDropdown.value = !showColumnsDropdown.value;
+};
 </script>
 
 <style lang="scss" scoped>

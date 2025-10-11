@@ -1,7 +1,8 @@
 <template>
   <nav class="breadcrumb" aria-label="breadcrumb">
     <ol class="breadcrumb-list">
-      <li v-for="(item, index) in breadcrumbItems" :key="index" class="breadcrumb-item"
+      <li
+v-for="(item, index) in breadcrumbItems" :key="index" class="breadcrumb-item"
         :class="{ 'is-active': index === breadcrumbItems.length - 1 }">
         <span v-if="index < breadcrumbItems.length - 1" class="breadcrumb-link" @click="navigateTo(item.path)">
           {{ item.title }}

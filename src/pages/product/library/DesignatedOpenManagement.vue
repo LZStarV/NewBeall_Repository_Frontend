@@ -21,7 +21,8 @@
         <div class="select-container">
           <lay-select v-model="selectedCompany" :placeholder="companySearchText" style="width: 200px;">
             <lay-select-option value="">请选择授权公司</lay-select-option>
-            <lay-select-option v-for="company in authorizedCompanies" :key="company.id"
+            <lay-select-option
+v-for="company in authorizedCompanies" :key="company.id"
               :value="company.id">
               {{ company.name }}
             </lay-select-option>
@@ -36,7 +37,8 @@
       <div class="company-table-section">
         <div class="table-toolbar">
           <div class="dropdown-container">
-            <button type="button" aria-label="columns"
+            <button
+type="button" aria-label="columns"
               class="btn btn-default btn-outline dropdown-toggle"
               @click="toggleColumnsDropdown">
               <lay-icon type="layui-icon-shrink-right" />
@@ -44,19 +46,22 @@
             <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
               <li role="menuitem">
                 <label>
-                  <input type="checkbox" v-model="columnVisibility.companyName"
+                  <input
+v-model="columnVisibility.companyName" type="checkbox"
                     @change="updateVisibleColumns" /> 公司名称
                 </label>
               </li>
               <li role="menuitem">
                 <label>
-                  <input type="checkbox" v-model="columnVisibility.deleteRule"
+                  <input
+v-model="columnVisibility.deleteRule" type="checkbox"
                     @change="updateVisibleColumns" /> 删除规则
                 </label>
               </li>
               <li role="menuitem">
                 <label>
-                  <input type="checkbox" v-model="columnVisibility.status"
+                  <input
+v-model="columnVisibility.status" type="checkbox"
                     @change="updateVisibleColumns" /> 状态
                 </label>
               </li>
@@ -96,9 +101,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed } from 'vue'
-import RightSideModal from '@/components/RightSideModal.vue'
-import http from '@/utils/http'
+import { ref, reactive, computed } from 'vue';
+import RightSideModal from '@/components/RightSideModal.vue';
+import http from '@/utils/http';
 
 // 公司接口类型定义
 interface Company {
@@ -118,54 +123,54 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   rightModalWidth: '35%',
   authorizedCompanies: () => []
-})
+});
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
   updateAuthorizedCompanies: [companies: Company[]]
-}>()
+}>();
 
 // 选中的公司
-const selectedCompany = ref('')
+const selectedCompany = ref('');
 
 // 公司搜索文本
-const companySearchText = ref('请选择授权公司')
+const companySearchText = ref('请选择授权公司');
 
 // 表格列显示控制
 const columnVisibility = reactive({
   companyName: true,
   deleteRule: true,
   status: true
-})
+});
 
 // 控制列显示下拉框
-const showColumnsDropdown = ref(false)
+const showColumnsDropdown = ref(false);
 
 // 计算属性：本地授权公司列表
-const authorizedCompanies = computed(() => props.authorizedCompanies)
+const authorizedCompanies = computed(() => props.authorizedCompanies);
 
 // 关闭弹窗
 const handleClose = () => {
-  selectedCompany.value = ''
-  showColumnsDropdown.value = false
-  emit('close')
-}
+  selectedCompany.value = '';
+  showColumnsDropdown.value = false;
+  emit('close');
+};
 
 // 切换列显示下拉框
 const toggleColumnsDropdown = () => {
-  showColumnsDropdown.value = !showColumnsDropdown.value
-}
+  showColumnsDropdown.value = !showColumnsDropdown.value;
+};
 
 // 获取可见列数量
 const getVisibleColumnsCount = () => {
-  return Object.values(columnVisibility).filter(Boolean).length
-}
+  return Object.values(columnVisibility).filter(Boolean).length;
+};
 
 // 更新可见列
 const updateVisibleColumns = () => {
   // 列显示状态更新时的处理逻辑
-}
+};
 </script>
 
 <style lang="scss" scoped>

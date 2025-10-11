@@ -126,8 +126,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import ModalWindow from '@/components/ModalWindow.vue'
+import { ref, computed } from 'vue';
+import ModalWindow from '@/components/ModalWindow.vue';
 
 // 定义产品接口类型
 interface Product {
@@ -166,15 +166,15 @@ interface Props {
   selectedProduct?: Product | null
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
-}>()
+}>();
 
 // 当前激活的选项卡
-const activeTab = ref('1')
+const activeTab = ref('1');
 
 // 产品详情弹窗按钮配置
 const productDetailButtons = ref([
@@ -182,18 +182,18 @@ const productDetailButtons = ref([
     text: '关闭',
     callback: () => handleClose()
   }
-])
+]);
 
 // 价格表格配置
 const priceColumns: any[] = [
   { title: '成本价', key: 'cost', width: '120px' },
   { title: '参考售价', key: 'referencePrice', width: '120px' },
   { title: '市场指导价', key: 'marketPrice', width: '130px' }
-]
+];
 
 // 价格数据
 const priceData = computed(() => {
-  if (!props.selectedProduct) return []
+  if (!props.selectedProduct) return [];
 
   return [
     {
@@ -201,14 +201,14 @@ const priceData = computed(() => {
       referencePrice: `¥${props.selectedProduct.price}`,
       marketPrice: `¥${props.selectedProduct.marketprice}`
     }
-  ]
-})
+  ];
+});
 
 // 关闭弹窗
 const handleClose = () => {
-  activeTab.value = '1'
-  emit('close')
-}
+  activeTab.value = '1';
+  emit('close');
+};
 </script>
 
 <style lang="scss" scoped>

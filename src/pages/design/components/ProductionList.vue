@@ -8,13 +8,14 @@
       </div>
 
       <!-- 子表格 -->
-      <lay-table :columns="columns" :data-source="group.items" :default-toolbar="index === 0 ? defaultToolbars : []"
+      <lay-table
+:columns="columns" :data-source="group.items" :default-toolbar="index === 0 ? defaultToolbars : []"
         :loading="loading" :pagination="false" even @sort-change="(key, sort) => sortChange(key, sort, index)">
-
-        <!-- 图片列自定义渲染 -->
+<!-- 图片列自定义渲染 -->
         <template #image="{ row }">
           <div class="product-image">
-            <img v-if="row.pictureaddress" :src="env.getBaseStaticUrl() + row.pictureaddress" :alt="row.name"
+            <img
+v-if="row.pictureaddress" :src="env.getBaseStaticUrl() + row.pictureaddress" :alt="row.name"
               class="product-img" @click="previewImage(row.pictureaddress)" />
             <span v-else class="no-image">暂无图片</span>
           </div>
@@ -45,8 +46,9 @@
 
     <!-- 分页组件 -->
     <div v-if="pagination.total > 0" class="pagination-wrapper">
-      <lay-page :current="pagination.current" :limit="pagination.pageSize" :total="pagination.total"
-        @change="handlePagination" show-count show-limit show-page show-skip />
+      <lay-page
+:current="pagination.current" :limit="pagination.pageSize" :total="pagination.total"
+        show-count show-limit show-page show-skip @change="handlePagination" />
     </div>
   </div>
 </template>

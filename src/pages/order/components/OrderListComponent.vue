@@ -1,12 +1,14 @@
 <template>
   <div class="order-list-component">
-    <SearchPanel :api-name="isInquiryList ? 'inquery' : 'ordersNotice'" :view-name="viewName"
-      :page-size="pagination.limit" @search-result="handleSearchResult" @loading-change="handleLoadingChange"
-      ref="searchPanelRef" />
+    <SearchPanel
+ref="searchPanelRef" :api-name="isInquiryList ? 'inquery' : 'ordersNotice'"
+      :view-name="viewName" :page-size="pagination.limit" @search-result="handleSearchResult"
+      @loading-change="handleLoadingChange" />
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table ref="tableRef1" :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars"
+      <lay-table
+ref="tableRef1" :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars"
         :loading="loading" :page="pagination" even @sort-change="sortChange">
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
@@ -72,7 +74,8 @@
     <!-- 详细信息弹窗 -->
     <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="订单详情" @close="detailModalVisible = false">
       <div v-if="selectedOrder">
-        <InqueryOrderDetail v-if="isInquiryList" :row="selectedOrder" :view-name="props.viewName"
+        <InqueryOrderDetail
+v-if="isInquiryList" :row="selectedOrder" :view-name="props.viewName"
           :is-unhandled="selectedOrder.typeName === '未处理'" @close="handleRefreshClose" />
         <OrderDetail v-else :row="selectedOrder" :view-name="props.viewName" />
       </div>
@@ -82,9 +85,11 @@
     </ModalWindow>
 
     <!-- 询价对比弹窗 -->
-    <ModalWindow :visible="inqueryCompareModalVisible" :is-teleport="true" title="询价对比"
+    <ModalWindow
+:visible="inqueryCompareModalVisible" :is-teleport="true" title="询价对比"
       @close="inqueryCompareModalVisible = false">
-      <InqueryPage v-if="inqueryCompareModalVisible" :order-id="inqueryCompareData.orderId"
+      <InqueryPage
+v-if="inqueryCompareModalVisible" :order-id="inqueryCompareData.orderId"
         :product-data="inqueryCompareData.productData" @close="inqueryCompareModalVisible = false" />
     </ModalWindow>
   </div>
@@ -328,7 +333,7 @@ const handleInqueryCompare = async () => {
     console.error('对比询价失败:', error);
     notify.error('对比询价失败，请重试');
   }
-}
+};
 
 // 用户树相关状态
 const userTreeData = ref<UserTreeType[]>([]);

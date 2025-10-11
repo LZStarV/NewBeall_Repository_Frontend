@@ -1,5 +1,5 @@
 <template>
-  <div class="detail-content" v-if="detail">
+  <div v-if="detail" class="detail-content">
     <!-- 顶部信息 -->
     <lay-row :gutter="20">
       <lay-col :xs="24" :md="12">
@@ -52,16 +52,18 @@
       </div>
       <div class="btns">
         <lay-button size="md" type="primary" @click="">打折</lay-button>
-        <lay-button size="md" type="primary" @click="" disabled>未处理</lay-button>
+        <lay-button size="md" type="primary" disabled @click="">未处理</lay-button>
         <lay-button size="md" type="primary" @click="">沟通</lay-button>
       </div>
     </div>
     <!-- 产品列表 -->
-    <lay-table ref="tableRef1" :columns="productColumns" :data-source="productDataSource" :loading="productLoading"
+    <lay-table
+ref="tableRef1" :columns="productColumns" :data-source="productDataSource" :loading="productLoading"
       even>
       <!-- 折后单价 -->
       <template #modifyprice="{ row }">
-        <span :class="row.modifyprice - row.price === 0
+        <span
+:class="row.modifyprice - row.price === 0
           ? ''
           : row.modifyprice - row.price > 0
             ? 'price-up'
@@ -82,7 +84,7 @@
           formatMoney(totalAmount)
         }}</span>
       </div>
-      <div class="total-item" v-if="props.viewName === 'receive'">
+      <div v-if="props.viewName === 'receive'" class="total-item">
         (￥)订单总利润：<span class="price">{{
           formatMoney(totalProfit)
         }}</span>
@@ -90,7 +92,8 @@
     </div>
     <!-- 状态日志列表 -->
     <h5>状态日志</h5>
-    <lay-table ref="tableRef2" :columns="logColumns" :data-source="logDataSource" :loading="logLoading"
+    <lay-table
+ref="tableRef2" :columns="logColumns" :data-source="logDataSource" :loading="logLoading"
       :expand-index="1" even>
       <!-- 日志内容 -->
       <template #logcontent="{ row }">
@@ -299,7 +302,7 @@ const fetchDetail = async () => {
     };
     logDataSource.value = convertLogData(res.data.uplogList);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('获取通知详情失败', error);
   }
 };

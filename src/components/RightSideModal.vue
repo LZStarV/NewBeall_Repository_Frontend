@@ -1,7 +1,8 @@
 <template>
     <!-- 右侧滑入弹窗组件 -->
     <teleport to="body" :disabled="!isTeleport">
-        <div v-if="modalVisible" class="right-side-modal-overlay" :class="{
+        <div
+v-if="modalVisible" class="right-side-modal-overlay" :class="{
             'show': modalVisible,
             'teleport-enabled': isTeleport,
             'content-wrapper-positioned': modalElement?.parentElement?.classList.contains('content-wrapper-positioned')
@@ -14,7 +15,7 @@
                 <div class="modal-header">
                     <h3 class="modal-title">{{ title }}</h3>
                     <div class="header-actions">
-                        <button class="action-btn close-btn" @click="handleClose" title="关闭">
+                        <button class="action-btn close-btn" title="关闭" @click="handleClose">
                             <lay-icon type="layui-icon-close" />
                         </button>
                     </div>

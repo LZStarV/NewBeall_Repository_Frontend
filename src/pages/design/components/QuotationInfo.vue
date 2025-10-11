@@ -1,11 +1,12 @@
 <template>
   <!-- 操作记录面板按钮与容器 -->
-  <div class="log-panel-toggle" v-if="localQuotationData">
+  <div v-if="localQuotationData" class="log-panel-toggle">
     <lay-button size="sm" type="normal" @click="toggleLogs">
       {{ showLogs ? '隐藏操作记录' : '查看操作记录' }}
     </lay-button>
   </div>
-  <OperationLogPanel v-if="localQuotationData" :visible="showLogs" :order-id="localQuotationData.ordersId"
+  <OperationLogPanel
+v-if="localQuotationData" :visible="showLogs" :order-id="localQuotationData.ordersId"
     :phase-type="phaseType" @update:visible="(v: boolean) => showLogs = v" @view-change="viewChange" />
 
   <!-- 详情内容 -->
@@ -26,7 +27,7 @@
           </div>
         </div>
       </div>
-      <div class="seal-area" v-if="stampChecked">
+      <div v-if="stampChecked" class="seal-area">
         <canvas ref="sealCanvasRef" width="240" height="240"></canvas>
       </div>
       <lay-col :xs="24" :md="12">
@@ -213,7 +214,7 @@ const toggleLogs = () => {
 const viewChange = (record: OrderLogsRecord) => {
   // TODO: 打开侧滑/弹窗展示record对应的修改详情
   // 这里先占位，后续根据后端返回的变更详情接口实现
-  // eslint-disable-next-line no-console
+   
   console.log('查看修改内容：', record);
 };
 
@@ -301,7 +302,7 @@ const updateQuotationData = async () => {
           });
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
+         
         console.warn('获取我司详情失败，已跳过回退数据填充');
       }
     }

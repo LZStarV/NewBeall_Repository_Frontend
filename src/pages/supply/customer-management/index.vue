@@ -16,7 +16,9 @@
           </span>
         </div>
         <lay-button type="normal" size="sm" @click="clearFilter"
-          >清除</lay-button
+          >
+清除
+</lay-button
         >
       </section>
       <!-- 搜索筛选区域 -->
@@ -63,8 +65,7 @@
             placeholder="客户类型"
             allow-clear
             :options="CategoryOptions"
-          >
-          </lay-select>
+          />
         </div>
         <lay-button type="primary" @click="searchCustomers">
           <i class="layui-icon layui-icon-search"></i>
@@ -80,57 +81,57 @@
           <SvgIcon
             name="order_receive_order"
             @click="getClipboardCard"
-          ></SvgIcon>
+          />
         </lay-tooltip>
         <lay-tooltip
           :content="showDuplicateOnly ? '显示全部客户' : '显示重复客户'"
           trigger="hover"
         >
-          <SvgIcon name="group_chat" @click="toggleDuplicateView"></SvgIcon>
+          <SvgIcon name="group_chat" @click="toggleDuplicateView" />
         </lay-tooltip>
         <lay-tooltip content="复制" trigger="hover">
-          <SvgIcon name="copy" @click="copyCustomer"></SvgIcon>
+          <SvgIcon name="copy" @click="copyCustomer" />
         </lay-tooltip>
         <lay-tooltip content="新增" trigger="hover">
-          <SvgIcon name="add_to" @click="addCustomer"></SvgIcon>
+          <SvgIcon name="add_to" @click="addCustomer" />
         </lay-tooltip>
         <lay-tooltip content="编辑" trigger="hover">
-          <SvgIcon name="edit" @click="editCustomer"></SvgIcon>
+          <SvgIcon name="edit" @click="editCustomer" />
         </lay-tooltip>
         <lay-tooltip content="导入" trigger="hover">
-          <SvgIcon name="download"></SvgIcon>
+          <SvgIcon name="download" />
         </lay-tooltip>
         <lay-tooltip content="导出" trigger="hover">
-          <SvgIcon name="export"></SvgIcon>
+          <SvgIcon name="export" />
         </lay-tooltip>
         <lay-tooltip content="删除" trigger="hover">
-          <SvgIcon name="garbage" @click="deleteCustomer"></SvgIcon>
+          <SvgIcon name="garbage" @click="deleteCustomer" />
         </lay-tooltip>
         <lay-tooltip content="共享" trigger="hover">
-          <SvgIcon name="share" @click="shareCustomer"></SvgIcon>
+          <SvgIcon name="share" @click="shareCustomer" />
         </lay-tooltip>
         <lay-tooltip content="切换视图" trigger="hover">
-          <SvgIcon name="eye"></SvgIcon>
+          <SvgIcon name="eye" />
         </lay-tooltip>
         <lay-tooltip content="刷新" trigger="hover">
-          <SvgIcon name="refresh"></SvgIcon>
+          <SvgIcon name="refresh" />
         </lay-tooltip>
         <lay-tooltip content="列表" trigger="hover">
-          <SvgIcon name="menu"></SvgIcon>
+          <SvgIcon name="menu" />
         </lay-tooltip>
       </div>
       <!-- 客户列表 -->
       <div class="customer-list">
         <lay-row
+          v-if="customerList.length > 0"
           space="30"
           class="customer-list"
-          v-if="customerList.length > 0"
         >
-          <lay-col md="6" sm="12" xs="24" v-for="customer in customerList">
+          <lay-col v-for="customer in customerList" md="6" sm="12" xs="24">
             <div
+              :key="customer.id"
               class="customer-card"
               :class="{ active: activeCustomers.includes(customer.id) }"
-              :key="customer.id"
               @click="toggleCustomerSelection(customer.id)"
             >
               <div class="card-header">
@@ -139,8 +140,8 @@
                 </div>
                 <i
                   class="layui-icon layui-icon-share"
-                  @click.stop="shareCard(customer.id)"
                   title="分享"
+                  @click.stop="shareCard(customer.id)"
                 ></i>
               </div>
 
@@ -148,7 +149,7 @@
                 <div class="contact-info">
                   <div class="contact-name">
                     <span class="name">{{ customer.contactUser || '-' }}</span>
-                    <span class="position" v-if="customer.job">{{
+                    <span v-if="customer.job" class="position">{{
                       customer.job
                     }}</span>
                   </div>
@@ -180,7 +181,7 @@
             </div>
           </lay-col>
         </lay-row>
-        <lay-empty v-else style="margin: 100px auto"></lay-empty>
+        <lay-empty v-else style="margin: 100px auto" />
       </div>
       <!-- 分页 -->
       <div class="pagination-wrapper">
@@ -217,14 +218,14 @@
     "
     :visible="detailsVisiable"
     :btn="modalButtons"
-    isTeleport
-    :sizeArgs="['80%', '80%']"
+    is-teleport
+    :size-args="['80%', '80%']"
     @close="detailsVisiable = false"
   >
     <lay-loading :type="1" :loading="isAiLoading" tip="正在获取信息...">
       <lay-form
-        :model="formData"
         ref="formRef"
+        :model="formData"
         :rules="formRules"
         class="customer-detail-form"
       >
@@ -337,8 +338,7 @@
                 placeholder="请选择客户类型"
                 :options="CategoryOptions"
                 :disabled="modalMode === 'view'"
-              >
-              </lay-select>
+              />
             </lay-form-item>
           </lay-col>
 
@@ -363,7 +363,7 @@
           </lay-col>
 
           <!-- 13. 人员规模 -->
-          <lay-col :md="12" :sm="24" :xs="24" v-if="formData.clientSize">
+          <lay-col v-if="formData.clientSize" :md="12" :sm="24" :xs="24">
             <lay-form-item label="人员规模" prop="clientSize">
               <lay-input
                 v-model="formData.clientSize"
@@ -428,8 +428,8 @@
         callback: recognizeCard,
       },
     ]"
-    isTeleport
-    :sizeArgs="['600px', 'auto']"
+    is-teleport
+    :size-args="['600px', 'auto']"
     @close="cardImageVisible = false"
   >
     <lay-loading :type="1" :loading="isRecognizing" tip="正在识别名片...">

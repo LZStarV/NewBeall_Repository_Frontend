@@ -1,12 +1,12 @@
 <template>
   <div class="approval-order-list-component">
     <SearchPanel
+      ref="searchPanelRef"
       :deleteordiscount="deleteordiscountValue"
       :page-size="pagination.limit"
       :is-order-record="isOrderRecord"
       @search-result="handleSearchResult"
       @loading-change="handleLoadingChange"
-      ref="searchPanelRef"
     />
 
     <!-- 底部列表区域 -->

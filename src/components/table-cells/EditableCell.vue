@@ -19,8 +19,8 @@
     <!-- 数字输入框 -->
     <lay-input-number
       v-else-if="isEditing && inputType === 'number'"
-      v-model="editValue as unknown as number"
       ref="inputRef"
+      v-model="editValue as unknown as number"
       position="right"
       type="number"
       size="xs"

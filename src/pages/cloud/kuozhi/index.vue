@@ -9,8 +9,9 @@
                         <div class="layui-inline">
                             <label class="layui-form-label productName">产品名称</label>
                             <div class="layui-input-inline">
-                                <input v-model="filterForm.productName" autocomplete="off" class="layui-input"
-                                    name="name" type="text" placeholder="输入产品名称" @keydown="handleQuickSearch">
+                                <input
+v-model="filterForm.productName" autocomplete="off" class="layui-input"
+                                    name="name" type="text" placeholder="输入产品名称" @keydown="handleQuickSearch" />
                             </div>
                         </div>
                     </div>
@@ -19,7 +20,8 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label inventory-label">品牌</label>
                         <div class="layui-input-inline inventory-inputW">
-                            <select v-model="filterForm.brand" name="brand" id="brand" lay-filter="searchBrand"
+                            <select
+id="brand" v-model="filterForm.brand" name="brand" lay-filter="searchBrand"
                                 lay-search="">
                                 <option value="">请选择</option>
                                 <option v-for="brand in brandOptions" :key="brand.value" :value="brand.value">
@@ -33,7 +35,8 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label inventory-label">型号</label>
                         <div class="layui-input-inline inventory-inputW">
-                            <select v-model="filterForm.model" name="model" id="model" lay-filter="searchModel"
+                            <select
+id="model" v-model="filterForm.model" name="model" lay-filter="searchModel"
                                 lay-search="">
                                 <option value="">请选择</option>
                                 <option v-for="model in modelOptions" :key="model.value" :value="model.value">
@@ -47,7 +50,8 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label productName">公司名称</label>
                         <div class="layui-input-inline">
-                            <select v-model="filterForm.company" name="company" id="company" lay-filter="searchCompany"
+                            <select
+id="company" v-model="filterForm.company" name="company" lay-filter="searchCompany"
                                 lay-search="">
                                 <option value="">请选择</option>
                                 <option v-for="company in companyOptions" :key="company.value" :value="company.value">
@@ -61,10 +65,12 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label province">省</label>
                         <div class="layui-input-inline inventory-inputW">
-                            <select v-model="filterForm.province" name="province" id="province"
+                            <select
+id="province" v-model="filterForm.province" name="province"
                                 lay-filter="searchProvince" lay-search="">
                                 <option value="">请选择</option>
-                                <option v-for="province in provinceOptions" :key="province.value"
+                                <option
+v-for="province in provinceOptions" :key="province.value"
                                     :value="province.value">
                                     {{ province.label }}
                                 </option>
@@ -76,7 +82,8 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label city">市</label>
                         <div class="layui-input-inline inventory-inputW">
-                            <select v-model="filterForm.city" name="city" id="city" lay-filter="searchCity"
+                            <select
+id="city" v-model="filterForm.city" name="city" lay-filter="searchCity"
                                 lay-search="">
                                 <option value="">请选择市</option>
                                 <option v-for="city in cityOptions" :key="city.value" :value="city.value">
@@ -88,8 +95,9 @@
 
                     <!-- 搜索按钮区域 -->
                     <div class="inventorySearchBtn">
-                        <button class="btnIcon invite-but" data-title="搜索" @click="handleSearch"
-                            :disabled="searchLoading" type="button">
+                        <button
+class="btnIcon invite-but" data-title="搜索" :disabled="searchLoading"
+                            type="button" @click="handleSearch">
                             <i class="layui-icon layui-icon-search"></i>
                         </button>
                         <span data-title="重置" class="btnIcon invite-but" @click="handleRefreshForm">
@@ -103,8 +111,9 @@
         <!-- 产品列表表格 -->
         <lay-card>
             <div class="table-container">
-                <lay-table :columns="tableColumns" :data-source="tableData" :page="pagination"
-                    @change="handleTableChange" :loading="loading">
+                <lay-table
+:columns="tableColumns" :data-source="tableData" :page="pagination"
+                    :loading="loading" @change="handleTableChange">
                     <!-- 产品名称列 -->
                     <template #productName="{ row }">
                         <a href="#" class="product-link" @click.prevent="handleViewProduct(row)">{{ row.name }}</a>
@@ -118,7 +127,8 @@
                     <!-- 产品图片列 -->
                     <template #productImage="{ row }">
                         <div class="product-image">
-                            <img v-if="row.pictureaddress" :src="row.pictureaddress" :alt="row.name"
+                            <img
+v-if="row.pictureaddress" :src="row.pictureaddress" :alt="row.name"
                                 @error="handleImageError" />
                             <div v-else class="no-image">暂无图片</div>
                         </div>
@@ -130,16 +140,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
-import Notify from '@/utils/notify'
+import { ref, reactive, onMounted } from 'vue';
+import Notify from '@/utils/notify';
 import {
     getIdleCloudList,
     getProvinces,
     getIdleCloudBrandList,
     getIdleCloudModelList,
     getIdleCloudCompanyList
-} from './Api/Api'
-import { tableColumns, tableData, cityOptions } from './type'
+} from './Api/Api';
+import { tableColumns, tableData, cityOptions } from './type';
 
 // 搜索表单
 const filterForm = reactive({
@@ -149,20 +159,20 @@ const filterForm = reactive({
     company: '',
     province: '',
     city: ''
-})
+});
 
 
 
 // 加载状态
-const loading = ref(false)
-const searchLoading = ref(false)
+const loading = ref(false);
+const searchLoading = ref(false);
 
 // 分页配置
 const pagination = reactive({
     current: 1,
     limit: 50,
     total: 0
-})
+});
 
 
 // 下拉选项数据类型定义
@@ -172,10 +182,10 @@ interface OptionItem {
 }
 
 // 下拉选项数据 
-const brandOptions = ref<OptionItem[]>([])
-const modelOptions = ref<OptionItem[]>([])
-const companyOptions = ref<OptionItem[]>([])
-const provinceOptions = ref<OptionItem[]>([])
+const brandOptions = ref<OptionItem[]>([]);
+const modelOptions = ref<OptionItem[]>([]);
+const companyOptions = ref<OptionItem[]>([]);
+const provinceOptions = ref<OptionItem[]>([]);
 
 // 获取下拉选项数据
 const fetchOptionsData = async () => {
@@ -186,62 +196,62 @@ const fetchOptionsData = async () => {
             getIdleCloudBrandList(),
             getIdleCloudModelList(),
             getIdleCloudCompanyList()
-        ])
+        ]);
 
         // 处理省份数据
-        const provincesData = provincesRes.data || provincesRes
+        const provincesData = provincesRes.data || provincesRes;
         if (Array.isArray(provincesData)) {
             provinceOptions.value = provincesData.map((item: any) => ({
                 value: item.provinceCode || item.code || item.id,
                 label: item.shortName || item.name || item.label
-            }))
+            }));
         }
 
         // 处理品牌数据
-        const brandsData = brandsRes.data || brandsRes
+        const brandsData = brandsRes.data || brandsRes;
         if (Array.isArray(brandsData)) {
             brandOptions.value = brandsData.map((item: any) => ({
                 value: item.value || item.name || item,
                 label: item.label || item.name || item
-            }))
+            }));
         }
 
         // 处理型号数据
-        const modelsData = modelsRes.data || modelsRes
+        const modelsData = modelsRes.data || modelsRes;
         if (Array.isArray(modelsData)) {
             modelOptions.value = modelsData.map((item: any) => ({
                 value: item.value || item.name || item,
                 label: item.label || item.name || item
-            }))
+            }));
         }
 
         // 处理公司数据
-        const companiesData = companiesRes.data || companiesRes
+        const companiesData = companiesRes.data || companiesRes;
         if (Array.isArray(companiesData)) {
             companyOptions.value = companiesData.map((item: any) => ({
                 value: item.value || item.name || item,
                 label: item.label || item.name || item
-            }))
+            }));
         }
 
     } catch (error) {
-        console.error('获取选项数据失败:', error)
+        console.error('获取选项数据失败:', error);
         Notify.error({
             title: '错误',
             content: '获取选项数据失败，请稍后重试',
             time: 3000
-        })
+        });
     }
-}
+};
 
 // 获取产品数据
 const fetchProductList = async (searchParams?: any) => {
     try {
-        loading.value = true
+        loading.value = true;
 
         // 如果有搜索参数，重置分页到第一页
         if (searchParams && Object.keys(searchParams).length > 0) {
-            pagination.current = 1
+            pagination.current = 1;
         }
 
         // 构建请求参数（实际项目中会使用这些参数调用API）
@@ -249,55 +259,55 @@ const fetchProductList = async (searchParams?: any) => {
             page: pagination.current,
             limit: pagination.limit,
             ...searchParams
-        }
+        };
 
         // 调用真实 API
-        const response = await getIdleCloudList(requestParams)
-        const responseData = response.data || response
+        const response = await getIdleCloudList(requestParams);
+        const responseData = response.data || response;
 
         if (responseData && responseData.rows && Array.isArray(responseData.rows)) {
             tableData.value = responseData.rows.map((item: any) => ({
                 ...item,
                 checked: false
-            }))
-            pagination.total = responseData.total || responseData.rows.length
+            }));
+            pagination.total = responseData.total || responseData.rows.length;
         } else {
             // 如果没有 rows 属性，尝试直接使用 response 作为数组
             if (Array.isArray(responseData)) {
                 tableData.value = responseData.map((item: any) => ({
                     ...item,
                     checked: false
-                }))
-                pagination.total = responseData.length
+                }));
+                pagination.total = responseData.length;
             } else {
-                tableData.value = []
-                pagination.total = 0
+                tableData.value = [];
+                pagination.total = 0;
             }
         }
 
     } catch (error) {
-        console.error('获取产品列表失败:', error)
+        console.error('获取产品列表失败:', error);
         Notify.error({
             title: '错误',
             content: '获取产品列表失败，请稍后重试',
             time: 3000
-        })
+        });
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 // 表格变化处理
 const handleTableChange = async (pageData: { current: number; limit: number }) => {
-    pagination.current = pageData.current
-    pagination.limit = pageData.limit
-    await fetchProductList()
-}
+    pagination.current = pageData.current;
+    pagination.limit = pageData.limit;
+    await fetchProductList();
+};
 
 // 搜索功能
 const handleSearch = async () => {
     try {
-        searchLoading.value = true
+        searchLoading.value = true;
 
         // 检查是否有搜索条件
         const hasSearchConditions = !!(
@@ -307,125 +317,125 @@ const handleSearch = async () => {
             filterForm.company ||
             filterForm.province ||
             filterForm.city
-        )
+        );
 
         if (!hasSearchConditions) {
             Notify.error({
                 title: '搜索提示',
                 content: '请至少输入一个搜索条件',
                 time: 3000
-            })
-            return
+            });
+            return;
         }
 
         // 构建搜索参数
-        const searchParams: any = {}
+        const searchParams: any = {};
         if (filterForm.productName.trim()) {
-            searchParams.name = filterForm.productName.trim()
+            searchParams.name = filterForm.productName.trim();
         }
         if (filterForm.brand) {
-            searchParams.brand = filterForm.brand
+            searchParams.brand = filterForm.brand;
         }
         if (filterForm.model) {
-            searchParams.model = filterForm.model
+            searchParams.model = filterForm.model;
         }
         if (filterForm.company) {
-            searchParams.company = filterForm.company
+            searchParams.company = filterForm.company;
         }
         if (filterForm.province) {
-            searchParams.province = filterForm.province
+            searchParams.province = filterForm.province;
         }
         if (filterForm.city) {
-            searchParams.city = filterForm.city
+            searchParams.city = filterForm.city;
         }
 
-        await fetchProductList(searchParams)
+        await fetchProductList(searchParams);
 
         Notify.success({
             title: '搜索完成',
             content: '已更新搜索结果',
             time: 3000
-        })
+        });
     } catch (error: any) {
-        console.error('搜索失败:', error)
+        console.error('搜索失败:', error);
         Notify.error({
             title: '搜索失败',
             content: error.message || '搜索过程中发生错误，请稍后重试',
             time: 3000
-        })
+        });
     } finally {
-        searchLoading.value = false
+        searchLoading.value = false;
     }
-}
+};
 
 // 重置搜索表单
 const handleRefreshForm = async () => {
     try {
-        searchLoading.value = true
+        searchLoading.value = true;
 
         // 重置表单数据
-        filterForm.productName = ''
-        filterForm.brand = ''
-        filterForm.model = ''
-        filterForm.company = ''
-        filterForm.province = ''
-        filterForm.city = ''
+        filterForm.productName = '';
+        filterForm.brand = '';
+        filterForm.model = '';
+        filterForm.company = '';
+        filterForm.province = '';
+        filterForm.city = '';
 
         // 重置表格数据
-        await fetchProductList()
+        await fetchProductList();
 
         Notify.success({
             title: '重置成功',
             content: '已重置搜索条件并刷新数据',
             time: 3000
-        })
+        });
     } catch (error: any) {
-        console.error('重置失败:', error)
+        console.error('重置失败:', error);
         Notify.error({
             title: '重置失败',
             content: '重置过程中发生错误，请稍后重试',
             time: 3000
-        })
+        });
     } finally {
-        searchLoading.value = false
+        searchLoading.value = false;
     }
-}
+};
 
 // 快速搜索功能（支持Enter键搜索）
 const handleQuickSearch = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-        handleSearch()
+        handleSearch();
     }
-}
+};
 
 // 查看产品详情
 const handleViewProduct = (product: Product) => {
-    console.log('查看产品详情:', product)
+    console.log('查看产品详情:', product);
     // 这里可以添加查看产品详情的逻辑
-}
+};
 
 // 查看参数详情
 const handleViewParameters = (product: Product) => {
-    console.log('查看参数详情:', product)
+    console.log('查看参数详情:', product);
     // 这里可以添加查看参数详情的逻辑
-}
+};
 
 // 处理图片加载错误
 const handleImageError = (event: Event) => {
-    const img = event.target as HTMLImageElement
-    img.style.display = 'none'
-    const parent = img.parentElement
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const parent = img.parentElement;
     if (parent) {
-        parent.innerHTML = '<div class="no-image">暂无图片</div>'
+        parent.innerHTML = '<div class="no-image">暂无图片</div>';
     }
-}
+};
 
 // 组件挂载时获取数据
 onMounted(async () => {
     // 先获取选项数据，再获取产品列表
-    await fetchOptionsData()
-    await fetchProductList()
-})
+    await fetchOptionsData();
+    await fetchProductList();
+});
 </script>
 
 <style scoped lang="scss">

@@ -1,6 +1,6 @@
 <template>
   <!-- 操作记录面板按钮与容器 -->
-  <div class="log-panel-toggle" v-if="moduleData">
+  <div v-if="moduleData" class="log-panel-toggle">
     <lay-button size="sm" type="normal" @click="toggleLogs">
       {{ showLogs ? '隐藏操作记录' : '查看操作记录' }}
     </lay-button>
@@ -105,7 +105,7 @@ const toggleLogs = () => {
 const viewChange = (record: OrderLogsRecord) => {
   // TODO: 打开侧滑/弹窗展示record对应的修改详情
   // 这里先占位，后续根据后端返回的变更详情接口实现
-  // eslint-disable-next-line no-console
+   
   console.log('查看修改内容：', record);
 };
 

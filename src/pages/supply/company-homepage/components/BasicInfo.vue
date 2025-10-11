@@ -14,17 +14,16 @@
         <lay-form-item label="注册角色" prop="role">
           <div class="role">
           <span>{{ formData.role === 1 ? '产品供应商' : '工程集成商' }}</span>
-          <img :src="formData.logoUrl" alt="logo"></img>
+          <img :src="formData.logoUrl" alt="logo" /></img>
           </div>
-
-        </lay-form-item>
+</lay-form-item>
         <lay-form-item label="企业全称" prop="companyName">
           <span>{{ formData.companyName }}</span>
         </lay-form-item>
         <lay-form-item label="企业简称" prop="abbreviation">
           <lay-input
-            placeholder="请输入企业简称"
             v-model="formData.abbreviation"
+            placeholder="请输入企业简称"
           />
         </lay-form-item>
         <lay-form-item label="所在地区" prop="area" required>
@@ -95,7 +94,7 @@
         </lay-form-item>
       </div>
       <lay-form-item style="text-align: end; margin-right: 40px">
-        <lay-button type="normal" @click="submit" :loading="submitting">保存</lay-button>
+        <lay-button type="normal" :loading="submitting" @click="submit">保存</lay-button>
       </lay-form-item>
     </lay-form>
   </div>
@@ -181,7 +180,7 @@ const getCode = (type: number, name: string | number | object) => {
     return cityOpt.value?.find((item: any) => item.value === name).key;
   if(type === 3)
     return areaOpt.value?.find((item: any) => item.value === name).key;
-}
+};
 
 // 处理省份选择变化
 const handleProvinceChange = async (provinceName: string | number | object) => {
@@ -192,7 +191,7 @@ const handleProvinceChange = async (provinceName: string | number | object) => {
   areaOpt.value = [];
 
   await loadCityOpt(provinceName);
-}
+};
 
 // 加载城市
 const loadCityOpt = async (provinceName: string | number | object) => {
@@ -209,7 +208,7 @@ const loadCityOpt = async (provinceName: string | number | object) => {
   } catch (error) {
     console.error('获取城市数据失败:', error);
   }
-}
+};
 
 // 处理城市选择变化
 const handleCityChange = async (cityName: string | number | object) => {
@@ -218,7 +217,7 @@ const handleCityChange = async (cityName: string | number | object) => {
   areaOpt.value = [];
 
   await loadAreaOpt(cityName);
-}
+};
 
 // 加载区域
 const loadAreaOpt = async (cityName: string | number | object) => {
@@ -235,7 +234,7 @@ const loadAreaOpt = async (cityName: string | number | object) => {
   } catch (error) {
     console.error('获取区县数据失败:', error);
   }
-}
+};
 
 // 初始化表单数据的函数
 const initFormData = async (companyData?: CompanyDetailResponseData) => {

@@ -1,0 +1,894 @@
+<!doctype html>
+<html class="htmlhead">
+  <head>
+    <script>
+      const start = Date.now();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="renderer" content="webkit" />
+    <!-- 让360浏览器默认选择webkit内核 -->
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+    />
+
+    <!-- 全局css -->
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <!--layui-->
+    <link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" />
+
+    <link href="/static/css/skin.css" rel="stylesheet" />
+    <link href="/static/css/bootstrap.min.css?v=3.3.6" rel="stylesheet" />
+    <link href="/static/css/font-awesome.css?v=4.4.0" rel="stylesheet" />
+    <link href="/static/css/plugins/chosen/chosen.css" rel="stylesheet" />
+    <link
+      href="/static/css/plugins/bootstrap-table/bootstrap-table.min.css"
+      rel="stylesheet"
+    />
+    <!--自定义扩展bootstrapTable分页跳转到指定页码-->
+    <link href="/static/css/bootstrap-table-pagejump.css" rel="stylesheet" />
+
+    <link
+      href="/static/css/plugins/validate/bootstrapValidator.min.css"
+      rel="stylesheet"
+    />
+    <link href="/static/css/animate.css" rel="stylesheet" />
+    <link href="/static/css/style.css?v=4.1.0" rel="stylesheet" />
+    <link href="/static/css/_fstyle.css" rel="stylesheet" />
+    <link href="/static/css/plugins/iCheck/custom.css" rel="stylesheet" />
+    <link
+      href="/static/css/plugins/webuploader/webuploader.css"
+      rel="stylesheet"
+    />
+
+    <link href="/static/css/plugins/ztree/zTreeStyle.css" rel="stylesheet" />
+    <link
+      href="/static/css/plugins/bootstrap-treetable/bootstrap-treetable.css"
+      rel="stylesheet"
+    />
+    <!--bootstrap-select css存在样式污染在用的页面单独引用-->
+    <!--<link rel="stylesheet" href="/static/css/bootstrap-select.css">-->
+
+    <!-- <link href="/static/css/plugins/ztree/demo.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/css/customStyle.css" />
+    <link href="/static/css/bubble.css" rel="stylesheet" />
+    <!-- 全局js -->
+    <script src="/static/js/jquery.min.js?v=2.1.4"></script>
+
+    <!--    <script src="/static/js/bootstrap.min.js?v=3.3.6"></script>-->
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/plugins/sortable/Sortable.js"></script>
+
+    <script src="/static/js/plugins/ztree/jquery.ztree.all.min.js"></script>
+    <script src="/static/js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <!--自定义扩展bootstrapTable分页跳转到指定页码-->
+    <script src="/static/js/common/bootstrap-table-pagejump.js"></script>
+    <script src="/static/js/plugins/validate/bootstrapValidator.min.js"></script>
+    <script src="/static/js/plugins/validate/zh_CN.js"></script>
+    <script src="/static/js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="/static/js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script src="/static/js/plugins/bootstrap-treetable/bootstrap-treetable.js"></script>
+    <script src="/static/js/plugins/layer/layer.min.js"></script>
+    <!--    <script src="/static/js/plugins/layui/layui-v2.7.6/layui/layui.js"></script>-->
+    <script src="/static/js/plugins/layui/layui.js"></script>
+    <script src="/static/js/plugins/chosen/chosen.jquery.js"></script>
+    <script src="/static/js/plugins/iCheck/icheck.min.js"></script>
+    <script src="/static/js/common/DateUtils.js"></script>
+    <script src="/static/js/plugins/layer/laydate/laydate.js"></script>
+    <script src="/static/js/plugins/webuploader/webuploader.min.js"></script>
+    <script src="/static/js/common/ajax-object.js"></script>
+    <script src="/static/js/common/bootstrap-table-object.js"></script>
+    <script src="/static/js/common/tree-table-object.js"></script>
+    <script src="/static/js/common/web-upload-object.js"></script>
+    <script src="/static/js/common/ztree-object.js"></script>
+    <script src="/static/js/common/Feng.js?v=0.0.32"></script>
+    <script src="/static/js/common/twUtils.js?v=0.0.32"></script>
+    <script src="/static/js/common/layui-config-common.js"></script>
+    <script src="/static/js/common/Map.js"></script>
+    <!--格式化时间-->
+    <script src="/static/js/dateFormat.js"></script>
+    <!--格式化数字位(价格)-->
+    <script src="/static/js/common/formatNum-object.js?v=0.0.32"></script>
+    <!--art-template前端模板引擎-->
+    <script src="/static/js/template-web.js"></script>
+    <!--字体图标的名称-->
+    <script src="/static/js/common/common-icon.js"></script>
+    <!--bootstrap-select-->
+    <script src="/static/js/bootstrap-select.js"></script>
+    <!-- 日期选择-->
+    <script src="/static/js/plugins/My97DatePicker/WdatePicker.js"></script>
+    <!-- iconJS -->
+    <script src="/static/js/newBeall_icon/iconfont.js"></script>
+    <style type="text/css">
+      /*table{*/
+      /*width:100px;*/
+      /*table-layout:fixed;!* 只有定义了表格的布局算法为fixed，下面td的定义才能起作用。 *!*/
+      /*}*/
+      /*td{*/
+      /*width:100%;*/
+      /*word-break:keep-all;!* 不换行 *!*/
+      /*white-space:nowrap;!* 不换行 *!*/
+      /*overflow:hidden;!* 内容超出宽度时隐藏超出部分的内容 *!*/
+      /*text-overflow:ellipsis;!* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用*!*/
+      /*}*/
+      .ibox-content {
+        border-radius: 6px;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .icon {
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.15em;
+        fill: currentColor;
+        overflow: hidden;
+      }
+      /*
+            媒体查询 当最大宽度不足800时触发
+            这里是作为全局使用的（也可以写到customStyle.css）
+         */
+      @media (max-width: 800px) {
+        .layui-table-tool-temp {
+          display: flex;
+          width: 87%;
+          overflow: auto;
+          gap: 5px;
+        }
+        #aside-nav {
+          display: none;
+        }
+        /*壹新手机适配*/
+        .yixin-phone {
+          display: flex;
+          flex-direction: column;
+        }
+        .yixin-phone .uptrend {
+          margin-left: unset !important;
+        }
+        .yixin-phone .uptrend > div > .layui-form > div {
+          margin-left: unset !important;
+        }
+        .yixin-phone .uptrend:last-child {
+          position: unset !important;
+          display: flex;
+          justify-content: center;
+        }
+        .yixin-phone .uptrend:last-child > button {
+          margin-right: unset !important;
+        }
+        .yixin-phone .uptrend .input-group {
+          margin-bottom: unset !important;
+        }
+      }
+    </style>
+    <script type="text/javascript">
+      Feng.addCtx('');
+      Feng.addImgPrefix('https://yx.newbeall.com/softLink/');
+      Feng.addSocketPath('https://newbeall.com');
+      Feng.addExts('img|jpg|png|jpeg');
+      //Feng.addImgPrefix("/kaptcha/");
+      Feng.sessionTimeoutRegistry();
+      // 判断浏览器兼容性
+      isBrower();
+    </script>
+    <title>壹新设计报价云平台</title>
+  </head>
+
+  <body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+      <div class="backcolor-shopInvitaion">
+        <input id="inviteCode" value="6GGH82" type="hidden" />
+        <input id="inDate" value="Sat Dec 12 00:00:00 CST 2099" type="hidden" />
+
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/process_pjj.png" />
+        </div>
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/process_tell.png" style="width: 840px" />
+          <!-- 邀请流程 -->
+        </div>
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 分享我的邀请码 start-->
+        <div class="sharmyInv-pjj">
+          <div class="sharmyInv-pjjtop">
+            <!-- 头部插入 -->
+          </div>
+          <div class="sharmyInv-pjjbody">
+            <h1 class="text-center-pjj">分享我的邀请码</h1>
+            <!-- 未生成 start-->
+            <div class="three-pjj-unenforced pjj-show">
+              <div class="threetext text-right-pjj re_pjj">
+                <img src="/static/img/invite/yqmtext.png" />
+              </div>
+              <div class="threeinput">
+                <input
+                  type="text"
+                  class="text-center-pjj"
+                  readonly
+                  value="（未生成）"
+                />
+              </div>
+              <div class="threebutton">
+                <button class="creatInvite">生成邀请码</button>
+              </div>
+              <p class="text-center-pjj">邀请码永久有效</p>
+            </div>
+            <!-- 未生成 end-->
+
+            <!-- 已过期 start-->
+            <div class="three-pjj-failed">
+              <div class="threetext text-right-pjj re_pjj">
+                <img src="/static/img/invite/yqmtext.png" />
+              </div>
+              <div class="threeinput">
+                <input
+                  type="text"
+                  class="text-center-pjj"
+                  readonly
+                  value="5678"
+                />
+              </div>
+              <div class="threebutton">
+                <button class="creatInvite">生成邀请码</button>
+              </div>
+              <p class="text-center-pjj">
+                <font color="#ff6600">（已过期）</font>请重新生成二维码
+              </p>
+            </div>
+            <!-- 已过期 end-->
+
+            <!-- 生效中 start-->
+            <div class="three-pjj-validity">
+              <div class="threetext text-right-pjj re_pjj">
+                <img src="/static/img/invite/yqmtext.png" />
+              </div>
+              <div class="threeinput">
+                <div
+                  class="text-center-pjj inviteCode"
+                  style="height: 55px !important"
+                >
+                  567896
+                </div>
+              </div>
+              <div class="threebutton">
+                <button>一键复制</button>
+              </div>
+              <p class="text-center-pjj">
+                <font color="#ff6600">（生效中）</font>
+              </p>
+            </div>
+            <!-- 生效中 end-->
+          </div>
+          <div class="sharmyInv-pjjbottom">
+            <!-- 底部插入 -->
+          </div>
+        </div>
+        <!-- 分享我的邀请码 end-->
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励一 start -->
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/reward01.png" />
+        </div>
+        <!-- 奖励一 end -->
+        <div class="clear-both-pjj hei_20">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励一表格区域开始 -->
+        <div class="sharmyInv-pjj">
+          <div class="RewardTitle re_pjj z-index-1">
+            <!-- 头部样式插入图片 -->
+            <ul class="layui-row">
+              <li class="layui-col-md3"></li>
+              <li class="layui-col-md3">邀请奖励</li>
+              <li class="layui-col-md6">奖励规则</li>
+            </ul>
+          </div>
+          <div class="Rewardtable re_pjj z-index-2 mar-t">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body">
+              <ul class="layui-row">
+                <li class="layui-col-md3">
+                  <div class="tab">个人用户</div>
+                  <div class="tab grey">产品供应商(企业用户)</div>
+                  <div class="tab">工程集成商(企业用户)</div>
+                </li>
+                <li class="num layui-col-md3">
+                  <div class="tab">
+                    <strong>10积分/账号</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>20积分/账号</strong>
+                  </div>
+                  <div class="tab">
+                    <strong>20积分/账号</strong>
+                  </div>
+                </li>
+
+                <li class="layui-col-md6">
+                  <p
+                    class="list first-child"
+                    style="
+                      display: block;
+                      text-align: left;
+                      margin-left: 20px;
+                      font-size: 16px;
+                    "
+                  >
+                    1.邀请好友首次注册平台，您就可以获得积分奖励，无次数上限
+                  </p>
+                  <p
+                    class="list"
+                    style="
+                      display: block;
+                      text-align: left;
+                      margin-left: 20px;
+                      font-size: 16px;
+                    "
+                  >
+                    2.推广奖励自动到账，您可以在积分明细列表查看详细记录
+                  </p>
+                </li>
+              </ul>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+        </div>
+        <!-- 奖励一表格区域结束 -->
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励二 start -->
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/reward02.png" />
+        </div>
+        <!-- 奖励二 end -->
+        <div class="clear-both-pjj hei_20">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励二表格区域开始 -->
+        <div class="sharmyInv-pjj">
+          <div class="RewardTitle re_pjj z-index-1">
+            <!-- 头部样式插入图片 -->
+            <ul class="layui-row">
+              <li class="layui-col-md3">个人会员</li>
+              <li class="layui-col-md3">充值奖励</li>
+              <li class="layui-col-md3">企业会员</li>
+              <li class="layui-col-md3">充值奖励</li>
+            </ul>
+          </div>
+          <div class="Rewardtable re_pjj z-index-2 mar-t">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body">
+              <ul class="layui-row">
+                <li class="layui-col-md3">
+                  <div class="tab">个人月度会员</div>
+                  <div class="tab grey">个人季度会员</div>
+                  <div class="tab">个人半年度会员</div>
+                  <div class="tab grey">个人年度会员</div>
+                </li>
+                <li class="num layui-col-md3">
+                  <div class="tab">
+                    <strong>5积分</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>15积分</strong>
+                  </div>
+                  <div class="tab">
+                    <strong>30积分</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>60积分</strong>
+                  </div>
+                </li>
+                <li class="layui-col-md3">
+                  <div class="tab">企业月度会员</div>
+                  <div class="tab grey">企业半年度会员</div>
+                  <div class="tab">企业年度会员</div>
+                  <div class="tab grey">企业三年度会员</div>
+                </li>
+                <li class="layui-col-md3">
+                  <div class="tab">
+                    <strong>100积分</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>1个月会员</strong>
+                  </div>
+                  <div class="tab">
+                    <strong>2个月会员</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>半年会员</strong>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+          <div class="Rewardtable">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body padding-bottom-pjj">
+              <img src="/static/img/invite/iconrull.png" class="icon-pjj" />
+              <div class="mesgright-pjj">
+                <p class="title-pjj">
+                  <font class="RewardFont"><strong>奖励规则:</strong></font>
+                </p>
+                <p class="list first-child">
+                  1.好友每次充值会员，您都能获得对应会员等级奖励
+                </p>
+                <p class="list">
+                  2.会员推广奖励自动到账，您可以在我邀请的好友中查看详细记录
+                </p>
+              </div>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+        </div>
+        <!-- 奖励二表格区域结束 -->
+
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励三 start -->
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/reward03.png" />
+        </div>
+        <p class="sharmyInv-pjj text-right-pjj">
+          累计推广会员&nbsp;<font class="RewardFont"
+            ><strong class="RewardVip">0</strong></font
+          >人 累计推广用户&nbsp;<font class="RewardFont"
+            ><strong class="RewardNum">0</strong></font
+          >人
+        </p>
+        <!-- 奖励三 end -->
+        <div class="clear-both-pjj hei_20">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 奖励三表格区域开始 -->
+        <div class="sharmyInv-pjj tab03">
+          <div class="RewardTitle re_pjj z-index-1">
+            <!-- 头部样式插入图片 -->
+            <ul class="layui-row">
+              <li class="layui-col-md3">累积推广会员</li>
+              <li class="layui-col-md3">累积推广用户</li>
+              <li class="layui-col-md3">奖励规则</li>
+              <li class="layui-col-md3">操作</li>
+            </ul>
+          </div>
+          <div class="Rewardtable re_pjj z-index-2 mar-t">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body">
+              <ul class="layui-row">
+                <li class="layui-col-md3">
+                  <div class="tab">1人</div>
+                  <div class="tab grey">5人</div>
+                  <div class="tab">10人</div>
+                  <div class="tab grey">20人</div>
+                </li>
+                <li class="num layui-col-md3">
+                  <div class="tab"><strong>10</strong>&nbsp;人</div>
+                  <div class="tab grey"><strong>20</strong>&nbsp;人</div>
+                  <div class="tab"><strong>40</strong>&nbsp;人</div>
+                  <div class="tab grey"><strong>60</strong>&nbsp;人</div>
+                </li>
+                <li class="layui-col-md3">
+                  <div class="tab">
+                    <strong>一个月会员</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>季度会员</strong>
+                  </div>
+                  <div class="tab">
+                    <strong>半年会员</strong>
+                  </div>
+                  <div class="tab grey">
+                    <strong>一年会员</strong>
+                  </div>
+                </li>
+                <li class="layui-col-md3">
+                  <div class="tab">
+                    <!--                            <a href="#"><img src="/static/img/invite/haslingqu.png"/></a>-->
+                    <a href="javascript:void(0);"
+                      ><img
+                        class="linqu"
+                        data-val='{"vip":1,"num":10}'
+                        src="/static/img/invite/towget.png"
+                    /></a>
+                  </div>
+                  <div class="tab grey">
+                    <a href="javascript:void(0);"
+                      ><img
+                        class="linqu"
+                        data-val='{"vip":5,"num":20}'
+                        src="/static/img/invite/nowget.png"
+                    /></a>
+                  </div>
+                  <div class="tab">
+                    <a href="javascript:void(0);"
+                      ><img
+                        class="linqu"
+                        data-val='{"vip":15,"num":40}'
+                        src="/static/img/invite/haslingqu.png"
+                    /></a>
+                  </div>
+                  <div class="tab grey">
+                    <a href="javascript:void(0);"
+                      ><img
+                        class="linqu"
+                        onclick="show()"
+                        data-val='{"vip":20,"num":60}'
+                        src="/static/img/invite/nowget.png"
+                    /></a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+          <div class="Rewardtable">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body padding-bottom-pjj">
+              <img src="/static/img/invite/iconrull.png" class="icon-pjj" />
+              <div class="mesgright-pjj">
+                <p class="title-pjj">
+                  <font class="RewardFont"><strong>奖励规则:</strong></font>
+                </p>
+                <p class="list first-child">
+                  1.每项管理奖金每人仅限领取一次，不同管理奖金可以叠加领取
+                </p>
+                <p class="list">
+                  2.累计推广会员人数和笔数均达到以上条件，即可在本页面<a
+                    href="#"
+                    class="RewardFont"
+                    >【点击领取】</a
+                  >对应奖金
+                </p>
+                <p class="list">3.个人用户和企业用户均视为单个用户</p>
+              </div>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+        </div>
+        <!-- 奖励三表格区域结束 -->
+
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+        <!-- 常见说明 start-->
+        <div class="sharmyInv-pjj">
+          <div class="sharmyInv-pjjtop">
+            <!-- 头部插入 -->
+          </div>
+          <div class="sharmyInv-pjjbody">
+            <h1 class="text-center-pjj">常见说明</h1>
+
+            <div class="clear-both-pjj hei_40">
+              <!-- 分隔符 -->
+            </div>
+
+            <div class="explanation-pjj">
+              <img src="/static/img/invite/q1.png" />
+              <div class="clear-both-pjj"></div>
+              <div class="answer-pjj">
+                答：可以的，只要通过<a href="#" class="RewardFont">您的邀请码</a
+                >注册，都有机会获得以上奖励。
+              </div>
+            </div>
+            <div class="explanation-pjj">
+              <img src="/static/img/invite/q2.png" />
+              <div class="clear-both-pjj"></div>
+              <div class="answer-pjj">
+                答：是的，只要达成奖励要求，可以<a href="#" class="RewardFont"
+                  >同时获得奖励一、奖励二、奖励三</a
+                >的奖励。
+              </div>
+            </div>
+            <div class="explanation-pjj">
+              <img src="/static/img/invite/q3.png" />
+              <div class="clear-both-pjj"></div>
+              <div class="answer-pjj">
+                答：奖励一、奖励二的积分会自动到账，<a
+                  href="#"
+                  class="RewardFont"
+                  >奖励三</a
+                >需在本页面手动领取，可在下方查看详细信息。
+              </div>
+            </div>
+            <div class="explanation-pjj">
+              <img src="/static/img/invite/q6.png" />
+              <div class="clear-both-pjj"></div>
+              <div class="answer-pjj">
+                答：是的，未通过邀请码或邀请链接注册无法计算奖励。您也可以通过代注册功能帮好友注册账户。
+              </div>
+            </div>
+
+            <div class="clear-both-pjj hei_40">
+              <!-- 分隔符 -->
+            </div>
+          </div>
+          <div class="sharmyInv-pjjbottom">
+            <!-- 底部插入 -->
+          </div>
+        </div>
+        <!-- 常见说明 end-->
+        <div class="clear-both-pjj hei_40">
+          <!-- 分隔符 -->
+        </div>
+
+        <!-- 分享邀请链接 start-->
+        <div class="sharmyInv-pjj">
+          <div class="sharmyInv-pjjtop">
+            <!-- 头部插入 -->
+          </div>
+          <div class="sharmyInv-pjjbody" id="shareLink">
+            <h1 class="text-center-pjj">分享邀请链接</h1>
+            <!-- 未生成 start-->
+            <div class="three-pjj-unenforced pjj-show">
+              <div class="threetext text-right-pjj re_pjj"></div>
+              <div class="threeinput">
+                <input
+                  type="text"
+                  class="text-center-pjj"
+                  readonly
+                  value="（未生成）"
+                />
+              </div>
+              <div class="threebutton">
+                <button class="creatInvite">生成邀请链接</button>
+              </div>
+              <p class="text-center-pjj">邀请码有限期为7天，过期后可重新生成</p>
+            </div>
+            <!-- 未生成 end-->
+
+            <!-- 已过期 start-->
+            <div class="three-pjj-failed">
+              <div class="threetext text-right-pjj re_pjj"></div>
+              <div class="threeinput myhei">
+                <div class="text-center-pjj backlink">
+                  嗨！！！我在这里发现了一个高效，实用的设计报价平台，快来一起来体验吧！http://newbeall.com/register?code=fjopuyCFHIKSUX5
+                </div>
+              </div>
+              <div class="threebutton">
+                <button class="creatInvite">生成邀请链接</button>
+              </div>
+              <p class="text-center-pjj">
+                <font color="#ff6600">（已过期）请重新生成邀请链接</font>
+              </p>
+            </div>
+            <!-- 已过期 end-->
+
+            <!-- 生效中 start-->
+            <div class="three-pjj-validity">
+              <div class="threetext text-right-pjj re_pjj"></div>
+              <div class="threeinput myhei">
+                <div class="text-center-pjj backlink">
+                  嗨！！！我在这里发现了一个高效，实用的设计报价平台，快来一起来体验吧！http://newbeall.com/register?code=fjopuyCFHIKSUX5
+                </div>
+              </div>
+              <div class="threebutton">
+                <button>一键复制</button>
+              </div>
+              <p class="text-center-pjj">
+                <font color="#ff6600">（生效中）</font>
+              </p>
+            </div>
+            <!-- 生效中 end-->
+          </div>
+          <div class="sharmyInv-pjjbottom">
+            <!-- 底部插入 -->
+          </div>
+        </div>
+        <!-- 分享邀请链接 end-->
+
+        <div class="clear-both-pjj hei_40"></div>
+        <!-- 我邀请的好友 start -->
+        <div class="banner_Invitation_pjj text-center-pjj">
+          <img src="/static/img/invite/myfriend.png" />
+        </div>
+        <div class="clear-both-pjj hei_20"></div>
+        <!-- 我邀请的好友内容头部 -->
+        <div class="sharmyInv-pjj tab03 friend">
+          <div class="RewardTitle re_pjj z-index-1">
+            <!-- 头部样式插入图片 -->
+            <ul class="layui-row">
+              <li style="width: 160px">账户</li>
+              <li style="width: 160px">手机号</li>
+              <li style="width: 240px">注册时间</li>
+              <li style="width: 160px">累计积分奖励</li>
+              <li style="width: 160px">累计会员奖励</li>
+            </ul>
+          </div>
+          <div class="Rewardtable re_pjj z-index-2 mar-t">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body" id="inviteRecord">
+              <ul class="layui-row"></ul>
+              <div class="page-pjj text-center-pjj">
+                <button
+                  class="pre"
+                  type="button"
+                  onclick="pageRecord(this)"
+                  data-val="0"
+                >
+                  <上一页
+                </button>
+                &nbsp;&nbsp;
+                <button
+                  class="next"
+                  type="button"
+                  id="next"
+                  onclick="pageRecord(this)"
+                  data-val="2"
+                >
+                  下一页>
+                </button>
+              </div>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+        </div>
+        <!-- 我邀请的好友 end -->
+
+        <div class="clear-both-pjj hei_40" style="display: none"></div>
+        <!-- 奖励排行榜 start -->
+        <div
+          class="banner_Invitation_pjj text-center-pjj"
+          style="display: none"
+        >
+          <img src="/static/img/invite/jiangli.png" />
+        </div>
+        <!-- 奖励排行榜 end -->
+        <div class="clear-both-pjj hei_20" style="display: none"></div>
+        <div class="sharmyInv-pjj" style="display: none">
+          <div class="RewardTitle re_pjj z-index-1">
+            <table
+              border="0"
+              cellspacing="0"
+              cellpadding="0"
+              class="datetable-pjj"
+            >
+              <tr>
+                <td>邀请排名</td>
+                <td>用户昵称</td>
+                <td>好友人数</td>
+                <td>获得邀请奖励</td>
+              </tr>
+            </table>
+          </div>
+          <div class="Rewardtable re_pjj z-index-2 mar-t">
+            <div class="Rewardtable-top"></div>
+            <div class="Rewardtable-body">
+              <table
+                border="0"
+                cellspacing="0"
+                cellpadding="0"
+                class="datetable-pjj-list"
+              >
+                <tr>
+                  <td><img src="/static/img/invite/firstlist.png" /></td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+                <tr>
+                  <td><img src="/static/img/invite/secondlist.png" /></td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+                <tr>
+                  <td><img src="/static/img/invite/threelist.png" /></td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>123****1225</td>
+                  <td>1,151</td>
+                  <td>998,888 元</td>
+                </tr>
+              </table>
+            </div>
+            <div class="Rewardtable-bottom"></div>
+          </div>
+        </div>
+      </div>
+      <link rel="stylesheet" href="/static/css/invite/invitation.css" />
+      <script src="/static/modular/system/invite/invite.js"></script>
+
+      <script type="text/html" id="recordListTpl">
+        {{if recordList.length!=0}} {{each recordList}}
+        <li class="row-pjj">
+          <div class="date-pjj text-center-pjj ">
+            <div class="date-span " style="width: 160px">
+              {{$value.beInviteAccount}}
+            </div>
+            <div class="date-span " style="width: 160px">
+              {{$value.beInvitePhone}}
+            </div>
+            <div class="date-span " style="width: 240px">
+              {{$value.inviteTime,"yyyy-MM-dd HH:mm:ss"}}
+            </div>
+            <div class="date-span " style="width: 160px">
+              {{$value.awardIntegral}}积分
+            </div>
+            <div class="date-span " style="width: 160px">
+              {{$value.awardVip}}个月
+            </div>
+          </div>
+
+          <div class="clear-both-pjj border-dashed"></div>
+        </li>
+        {{/each}} {{/if}}
+      </script>
+    </div>
+
+    <script src="/static/js/content.js?v=0.0.32"></script>
+    <script>
+      window.onload = () => {
+        const end = Date.now();
+        var time = end - start;
+        console.log('消耗了' + time + 'ms');
+        //进入这个页面设置父页面title
+        //parent.document.querySelector("title").innerText = '壹新设计报价云平台';
+        $(parent.document).find('title').text('壹新设计报价云平台');
+      };
+
+      function showLog(obj, type) {
+        let { name, isMessage, content, title } = obj;
+        layui.use('notice', function () {
+          var notice = layui.notice;
+          if (type == 0) {
+            notice.success({
+              title: '用户登录通知',
+              message: name + '登录壹新平台',
+            });
+          } else if (type == 1) {
+            notice.success({ title: '用户离线通知', message: name + '已离线' });
+          } else if (type == 3) {
+            notice.success({
+              title: '订单处理通知',
+              message: '接收来自' + name + '的订单！请尽快查看',
+            });
+          } else if (type == 4) {
+            // 即时通讯消息提示
+            if (isMessage) {
+              // 为true
+              notice.success({
+                title: '消息通知',
+                message: name + '查看了消息！请尽快联系',
+              });
+            } else {
+              notice.success({
+                title: title || '消息通知',
+                message: name + ':' + content,
+              });
+            }
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

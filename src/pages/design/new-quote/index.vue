@@ -1,6 +1,7 @@
 <template>
   <div class="new-quote-page">
-    <QuotationEdit ref="quotationEditRef" :quotation-menu-config="quotationMenuConfig" :is-new-quotation="true"
+    <QuotationEdit
+ref="quotationEditRef" :quotation-menu-config="quotationMenuConfig" :is-new-quotation="true"
       @data-submit="handleDataSubmit" @temp-save="handleTempSave" />
   </div>
 </template>

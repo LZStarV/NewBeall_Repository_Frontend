@@ -3,48 +3,55 @@
         <lay-card class="table-card">
             <!-- 工具栏区域 -->
             <div class="fixed-table-toolbar">
-                <span data-title="动态接收人" @click="handleAuthorize" class="btnIcon invite-but">
+                <span data-title="动态接收人" class="btnIcon invite-but" @click="handleAuthorize">
                     <lay-icon type="layui-icon-add-circle" />
                 </span>
 
-                <button class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh" title="刷新"
+                <button
+class="btn btn-default btn-outline" type="button" name="refresh" aria-label="refresh" title="刷新"
                     @click="handleRefresh">
                     <lay-icon type="layui-icon-refresh" />
                 </button>
 
                 <div class="dropdown-container">
-                    <button type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
+                    <button
+type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
                         @click="toggleColumnsDropdown">
                         <lay-icon type="layui-icon-shrink-right" />
                     </button>
                     <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
                         <li role="menuitem">
                             <label>
-                                <input type="checkbox" v-model="columnVisibility.functionDescription"
+                                <input
+v-model="columnVisibility.functionDescription" type="checkbox"
                                     @change="updateVisibleColumns" /> 功能描述
                             </label>
                         </li>
                         <li role="menuitem">
                             <label>
-                                <input type="checkbox" v-model="columnVisibility.functionTopicDescription"
+                                <input
+v-model="columnVisibility.functionTopicDescription" type="checkbox"
                                     @change="updateVisibleColumns" /> 功能主题
                             </label>
                         </li>
                         <li role="menuitem">
                             <label>
-                                <input type="checkbox" v-model="columnVisibility.functionType"
+                                <input
+v-model="columnVisibility.functionType" type="checkbox"
                                     @change="updateVisibleColumns" /> 功能类型
                             </label>
                         </li>
                         <li role="menuitem">
                             <label>
-                                <input type="checkbox" v-model="columnVisibility.defaultRecipient"
+                                <input
+v-model="columnVisibility.defaultRecipient" type="checkbox"
                                     @change="updateVisibleColumns" /> 默认接收人
                             </label>
                         </li>
                         <li role="menuitem">
                             <label>
-                                <input type="checkbox" v-model="columnVisibility.messageType"
+                                <input
+v-model="columnVisibility.messageType" type="checkbox"
                                     @change="updateVisibleColumns" /> 消息类型
                             </label>
                         </li>
@@ -54,7 +61,8 @@
 
             <!-- 自定义动态列表表格 -->
             <div class="table-container">
-                <lay-table :columns="visibleColumns" :data-source="tableData" :page="pagination"
+                <lay-table
+:columns="visibleColumns" :data-source="tableData" :page="pagination"
                     @change="handleTableChange">
                     <!-- 功能主题描述列 -->
                     <template #functionTopicDescription="{ row }">
@@ -73,7 +81,8 @@
                     <!-- 默认接收人列 -->
                     <template #defaultRecipient="{ row }">
                         <div class="recipient-tags">
-                            <span v-for="tag in parseRecipients(row.defaultRecipient)" :key="tag" class="recipient-tag"
+                            <span
+v-for="tag in parseRecipients(row.defaultRecipient)" :key="tag" class="recipient-tag"
                                 :class="getRecipientTagClass(tag)">
                                 {{ tag }}
                             </span>

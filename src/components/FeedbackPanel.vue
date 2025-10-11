@@ -16,7 +16,6 @@
           v-model="feedbackContent"
           :class="{ 'input-error': feedbackError }"
           placeholder="请输入建议内容，5到200字"
-          @input="validateFeedback"
           style="
             width: 100%;
             padding: 10px;
@@ -27,6 +26,7 @@
             font-size: 14px;
             box-sizing: border-box;
           "
+          @input="validateFeedback"
         ></textarea>
         <p
           v-if="feedbackError"
@@ -43,7 +43,6 @@
           type="tel"
           :class="{ 'input-error': phoneError }"
           placeholder="输入联系电话"
-          @input="validatePhone"
           style="
             width: 100%;
             padding: 10px;
@@ -52,6 +51,7 @@
             font-size: 14px;
             box-sizing: border-box;
           "
+          @input="validatePhone"
         />
         <p
           v-if="phoneError"
@@ -137,17 +137,17 @@ onUnmounted(() => {
 // 定义弹窗按钮
 const actionBtns = ref([
   {
-    text: '取消',
-    callback: () => {
-      handleClose();
-    },
-  },
-  {
     text: '提交',
     callback: () => {
       handleSubmit();
     },
   },
+  {
+    text: '取消',
+    callback: () => {
+      handleClose();
+    },
+  }
 ]);
 
 // 验证建议内容

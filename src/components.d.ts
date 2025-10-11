@@ -21,6 +21,7 @@ declare module 'vue' {
     ImageUpload: typeof import('./components/ImageUpload.vue')['default']
     ModalWindow: typeof import('./components/ModalWindow.vue')['default']
     NoticeBar: typeof import('./components/NoticeBar.vue')['default']
+    NoticeDetail: typeof import('./components/NoticeDetail.vue')['default']
     OperationLogPanel: typeof import('./components/OperationLogPanel.vue')['default']
     RightSideModal: typeof import('./components/RightSideModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -60,7 +60,8 @@
 
             <!-- 会员续费 -->
             <template v-else-if="activeTab === 'renewal'">
-                <RenewalSection v-model="selectedPackage" v-model:use-points="usePoints"
+                <RenewalSection
+v-model="selectedPackage" v-model:use-points="usePoints"
                     :available-points="companyInfo.integration || 0" />
                 <PaymentSection v-model="paymentMethod" :amount="renewalPrice" @pay="handlePay('renewal')" />
             </template>
@@ -82,40 +83,41 @@
         <PointsRules />
 
         <!-- 支付弹窗 -->
-        <PaymentModal :visible="showPaymentModal" :payment-url="paymentUrl" :amount="currentPaymentAmount"
+        <PaymentModal
+:visible="showPaymentModal" :payment-url="paymentUrl" :amount="currentPaymentAmount"
             :payment-type="currentPaymentType" @close="closePaymentModal" @payment-success="handlePaymentSuccess"
             @payment-timeout="handlePaymentTimeout" />
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { companyInfo } from './type'
-import { ExpiredAuthApi, CompanyInfo } from './Api'
-import Notify from '@/utils/notify'
-import http from '@/utils/http'
-import PointsSection from './PointsSection.vue'
-import RenewalSection from './RenewalSection.vue'
-import StorageSection from './StorageSection.vue'
-import AiServiceSection from './AiServiceSection.vue'
-import PaymentSection from './PaymentSection.vue'
-import PointsRules from './PointsRules.vue'
-import PaymentModal from './PaymentModal.vue'
+import { ref, computed, onMounted } from 'vue';
+import { companyInfo } from './type';
+import { ExpiredAuthApi, CompanyInfo } from './Api';
+import Notify from '@/utils/notify';
+import http from '@/utils/http';
+import PointsSection from './PointsSection.vue';
+import RenewalSection from './RenewalSection.vue';
+import StorageSection from './StorageSection.vue';
+import AiServiceSection from './AiServiceSection.vue';
+import PaymentSection from './PaymentSection.vue';
+import PointsRules from './PointsRules.vue';
+import PaymentModal from './PaymentModal.vue';
 
 // 响应式数据
-const activeTab = ref('points')
-const selectedPoints = ref('50')
-const selectedPackage = ref('month')
-const selectedStorage = ref('500mb')
-const selectedAiService = ref('1month')
-const paymentMethod = ref('wechat')
-const usePoints = ref(false)
+const activeTab = ref('points');
+const selectedPoints = ref('50');
+const selectedPackage = ref('month');
+const selectedStorage = ref('500mb');
+const selectedAiService = ref('1month');
+const paymentMethod = ref('wechat');
+const usePoints = ref(false);
 
 // 支付弹窗相关数据
-const showPaymentModal = ref(false)
-const paymentUrl = ref('')
-const currentPaymentAmount = ref('')
-const currentPaymentType = ref('')
+const showPaymentModal = ref(false);
+const paymentUrl = ref('');
+const currentPaymentAmount = ref('');
+const currentPaymentType = ref('');
 
 // 价格数据
 const prices = {
@@ -123,46 +125,46 @@ const prices = {
     renewal: { month: 399.00, halfYear: 2199.00, year: 4199.00, threeYears: 9999.00 },
     storage: { '500mb': '120.00', '1gb': '240.00', '10gb': '2307.00' },
     ai: { '1month': '100.00', '6months': '580.00', '12months': '1099.00' }
-}
+};
 
 // 计算属性
 const logoImageUrl = computed(() => {
-    const logoUrl = companyInfo.value.logoUrl
-    return logoUrl ? `https://yx.newbeall.com/softLink/${logoUrl}` : '@/assets/image/default/cover_logo.png'
-})
+    const logoUrl = companyInfo.value.logoUrl;
+    return logoUrl ? `https://yx.newbeall.com/softLink/${logoUrl}` : '@/assets/image/default/cover_logo.png';
+});
 
 const formatAiServiceDate = computed(() => {
-    const aiindate = companyInfo.value.aiindate
-    return (!aiindate || aiindate.trim() === '') ? '未开通' : aiindate
-})
+    const aiindate = companyInfo.value.aiindate;
+    return (!aiindate || aiindate.trim() === '') ? '未开通' : aiindate;
+});
 
 const formatMemoryDisplay = computed(() => {
-    const memory = companyInfo.value.memory
-    return memory ? Math.ceil(parseFloat(memory)) : 0
-})
+    const memory = companyInfo.value.memory;
+    return memory ? Math.ceil(parseFloat(memory)) : 0;
+});
 
-const pointsPrice = computed(() => prices.points[selectedPoints.value] || '50.00')
-const storagePrice = computed(() => prices.storage[selectedStorage.value] || '120.00')
-const aiServicePrice = computed(() => prices.ai[selectedAiService.value] || '100.00')
+const pointsPrice = computed(() => prices.points[selectedPoints.value] || '50.00');
+const storagePrice = computed(() => prices.storage[selectedStorage.value] || '120.00');
+const aiServicePrice = computed(() => prices.ai[selectedAiService.value] || '100.00');
 
 const renewalPrice = computed(() => {
-    const basePrice = prices.renewal[selectedPackage.value] || 399.00
-    if (!usePoints.value) return basePrice.toFixed(2)
+    const basePrice = prices.renewal[selectedPackage.value] || 399.00;
+    if (!usePoints.value) return basePrice.toFixed(2);
 
     const deductionRates = {
         month: { rate: 1.0, maxPoints: 100 },
         halfYear: { rate: 1.09, maxPoints: 600 },
         year: { rate: 1.14, maxPoints: 1300 },
         threeYears: { rate: 1.44, maxPoints: 2800 }
-    }
+    };
 
-    const config = deductionRates[selectedPackage.value] || deductionRates.month
-    const availablePoints = companyInfo.value.integration || 0
-    const maxPoints = Math.min(availablePoints, config.maxPoints)
-    const deduction = Math.floor(maxPoints * config.rate)
+    const config = deductionRates[selectedPackage.value] || deductionRates.month;
+    const availablePoints = companyInfo.value.integration || 0;
+    const maxPoints = Math.min(availablePoints, config.maxPoints);
+    const deduction = Math.floor(maxPoints * config.rate);
 
-    return Math.max(0, basePrice - deduction).toFixed(2)
-})
+    return Math.max(0, basePrice - deduction).toFixed(2);
+});
 
 // 支付处理
 const handlePay = async (type) => {
@@ -178,32 +180,32 @@ const handlePay = async (type) => {
                 type === 'renewal' ? selectedPackage.value :
                     type === 'storage' ? selectedStorage.value : selectedAiService.value,
             useIntegral: type === 'renewal' ? usePoints.value : false
-        }
+        };
 
 
         if (paymentMethod.value === 'wechat') {
             // 发起微信支付请求
             // 微信支付调用，构建查询参数
-            const opt = getPaymentOpt(type)
-            const useIntegral = paymentData.useIntegral
+            const opt = getPaymentOpt(type);
+            const useIntegral = paymentData.useIntegral;
 
             // 发起微信支付请求，参数通过URL查询字符串传递
-            const result = await http.post(`wx/pay?opt=${opt}&useIntegral=${useIntegral}`)
+            const result = await http.post(`wx/pay?opt=${opt}&useIntegral=${useIntegral}`);
 
             if (result && result.code === '200') {
                 // 显示支付二维码
-                paymentUrl.value = result.data
-                currentPaymentAmount.value = paymentData.amount
-                currentPaymentType.value = type
-                showPaymentModal.value = true
+                paymentUrl.value = result.data;
+                currentPaymentAmount.value = paymentData.amount;
+                currentPaymentType.value = type;
+                showPaymentModal.value = true;
 
                 Notify.success({
                     title: '支付请求成功',
                     content: '请使用微信扫码支付',
                     time: 2000
-                })
+                });
             } else {
-                throw new Error(result?.msg || '支付失败')
+                throw new Error(result?.msg || '支付失败');
             }
 
 
@@ -213,99 +215,99 @@ const handlePay = async (type) => {
                 title: '支付宝支付',
                 content: '支付宝支付功能开发中...',
                 time: 2000
-            })
+            });
         }
     } catch (error) {
-        console.error('支付错误:', error)
+        console.error('支付错误:', error);
         Notify.error({
             title: '支付失败',
             content: error.message || '支付过程中发生错误，请重试',
             time: 3000
-        })
+        });
     }
-}
+};
 
 // 获取支付选项参数
 const getPaymentOpt = (type) => {
     const selection = type === 'points' ? selectedPoints.value :
         type === 'renewal' ? selectedPackage.value :
             type === 'storage' ? selectedStorage.value :
-                selectedAiService.value
+                selectedAiService.value;
 
     // 积分充值映射：50->5, 110->6, 580->7, 1250->8
     if (type === 'points') {
-        const pointsMap = { '50': 5, '110': 6, '580': 7, '1250': 8 }
-        return pointsMap[selection] || 5
+        const pointsMap = { '50': 5, '110': 6, '580': 7, '1250': 8 };
+        return pointsMap[selection] || 5;
     }
 
     // 会员续费映射：month->9, halfYear->2, year->11, threeYears->12
     if (type === 'renewal') {
-        const renewalMap = { 'month': 1, 'halfYear': 2, 'year': 3, 'threeYears': 4 }
-        return renewalMap[selection] || 1
+        const renewalMap = { 'month': 1, 'halfYear': 2, 'year': 3, 'threeYears': 4 };
+        return renewalMap[selection] || 1;
     }
 
     // 云空间购买映射：500mb->13, 1gb->14, 10gb->15
     if (type === 'storage') {
-        const storageMap = { '500mb': 13, '1gb': 14, '10gb': 15 }
-        return storageMap[selection] || 13
+        const storageMap = { '500mb': 13, '1gb': 14, '10gb': 15 };
+        return storageMap[selection] || 13;
     }
 
     // AI服务映射：1month->16, 6months->17, 12months->18
     if (type === 'ai') {
-        const aiMap = { '1month': 16, '6months': 17, '12months': 18 }
-        return aiMap[selection] || 16
+        const aiMap = { '1month': 16, '6months': 17, '12months': 18 };
+        return aiMap[selection] || 16;
     }
 
-    return 5 // 默认值
-}
+    return 5; // 默认值
+};
 
 // 获取支付类型名称
 const getPaymentTypeName = (type) => {
     switch (type) {
-        case 'points': return '积分充值'
-        case 'renewal': return '会员续费'
-        case 'storage': return '云空间购买'
-        case 'ai': return 'AI服务'
-        default: return '支付'
+        case 'points': return '积分充值';
+        case 'renewal': return '会员续费';
+        case 'storage': return '云空间购买';
+        case 'ai': return 'AI服务';
+        default: return '支付';
     }
-}
+};
 
 // 支付弹窗处理函数
 const closePaymentModal = () => {
-    showPaymentModal.value = false
-    paymentUrl.value = ''
-    currentPaymentAmount.value = ''
-    currentPaymentType.value = ''
-}
+    showPaymentModal.value = false;
+    paymentUrl.value = '';
+    currentPaymentAmount.value = '';
+    currentPaymentType.value = '';
+};
 
 const handlePaymentSuccess = async () => {
     Notify.success({
         title: '支付成功',
         content: `${getPaymentTypeName(currentPaymentType.value)}支付完成！`,
         time: 3000
-    })
+    });
 
     // 刷新公司信息
-    await CompanyInfo()
+    await CompanyInfo();
 
     // 关闭弹窗
-    closePaymentModal()
-}
+    closePaymentModal();
+};
 
 const handlePaymentTimeout = () => {
     Notify.warning({
         title: '支付超时',
         content: '支付已超时，请重新发起支付',
         time: 3000
-    })
+    });
 
-    closePaymentModal()
-}
+    closePaymentModal();
+};
 
 onMounted(async () => {
-    await ExpiredAuthApi()
-    await CompanyInfo()
-})
+    await ExpiredAuthApi();
+    await CompanyInfo();
+});
 </script>
 
 <style lang="scss" scoped>

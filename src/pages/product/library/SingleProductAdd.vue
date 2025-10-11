@@ -10,7 +10,7 @@
       </div>
 
       <div class="modal-content">
-        <lay-form :model="productForm" ref="formRef">
+        <lay-form ref="formRef" :model="productForm">
           <!-- 产品名称和单位 -->
           <div class="form-row">
             <div class="custom-form-item">
@@ -70,13 +70,15 @@
             <div class="custom-form-item category-item">
               <label class="form-label">产品类别</label>
               <div style="display: flex;">
-                <lay-select v-model="productForm.mainCategoryId" placeholder="-请选择-" @change="onMainCategoryChange"
-                  style="flex: 1;">
+                <lay-select
+v-model="productForm.mainCategoryId" placeholder="-请选择-" style="flex: 1;"
+                  @change="onMainCategoryChange">
                   <lay-select-option v-for="category in mainCategories" :key="category.id" :value="category.id">
                     {{ category.categoryName }}
                   </lay-select-option>
                 </lay-select>
-                <lay-select v-model="productForm.subCategoryId" placeholder="-请选择-"
+                <lay-select
+v-model="productForm.subCategoryId" placeholder="-请选择-"
                   :disabled="!productForm.mainCategoryId" style="flex: 2;">
                   <template v-for="group in subCategoryGroups" :key="group.id">
                     <!-- 父级分类（不可选择） -->
@@ -85,7 +87,8 @@
                     </lay-select-option>
                     <!-- 子级分类（可选择） -->
                     <template v-if="Array.isArray(group.productItems)">
-                      <lay-select-option v-for="subCategory in group.productItems" :key="subCategory.id"
+                      <lay-select-option
+v-for="subCategory in group.productItems" :key="subCategory.id"
                         :value="subCategory.id" class="category-sub-item">
                         {{ subCategory.categoryName }}
                       </lay-select-option>
@@ -102,7 +105,8 @@
             <div class="image-upload-container">
               <!-- 图片上传区域 -->
               <div class="image-upload-area" @click="triggerFileUpload">
-                <input ref="fileInputRef" type="file" accept="image/*" style="display: none;"
+                <input
+ref="fileInputRef" type="file" accept="image/*" style="display: none;"
                   @change="handleFileUpload" />
 
                 <!-- 如果已上传图片，显示图片预览 -->
@@ -137,38 +141,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch, onMounted } from 'vue'
-import Notify from '@/utils/notify'
-import http from '@/utils/http'
-import categoryApi from '@/api/product/categoryApi'
-import type { ProductForm, ProductCategory } from './type'
+import { ref, reactive, watch, onMounted } from 'vue';
+import Notify from '@/utils/notify';
+import http from '@/utils/http';
+import categoryApi from '@/api/product/categoryApi';
+import type { ProductForm, ProductCategory } from './type';
 
 // 定义组件的props
 interface Props {
   visible: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
   success: [product: ProductForm]
-}>()
+}>();
 
 // 表单引用
-const formRef = ref()
+const formRef = ref();
 
 // 文件输入框引用
-const fileInputRef = ref<HTMLInputElement>()
+const fileInputRef = ref<HTMLInputElement>();
 
 // 存储上传的图片 base64 数据
-const uploadedImageData = ref<string>('')
+const uploadedImageData = ref<string>('');
 
 // 分类相关的响应式数据
-const mainCategories = ref<ProductCategory[]>([])
-const subCategories = ref<ProductCategory[]>([])
-const subCategoryGroups = ref<ProductCategory[]>([]) // 保持分组结构的子分类
+const mainCategories = ref<ProductCategory[]>([]);
+const subCategories = ref<ProductCategory[]>([]);
+const subCategoryGroups = ref<ProductCategory[]>([]); // 保持分组结构的子分类
 
 // 产品表单数据
 const productForm = reactive<ProductForm>({
@@ -189,7 +193,7 @@ const productForm = reactive<ProductForm>({
   pictureaddress: '',
   mainCategoryId: '',
   subCategoryId: ''
-})
+});
 
 // 重置表单
 const resetForm = () => {
@@ -211,34 +215,34 @@ const resetForm = () => {
     pictureaddress: '',
     mainCategoryId: '',
     subCategoryId: ''
-  })
+  });
   // 重置分类数据
-  subCategories.value = []
-  subCategoryGroups.value = []
+  subCategories.value = [];
+  subCategoryGroups.value = [];
   // 重置上传的图片数据
-  uploadedImageData.value = ''
-}
+  uploadedImageData.value = '';
+};
 
 // 生成产品编号
 const generateProductId = () => {
-  const timestamp = Date.now().toString()
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
-  return `PRD${timestamp.slice(-8)}${random}`
-}
+  const timestamp = Date.now().toString();
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `PRD${timestamp.slice(-8)}${random}`;
+};
 
 // 监听弹窗显示状态，自动生成产品编号
 watch(() => props.visible, (newVal) => {
   if (newVal) {
-    resetForm()
-    productForm.proId = generateProductId()
+    resetForm();
+    productForm.proId = generateProductId();
   }
-})
+});
 
 // 关闭弹窗
 const handleClose = () => {
-  resetForm()
-  emit('close')
-}
+  resetForm();
+  emit('close');
+};
 
 // 表单验证
 const validateForm = (): boolean => {
@@ -247,8 +251,8 @@ const validateForm = (): boolean => {
       title: '验证失败',
       content: '请输入产品编号',
       time: 3000
-    })
-    return false
+    });
+    return false;
   }
 
   if (!productForm.name.trim()) {
@@ -256,28 +260,28 @@ const validateForm = (): boolean => {
       title: '验证失败',
       content: '请输入产品名称',
       time: 3000
-    })
-    return false
+    });
+    return false;
   }
 
   if (productForm.purchaseprice && productForm.price) {
-    const cost = parseFloat(productForm.purchaseprice)
-    const sellPrice = parseFloat(productForm.price)
+    const cost = parseFloat(productForm.purchaseprice);
+    const sellPrice = parseFloat(productForm.price);
     if (cost > sellPrice) {
       Notify.error({
         title: '价格提醒',
         content: '成本价高于参考售价，请检查价格设置',
         time: 4000
-      })
+      });
     }
   }
 
-  return true
-}
+  return true;
+};
 
 // 提交保存
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
   try {
     // 这里调用新增产品API
@@ -287,33 +291,33 @@ const handleSubmit = async () => {
       pictureaddress: uploadedImageData.value || productForm.pictureaddress,
       createtime: new Date().toISOString(),
       uname: '当前用户' // 这里应该从用户状态获取
-    })
+    });
 
     if (response && (response.status === 200 || (response as any).code === 200)) {
       Notify.success({
         title: '新增成功',
         content: `产品 "${productForm.name}" 已成功添加`,
         time: 3000
-      })
+      });
 
-      emit('success', { ...productForm })
-      handleClose()
+      emit('success', { ...productForm });
+      handleClose();
     } else {
-      throw new Error('新增产品失败')
+      throw new Error('新增产品失败');
     }
   } catch (error) {
-    console.error('新增产品失败:', error)
+    console.error('新增产品失败:', error);
     Notify.error({
       title: '新增失败',
       content: error instanceof Error ? error.message : '新增产品失败，请稍后重试',
       time: 3000
-    })
+    });
   }
-}
+};
 
 // 保存并继续新增
 const handleSaveAndContinue = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
   try {
     // 先保存当前产品
@@ -323,100 +327,100 @@ const handleSaveAndContinue = async () => {
       pictureaddress: uploadedImageData.value || productForm.pictureaddress,
       createtime: new Date().toISOString(),
       uname: '当前用户'
-    })
+    });
 
     if (response && (response.status === 200 || (response as any).code === 200)) {
       Notify.success({
         title: '新增成功',
         content: `产品 "${productForm.name}" 已成功添加，继续新增下一个产品`,
         time: 3000
-      })
+      });
 
-      emit('success', { ...productForm })
+      emit('success', { ...productForm });
 
       // 重置表单并生成新的产品编号
-      resetForm()
-      productForm.proId = generateProductId()
+      resetForm();
+      productForm.proId = generateProductId();
     } else {
-      throw new Error('新增产品失败')
+      throw new Error('新增产品失败');
     }
   } catch (error) {
-    console.error('新增产品失败:', error)
+    console.error('新增产品失败:', error);
     Notify.error({
       title: '新增失败',
       content: error instanceof Error ? error.message : '新增产品失败，请稍后重试',
       time: 3000
-    })
+    });
   }
-}
+};
 
 // 获取主分类数据
 const fetchMainCategories = async () => {
   try {
-    const response = await categoryApi.getMainCategories()
-    mainCategories.value = response
+    const response = await categoryApi.getMainCategories();
+    mainCategories.value = response;
   } catch (error) {
-    console.error('获取主分类失败:', error)
+    console.error('获取主分类失败:', error);
     Notify.error({
       title: '错误',
       content: '获取产品分类失败',
       time: 3000
-    })
+    });
   }
-}
+};
 
 // 获取子分类数据
 const fetchSubCategories = async (parentId: string) => {
   try {
-    const response = await categoryApi.getSubCategories(parentId)
+    const response = await categoryApi.getSubCategories(parentId);
     if (response.data) {
       // 保持分组结构用于显示
-      subCategoryGroups.value = response.data
+      subCategoryGroups.value = response.data;
 
       // 提取所有子分类用于选择验证
-      const allSubCategories: ProductCategory[] = []
+      const allSubCategories: ProductCategory[] = [];
       response.data.forEach((item: any) => {
         if (Array.isArray(item.productItems)) {
-          allSubCategories.push(...item.productItems)
+          allSubCategories.push(...item.productItems);
         }
-      })
-      subCategories.value = allSubCategories
+      });
+      subCategories.value = allSubCategories;
     }
   } catch (error) {
-    console.error('获取子分类失败:', error)
-    subCategories.value = []
-    subCategoryGroups.value = []
+    console.error('获取子分类失败:', error);
+    subCategories.value = [];
+    subCategoryGroups.value = [];
   }
-}
+};
 
 // 主分类变化处理
 const onMainCategoryChange = async () => {
-  productForm.subCategoryId = '' // 重置子分类选择
-  subCategories.value = [] // 清空子分类列表
-  subCategoryGroups.value =[] // 清空分组数据
+  productForm.subCategoryId = ''; // 重置子分类选择
+  subCategories.value = []; // 清空子分类列表
+  subCategoryGroups.value =[]; // 清空分组数据
 
   if (productForm.mainCategoryId) {
-    await fetchSubCategories(productForm.mainCategoryId)
+    await fetchSubCategories(productForm.mainCategoryId);
   }
-}
+};
 
 // 触发文件选择
 const triggerFileUpload = () => {
-  fileInputRef.value?.click()
-}
+  fileInputRef.value?.click();
+};
 
 // 处理文件上传
 const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
 
-  if (!file) return
+  if (!file) return;
 
   console.log('选择的文件:', {
     name: file.name,
     type: file.type,
     size: file.size
-  })
+  });
 
   // 验证文件类型
   if (!file.type.startsWith('image/')) {
@@ -424,80 +428,80 @@ const handleFileUpload = (event: Event) => {
       title: '文件类型错误',
       content: '请选择图片文件',
       time: 3000
-    })
-    return
+    });
+    return;
   }
 
   // 验证文件大小 (限制为5MB)
-  const maxSize = 5 * 1024 * 1024 // 5MB
+  const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
     Notify.error({
       title: '文件过大',
       content: '图片大小不能超过5MB',
       time: 3000
-    })
-    return
+    });
+    return;
   }
 
   try {
     // 使用 FileReader 读取文件并转换为 base64 或 blob URL
-    const reader = new FileReader()
+    const reader = new FileReader();
 
     reader.onload = (e) => {
-      const result = e.target?.result as string
+      const result = e.target?.result as string;
       if (result) {
         // 将 base64 数据存储到单独变量中
-        uploadedImageData.value = result
+        uploadedImageData.value = result;
         // 设置一个简单的预览标识，不显示 base64 数据
-        productForm.pictureaddress = '已选择图片'
+        productForm.pictureaddress = '已选择图片';
 
         Notify.success({
           title: '图片选择成功',
           content: '图片已选择，可以预览',
           time: 2000
-        })
+        });
 
-        console.log('图片已加载到预览区域')
+        console.log('图片已加载到预览区域');
       }
-    }
+    };
 
     reader.onerror = () => {
       Notify.error({
         title: '图片读取失败',
         content: '无法读取选择的图片文件',
         time: 3000
-      })
-    }
+      });
+    };
 
     // 读取为 Data URL (base64)
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(file);
 
   } catch (error) {
-    console.error('图片处理失败:', error)
+    console.error('图片处理失败:', error);
     Notify.error({
       title: '图片处理失败',
       content: '处理图片时发生错误',
       time: 3000
-    })
+    });
   } finally {
     // 清空文件输入框
     if (target) {
-      target.value = ''
+      target.value = '';
     }
   }
-}
+};
 
 // 图片加载错误处理
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  target.src = 'https://via.placeholder.com/150x150?text=图片加载失败'
-  target.alt = '图片加载失败'
-}
+  const target = event.target as HTMLImageElement;
+  target.src = 'https://via.placeholder.com/150x150?text=图片加载失败';
+  target.alt = '图片加载失败';
+};
 
 // 组件挂载时获取分类数据
 onMounted(async () => {
-  await fetchMainCategories()
-})
+  await fetchMainCategories();
+});
 </script>
 
 <style lang="scss" scoped>

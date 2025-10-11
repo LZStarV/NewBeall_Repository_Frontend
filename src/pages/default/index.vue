@@ -56,7 +56,8 @@
                 宣传片
               </lay-menu-item>
               <lay-menu-item @click="router.push({ path: '/login' })"
-                >登录
+                >
+登录
               </lay-menu-item>
               <lay-menu-item>
                 <lay-button> 注册 </lay-button>

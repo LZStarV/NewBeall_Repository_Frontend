@@ -2,11 +2,13 @@
     <div class="payment-section">
         <!-- 支付方式 -->
         <div class="payment-methods">
-            <div class="payment-option" :class="{ active: modelValue === 'wechat' }"
+            <div
+class="payment-option" :class="{ active: modelValue === 'wechat' }"
                 @click="$emit('update:modelValue', 'wechat')">
                 <img src="@/assets/image/member/renewal/wechatpay.png" alt="微信支付" />
             </div>
-            <div class="payment-option" :class="{ active: modelValue === 'alipay' }"
+            <div
+class="payment-option" :class="{ active: modelValue === 'alipay' }"
                 @click="$emit('update:modelValue', 'alipay')">
                 <img src="@/assets/image/member/renewal/alipay.png" alt="支付宝支付" />
             </div>
@@ -21,12 +23,12 @@
 </template>
 
 <script setup>
-defineProps(['amount', 'modelValue'])
-const emit = defineEmits(['update:modelValue', 'pay'])
+defineProps(['amount', 'modelValue']);
+const emit = defineEmits(['update:modelValue', 'pay']);
 
 const handlePayClick = () => {
-    emit('pay')
-}
+    emit('pay');
+};
 </script>
 
 <style lang="scss" scoped>

@@ -1,6 +1,7 @@
 <template>
   <!-- 右侧参数详情弹窗 -->
-  <RightSideModal :visible="visible" :title="`${selectedProduct?.name || ''} - 产品详情`" :width="rightModalWidth"
+  <RightSideModal
+:visible="visible" :title="`${selectedProduct?.name || ''} - 产品详情`" :width="rightModalWidth"
     :mask-closable="true" @close="handleClose">
     <div v-if="selectedProduct" class="parameters-detail">
       <!-- 产品基本信息 -->
@@ -36,8 +37,9 @@
           产品图片
         </h4>
         <div class="product-images">
-          <div class="single-image-container"
-            v-if="selectedProduct?.pictureaddress || selectedProduct?.pictureaddressOne">
+          <div
+v-if="selectedProduct?.pictureaddress || selectedProduct?.pictureaddressOne"
+            class="single-image-container">
             <img
               :src="`https://yx.newbeall.com/softLink/${selectedProduct?.pictureaddress || selectedProduct?.pictureaddressOne}`"
               :alt="selectedProduct?.name" class="product-image-full" @error="handleImageError" />
@@ -103,8 +105,8 @@
 </template>
 
 <script lang="ts" setup>
-import RightSideModal from '@/components/RightSideModal.vue'
-import type { Product } from './type'
+import RightSideModal from '@/components/RightSideModal.vue';
+import type { Product } from './type';
 
 
 // 定义组件的props
@@ -116,31 +118,31 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   rightModalWidth: '35%'
-})
+});
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
-}>()
+}>();
 
 // 关闭弹窗
 const handleClose = () => {
-  emit('close')
-}
+  emit('close');
+};
 
 // 图片加载失败处理
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  target.src = 'https://via.placeholder.com/150' // 替换为默认图片
-  target.alt = '加载失败'
-}
+  const target = event.target as HTMLImageElement;
+  target.src = 'https://via.placeholder.com/150'; // 替换为默认图片
+  target.alt = '加载失败';
+};
 
 // 格式化参数文本，处理分号和逗号的换行
 const formatParamText = (text: string) => {
-  if (!text) return ''
+  if (!text) return '';
   // 将分号替换为换行符，并确保换行符后有空格
-  return text.replace(/;/g, '<br />&nbsp;&nbsp;').replace(/,/g, '<br />&nbsp;&nbsp;')
-}
+  return text.replace(/;/g, '<br />&nbsp;&nbsp;').replace(/,/g, '<br />&nbsp;&nbsp;');
+};
 </script>
 
 <style lang="scss" scoped>

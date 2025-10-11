@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <div class="rules-content" v-show="showRules">
+        <div v-show="showRules" class="rules-content">
             <ol>
                 <li>积分永不过期。</li>
                 <li>云空间跟随会员一起过期，会员过期积分可以保存3年。</li>
@@ -26,13 +26,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const showRules = ref(false)
+const showRules = ref(false);
 
 const toggleRules = () => {
-    showRules.value = !showRules.value
-}
+    showRules.value = !showRules.value;
+};
 </script>
 
 <style lang="scss" scoped>

@@ -5,17 +5,17 @@
         <!-- 工具栏区域 -->
         <div class="fixed-table-toolbar">
           <div class="bs-bars pull-left">
-            <div class="hidden-xs" id="SalesPermissionTableToolbar" role="group">
-              <span data-title="添加" @click="handleAdd" class="btnIcon invite-but">
+            <div id="SalesPermissionTableToolbar" class="hidden-xs" role="group">
+              <span data-title="添加" class="btnIcon invite-but" @click="handleAdd">
                 <lay-icon type="layui-icon-add-circle" />
               </span>
-              <span data-title="修改" @click="handleEdit" class="btnIcon invite-but">
+              <span data-title="修改" class="btnIcon invite-but" @click="handleEdit">
                 <lay-icon type="layui-icon-edit" />
               </span>
-              <span data-title="删除" @click="handleDelete" class="btnIcon invite-but">
+              <span data-title="删除" class="btnIcon invite-but" @click="handleDelete">
                 <lay-icon type="layui-icon-delete" />
               </span>
-              <span style="margin-right: 10px;" data-title="权限设置" @click="handlePermission" class="btnIcon invite-but">
+              <span style="margin-right: 10px;" data-title="权限设置" class="btnIcon invite-but" @click="handlePermission">
                 <lay-icon type="layui-icon-set" />
               </span>
             </div>

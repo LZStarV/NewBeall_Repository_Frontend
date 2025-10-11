@@ -6,12 +6,14 @@
                 <div class="filter-section">
                     <lay-form :model="filterForm" layout="inline">
                         <lay-form-item label="产品名称">
-                            <lay-input v-model="filterForm.productName" placeholder="请输入产品名称" style="width: 140px"
+                            <lay-input
+v-model="filterForm.productName" placeholder="请输入产品名称" style="width: 140px"
                                 @keydown="handleQuickSearch" />
                         </lay-form-item>
                         <lay-form-item label="品牌">
                             <lay-select v-model="filterForm.brand" placeholder="请选择" style="width: 100px">
-                                <lay-select-option v-for="model in productBrand" :key="model.value"
+                                <lay-select-option
+v-for="model in productBrand" :key="model.value"
                                     :value="model.value">
                                     {{ model.label }}
                                 </lay-select-option>
@@ -19,7 +21,8 @@
                         </lay-form-item>
                         <lay-form-item label="创建人">
                             <lay-select v-model="filterForm.creator" placeholder="请选择" style="width: 100px">
-                                <lay-select-option v-for="model in productCreator" :key="model.value"
+                                <lay-select-option
+v-for="model in productCreator" :key="model.value"
                                     :value="model.value">
                                     {{ model.label }}
                                 </lay-select-option>
@@ -30,7 +33,8 @@
                         </lay-form-item>
                         <lay-form-item label="型号">
                             <lay-select v-model="filterForm.model" placeholder="请选择" style="width: 100px">
-                                <lay-select-option v-for="model in productModels" :key="model.value"
+                                <lay-select-option
+v-for="model in productModels" :key="model.value"
                                     :value="model.value">
                                     {{ model.label }}
                                 </lay-select-option>
@@ -55,39 +59,47 @@
             </lay-card>
 
             <!-- 表格区域 -->
-            <ProductTable ref="productTableRef" @view-product="handleViewProduct"
+            <ProductTable
+ref="productTableRef" @view-product="handleViewProduct"
                 @view-parameters="handleViewParameters" @open-permission-management="handleOpenPermissionManagement"
                 @open-designated-open-management="handleOpenDesignatedOpenManagement"
                 @brand-management="handleBrandManagement" @add-to-idle-cloud="handleAddToIdleCloud" />
         </div>
 
         <!-- 产品详情弹窗 -->
-        <ProductDetail :visible="productDetailVisible" :selected-product="selectedProduct"
+        <ProductDetail
+:visible="productDetailVisible" :selected-product="selectedProduct"
             @close="closeProductDetail" />
 
         <!-- 产品星标管理弹窗 -->
-        <PermissionManagement :visible="permissionVisible" :selected-product="selectedPermissionProduct"
+        <PermissionManagement
+:visible="permissionVisible" :selected-product="selectedPermissionProduct"
             :right-modal-width="rightModalWidth" :authorized-companies="authorizedCompanies"
             @close="closePermissionPopup" @update-authorized-companies="handleUpdateAuthorizedCompanies" />
 
         <!-- 右侧参数详情弹窗 -->
-        <ParametersDetail :visible="parametersVisible" :selected-product="selectedParametersProduct"
+        <ParametersDetail
+:visible="parametersVisible" :selected-product="selectedParametersProduct"
             :right-modal-width="rightModalWidth" @close="closeParametersPopup" />
 
         <!-- 指定开放管理弹窗 -->
-        <DesignatedOpenManagement :visible="designatedOpenVisible" :selected-product="selectedDesignatedOpenProduct"
+        <DesignatedOpenManagement
+:visible="designatedOpenVisible" :selected-product="selectedDesignatedOpenProduct"
             :right-modal-width="rightModalWidth" :authorized-companies="authorizedCompanies"
             @close="closeDesignatedOpenPopup" @update-authorized-companies="handleUpdateAuthorizedCompanies" />
 
         <!-- 闲置云询价弹窗 -->
-        <IdleCloudInquiry :visible="idleCloudVisible" :selected-product="selectedIdleProduct"
+        <IdleCloudInquiry
+:visible="idleCloudVisible" :selected-product="selectedIdleProduct"
             :right-modal-width="rightModalWidth" @close="closeIdleCloudPopup" @submit="handleIdleCloudSubmit" />
 
         <!-- 品牌管理页面 -->
-        <BrandManagement :visible="brandManagementVisible" :product-brand="productBrand" @close="closeBrandManagement"
+        <BrandManagement
+:visible="brandManagementVisible" :product-brand="productBrand" @close="closeBrandManagement"
             @brand-price-management="handleBrandPriceManagement" />
         <!-- 品牌自动报价管理弹窗 -->
-        <BrandPriceManagement :visible="brandPriceManagementVisible" :selected-brand="selectedBrand"
+        <BrandPriceManagement
+:visible="brandPriceManagementVisible" :selected-brand="selectedBrand"
             :right-modal-width="rightModalWidth" @close="closeBrandPriceManagement" />
     </div>
 </template>
@@ -762,7 +774,7 @@ const brandManagementVisible = ref(false);
 // 关闭品牌管理页面
 const closeBrandManagement = () => {
     brandManagementVisible.value = false;
-}
+};
 
 // 品牌自动报价管理弹窗状态
 const brandPriceManagementVisible = ref(false);

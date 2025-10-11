@@ -11,9 +11,9 @@
       <div class="form-group">
         <label for="idlePrice">{{ selectedProduct?.name || '' }}：</label>
         <input 
-          type="text" 
           id="idlePrice" 
           v-model="formData.idlePrice" 
+          type="text" 
           placeholder="请输入库存售价" 
         />
       </div>
@@ -21,7 +21,7 @@
       <!-- 备注选择开关 -->
       <div class="form-group">
         <label class="switch-label">
-          <input type="checkbox" v-model="formData.enableRemarks" />
+          <input v-model="formData.enableRemarks" type="checkbox" />
           <span class="switch-text">添加备注</span>
         </label>
       </div>
@@ -31,18 +31,18 @@
         <div class="form-group">
           <label for="condition">成色：</label>
           <input 
-            type="text" 
             id="condition" 
             v-model="formData.condition" 
+            type="text" 
             placeholder="请输入成色" 
           />
         </div>
         <div class="form-group">
           <label for="functionalState">功能状态：</label>
           <input 
-            type="text" 
             id="functionalState" 
-            v-model="formData.functionalState"
+            v-model="formData.functionalState" 
+            type="text"
             placeholder="请输入功能状态" 
           />
         </div>
@@ -57,9 +57,9 @@
         <div class="form-group">
           <label for="isUnderWarranty">是否在保：</label>
           <input 
-            type="text" 
             id="isUnderWarranty" 
-            v-model="formData.isUnderWarranty"
+            v-model="formData.isUnderWarranty" 
+            type="text"
             placeholder="请输入是否在保" 
           />
         </div>
@@ -81,10 +81,10 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
-import RightSideModal from '@/components/RightSideModal.vue'
-import http from '@/utils/http'
-import Notify from '@/utils/notify'
+import { reactive } from 'vue';
+import RightSideModal from '@/components/RightSideModal.vue';
+import http from '@/utils/http';
+import Notify from '@/utils/notify';
 
 // 定义组件的props
 interface Props {
@@ -95,13 +95,13 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   rightModalWidth: '35%'
-})
+});
 
 // 定义组件的emits
 const emit = defineEmits<{
   close: []
   submit: [data: any]
-}>()
+}>();
 
 // 表单数据
 const formData = reactive({
@@ -113,22 +113,22 @@ const formData = reactive({
   equipmentDetails: '', // 设备详情
   isUnderWarranty: '',  // 是否在保
   others: ''            // 其他
-})
+});
 
 // 关闭弹窗
 const handleClose = () => {
   // 重置表单数据
-  formData.idlePrice = ''
-  formData.enableRemarks = false
-  formData.remarks = ''
-  formData.condition = ''
-  formData.functionalState = ''
-  formData.equipmentDetails = ''
-  formData.isUnderWarranty = ''
-  formData.others = ''
+  formData.idlePrice = '';
+  formData.enableRemarks = false;
+  formData.remarks = '';
+  formData.condition = '';
+  formData.functionalState = '';
+  formData.equipmentDetails = '';
+  formData.isUnderWarranty = '';
+  formData.others = '';
   
-  emit('close')
-}
+  emit('close');
+};
 
 // 提交表单
 const handleSubmit = () => {
@@ -138,22 +138,22 @@ const handleSubmit = () => {
       title: '提示',
       content: '请输入库存售价',
       time: 3000
-    })
-    return
+    });
+    return;
   }
 
   // 构建提交数据
   const submitData = {
     product: props.selectedProduct,
     formData: { ...formData }
-  }
+  };
 
   // 发送事件给父组件
-  emit('submit', submitData)
+  emit('submit', submitData);
   
   // 关闭弹窗
-  handleClose()
-}
+  handleClose();
+};
 </script>
 
 <style lang="scss" scoped>

@@ -4,10 +4,10 @@
     <div v-if="isSubProjectRow" class="sub-project-row">
       <SvgIcon
         name="add_to"
-        @click="handleAddClick"
         class="add-button"
         title="添加子项目"
         width="1.25rem"
+        @click="handleAddClick"
       />
       <span class="sub-project-name">{{ data.name ? data.name : '' }}</span>
     </div>

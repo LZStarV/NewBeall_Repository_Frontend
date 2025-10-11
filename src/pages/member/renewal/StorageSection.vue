@@ -1,7 +1,8 @@
 <template>
     <div class="storage-section">
         <div class="package-grid">
-            <div v-for="item in packages" :key="item.key" class="package-card"
+            <div
+v-for="item in packages" :key="item.key" class="package-card"
                 :class="{ active: modelValue === item.key }" @click="$emit('update:modelValue', item.key)">
                 <h3>云空间购买</h3>
                 <div class="storage">{{ item.storage }}</div>
@@ -14,14 +15,14 @@
 </template>
 
 <script setup>
-defineProps(['modelValue'])
-defineEmits(['update:modelValue'])
+defineProps(['modelValue']);
+defineEmits(['update:modelValue']);
 
 const packages = [
     { key: '500mb', storage: '500MB', price: '120.00' },
     { key: '1gb', storage: '1GB', price: '240.00' },
     { key: '10gb', storage: '10GB', price: '2307.00' }
-]
+];
 </script>
 
 <style lang="scss" scoped>

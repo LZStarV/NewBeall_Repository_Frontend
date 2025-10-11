@@ -1,5 +1,6 @@
 <template>
-  <ModalWindow :visible="visible" title="批量导入报价单信息" :btn="[
+  <ModalWindow
+:visible="visible" title="批量导入报价单信息" :btn="[
     { text: '开始导入', callback: handleConfirm },
     { text: '取消', callback: handleCancel },
   ]" :area="['800px', '500px']" :is-teleport="true" @close="handleCancel">
@@ -16,9 +17,9 @@
         <div class="import-head">
           当前导入报价单中的产品 若已存在自建库，您可选择产品价格导入方式：
           <lay-select v-model="importMethod" placeholder="请选择">
-            <lay-select-option :value="0" label="第一方式"></lay-select-option>
-            <lay-select-option :value="1" label="第二方式"></lay-select-option>
-            <lay-select-option :value="2" label="第三方式"></lay-select-option>
+            <lay-select-option :value="0" label="第一方式" />
+            <lay-select-option :value="1" label="第二方式" />
+            <lay-select-option :value="2" label="第三方式" />
           </lay-select>
         </div>
         <div class="method-tips">
@@ -41,7 +42,6 @@
       </div>
     </div>
   </ModalWindow>
-
 </template>
 
 <script setup lang="ts">

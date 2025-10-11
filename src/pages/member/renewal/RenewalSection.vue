@@ -1,7 +1,8 @@
 <template>
     <div class="renewal-section">
         <div class="package-grid">
-            <div v-for="item in packages" :key="item.key" class="package-card"
+            <div
+v-for="item in packages" :key="item.key" class="package-card"
                 :class="{ active: modelValue === item.key }" @click="$emit('update:modelValue', item.key)">
                 <h3>会员续费</h3>
                 <div class="duration">{{ item.duration }}</div>
@@ -21,44 +22,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
 
-const props = defineProps(['modelValue', 'usePoints', 'availablePoints'])
-const emit = defineEmits(['update:modelValue', 'update:usePoints'])
+const props = defineProps(['modelValue', 'usePoints', 'availablePoints']);
+const emit = defineEmits(['update:modelValue', 'update:usePoints']);
 
-const usePointsLocal = ref(props.usePoints)
+const usePointsLocal = ref(props.usePoints);
 
 const packages = [
     { key: 'month', duration: '1个月', price: '399.00' },
     { key: 'halfYear', duration: '半年', price: '2199.00' },
     { key: 'year', duration: '一年', price: '4199.00' },
     { key: 'threeYears', duration: '三年', price: '9999.00' }
-]
+];
 
 const deductionRates = {
     month: { rate: 1.0, maxPoints: 100 },
     halfYear: { rate: 1.09, maxPoints: 600 },
     year: { rate: 1.14, maxPoints: 1300 },
     threeYears: { rate: 1.44, maxPoints: 2800 }
-}
+};
 
 const deductionAmount = computed(() => {
-    const config = deductionRates[props.modelValue] || deductionRates.month
-    const maxPoints = Math.min(props.availablePoints || 0, config.maxPoints)
-    return Math.floor(maxPoints * config.rate)
-})
+    const config = deductionRates[props.modelValue] || deductionRates.month;
+    const maxPoints = Math.min(props.availablePoints || 0, config.maxPoints);
+    return Math.floor(maxPoints * config.rate);
+});
 
 // 获取积分折扣率（百分比）
 const getPointsRate = (key) => {
-    const config = deductionRates[key] || deductionRates.month
-    return Math.round(config.rate * 100)
-}
+    const config = deductionRates[key] || deductionRates.month;
+    return Math.round(config.rate * 100);
+};
 
 // 获取最高可用积分
 const getMaxPoints = (key) => {
-    const config = deductionRates[key] || deductionRates.month
-    return config.maxPoints
-}
+    const config = deductionRates[key] || deductionRates.month;
+    return config.maxPoints;
+};
 </script>
 
 <style lang="scss" scoped>

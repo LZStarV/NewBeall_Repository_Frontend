@@ -1,6 +1,7 @@
 <template>
     <!-- 公司详情弹窗 -->
-    <ModalWindow :visible="visible" :title="'公司信息'" :btn="companyDetailButtons" :sync-height="true"
+    <ModalWindow
+:visible="visible" :title="'公司信息'" :btn="companyDetailButtons" :sync-height="true"
         :size-args="['70%', '90%']" @close="handleClose">
         <div v-if="selectedCompany" class="company-detail">
             <!-- 左右分栏布局 -->
@@ -23,7 +24,8 @@
 
                     <!-- 导航菜单 -->
                     <div class="nav-menu">
-                        <div v-for="item in menuItems" :key="item.key" class="nav-item"
+                        <div
+v-for="item in menuItems" :key="item.key" class="nav-item"
                             :class="{ active: activeMenu === item.key }" @click="activeMenu = item.key">
                             <i :class="item.icon"></i>
                             <span>{{ item.label }}</span>
@@ -194,28 +196,28 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import ModalWindow from '@/components/ModalWindow.vue'
-import type { ConnectedDemand } from './type'
+import { ref, computed } from 'vue';
+import ModalWindow from '@/components/ModalWindow.vue';
+import type { ConnectedDemand } from './type';
 
 // 定义组件属性
 defineProps<{
     visible: boolean
     selectedCompany: ConnectedDemand | null
-}>()
+}>();
 
 // 定义事件
 const emit = defineEmits<{
     close: []
-}>()
+}>();
 
 // 当前激活的菜单
-const activeMenu = ref('basic')
+const activeMenu = ref('basic');
 
 // 信息完善度
 const completionRate = computed(() => {
-    return 100 // 可以根据实际数据计算
-})
+    return 100; // 可以根据实际数据计算
+});
 
 // 导航菜单配置
 const menuItems = ref([
@@ -226,7 +228,7 @@ const menuItems = ref([
     { key: 'profile', label: '企业信息简介', icon: 'layui-icon-file' },
     { key: 'performance', label: '公司工程业绩', icon: 'layui-icon-trophy' },
     { key: 'certificates', label: '公司资质证书', icon: 'layui-icon-flag' }
-])
+]);
 
 // 弹窗按钮配置
 const companyDetailButtons = ref([
@@ -234,15 +236,15 @@ const companyDetailButtons = ref([
         text: '关闭',
         type: 'normal',
         callback: () => {
-            handleClose()
+            handleClose();
         }
     }
-])
+]);
 
 // 关闭弹窗
 const handleClose = () => {
-    emit('close')
-}
+    emit('close');
+};
 </script>
 
 <style scoped lang="scss">

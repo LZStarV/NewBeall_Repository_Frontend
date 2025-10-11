@@ -12,7 +12,7 @@
       <div class="select-all">
         <lay-checkbox
           v-model="isSelectAll"
-          :isIndeterminate="isIndeterminate"
+          :is-indeterminate="isIndeterminate"
           skin="primary"
           value="selectAll"
           @change="handleSelectAll"

@@ -16,7 +16,9 @@
               <lay-select-option value="phone">联系方式</lay-select-option>
               <lay-select-option value="orderid">订单id</lay-select-option>
               <lay-select-option value="projectName"
-                >项目名称</lay-select-option
+                >
+项目名称
+</lay-select-option
               >
               <lay-select-option value="typeName">订单状态</lay-select-option>
             </lay-select>

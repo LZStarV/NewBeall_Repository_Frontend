@@ -1,7 +1,8 @@
 <template>
     <div class="ai-service-section">
         <div class="package-grid">
-            <div v-for="item in packages" :key="item.key" class="package-card"
+            <div
+v-for="item in packages" :key="item.key" class="package-card"
                 :class="{ active: modelValue === item.key }" @click="$emit('update:modelValue', item.key)">
                 <h3>AI服务充值</h3>
                 <div class="duration">{{ item.duration }}</div>
@@ -13,14 +14,14 @@
 </template>
 
 <script setup>
-defineProps(['modelValue'])
-defineEmits(['update:modelValue'])
+defineProps(['modelValue']);
+defineEmits(['update:modelValue']);
 
 const packages = [
     { key: '1month', duration: '1个月', price: '100.00' },
     { key: '6months', duration: '6个月', price: '580.00' },
     { key: '12months', duration: '12个月', price: '1099.00' }
-]
+];
 </script>
 
 <style lang="scss" scoped>

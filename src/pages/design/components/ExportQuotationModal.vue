@@ -22,8 +22,8 @@
       <div class="export-options">
         <div class="option-item">
           <lay-checkbox
-            skin="primary"
             v-model="localExportOptions.derivePrime"
+            skin="primary"
             value="derivePrime"
             size="lg"
           >
@@ -32,8 +32,8 @@
         </div>
         <div class="option-item">
           <lay-checkbox
-            skin="primary"
             v-model="localExportOptions.isExplanation"
+            skin="primary"
             value="isExplanation"
             size="lg"
           >
@@ -42,8 +42,8 @@
         </div>
         <div class="option-item">
           <lay-checkbox
-            skin="primary"
             v-model="localExportOptions.isSeal"
+            skin="primary"
             value="isSeal"
             size="lg"
           >

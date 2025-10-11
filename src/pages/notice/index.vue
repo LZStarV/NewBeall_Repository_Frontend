@@ -67,13 +67,13 @@
     <lay-card class="content-list-card">
       <lay-table
         ref="msgTable"
+        v-model:selected-keys="selectedKeys"
         :page="paginator"
         :columns="columns"
         :data-source="noticeList"
         :default-toolbar="defaultToolbars"
         :loading="loading"
         even
-        v-model:selected-keys="selectedKeys"
         @row="selectNotice"
       >
         <template #titleContent="{ row }">
@@ -82,9 +82,9 @@
           </span>
         </template>
         <template #type="{ row }">
-          <lay-tag class="log-type-tag" :class="getLogtypeClass(row.type)">{{
-            row.type
-          }}</lay-tag>
+          <lay-tag class="log-type-tag" :class="getLogtypeClass(row.type)">
+            {{ row.type }}
+          </lay-tag>
         </template>
       </lay-table>
       <div
@@ -98,6 +98,13 @@
         <div class="page-info">共 {{ totalCount }} 条数据</div>
       </div>
     </lay-card>
+
+    <!-- 消息详情组件 -->
+    <NoticeDetail
+      v-model:visible="showNoticeDetail"
+      :notice-data="currentNoticeData"
+      @notice-updated="handleNoticeUpdated"
+    />
   </div>
 </template>
 
@@ -110,6 +117,7 @@ import type {
 import { layer } from '@layui/layui-vue';
 import noticeApi from '@/api/notice/noticeApi.ts';
 import Notify from '@/utils/notify.ts';
+import NoticeDetail from '@/components/NoticeDetail.vue';
 
 // API返回的通知数据类型
 interface ApiNoticeItem {
@@ -455,17 +463,27 @@ const deleteAll = async () => {
   });
 };
 
+// 控制消息详情弹窗的显示状态
+const showNoticeDetail = ref(false);
+// 当前显示的消息数据
+const currentNoticeData = ref<ApiNoticeItem>({});
+
 // 获取选中消息详情
 const selectNotice = async (row) => {
-  // TODO: 等待接口更新以修改此处逻辑
   const noticeId = row.id;
   try {
     const res = await noticeApi.getNoticeDetail(noticeId);
-    console.log(res);
+    currentNoticeData.value = res.data || {};
+    showNoticeDetail.value = true;
   } catch (error) {
     Notify.error('获取消息失败，请稍后再试！');
     console.error(error);
   }
+};
+
+// 处理消息更新事件
+const handleNoticeUpdated = async () => {
+  await loadNotices();
 };
 
 // 页面加载时初始化数据

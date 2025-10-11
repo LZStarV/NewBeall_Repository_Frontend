@@ -3,17 +3,24 @@
     <!-- 左侧区域 -->
     <div class="header-left">
       <!-- 品牌标题区域 -->
-      <div class="brand-content">
+      <div class="brand-content" @click="router.push('/')">
         <div class="brand-info">
-          <img src="@/assets/image/default/cover_logo.png" alt="Newbeall Logo" class="brand-logo-img" />
+          <img
+            src="@/assets/image/default/cover_logo.png"
+            alt="Newbeall Logo"
+            class="brand-logo-img"
+          />
           <span class="brand-subtitle">-设计报价管理平台-</span>
         </div>
         <div class="header-actions">
           <div class="collapse-btn" @click="toggleSidebar">
-            <lay-icon :type="sidebarCollapsed
-                ? 'layui-icon-spread-left'
-                : 'layui-icon-shrink-right'
-              " />
+            <lay-icon
+              :type="
+                sidebarCollapsed
+                  ? 'layui-icon-spread-left'
+                  : 'layui-icon-shrink-right'
+              "
+            />
           </div>
           <!-- 刷新按钮 -->
           <div class="collapse-btn" @click="refreshPage">
@@ -61,7 +68,6 @@
             </lay-button>
           </lay-tooltip>
 
-
           <!-- 消息通知 -->
           <lay-tooltip content="消息">
             <lay-button class="toolbar-btn" @click="openNotice">
@@ -79,7 +85,9 @@
           <!-- 主题切换 -->
           <lay-tooltip content="主题">
             <lay-button class="toolbar-btn" @click="toggleTheme">
-              <lay-icon :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'" />
+              <lay-icon
+                :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'"
+              />
             </lay-button>
           </lay-tooltip>
 
@@ -122,8 +130,11 @@
                     <lay-badge :count="messageCount" style="margin-left: 8px" />
                   </lay-dropdown-menu-item>
                   <lay-dropdown-menu-item @click="toggleTheme">
-                    <lay-icon :type="isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'
-                      " />
+                    <lay-icon
+                      :type="
+                        isDarkTheme ? 'layui-icon-moon' : 'layui-icon-light'
+                      "
+                    />
                     <span style="margin-left: 8px">主题切换</span>
                   </lay-dropdown-menu-item>
                   <lay-dropdown-menu-item @click="toggleFullscreen">
@@ -146,12 +157,12 @@
             </div>
             <template #content>
               <lay-dropdown-menu>
-                <lay-dropdown-menu-item @click="viewProfile">
+                <lay-dropdown-menu-item @click="openUserCenter">
                   个人中心
                 </lay-dropdown-menu-item>
-                <lay-dropdown-menu-item @click="changePassword">
-                  修改密码
-                </lay-dropdown-menu-item>
+<!--                <lay-dropdown-menu-item @click="changePassword">-->
+<!--                  修改密码-->
+<!--                </lay-dropdown-menu-item>-->
                 <lay-dropdown-menu-item divided @click="logout">
                   退出登录
                 </lay-dropdown-menu-item>
@@ -169,7 +180,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { layer } from "@layui/layui-vue";
+import { layer } from '@layui/layui-vue';
 import NoticeBar from '@/components/NoticeBar.vue';
 import FeedbackPanel from '@/components/FeedbackPanel.vue';
 import defaultAvatar from '@/assets/image/default/defaultAvatar.png';
@@ -222,7 +233,7 @@ const sidebarCollapsed = ref(false);
 const messageCount = ref(5);
 // 主题状态
 const isDarkTheme = ref(false);
-
+// 展示用户建议弹窗
 const showFeedbackPanel = ref(false);
 
 // 切换侧边栏
@@ -238,8 +249,7 @@ const refreshPage = () => {
 
 // 邀请好友
 const inviteFriends = () => {
-  console.log('邀请好友');
-  // 这里可以打开邀请好友的对话框或页面
+  routeNavigator.navigateTo('/invite');
 };
 
 // 用户建议
@@ -254,7 +264,7 @@ const wechatPublic = async () => {
     layer.open({
       title: '壹新微信公众号',
       isHtmlFragment: true,
-      content: `<img src="${wechatAccountURL.value}" alt="图片"></img>`
+      content: `<img src="${wechatAccountURL.value}" alt="图片"></img>`,
     });
   } catch (err) {
     Notify.error('获取失败，请稍后重试！');
@@ -272,6 +282,12 @@ const notepad = () => {
 const openNotice = () => {
   routeNavigator.navigateTo('/notice');
 };
+
+// 打开个人中心
+const openUserCenter = () => {
+  routeNavigator.navigateTo('/user');
+};
+
 
 // 签到
 const checkout = async () => {
@@ -303,11 +319,6 @@ const toggleFullscreen = () => {
   } else {
     document.exitFullscreen();
   }
-};
-
-// 查看个人资料
-const viewProfile = () => {
-  console.log('查看个人资料');
 };
 
 // 修改密码
@@ -352,7 +363,11 @@ onUnmounted(() => {
       display: flex;
       align-items: center;
       margin-right: 16px;
-      padding-right: 16px;
+      padding: 5px 16px 0 0;
+
+      &:hover {
+        cursor: pointer;
+      }
 
       .brand-info {
         text-align: center;

@@ -4,11 +4,11 @@
     <div class="info">
       <div class="notice" @click="handleClickNotice">
         上传注意事项
-        <lay-icon type="layui-icon-question"></lay-icon>
+        <lay-icon type="layui-icon-question" />
       </div>
       <div class="companyBus">
         <lay-row space="20">
-          <lay-col md="6" sm="8" xs="12" v-for="item in companyBusList" :key="item.businessName">
+          <lay-col v-for="item in companyBusList" :key="item.businessName" md="6" sm="8" xs="12">
             <div class="companyBusItem">
               <div class="icon">
                 <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
@@ -17,14 +17,14 @@
                 {{ item.businessName }}
               </div>
               <div class="delete-icon" @click="handleDelete(item)">
-                <lay-icon type="layui-icon-delete"></lay-icon>
+                <lay-icon type="layui-icon-delete" />
               </div>
             </div>
           </lay-col>
           <lay-col md="6" sm="8" xs="12">
             <div class="companyBusItem">
               <div class="add" @click="handleOpen">
-                <lay-icon type="layui-icon-addition"></lay-icon>
+                <lay-icon type="layui-icon-addition" />
               </div>
               <div class="businessName">添加业务</div>
             </div>
@@ -40,7 +40,7 @@
     <div class="modal-content">
       <h4>智能化</h4>
       <lay-row space="20" style="padding: 20px 0">
-        <lay-col md="8" sm="12" xs="24" v-for="item in iconMap" :key="item.businessName">
+        <lay-col v-for="item in iconMap" :key="item.businessName" md="8" sm="12" xs="24">
           <div class="modalItem" :class="{ active: isSelected(item.businessName) }" @click="toggleSelection(item)">
             <div class="icon">
               <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
@@ -53,8 +53,9 @@
       </lay-row>
       <h4>自定义添加</h4>
       <lay-row space="20" style="padding: 20px 0">
-        <lay-col md="8" sm="12" xs="24" v-for="item in selectedList?.filter(
-          (m) => m.businessType === '自定义添加')" :key="item.businessName">
+        <lay-col
+v-for="item in selectedList?.filter(
+          (m) => m.businessType === '自定义添加')" :key="item.businessName" md="8" sm="12" xs="24">
           <div class="modalItem" :class="{ active: isSelected(item.businessName) }" @click="toggleSelection(item)">
             <div class="icon">
               <img :src="getIconSrc(item.icon)" :alt="item.businessName" />
@@ -68,21 +69,22 @@
           <div class="modalItem">
             <lay-tooltip trigger="hover">
               <div class="add">
-                <lay-icon type="layui-icon-addition" v-if="!addItem?.icon"></lay-icon>
-                <img v-else :src="getIconSrc(addItem.icon)" style="width: 20px"></img>
+                <lay-icon v-if="!addItem?.icon" type="layui-icon-addition" />
+                <img v-else :src="getIconSrc(addItem.icon)" style="width: 20px" /></img>
               </div>
               <template #content>
                 <div class="changeIcon">
                   <p>更换图标</p>
-                  <div class="png" v-for="(value, key) in businessIconModules" :key="key">
-                    <img :src="value as string" style="width: 20px" @click="setAddIcon(key)"></img>
+                  <div v-for="(value, key) in businessIconModules" :key="key" class="png">
+                    <img :src="value as string" style="width: 20px" @click="setAddIcon(key)" /></img>
                   </div>
                 </div>
               </template>
             </lay-tooltip>
 
-            <lay-input v-model="addItem.businessName" size="sm" placeholder="请输入业务名称"
-              style="margin: 0 10px"></lay-input>
+            <lay-input
+v-model="addItem.businessName" size="sm" placeholder="请输入业务名称"
+              style="margin: 0 10px" />
             <div class="confirm" @click="handleCustomAdd">确定</div>
           </div>
         </lay-col>
@@ -92,7 +94,8 @@
       <div class="footer">
         <span>已选择：</span>
         <div class="selected-tags">
-          <lay-tag v-for="name in selectedList.map(m => m.businessName)" :key="name" variant="light"
+          <lay-tag
+v-for="name in selectedList.map(m => m.businessName)" :key="name" variant="light"
             :color="getPrimaryColor()" closable @close="handleUnselect(name)">
             {{ name }}
           </lay-tag>

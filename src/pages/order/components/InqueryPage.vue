@@ -5,7 +5,7 @@
         <tr>
           <th v-for="column in columns" :key="column.key" :class="column.class" :style="getColumnStyle(column.key)">
             <template v-if="column.key === 'checkbox'">
-              <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+              <input v-model="selectAll" type="checkbox" @change="toggleSelectAll" />
             </template>
             <template v-else>
               {{ column.title }}
@@ -21,14 +21,17 @@
           </tr>
           <template v-for="(item, itemIndex) in product.productDataList" :key="`${productIndex}-${itemIndex}`">
             <!-- 主行 -->
-            <tr :class="{
+            <tr
+:class="{
               'selected-row': selectedRows[productIndex] === itemIndex,
               'original-quote': item.companyName === '原报价单'
             }">
-              <td v-for="column in columns" :key="`${productIndex}-${itemIndex}-${column.key}`" :class="column.class"
+              <td
+v-for="column in columns" :key="`${productIndex}-${itemIndex}-${column.key}`" :class="column.class"
                 :style="getColumnStyle(column.key)">
                 <template v-if="column.key === 'checkbox'">
-                  <input type="radio" v-if="item.companyName !== '原报价单'"
+                  <input
+v-if="item.companyName !== '原报价单'" type="radio"
                     :checked="selectedRows[productIndex] === itemIndex"
                     @change="handleRowSelect(productIndex, itemIndex)" />
                 </template>

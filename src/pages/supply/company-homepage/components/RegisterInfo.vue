@@ -70,8 +70,10 @@
         </lay-form-item>
       </div>
       <lay-form-item style="text-align: end; margin-right: 40px">
-        <lay-button type="normal" @click="submit" :loading="submitting"
-          >保存</lay-button
+        <lay-button type="normal" :loading="submitting" @click="submit"
+          >
+保存
+</lay-button
         >
       </lay-form-item>
     </lay-form>

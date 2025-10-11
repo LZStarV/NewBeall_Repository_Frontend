@@ -1,7 +1,8 @@
 <template>
     <div class="points-section">
         <div class="package-grid">
-            <div v-for="item in packages" :key="item.key" class="package-card"
+            <div
+v-for="item in packages" :key="item.key" class="package-card"
                 :class="{ active: modelValue === item.key }" @click="$emit('update:modelValue', item.key)">
                 <h3>充值积分</h3>
                 <div class="points">{{ item.points }}积分</div>
@@ -13,15 +14,15 @@
 </template>
 
 <script setup>
-defineProps(['modelValue'])
-defineEmits(['update:modelValue'])
+defineProps(['modelValue']);
+defineEmits(['update:modelValue']);
 
 const packages = [
     { key: '50', points: '50', price: '50.00' },
     { key: '110', points: '110', price: '100.00' },
     { key: '580', points: '580', price: '500.00' },
     { key: '1250', points: '1250', price: '1000.00' }
-]
+];
 </script>
 
 <style lang="scss" scoped>

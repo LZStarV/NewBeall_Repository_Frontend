@@ -2,7 +2,7 @@
   <div class="businessAreaInfoPage">
     <h4>业务覆盖区域</h4>
     <div class="select">
-      <lay-select v-model="value" placeholder="请选择"></lay-select>
+      <lay-select v-model="value" placeholder="请选择" />
       <lay-button type="normal">确定</lay-button>
     </div>
   </div>

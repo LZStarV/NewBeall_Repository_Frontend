@@ -18,7 +18,7 @@
           }"
         >
           <template v-if="!imgUrl">
-            <lay-icon type="layui-icon-addition" size="32px"></lay-icon>
+            <lay-icon type="layui-icon-addition" size="32px" />
           </template>
           <template v-else>
             <img :src="imgUrl" :alt="alt" @click.stop="preview" />
