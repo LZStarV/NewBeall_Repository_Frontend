@@ -2,17 +2,15 @@
   <div class="sub-project-add-cell">
     <!-- 如果是子项目行，显示新增按钮 -->
     <div v-if="isSubProjectRow" class="sub-project-row">
-      <SvgIcon
-        name="add_to"
-        @click="handleAddClick"
-        class="add-button"
-        title="添加子项目"
-        width="1.25rem"
-      />
-      <span class="sub-project-name">{{ data.name ? data.name : '' }}</span>
+      <lay-tooltip position="top" content="添加产品">
+        <SvgIcon name="add_to" @click="handleAddClick" class="add-button" title="添加子项目" width="1.25rem" />
+      </lay-tooltip>
+      <!-- <span class="sub-project-name">{{ data.name ? data.name : '' }}</span> -->
     </div>
     <!-- 如果是普通行，显示编号或空 -->
-    <span v-else class="row-id">{{ data.id || '' }}</span>
+    <lay-tooltip v-else position="top" :content="String(data.id)">
+      <span class="row-id">{{ data.id || '' }}</span>
+    </lay-tooltip>
   </div>
 </template>
 

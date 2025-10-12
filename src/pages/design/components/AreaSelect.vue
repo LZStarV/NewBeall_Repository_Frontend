@@ -5,6 +5,7 @@
       v-model="selectedProvince"
       placeholder="请选择省"
       :disabled="provinceLoading"
+      allow-clear
       @update:model-value="handleProvinceChange"
     >
       <lay-select-option
@@ -20,6 +21,7 @@
       v-model="selectedCity"
       placeholder="请选择市"
       :disabled="cityLoading || !selectedProvince"
+      allow-clear
       @update:model-value="handleCityChange"
     >
       <lay-select-option
@@ -35,6 +37,7 @@
       v-model="selectedArea"
       placeholder="请选择区"
       :disabled="areaLoading || !selectedCity"
+      allow-clear
       @update:model-value="handleAreaChange"
     >
       <lay-select-option

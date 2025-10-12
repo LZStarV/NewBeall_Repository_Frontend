@@ -1,62 +1,27 @@
 <template>
-  <div
-    v-if="data.value !== undefined"
-    class="editable-cell"
-    :class="[`align-${column.align || 'center'}`]"
-  >
+  <div v-if="data !== undefined" class="editable-cell" :class="[`align-${column.align || 'center'}`]">
     <!-- 文本输入框 -->
-    <lay-input
-      v-if="isEditing && inputType === 'text'"
-      ref="inputRef"
-      v-model="editValue"
-      size="sm"
-      :style="{ textAlign: column.align || 'center' }"
-      @blur="handleSave"
-      @keyup.enter="handleSave"
-      @keyup.esc="handleCancel"
-    />
+    <lay-input v-if="isEditing && inputType === 'text'" ref="inputRef" v-model="editValue" size="sm"
+      :style="{ textAlign: column.align || 'center' }" @blur="handleSave" @keyup.enter="handleSave"
+      @keyup.esc="handleCancel" />
 
     <!-- 数字输入框 -->
-    <lay-input-number
-      v-else-if="isEditing && inputType === 'number'"
-      v-model="editValue as unknown as number"
-      ref="inputRef"
-      position="right"
-      type="number"
-      size="xs"
-      :style="{ textAlign: column.align || 'center' }"
-      :min="column.min"
-      :max="column.max"
-      :step="column.step"
-      @blur="handleSave"
-      @keyup.enter="handleSave"
-      @keyup.esc="handleCancel"
-    />
+    <lay-input-number v-else-if="isEditing && inputType === 'number'" v-model="editValue as unknown as number"
+      ref="inputRef" position="right" type="number" size="xs" :style="{ textAlign: column.align || 'center' }"
+      :min="column.min" :max="column.max" :step="column.step" @blur="handleSave" @keyup.enter="handleSave"
+      @keyup.esc="handleCancel" />
 
     <!-- 选择器 -->
-    <lay-select
-      v-else-if="isEditing && inputType === 'select'"
-      ref="inputRef"
-      v-model="editValue"
-      size="xs"
-      @change="handleSave"
-      @blur="handleCancel"
-    >
-      <lay-select-option
-        v-for="option in column.options"
-        :key="option.value"
-        :value="option.value"
-        :label="option.label"
-      />
+    <lay-select v-else-if="isEditing && inputType === 'select'" ref="inputRef" v-model="editValue" size="xs"
+      @change="handleSave" @blur="handleCancel">
+      <lay-select-option v-for="option in column.options" :key="option.value" :value="option.value"
+        :label="option.label" />
     </lay-select>
 
+    <div v-else-if="isSubProjectRow"></div>
+
     <!-- 显示模式 -->
-    <div
-      v-else
-      class="cell-display"
-      :class="[`align-${column.align || 'center'}`]"
-      @click="handleEdit"
-    >
+    <div v-else class="cell-display" :class="[`align-${column.align || 'center'}`]" @click="handleEdit">
       <span>{{ getDisplayText() }}</span>
       <SvgIcon :name="editIconName" class="edit-icon" width="12" height="12" />
     </div>
@@ -161,6 +126,11 @@ watch(
 
 const editIconName = computed(() => {
   return inputType.value === 'select' ? 'expand' : 'pen';
+});
+
+// 判断是否为子项目行
+const isSubProjectRow = computed(() => {
+  return props.data.isSubProject === true;
 });
 </script>
 
