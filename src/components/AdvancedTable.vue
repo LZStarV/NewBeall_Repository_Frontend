@@ -90,8 +90,8 @@
               clickable: clickable || rowSelection,
               'sub-project-row': element.isSubProject,
             }" :style="{
-                '--sub-project-color': element.backgroundColor || '',
-              }" @click="handleRowClick(element, index)">
+              '--sub-project-color': element.backgroundColor || '',
+            }" @click="handleRowClick(element, index)">
               <div v-for="col in visibleColumns" :key="col.key" class="table-cell"
                 :class="[`align-${col.align || 'center'}`]" :style="{
                   width: col.width
@@ -118,7 +118,15 @@
                 </template>
 
                 <!-- 默认文本渲染 -->
-                <span v-else>{{ getColumnValue(element, col.key) }}</span>
+                <template v-else>
+                  <lay-tooltip v-if="col.ellipsisTooltip" position="top"
+                    :content="getColumnValue(element, col.key) as string">
+                    <span :style="col.customStyle">{{ getColumnValue(element, col.key) }}</span>
+                  </lay-tooltip>
+                  <span :style="col.customStyle" v-else>{{ (typeof getColumnValue(element, col.key) === 'number' &&
+                    col.customStyle?.toFixed) ? Number(getColumnValue(element,
+                      col.key)).toFixed(col.customStyle.toFixed) : getColumnValue(element, col.key) }}</span>
+                </template>
               </div>
             </div>
           </template>
@@ -130,9 +138,7 @@
             selected: isRowSelected(row),
             clickable: clickable || rowSelection,
             'sub-project-row': row.isSubProject,
-          }" :style="{
-              '--sub-project-color': row.backgroundColor || '',
-            }" @click="handleRowClick(row, index)">
+          }" @click="handleRowClick(row, index)">
             <div v-for="col in visibleColumns" :key="col.key" class="table-cell"
               :class="[`align-${col.align || 'center'}`]" :style="{
                 width: col.width
@@ -157,7 +163,13 @@
               </template>
 
               <!-- 默认文本渲染 -->
-              <span v-else>{{ getColumnValue(row, col.key) }}</span>
+              <template v-else>
+                <lay-tooltip v-if="col.ellipsisTooltip" position="top"
+                  :content="getColumnValue(row, col.key) as string">
+                  <span>{{ getColumnValue(row, col.key) }}</span>
+                </lay-tooltip>
+                <span v-else>{{ getColumnValue(row, col.key) }}</span>
+              </template>
             </div>
           </div>
         </div>
@@ -196,6 +208,8 @@ export interface TableColumn {
   filterable?: boolean;
   visible?: boolean;
   required?: boolean;
+  ellipsisTooltip?: boolean; // 是否启用文本提示
+  customStyle?: Record<string, string | number | undefined> & { toFixed?: number }; // 自定义样式
   customRender?: ComponentOptions<unknown> | Component | null;
 }
 
@@ -356,11 +370,7 @@ const getFilterOptions = (columnKey: string) => {
     label: String(value),
   }));
 
-  // 添加"全选"选项到开头
-  return [
-    { value: '', label: '全部' },
-    ...options.sort((a, b) => a.label.localeCompare(b.label)),
-  ];
+  return options.sort((a, b) => a.label.localeCompare(b.label));
 };
 
 const getRowKey = (row: Record<string, unknown>): string | number => {
@@ -548,6 +558,7 @@ watch(
     localColumns.value = newColumns.map((col) => ({
       ...col,
       visible: col.visible !== false, // 默认为true，除非明确设置为false
+      ellipsisTooltip: col.ellipsisTooltip || false,
     }));
 
     // 初始化筛选状态

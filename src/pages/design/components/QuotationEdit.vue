@@ -14,7 +14,7 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">客户单位</label>
-                <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange">
+                <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange" allow-clear>
                   <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
                     :label="client.contacts" />
                 </lay-select>
@@ -72,7 +72,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label required">项目负责人</label>
-                <lay-select v-model="projectInfo.manager" placeholder="请选择">
+                <lay-select v-model="projectInfo.manager" placeholder="请选择" allow-clear>
                   <lay-select-option v-for="item in projectManagerList" :key="item.id" :value="item.id"
                     :label="item.name" />
                 </lay-select>
@@ -87,7 +87,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">报价单性质</label>
-                <lay-select v-model="projectInfo.nature" placeholder="初步建议阶段">
+                <lay-select v-model="projectInfo.nature" placeholder="请选择" allow-clear>
                   <lay-select-option value="初步建议阶段">
                     初步建议阶段
                   </lay-select-option>
@@ -166,8 +166,7 @@
             <div class="module-content">
               <div class="form-row">
                 <label class="form-head-label">交货方式</label>
-                <lay-select v-model="tradeInfo.deliveryMethod" placeholder="请选择">
-                  <lay-select-option value="">请选择</lay-select-option>
+                <lay-select v-model="tradeInfo.deliveryMethod" placeholder="请选择" allow-clear>
                   <lay-select-option value="货到付款">
                     货到付款
                   </lay-select-option>
@@ -191,7 +190,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">结算方式</label>
-                <lay-select v-model="tradeInfo.paymentMethod" placeholder="请选择">
+                <lay-select v-model="tradeInfo.paymentMethod" placeholder="请选择" allow-clear>
                   <lay-select-option v-for="item in settleList" :key="item.id" :value="item.id" :label="item.method" />
                 </lay-select>
               </div>
@@ -213,7 +212,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">供应商信息</label>
-                <lay-select v-model="modelInfo.gyClient" placeholder="请选择">
+                <lay-select v-model="modelInfo.gyClient" placeholder="请选择" allow-clear>
                   <lay-select-option value="option1" label="选项1" />
                 </lay-select>
                 <lay-button type="normal" size="md" class="info-button">
@@ -256,21 +255,26 @@
           <!-- 表格区域 -->
           <AdvancedTable :columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
             :enable-drag="true" :pagination="false" :show-toolbar="false" :row-key="'id'" :responsive="true"
-            :clickable="true" @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate"
-            @row-drag="handleRowDrag" @button-click="handleButtonClick" @row-click="handleRowClick" />
+            @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate" @row-drag="handleRowDrag"
+            @button-click="handleButtonClick" @row-click="handleRowClick" />
           <!-- 成本统计-->
           <div class="cost-statistics">
             <div class="cost-statistics-item">
-              <span class="cost-statistics-item-label">总成本合计（A）: </span>
-              <span class="cost-statistics-item-value">0</span>
+              <span class="cost-statistics-item-label">总成本合计 (A): </span>
+              <span class="cost-statistics-item-value">{{ costStatistics.totalCost.toFixed(2) }}</span>
             </div>
             <div class="cost-statistics-item">
-              <span class="cost-statistics-item-label">总成本合计（B）: </span>
-              <span class="cost-statistics-item-value">0</span>
+              <span class="cost-statistics-item-label">总售价合计 (B): </span>
+              <span class="cost-statistics-item-value">{{ costStatistics.totalPrice.toFixed(2) }}</span>
             </div>
             <div class="cost-statistics-item">
-              <span class="cost-statistics-item-label">毛利率（B-A）/B: </span>
-              <span class="cost-statistics-item-value">0</span>
+              <span class="cost-statistics-item-label">毛利率 (B - A) / B: </span>
+              <span class="cost-statistics-item-value">{{ ((costStatistics.totalPrice ? (costStatistics.totalPrice -
+                costStatistics.totalCost) / costStatistics.totalPrice : 0) * 100).toFixed(2) }}%</span>
+            </div>
+            <div class="cost-statistics-item">
+              <span class="cost-statistics-item-label">开项: </span>
+              <span class="cost-statistics-item-value">{{ openItemCount }}</span>
             </div>
           </div>
         </div>
@@ -298,11 +302,12 @@ import AdvancedTable from '@/components/AdvancedTable.vue';
 import EditableCell from '@/components/table-cells/EditableCell.vue';
 import ImageCell from '@/components/table-cells/ImageCell.vue';
 import ButtonCell from '@/components/table-cells/ButtonCell.vue';
+import LinkCell from '@/components/table-cells/LinkCell.vue';
 import SubProjectAddCell from '@/components/table-cells/SubProjectAddCell.vue';
 import SubProjectDrawer from './SubProjectDrawer.vue';
 import ProductInterestRateDialog from './ProductInterestRateDialog.vue';
 import ProductSelectModal from './ProductSelectModal.vue';
-import { onMounted, ref, markRaw } from 'vue';
+import { onMounted, ref, markRaw, watch, computed } from 'vue';
 import type {
   OrderModuleListResponse,
   QuotationListResponse,
@@ -315,6 +320,7 @@ import {
   orderDetailsToQuotationItems,
   quotationItemsToOrderDetails,
   type QuotationItem,
+  EMPTY_ROW_ID,
 } from '@/utils/orderUtils';
 import { getAreaNames, getQuoteTypeName } from '@/utils/areaUtils';
 import ordersApi from '@/api/orders/ordersApi';
@@ -326,8 +332,8 @@ import notify from '@/utils/notify';
 import type { ClientType } from '@/api/client/clinetApi.type';
 import clientApi from '@/api/client/clinetApi';
 import type { OrderProduct } from '@/api/product/productApi.type';
-
-// 使用从 orderUtils 导入的 QuotationItem 类型
+import CompanyLinkCell from '@/components/table-cells/CompanyLinkCell.vue';
+import env from '@/utils/env';
 
 // 报价目录菜单配置
 interface ButtonAction {
@@ -406,7 +412,7 @@ const quotationColumns = ref([
     width: 150,
     key: 'name',
     filterable: true,
-    customRender: markRaw(ButtonCell), // 名称跳转按钮
+    customRender: markRaw(LinkCell), // 名称跳转按钮
   },
   {
     title: '品牌',
@@ -418,12 +424,13 @@ const quotationColumns = ref([
     title: '规格型号',
     width: 150,
     key: 'model',
+    ellipsisTooltip: true,
   },
   {
     title: '参数/特点',
     width: 80,
     key: 'feature',
-    customRender: markRaw(ButtonCell), // 参数跳转按钮
+    customRender: markRaw(LinkCell), // 参数跳转按钮
   },
   {
     title: '单位',
@@ -444,24 +451,38 @@ const quotationColumns = ref([
     width: 100,
     key: 'cost',
     sortable: true,
+    customStyle: {
+      color: '#ff0000',
+      toFixed: 2,
+    }
   },
   {
     title: '成本小计',
     width: 120,
     key: 'costTotal',
     sortable: true,
+    customStyle: {
+      color: '#ff0000',
+      toFixed: 2,
+    }
   },
   {
     title: '售价',
     width: 100,
     key: 'price',
     sortable: true,
+    customStyle: {
+      toFixed: 2,
+    }
   },
   {
     title: '售价小计',
     width: 120,
     key: 'priceTotal',
     sortable: true,
+    customStyle: {
+      toFixed: 2,
+    }
   },
   {
     title: '图片',
@@ -480,6 +501,7 @@ const quotationColumns = ref([
     width: 120,
     key: 'company',
     filterable: true,
+    customRender: markRaw(CompanyLinkCell),
   },
 ]); // 列配置
 
@@ -549,6 +571,9 @@ const productInterestRate = ref<{
   useDefaultPrice: boolean;
   interestRate?: number;
 }>();
+
+// 默认指导价利率 0.36
+const defaultInterestRate = 0.36;
 
 const handleButtonClick = (
   action: string,
@@ -624,11 +649,45 @@ const handleButtonClick = (
   }
 };
 
+// 底部价格统计
+const costStatistics = ref<{
+  totalCost: number;
+  totalPrice: number;
+}>({
+  totalCost: 0,
+  totalPrice: 0,
+});
+
+// 开项
+const openItemCount = computed(() => {
+  if (!quotationData.value) return 0; // 空表不计
+  return quotationData.value.filter((item) => item.id && String(item.id) !== EMPTY_ROW_ID).length;
+});
+
 // 更新成本统计
 const updateCostStatistics = () => {
   // 这里可以添加成本统计的计算逻辑
   console.log('更新成本统计');
+  if (!quotationData.value) return; // 空表不计
+  const totalCost = quotationData.value.reduce(
+    (acc, cur) => acc + (Number(cur.costTotal) || 0),
+    0,
+  );
+  const totalPrice = quotationData.value.reduce(
+    (acc, cur) => acc + (Number(cur.priceTotal) || 0),
+    0,
+  );
+  costStatistics.value = {
+    totalCost,
+    totalPrice,
+  };
 };
+
+watch(
+  () => quotationData.value,
+  updateCostStatistics,
+  { deep: true },
+);
 
 // 处理子项目新增按钮点击
 const handleSubProjectAdd = () => {
@@ -637,7 +696,7 @@ const handleSubProjectAdd = () => {
     if (!productInterestRate.value || !productInterestRate.value.interestRate) {
       showProductInterestRateDialog.value = true;
     } else {
-      openProductSelectionWindow(productInterestRate.value);
+      openProductSelectModal();
     }
     return;
   }
@@ -706,7 +765,7 @@ const handleSubProjectSubmit = (subProjectData: {
     subProjectData: subProjectData,
     backgroundColor: subProjectData.color, // 用于背景色显示
     encryptId: '',
-    productId: 'EMPTY0000000000000',
+    productId: EMPTY_ROW_ID,
     subproject: subProjectData.name,
     subprojectClass: getSubprojectClass(subProjectData.level as LevelType),
     subprojectColor: subProjectData.color,
@@ -761,20 +820,6 @@ const handleProductInterestRateConfirm = (data: {
   }
 
   // 打开产品选择窗口
-  openProductSelectionWindow(data);
-};
-
-// 打开产品选择窗口（预留函数）
-const openProductSelectionWindow = (interestRateData: {
-  interestRate?: number;
-  useDefaultPrice: boolean;
-}) => {
-  console.log('打开产品选择窗口:', interestRateData);
-  // TODO: 实现产品选择窗口
-  // 这里可以：
-  // 1. 打开一个新的弹窗或抽屉
-  // 2. 根据利率数据过滤产品
-  // 3. 让用户选择产品
   openProductSelectModal();
 };
 
@@ -1002,7 +1047,7 @@ const collectFormData = async (): Promise<Quotation> => {
     contacts: companyInfo.value.contact,
     deliveryMethod: tradeInfo.value.deliveryMethod,
     explanation: null, // TODO待放入报价单说明信息
-    orderdetailsList: quotationItemsToOrderDetails(quotationData.value),
+    orderdetailsList: quotationItemsToOrderDetails(quotationData.value, productInterestRate.value?.interestRate ? productInterestRate.value.interestRate : defaultInterestRate),
     ordersCharacter: projectInfo.value.nature?.toString(),
     orderstype1: quoteType1Name, // 使用获取到的报价类型名称
     orderstype2: quoteType2Name,
@@ -1046,9 +1091,25 @@ const triggerTempSave = async () => {
 };
 
 // 处理产品选择
-const handleProductSelect = (product: OrderProduct) => {
-  console.log('选中产品:', product);
-  // 这里可以添加将选中的产品添加到报价单的逻辑
+const handleProductSelect = (products: OrderProduct[]) => {
+  console.log('选中产品:', products);
+  // 将选中的产品添加到报价单
+  products.forEach((product) => {
+    quotationData.value.splice(quotationData.value.length - 1, 0, {
+      ...product,
+      id: quotationData.value.length,
+      name: product.name,
+      feature: '',
+      quantity: 1,
+      cost: Number(product.purchaseprice),
+      costTotal: Number(product.purchaseprice),
+      price: Number(product.purchaseprice) * (1 + (Number(productInterestRate.value?.interestRate || defaultInterestRate))),
+      priceTotal: Number(product.purchaseprice) * (1 + (Number(productInterestRate.value?.interestRate || defaultInterestRate))),
+      pic: product.pictureaddress ? (product.pictureaddress.slice(0, 4) === 'http' ? product.pictureaddress : `${env.getBaseStaticUrl()}${product.pictureaddressOne}`) : '',
+      company: typeof product.company === 'string' ? product.company : (product.company as { abbreviation: string }).abbreviation,
+      productId: product.proId,
+    } as unknown as QuotationItem);
+  });
 };
 
 // 处理产品选择取消

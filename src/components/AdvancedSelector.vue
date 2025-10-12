@@ -5,6 +5,7 @@
     :disabled="loading"
     :auto-fit-width="false"
     @update:model-value="handleValueChange"
+    allow-clear
   >
     <template #header>
       <div class="advanced-selector-header">

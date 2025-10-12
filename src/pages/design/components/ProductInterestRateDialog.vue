@@ -168,7 +168,7 @@ const handleConfirm = () => {
   }
 
   const data = {
-    interestRate: useDefaultPrice.value ? undefined : interestRate.value,
+    interestRate: useDefaultPrice.value ? undefined : Number(interestRate.value || 0) / 100,
     useDefaultPrice: useDefaultPrice.value,
   };
 
