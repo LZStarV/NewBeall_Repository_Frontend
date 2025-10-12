@@ -18,6 +18,13 @@ export interface ConnectedDemand {
 export const tableColumns = [
   { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
+    title: 'id',
+    key: 'id',
+    width: '80px',
+    sortable: true,
+    type: 'text',
+  },
+  {
     title: '客户公司',
     key: 'company',
     width: '200px',
@@ -30,6 +37,13 @@ export const tableColumns = [
     key: 'demandName',
     width: '150px',
     customSlot: 'demandName',
+    sortable: true,
+    type: 'text',
+  },
+  {
+    title: '方案预计价格',
+    key: 'price',
+    width: '150px',
     sortable: true,
     type: 'text',
   },
