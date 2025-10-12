@@ -7,72 +7,54 @@
       <lay-card class="search-card">
         <!-- 顶部Tab切换 -->
         <div class="tab-container">
-          <lay-button :type="activeTab === 'self-built' ? 'primary' : undefined" prefix-icon="layui-icon-home"
-            @click="handleTabClick('self-built')">自建库</lay-button>
-          <lay-button :type="activeTab === 'product-cloud' ? 'primary' : undefined" prefix-icon="layui-icon-website"
-            @click="handleTabClick('product-cloud')">产品云</lay-button>
-          <lay-button :type="activeTab === 'idle-cloud' ? 'primary' : undefined" prefix-icon="layui-icon-app"
-            @click="handleTabClick('idle-cloud')">闲置云</lay-button>
+          <div class="tab-buttons">
+            <lay-button :type="activeTab === 'self-built' ? 'primary' : undefined" prefix-icon="layui-icon-home"
+              @click="handleTabClick('self-built')">自建库</lay-button>
+            <lay-button :type="activeTab === 'product-cloud' ? 'primary' : undefined" prefix-icon="layui-icon-website"
+              @click="handleTabClick('product-cloud')">产品云</lay-button>
+            <lay-button :type="activeTab === 'idle-cloud' ? 'primary' : undefined" prefix-icon="layui-icon-app"
+              @click="handleTabClick('idle-cloud')">闲置云</lay-button>
+          </div>
+          <button class="expand-toggle-btn" @click="toggleExpand" :title="isExpanded ? '折叠分类' : '展开分类'">
+            <span class="expand-icon" :class="{ 'expanded': isExpanded }">{{ isExpanded ? '-' : '+' }}</span>
+          </button>
         </div>
 
+        <!-- 可折叠分类区域 -->
+        <lay-transition>
+          <div class="collapsible-section" v-show="isExpanded">
+            <ProductSelectModalMenu />
+          </div>
+        </lay-transition>
+
         <lay-form layout="inline" :pane="true" :label-width="80" class="search-form-items">
-          <!-- 自建库搜索栏 -->
-          <template v-if="activeTab === 'self-built'">
-            <lay-form-item label="产品名称">
-              <lay-input v-model="selfBuiltSearch.name" placeholder="请输入产品名称" class="search-input" mode="block" />
-            </lay-form-item>
+          <lay-form-item label="产品名称">
+            <lay-input v-model="serachParams.name" placeholder="请输入产品名称" class="search-input" mode="block" />
+          </lay-form-item>
 
-            <lay-form-item label="品牌">
-              <lay-select v-model="selfBuiltSearch.brand" placeholder="请选择品牌" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in brandOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
+          <lay-form-item label="品牌">
+            <lay-select v-model="serachParams.brand" placeholder="请选择品牌" class="search-input" mode="block" allow-clear>
+              <lay-select-option v-for="(item, index) in brandOptions" :key="index" :value="item" :label="item" />
+            </lay-select>
+          </lay-form-item>
 
-            <lay-form-item label="型号">
-              <lay-select v-model="selfBuiltSearch.model" placeholder="请选择型号" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in modelOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
+          <lay-form-item label="型号">
+            <lay-select v-model="serachParams.model" placeholder="请选择型号" class="search-input" mode="block" allow-clear>
+              <lay-select-option v-for="(item, index) in modelOptions" :key="index" :value="item" :label="item" />
+            </lay-select>
+          </lay-form-item>
 
-            <lay-form-item label="公司">
-              <lay-select v-model="selfBuiltSearch.provideCompany" placeholder="请选择公司" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in companyOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-          </template>
+          <lay-form-item label="公司">
+            <lay-select v-model="serachParams.provideCompany" placeholder="请选择公司" class="search-input" mode="block"
+              allow-clear>
+              <lay-select-option v-for="(item, index) in companyOptions" :key="index" :value="item" :label="item" />
+            </lay-select>
+          </lay-form-item>
 
-          <!-- 产品云搜索栏 -->
-          <template v-else-if="activeTab === 'product-cloud'">
-            <lay-form-item label="产品名称">
-              <lay-input v-model="productCloudSearch.name" placeholder="请输入产品名称" class="search-input" mode="block" />
-            </lay-form-item>
-
-            <lay-form-item label="品牌">
-              <lay-select v-model="productCloudSearch.brand" placeholder="请选择品牌" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in brandOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="型号">
-              <lay-select v-model="productCloudSearch.model" placeholder="请选择型号" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in modelOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="公司">
-              <lay-select v-model="productCloudSearch.provideCompany" placeholder="请选择公司" class="search-input"
-                mode="block" allow-clear>
-                <lay-select-option v-for="(item, index) in companyOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-
+          <!-- 产品云、闲置云的省市搜索栏 -->
+          <template v-if="activeTab === 'product-cloud' || activeTab === 'idle-cloud'">
             <lay-form-item label="省份">
-              <lay-select v-model="productCloudSearch.province" placeholder="请选择省份" class="search-input" mode="block"
+              <lay-select v-model="serachParams.province" placeholder="请选择省份" class="search-input" mode="block"
                 allow-clear>
                 <lay-select-option v-for="(item, index) in provinceOptions" :key="index" :value="item.value"
                   :label="item.label" />
@@ -80,53 +62,7 @@
             </lay-form-item>
 
             <lay-form-item label="城市">
-              <lay-select v-model="productCloudSearch.city" placeholder="请选择城市" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in cityOptions" :key="index" :value="item.value"
-                  :label="item.label" />
-              </lay-select>
-            </lay-form-item>
-          </template>
-
-          <!-- 闲置云搜索栏 -->
-          <template v-else-if="activeTab === 'idle-cloud'">
-            <lay-form-item label="产品名称">
-              <lay-input v-model="idleCloudSearch.name" placeholder="请输入产品名称" class="search-input" mode="block" />
-            </lay-form-item>
-
-            <lay-form-item label="品牌">
-              <lay-select v-model="idleCloudSearch.brand" placeholder="请选择品牌" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in idleBrandOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="型号">
-              <lay-select v-model="idleCloudSearch.model" placeholder="请选择型号" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in idleModelOptions" :key="index" :value="item" :label="item" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="公司">
-              <lay-select v-model="idleCloudSearch.provideCompany" placeholder="请选择公司" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in idleCompanyOptions" :key="index" :value="item"
-                  :label="item" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="省份">
-              <lay-select v-model="idleCloudSearch.province" placeholder="请选择省份" class="search-input" mode="block"
-                allow-clear>
-                <lay-select-option v-for="(item, index) in provinceOptions" :key="index" :value="item.value"
-                  :label="item.label" />
-              </lay-select>
-            </lay-form-item>
-
-            <lay-form-item label="城市">
-              <lay-select v-model="idleCloudSearch.city" placeholder="请选择城市" class="search-input" mode="block"
-                allow-clear>
+              <lay-select v-model="serachParams.city" placeholder="请选择城市" class="search-input" mode="block" allow-clear>
                 <lay-select-option v-for="(item, index) in cityOptions" :key="index" :value="item.value"
                   :label="item.label" />
               </lay-select>
@@ -221,9 +157,18 @@ import { layer } from '@layui/layui-vue';
 import notify from '@/utils/notify';
 import areaApi from '@/api/area/areaApi';
 import type { Province, City } from '@/api/area/areaApi.type';
+import ProductSelectModalMenu from './ProductSelectModalMenu.vue';
 
 // 控制模态框显示
 const visible = ref(false);
+
+// 控制分类区域展开/折叠状态
+const isExpanded = ref(false);
+
+// 切换展开/折叠状态
+const toggleExpand = () => {
+  isExpanded.value = !isExpanded.value;
+};
 
 // 定义组件事件
 const emit = defineEmits(['select', 'cancel']);
@@ -288,26 +233,8 @@ const defaultToolbars: TableDefaultToolbar[] = [
   'filter',
 ];
 
-// 自建库搜索参数
-const selfBuiltSearch = reactive({
-  name: '',
-  brand: '',
-  model: '',
-  provideCompany: '',
-});
-
-// 产品云搜索参数
-const productCloudSearch = reactive({
-  name: '',
-  brand: '',
-  model: '',
-  provideCompany: '',
-  province: '',
-  city: '',
-});
-
-// 闲置云搜索参数
-const idleCloudSearch = reactive({
+// 搜索参数
+const serachParams = reactive({
   name: '',
   brand: '',
   model: '',
@@ -320,9 +247,6 @@ const idleCloudSearch = reactive({
 const brandOptions = ref<string[]>([]);
 const modelOptions = ref<string[]>([]);
 const companyOptions = ref<string[]>([]);
-const idleBrandOptions = ref<string[]>([]);
-const idleModelOptions = ref<string[]>([]);
-const idleCompanyOptions = ref<string[]>([]);
 const provinceOptions = ref<{ label: string; value: string }[]>([]);
 const cityOptions = ref<{ label: string; value: string }[]>([]);
 
@@ -341,7 +265,7 @@ const loading = ref(false);
 
 // 自建库表格列配置
 const selfBuiltColumns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  { title: '选择', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '产品编号',
     width: '180px',
@@ -418,7 +342,7 @@ const selfBuiltColumns = [
 
 // 产品云表格列配置
 const productCloudColumns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  { title: '选择', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '产品编号',
     width: '180px',
@@ -489,7 +413,7 @@ const productCloudColumns = [
 
 // 闲置云表格列配置
 const idleCloudColumns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
+  { title: '选择', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '产品名称',
     width: '250px',
@@ -607,122 +531,72 @@ const fetchProductCloudList = async (name = '', brand = '', model = '') => {
   }
 };
 
-// 监听tab切换，重置搜索条件和表格数据
-watch(activeTab, () => {
-  pagination.current = 1;
-  dataSource.value = [];
+// 初始化下拉选项和表格数据
+const init = async () => {
+  resetAllParams();
 
   // 根据当前tab加载相应的下拉选项
   if (activeTab.value === 'self-built') {
     fetchBrandList();
+    fetchModelList(); // 加载型号数据
+    fetchCompanyList(); // 加载公司数据
     fetchProvinceList(); // 加载省份数据
   } else if (activeTab.value === 'product-cloud') {
     fetchProductCloudList();
   } else if (activeTab.value === 'idle-cloud') {
-    fetchIdleBrandList();
+    fetchIdleBrandOrModelList('brand');
     fetchIdleCompanyList();
-    fetchIdleModelList();
+    fetchIdleBrandOrModelList('model');
     fetchProvinceList(); // 加载省份数据
   }
 
-  // 加载数据
+  // 搜索数据
   handleSearch();
+};
+
+// 监听tab切换，重置搜索条件和表格数据
+watch(activeTab, () => {
+  init();
 });
 
 // 监听自建库搜索输入变化
-watch(() => selfBuiltSearch.name, () => {
-  if (activeTab.value === 'self-built') {
-    debouncedSearch();
-  }
-});
-
-// 监听产品云搜索输入变化
-watch(() => productCloudSearch.name, () => {
-  if (activeTab.value === 'product-cloud') {
-    debouncedSearch();
-  }
-});
-
-// 监听闲置云搜索输入变化
-watch(() => idleCloudSearch.name, () => {
-  if (activeTab.value === 'idle-cloud') {
-    debouncedSearch();
-  }
+watch(() => serachParams.name, () => {
+  debouncedSearch();
 });
 
 // 监听品牌变化，更新型号列表并触发搜索
-watch(() => selfBuiltSearch.brand, (newVal) => {
-  if (activeTab.value === 'self-built') {
-    fetchModelList(selfBuiltSearch.name, newVal);
+watch(() => serachParams.brand, (newVal) => {
+  if (activeTab.value === 'self-built' || activeTab.value === 'product-cloud') {
+    serachParams.model = ''; // 清空型号选择
+    serachParams.provideCompany = ''; // 清空公司选择
+    fetchModelList(serachParams.name, newVal);
+    fetchCompanyList(serachParams.name, newVal, serachParams.model);
     debouncedSearch(); // 自动触发搜索
   }
 });
 
-watch(() => productCloudSearch.brand, (newVal) => {
-  if (activeTab.value === 'product-cloud') {
-    fetchModelList(productCloudSearch.name, newVal);
-    debouncedSearch(); // 自动触发搜索
+// 监听型号变化，更新公司列表并触发搜索
+watch([() => serachParams.model], () => {
+  if (activeTab.value === 'self-built' || activeTab.value === 'product-cloud') {
+    serachParams.provideCompany = ''; // 清空公司选择
+    fetchCompanyList(serachParams.name, serachParams.brand, serachParams.model);
   }
 });
 
-// 监听品牌和型号变化，更新公司列表并触发搜索
-watch([() => selfBuiltSearch.brand, () => selfBuiltSearch.model], () => {
-  if (activeTab.value === 'self-built') {
-    fetchCompanyList(selfBuiltSearch.name, selfBuiltSearch.brand, selfBuiltSearch.model);
-  }
-});
-
-watch([() => productCloudSearch.brand, () => productCloudSearch.model], () => {
-  if (activeTab.value === 'product-cloud') {
-    fetchCompanyList(productCloudSearch.name, productCloudSearch.brand, productCloudSearch.model);
-  }
-});
-
-// 监听自建库选择框变化，触发搜索
-watch([() => selfBuiltSearch.model, () => selfBuiltSearch.provideCompany], () => {
-  if (activeTab.value === 'self-built') {
-    debouncedSearch();
-  }
-});
-
-// 监听产品云选择框变化，触发搜索
-watch([() => productCloudSearch.model, () => productCloudSearch.provideCompany,
-() => productCloudSearch.province, () => productCloudSearch.city], () => {
-  if (activeTab.value === 'product-cloud') {
-    debouncedSearch();
-  }
-});
+// 监听选择框变化，触发搜索
+watch([() => serachParams], () => {
+  debouncedSearch();
+}, { deep: true });
 
 // 监听省份变化，更新城市列表
-watch(() => productCloudSearch.province, async (newProvinceCode) => {
-  if (activeTab.value === 'product-cloud') {
-    productCloudSearch.city = ''; // 清空城市选择
+watch(() => serachParams.province, async (newProvinceCode) => {
+  if (activeTab.value === 'product-cloud' || activeTab.value === 'idle-cloud') {
+    serachParams.city = ''; // 清空城市选择
     if (newProvinceCode) {
       await fetchCityList(newProvinceCode);
     } else {
       cityOptions.value = [];
     }
-    debouncedSearch();
-  }
-});
-
-watch(() => idleCloudSearch.province, async (newProvinceCode) => {
-  if (activeTab.value === 'idle-cloud') {
-    idleCloudSearch.city = ''; // 清空城市选择
-    if (newProvinceCode) {
-      await fetchCityList(newProvinceCode);
-    } else {
-      cityOptions.value = [];
-    }
-    debouncedSearch();
-  }
-});
-
-// 监听闲置云选择框变化，触发搜索
-watch([() => idleCloudSearch.brand, () => idleCloudSearch.model,
-() => idleCloudSearch.provideCompany, () => idleCloudSearch.province,
-() => idleCloudSearch.city], () => {
-  if (activeTab.value === 'idle-cloud') {
     debouncedSearch();
   }
 });
@@ -743,32 +617,17 @@ const handleSearch = async () => {
     }
     switch (activeTab.value) {
       case 'self-built':
-        result = await productApi.getProductList(
-          '',
-          '',
-          selfBuiltSearch.name,
-          selfBuiltSearch.brand,
-          '',
-          selfBuiltSearch.model,
-          1,
-          1,
-          selfBuiltSearch.provideCompany,
-          'desc',
-          (pagination.current - 1) * pagination.limit,
-          pagination.limit
-        ) as unknown as SearchResult;
-        break;
       case 'product-cloud':
         result = await productApi.getProductList(
-          productCloudSearch.province,
-          productCloudSearch.city,
-          productCloudSearch.name,
-          productCloudSearch.brand,
+          serachParams.province,
+          serachParams.city,
+          serachParams.name,
+          serachParams.brand,
           '',
-          productCloudSearch.model,
-          2,
-          2,
-          productCloudSearch.provideCompany,
+          serachParams.model,
+          activeTab.value === 'self-built' ? 1 : 2,
+          activeTab.value === 'self-built' ? 1 : 2,
+          serachParams.provideCompany,
           'desc',
           (pagination.current - 1) * pagination.limit,
           pagination.limit
@@ -776,15 +635,15 @@ const handleSearch = async () => {
         break;
       case 'idle-cloud':
         result = await productApi.getProductList(
-          idleCloudSearch.province,
-          idleCloudSearch.city,
-          idleCloudSearch.name,
-          idleCloudSearch.brand,
+          serachParams.province,
+          serachParams.city,
+          serachParams.name,
+          serachParams.brand,
           '',
-          idleCloudSearch.model,
+          serachParams.model,
           3,
           3,
-          idleCloudSearch.provideCompany,
+          serachParams.provideCompany,
           'desc',
           (pagination.current - 1) * pagination.limit,
           pagination.limit
@@ -807,40 +666,22 @@ const handleSearch = async () => {
   }
 };
 
+// 重置所有搜索参数
+const resetAllParams = () => {
+  pagination.current = 1;
+  serachParams.name = '';
+  serachParams.brand = '';
+  serachParams.model = '';
+  serachParams.provideCompany = '';
+  serachParams.province = '';
+  serachParams.city = '';
+  // 重置城市选项
+  cityOptions.value = [];
+}
+
 // 处理刷新
 const handleRefresh = () => {
-  pagination.current = 1;
-
-  switch (activeTab.value) {
-    case 'self-built':
-      selfBuiltSearch.name = '';
-      selfBuiltSearch.brand = '';
-      selfBuiltSearch.model = '';
-      selfBuiltSearch.provideCompany = '';
-      break;
-    case 'product-cloud':
-      productCloudSearch.name = '';
-      productCloudSearch.brand = '';
-      productCloudSearch.model = '';
-      productCloudSearch.provideCompany = '';
-      productCloudSearch.province = '';
-      productCloudSearch.city = '';
-      // 重置城市选项
-      cityOptions.value = [];
-      break;
-    case 'idle-cloud':
-      idleCloudSearch.name = '';
-      idleCloudSearch.brand = '';
-      idleCloudSearch.model = '';
-      idleCloudSearch.provideCompany = '';
-      idleCloudSearch.province = '';
-      idleCloudSearch.city = '';
-      // 重置城市选项
-      cityOptions.value = [];
-      break;
-  }
-
-  handleSearch();
+  init();
 };
 
 // 处理选择产品
@@ -859,22 +700,16 @@ const handleSelect = () => {
 };
 
 // 获取闲置云品牌列表
-const fetchIdleBrandList = async () => {
+const fetchIdleBrandOrModelList = async (type: 'brand' | 'model') => {
   try {
-    const response = await productApi.inventoryBrandOrModelList('brand');
-    idleBrandOptions.value = response.data.filter(Boolean);
+    const response = await productApi.inventoryBrandOrModelList(type);
+    if (type === 'brand') {
+      brandOptions.value = response.data.filter(Boolean);
+    } else {
+      modelOptions.value = response.data.filter(Boolean);
+    }
   } catch (error) {
-    console.error('获取闲置云品牌列表失败:', error);
-  }
-};
-
-// 获取闲置云型号列表
-const fetchIdleModelList = async () => {
-  try {
-    const response = await productApi.inventoryBrandOrModelList('model');
-    idleModelOptions.value = response.data.filter(Boolean);
-  } catch (error) {
-    console.error('获取闲置云型号列表失败:', error);
+    console.error(`获取闲置云${type === 'brand' ? '品牌' : '型号'}列表失败:`, error);
   }
 };
 
@@ -882,7 +717,7 @@ const fetchIdleModelList = async () => {
 const fetchIdleCompanyList = async () => {
   try {
     const response = await productApi.inventoryCompanyList();
-    idleCompanyOptions.value = response.data.filter(Boolean);
+    companyOptions.value = response.data.filter(Boolean);
   } catch (error) {
     console.error('获取闲置云公司列表失败:', error);
   }
@@ -958,16 +793,7 @@ const toolBtns = [
 
 // 初始化
 onMounted(() => {
-  // 初始加载数据
-  handleSearch();
-  // 加载品牌列表
-  fetchBrandList();
-  // 加载型号列表
-  fetchModelList();
-  // 加载公司列表
-  fetchCompanyList();
-  // 加载省份列表
-  fetchProvinceList();
+  init();
 });
 </script>
 
@@ -978,7 +804,55 @@ onMounted(() => {
   .tab-container {
     margin-bottom: 16px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 1rem;
+
+    .tab-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .expand-toggle-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid $primary-color;
+      background: #fff;
+      color: $primary-color;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        background: $primary-color;
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba($primary-color, 0.3);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      .expand-icon {
+        transition: transform 0.3s ease;
+        line-height: 1;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .collapsible-section {
+    margin-bottom: 16px;
   }
 
   .search-card {
