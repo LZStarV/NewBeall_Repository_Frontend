@@ -285,6 +285,9 @@
   <!-- 产品利率输入弹窗 -->
   <ProductInterestRateDialog v-model:visible="showProductInterestRateDialog"
     @confirm="handleProductInterestRateConfirm" />
+
+  <!-- 产品选择模态框 -->
+  <ProductSelectModal ref="productSelectModalRef" @select="handleProductSelect" @cancel="handleProductSelectCancel" />
 </template>
 
 <script setup lang="ts">
@@ -298,6 +301,7 @@ import ButtonCell from '@/components/table-cells/ButtonCell.vue';
 import SubProjectAddCell from '@/components/table-cells/SubProjectAddCell.vue';
 import SubProjectDrawer from './SubProjectDrawer.vue';
 import ProductInterestRateDialog from './ProductInterestRateDialog.vue';
+import ProductSelectModal from './ProductSelectModal.vue';
 import { onMounted, ref, markRaw } from 'vue';
 import type {
   OrderModuleListResponse,
@@ -321,6 +325,7 @@ import { layer } from '@layui/layui-vue';
 import notify from '@/utils/notify';
 import type { ClientType } from '@/api/client/clinetApi.type';
 import clientApi from '@/api/client/clinetApi';
+import type { OrderProduct } from '@/api/product/productApi.type';
 
 // 使用从 orderUtils 导入的 QuotationItem 类型
 
@@ -540,6 +545,11 @@ const handleRowClick = (data: Record<string, unknown>, index: number) => {
   // - 跳转到编辑页面等
 };
 
+const productInterestRate = ref<{
+  useDefaultPrice: boolean;
+  interestRate?: number;
+}>();
+
 const handleButtonClick = (
   action: string,
   data: Record<string, unknown>,
@@ -623,8 +633,12 @@ const updateCostStatistics = () => {
 // 处理子项目新增按钮点击
 const handleSubProjectAdd = () => {
   if (hasSubItemStatusSet.value) {
-    // 直接打开输入预设产品利率窗口
-    showProductInterestRateDialog.value = true;
+    // 直接打开输入预设产品利率窗口，如果已经设置过就不打开
+    if (!productInterestRate.value || !productInterestRate.value.interestRate) {
+      showProductInterestRateDialog.value = true;
+    } else {
+      openProductSelectionWindow(productInterestRate.value);
+    }
     return;
   }
   hasSubItemStatusSet.value = true;
@@ -738,6 +752,7 @@ const handleProductInterestRateConfirm = (data: {
   useDefaultPrice: boolean;
 }) => {
   console.log('产品利率确认:', data);
+  productInterestRate.value = data;
 
   if (data.useDefaultPrice) {
     notify.success('已选择使用默认市场指导价');
@@ -745,8 +760,7 @@ const handleProductInterestRateConfirm = (data: {
     notify.success(`已设置产品利率为 ${data.interestRate}%`);
   }
 
-  // TODO: 这里应该打开产品选择窗口
-  // 预留函数，稍后实现产品选择窗口
+  // 打开产品选择窗口
   openProductSelectionWindow(data);
 };
 
@@ -761,7 +775,7 @@ const openProductSelectionWindow = (interestRateData: {
   // 1. 打开一个新的弹窗或抽屉
   // 2. 根据利率数据过滤产品
   // 3. 让用户选择产品
-  notify.info('产品选择窗口功能待实现');
+  openProductSelectModal();
 };
 
 // 初始化空白行
@@ -1031,12 +1045,32 @@ const triggerTempSave = async () => {
   emit('temp-save', formData);
 };
 
+// 处理产品选择
+const handleProductSelect = (product: OrderProduct) => {
+  console.log('选中产品:', product);
+  // 这里可以添加将选中的产品添加到报价单的逻辑
+};
+
+// 处理产品选择取消
+const handleProductSelectCancel = () => {
+  console.log('取消产品选择');
+};
+
+// 产品选择模态框引用
+const productSelectModalRef = ref();
+
+// 打开产品选择模态框
+const openProductSelectModal = () => {
+  productSelectModalRef.value?.showModal();
+};
+
 // 暴露方法给父组件
 defineExpose({
   triggerSubmit,
   triggerTempSave,
   collectFormData,
   showSubProjectDrawer,
+  openProductSelectModal,
 });
 
 onMounted(() => {

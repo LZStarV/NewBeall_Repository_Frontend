@@ -1,4 +1,5 @@
 import http from '@/utils/http';
+import type { ProductCloudSearchParamData } from './productApi.type';
 
 // 产品控制器 Product Controller
 
@@ -18,22 +19,46 @@ export default {
     );
   },
 
+  // 获取闲置云品牌或型号列表
+  inventoryBrandOrModelList(search: string) {
+    const formData = new FormData();
+    formData.append('search', search);
+    return http.post<FormData, string[]>(
+      '/product/inventoryBrandOrModelList',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  },
+
+  // 获取闲置云公司列表
+  inventoryCompanyList() {
+    return http.post<null, string[]>('/product/inventoryCompanyList');
+  },
+
   // 查询所有产品分类列表
   queryProItem() {
     return http.post('/product/queryProItem');
   },
 
-  // 查询
+  // 查询产品云搜索列表
   getProPlatformSearch(name: string, brand: string, model: string) {
     const formData = new FormData();
     formData.append('name', name);
     formData.append('brand', brand);
     formData.append('model', model);
-    return http.post<FormData>('/product/proPlatformSearch', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    return http.post<FormData, ProductCloudSearchParamData>(
+      '/product/proPlatformSearch',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    });
+    );
   },
 
   // 获取产品列表

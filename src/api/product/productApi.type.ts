@@ -20,3 +20,9 @@ export interface OrderProduct extends Product {
   subprojectParent: string;
   xjProductId: string;
 }
+
+export interface ProductCloudSearchParamData {
+  brands: string[];
+  models: string[];
+  proCompanys: string[];
+}
