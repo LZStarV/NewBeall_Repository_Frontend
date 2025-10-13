@@ -1,35 +1,88 @@
 <template>
   <div class="production-list-page">
     <!-- 按subprojectClass分组显示的子表格 -->
-    <div v-for="(group, index) in groupedData" :key="group.subprojectClass || 'empty'" class="sub-table-group">
+    <div
+      v-for="(group, index) in groupedData"
+      :key="group.subprojectClass || 'empty'"
+      class="sub-table-group"
+    >
       <!-- 子表格标题 -->
-      <div v-if="shouldShowTitle()" class="sub-table-title">
-        {{ group.subprojectName || group.subprojectClass }}
+      <div
+        v-if="shouldShowTitle(group)"
+        class="sub-table-title"
+        :style="{
+          backgroundColor: `rgba(${extractRGBValues(group.subprojectColor)}, 0.15)`,
+          border: `1px solid ${extractRgbColor(group.subprojectColor)}`,
+          borderLeft: `4px solid ${extractRgbColor(group.subprojectColor)}`,
+          borderBottom: `0px`,
+        }"
+      >
+        <span>{{ group.subprojectName || group.subprojectClass }}</span>
       </div>
 
       <!-- 子表格 -->
-      <lay-table :columns="columns" :data-source="group.items" :default-toolbar="index === 0 ? defaultToolbars : []"
-        :loading="loading" :pagination="false" even @sort-change="(key, sort) => sortChange(key, sort, index)">
+      <lay-table
+        :columns="columns"
+        :data-source="group.items"
+        :default-toolbar="index === 0 ? defaultToolbars : []"
+        :loading="loading"
+        :pagination="false"
+        even
+        @sort-change="(key, sort) => sortChange(key, sort, index)"
+      >
+        <!-- 参数详情列自定义渲染 -->
+        <template #parameterShow="{ row }">
+          <lay-tooltip>
+            <span class="parameter-show-span">查看参数</span>
+            <template #content>
+              <div class="parameter-container">
+                <div
+                  class="parameter-item"
+                  v-for="(param, index) in JSON.parse(row.param)"
+                  :key="index"
+                >
+                  <strong>{{ param.specName }}: </strong>
+                  <span>{{ param.specOption }}</span>
+                </div>
+              </div>
+            </template>
+          </lay-tooltip>
+        </template>
 
         <!-- 图片列自定义渲染 -->
         <template #image="{ row }">
           <div class="product-image">
-            <img v-if="row.pictureaddress" :src="env.getBaseStaticUrl() + row.pictureaddress" :alt="row.name"
-              class="product-img" @click="previewImage(row.pictureaddress)" />
+            <img
+              v-if="row.pic"
+              :src="row.pic"
+              :alt="row.name"
+              class="product-img"
+              @click="previewImage(row.pic)"
+            />
             <span v-else class="no-image">暂无图片</span>
           </div>
         </template>
 
         <!-- 单价列自定义渲染 -->
         <template #unitPrice="{ row }">
-          <span class="price-text">¥{{ (isNaN(parseFloat(row.profitprice || 0)) ? 0 : parseFloat(row.profitprice ||
-            0)).toFixed(2) }}</span>
+          <span class="price-text"
+            >¥{{
+              (isNaN(parseFloat(row.profitprice || 0))
+                ? 0
+                : parseFloat(row.profitprice || 0)
+              ).toFixed(2)
+            }}</span
+          >
         </template>
 
         <!-- 总金额列自定义渲染 -->
         <template #totalAmount="{ row }">
           <span class="price-text total-amount">
-            ¥{{ isNaN(parseFloat(row.totalAmount)) ? '0.00' : parseFloat(row.totalAmount).toFixed(2) }}
+            ¥{{
+              isNaN(parseFloat(row.totalAmount))
+                ? '0.00'
+                : parseFloat(row.totalAmount).toFixed(2)
+            }}
           </span>
         </template>
       </lay-table>
@@ -45,8 +98,16 @@
 
     <!-- 分页组件 -->
     <div v-if="pagination.total > 0" class="pagination-wrapper">
-      <lay-page :current="pagination.current" :limit="pagination.pageSize" :total="pagination.total"
-        @change="handlePagination" show-count show-limit show-page show-skip />
+      <lay-page
+        :current="pagination.current"
+        :limit="pagination.pageSize"
+        :total="pagination.total"
+        @change="handlePagination"
+        show-count
+        show-limit
+        show-page
+        show-skip
+      />
     </div>
   </div>
 </template>
@@ -61,6 +122,8 @@ import ordersApi from '@/api/orders/ordersApi';
 import type { OrderProduct } from '@/api/product/productApi.type';
 import env from '@/utils/env';
 import { layer } from '@layui/layui-vue';
+import { EMPTY_ROW_ID } from '@/utils/orderUtils';
+import { extractRgbColor, extractRGBValues } from '@/utils/colorPicker';
 
 // Props定义
 const props = defineProps<{
@@ -70,6 +133,7 @@ const props = defineProps<{
 // 产品数据类型定义 - 扩展OrderProduct类型，添加totalAmount属性
 type ProductionItem = OrderProduct & {
   totalAmount: string;
+  isSubprojectHeader: boolean;
 };
 
 // 表格数据
@@ -81,6 +145,8 @@ interface GroupedData {
   subprojectClass: string;
   subprojectName: string;
   items: ProductionItem[];
+  // 子项目颜色
+  subprojectColor: string;
 }
 
 // 分组后的数据
@@ -113,14 +179,12 @@ const previewImage = (img: string | { url: string }) => {
   // TODO: 实现图片预览功能
   const imageUrl = typeof img === 'string' ? img : img.url;
   layer.photos({
-    imgList: [{ src: env.getBaseStaticUrl() + imageUrl, alt: '产品图片' }],
+    imgList: [{ src: imageUrl, alt: '产品图片' }],
   });
 };
 
-
 // 表格列配置 - 根据Product类型调整
 const columns = [
-  { title: '', width: '20px', type: 'checkbox', fixed: 'left' as const },
   {
     title: '序号',
     width: '80px',
@@ -143,6 +207,7 @@ const columns = [
     title: '产品名称',
     width: '200px',
     key: 'name',
+    ellipsisTooltip: true,
   },
   {
     title: '品牌',
@@ -166,7 +231,7 @@ const columns = [
     title: '参数详情',
     width: '200px',
     key: 'param',
-    ellipsisTooltip: true,
+    customSlot: 'parameterShow',
   },
   {
     title: '单位',
@@ -193,7 +258,7 @@ const columns = [
   {
     title: '图片',
     width: '80px',
-    key: 'pictureaddress',
+    key: 'pic',
     customSlot: 'image',
   },
   {
@@ -209,15 +274,19 @@ const columns = [
 const groupDataBySubprojectClass = (data: ProductionItem[]): GroupedData[] => {
   const groups = new Map<string, ProductionItem[]>();
   const subprojectNames = new Map<string, string>();
+  let subprojectColor = '';
 
   // 按subprojectClass分组
-  data.forEach(item => {
+  data.forEach((item) => {
     const key = item.subprojectClass || '';
     if (!groups.has(key)) {
       groups.set(key, []);
     }
-    groups.get(key)!.push(item);
-
+    if (!item.isSubprojectHeader) groups.get(key)!.push(item);
+    // 记录子项目颜色
+    if (item.isSubprojectHeader && item.subprojectColor) {
+      subprojectColor = item.subprojectColor;
+    }
     // 记录subproject名称（同一分类下可能只有一个有名称）
     if (item.subproject && !subprojectNames.has(key)) {
       subprojectNames.set(key, item.subproject);
@@ -230,7 +299,8 @@ const groupDataBySubprojectClass = (data: ProductionItem[]): GroupedData[] => {
     result.push({
       subprojectClass,
       subprojectName: subprojectNames.get(subprojectClass) || '',
-      items
+      items,
+      subprojectColor: extractRgbColor(subprojectColor),
     });
   });
 
@@ -238,9 +308,9 @@ const groupDataBySubprojectClass = (data: ProductionItem[]): GroupedData[] => {
 };
 
 // 判断是否显示标题
-const shouldShowTitle = (): boolean => {
-  // 特殊处理：当数据中仅存在一个subprojectClass且其值为空时，不显示子表格标题
-  return groupedData.value.length > 1;
+const shouldShowTitle = (group: GroupedData): boolean => {
+  // 当subprojectClass包含sprojects时才显示标题
+  return group.subprojectClass.includes('sprojects');
 };
 
 // 计算总售价
@@ -248,7 +318,7 @@ const calculateTotalSalesPrice = (): void => {
   let total = 0;
 
   // 遍历所有分组数据
-  groupedData.value.forEach(group => {
+  groupedData.value.forEach((group) => {
     group.items.forEach((item) => {
       // 累加每个产品的总金额，处理NaN值
       const amount = parseFloat(item.totalAmount || '0');
@@ -271,7 +341,10 @@ const sortChange = (key: string, sort: string, groupIndex: number) => {
         case 'profitprice':
           const aProfitPrice = parseFloat(a.profitprice || '0');
           const bProfitPrice = parseFloat(b.profitprice || '0');
-          return (isNaN(aProfitPrice) ? 0 : aProfitPrice) - (isNaN(bProfitPrice) ? 0 : bProfitPrice);
+          return (
+            (isNaN(aProfitPrice) ? 0 : aProfitPrice) -
+            (isNaN(bProfitPrice) ? 0 : bProfitPrice)
+          );
         case 'num':
           const aNum = Number(a.num || 0);
           const bNum = Number(b.num || 0);
@@ -288,7 +361,10 @@ const sortChange = (key: string, sort: string, groupIndex: number) => {
         case 'profitprice':
           const aProfitPrice = parseFloat(a.profitprice || '0');
           const bProfitPrice = parseFloat(b.profitprice || '0');
-          return (isNaN(bProfitPrice) ? 0 : bProfitPrice) - (isNaN(aProfitPrice) ? 0 : aProfitPrice);
+          return (
+            (isNaN(bProfitPrice) ? 0 : bProfitPrice) -
+            (isNaN(aProfitPrice) ? 0 : aProfitPrice)
+          );
         case 'num':
           const aNum = Number(a.num || 0);
           const bNum = Number(b.num || 0);
@@ -316,11 +392,11 @@ const getProductionList = async () => {
 
   try {
     loading.value = true;
-    const response = await ordersApi.getOrderProductList(
+    const response = (await ordersApi.getOrderProductList(
       props.orderId,
       pagination.current,
-      pagination.pageSize
-    ) as unknown as { count: number; data: OrderProduct[] };
+      pagination.pageSize,
+    )) as unknown as { count: number; data: OrderProduct[] };
 
     console.log(response.data);
 
@@ -336,7 +412,15 @@ const getProductionList = async () => {
         return {
           ...item,
           index: (pagination.current - 1) * pagination.pageSize + index + 1,
-          totalAmount: isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)
+          totalAmount: isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2),
+          pic: item.pictureaddress
+            ? item.pictureaddress.slice(0, 4) === 'http'
+              ? item.pictureaddress
+              : `${env.getBaseStaticUrl()}${item.pictureaddressOne}`
+            : '',
+          isSubprojectHeader:
+            item.subprojectClass.includes('sprojects') ||
+            item.productId === EMPTY_ROW_ID,
         } as ProductionItem;
       });
 
@@ -388,7 +472,7 @@ watch(
       getProductionList();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onMounted(() => {
@@ -494,15 +578,36 @@ onMounted(() => {
     text-decoration: none;
   }
 
+  // 参数详情提示文本样式
+  .parameter-show-span {
+    cursor: pointer;
+    color: $primary-color;
+  }
+
+  // 参数详情容器样式
+  .parameter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .parameter-item {
+      strong {
+        display: block;
+        font-weight: 600;
+      }
+      span {
+        display: block;
+        font-weight: 400;
+      }
+    }
+  }
+
   // 产品图片样式
   .product-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
     .product-img {
       height: 40px;
-      object-fit: cover;
+      width: 60px;
+      object-fit: contain;
       border-radius: 4px;
       cursor: pointer;
       transition: transform 0.2s;
