@@ -1,6 +1,10 @@
 import http from '@/utils/http';
 
 export default {
+  // 获取通知栏内容
+  async getNoticeList() {
+    return await http.get('/company/getNotice');
+  },
   // 获取微信公众号链接
   async getWechatAccount() {
     const res = await http.get<Blob>(

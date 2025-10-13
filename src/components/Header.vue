@@ -32,7 +32,8 @@
 
     <!--通知栏-->
     <div ref="headerMiddleDOM" class="header-middle">
-      <NoticeBar :textlist="noticeList" :width="noticeBarWidth" />
+      <NoticeBar :textlist="companyNoticeList" :width="noticeBarWidth[0]" />
+      <NoticeBar :textlist="productNoticeList" :width="noticeBarWidth[1]" />
     </div>
 
     <!-- 右侧工具栏 -->
@@ -160,9 +161,9 @@
                 <lay-dropdown-menu-item @click="openUserCenter">
                   个人中心
                 </lay-dropdown-menu-item>
-<!--                <lay-dropdown-menu-item @click="changePassword">-->
-<!--                  修改密码-->
-<!--                </lay-dropdown-menu-item>-->
+                <!--                <lay-dropdown-menu-item @click="changePassword">-->
+                <!--                  修改密码-->
+                <!--                </lay-dropdown-menu-item>-->
                 <lay-dropdown-menu-item divided @click="logout">
                   退出登录
                 </lay-dropdown-menu-item>
@@ -178,7 +179,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { layer } from '@layui/layui-vue';
 import NoticeBar from '@/components/NoticeBar.vue';
@@ -194,39 +195,67 @@ const tabsStore = useTabsStore();
 const router = useRouter();
 const routeNavigator = new RouteNavigator(router, tabsStore);
 
-// 定义 emit
 const emit = defineEmits<{
   'toggle-sidebar': [collapsed: boolean];
 }>();
-// 通知
-const noticeList = ref([
-  '1111111111111111111111111111111111111111111111',
-  '2',
-  '3',
-  '4',
-]);
-// 通知栏宽度
-const noticeBarWidth = ref(200);
+
+// 两个通知栏的内容列表
+const companyNoticeList = ref(['加载中...']);
+const productNoticeList = ref(['加载中...']);
+// 通知栏宽度数组 - [左侧宽度, 右侧宽度]
+const noticeBarWidth = ref([700, 300]);
 const headerMiddleDOM = ref<HTMLElement>();
 const wechatAccountURL = ref<string | null>();
+// 屏幕宽度响应式变量
+const screenWidth = ref(window.innerWidth);
+// 定义最大和最小宽度
+const MAX_WIDTHS = [700, 300]; // 最大宽度[左侧, 右侧]
+const MIN_WIDTHS = [200, 100]; // 最小宽度[左侧, 右侧]
 
-// 计算通知栏宽度函数 - 获取header-middle元素的实际宽度
+// 计算通知栏宽度函数 - 实现线性下降的宽度调整逻辑
 const calculateNoticeBarWidth = () => {
   // 获取header-middle元素
   const headerMiddleElement = headerMiddleDOM.value;
 
-  // 如果元素存在，则设置通知栏宽度为元素宽度减去10px
+  // 如果元素存在
   if (headerMiddleElement) {
-    const headerMiddleWidth = headerMiddleElement.offsetWidth;
-    noticeBarWidth.value = Math.max(headerMiddleWidth - 80, 0);
+    // 获取当前屏幕宽度
+    const currentScreenWidth = screenWidth.value;
+
+    // 定义宽度变化的临界点
+    const MAX_SCREEN_WIDTH = 1600; // 最大屏幕宽度
+    const MIN_SCREEN_WIDTH = 1200; // 最小屏幕宽度（低于此值不显示通知栏）
+
+    // 计算宽度比例因子（线性下降）
+    const widthFactor =
+      currentScreenWidth < MIN_SCREEN_WIDTH
+        ? 0
+        : currentScreenWidth > MAX_SCREEN_WIDTH
+          ? 1
+          : (currentScreenWidth - MIN_SCREEN_WIDTH) /
+            (MAX_SCREEN_WIDTH - MIN_SCREEN_WIDTH);
+
+    // 计算整体header-middle的宽度（线性下降）
+    const headerMiddleWidth = Math.floor(800 * widthFactor); // 最大800px
+    headerMiddleElement.style.width = `${headerMiddleWidth}px`;
+
+    // 计算两个通知栏的宽度（线性下降）
+    const firstBarWidth = Math.floor(
+      MIN_WIDTHS[0] + (MAX_WIDTHS[0] - MIN_WIDTHS[0]) * widthFactor,
+    );
+    const secondBarWidth = Math.floor(
+      MIN_WIDTHS[1] + (MAX_WIDTHS[1] - MIN_WIDTHS[1]) * widthFactor,
+    );
+
+    noticeBarWidth.value = [firstBarWidth, secondBarWidth];
   } else {
-    // 如果元素不存在，设置一个默认宽度
-    noticeBarWidth.value = 200;
+    // 如果元素不存在，设置默认宽度
+    noticeBarWidth.value = [300, 150];
   }
 };
 
-// 使用防抖函数包装计算宽度函数
-const debouncedCalculateWidth = debounce(calculateNoticeBarWidth, 300);
+// 使用防抖函数包装处理函数
+const debouncedHandleResize = debounce(calculateNoticeBarWidth, 300);
 // 添加侧边栏折叠状态
 const sidebarCollapsed = ref(false);
 // 消息数量
@@ -288,7 +317,6 @@ const openUserCenter = () => {
   routeNavigator.navigateTo('/user');
 };
 
-
 // 签到
 const checkout = async () => {
   try {
@@ -332,15 +360,72 @@ const logout = () => {
   router.push('/default');
 };
 
+// 获取通知栏内容的方法
+const fetchNoticeBarContent = async () => {
+  try {
+    const res = await headerApi.getNoticeList();
+
+    // 检查数据结构是否符合预期
+    if (res && res.data) {
+      const { companyList = [], productList = [] } = res.data;
+
+      // 从companyList中提取name字段到companyNoticeList
+      if (Array.isArray(companyList)) {
+        companyNoticeList.value = companyList
+          .filter((item) => item && item.name)
+          .map((item) => item.name) || ['暂无公司通知'];
+      } else {
+        companyNoticeList.value = ['暂无公司通知'];
+      }
+
+      // 从productList中提取name字段到productNoticeList
+      if (Array.isArray(productList)) {
+        productNoticeList.value = productList
+          .filter((item) => item && item.name)
+          .map((item) => item.name) || ['暂无产品通知'];
+      } else {
+        productNoticeList.value = ['暂无产品通知'];
+      }
+
+      console.log('公司通知列表:', companyNoticeList.value);
+      console.log('产品通知列表:', productNoticeList.value);
+    }
+  } catch (err) {
+    console.error('获取通知栏内容异常：', err);
+    companyNoticeList.value = ['获取通知失败，请稍后刷新'];
+    productNoticeList.value = ['获取通知失败，请稍后刷新'];
+  }
+};
+
 // 组件挂载时计算初始宽度并添加事件监听器
-onMounted(() => {
+onMounted(async () => {
   calculateNoticeBarWidth();
-  window.addEventListener('resize', debouncedCalculateWidth);
+  window.addEventListener('resize', () => {
+    screenWidth.value = window.innerWidth;
+  });
+  window.addEventListener('resize', debouncedHandleResize);
+
+  // 调用获取通知栏内容的方法
+  await fetchNoticeBarContent();
+});
+
+// 添加屏幕宽度变化的watch监听器
+watch(screenWidth, (newWidth) => {
+  // 当屏幕宽度低于1200px时，隐藏通知栏
+  if (headerMiddleDOM.value) {
+    if (newWidth < 1200) {
+      headerMiddleDOM.value.style.display = 'none';
+    } else {
+      headerMiddleDOM.value.style.display = 'flex';
+    }
+  }
+  // 触发宽度计算
+  calculateNoticeBarWidth();
 });
 
 // 组件卸载时移除事件监听器
 onUnmounted(() => {
-  window.removeEventListener('resize', debouncedCalculateWidth);
+  window.removeEventListener('resize', debouncedHandleResize);
 });
 </script>
 
@@ -426,14 +511,14 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     margin-right: 20px;
-    flex: 3;
+    flex: 0 1 auto;
   }
 
   .header-right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    flex: 3;
+    flex: 1 0 auto;
   }
 
   .toolbar {
@@ -521,11 +606,11 @@ onUnmounted(() => {
     }
 
     .header-middle {
-      flex: 2;
+      display: none;
     }
 
     .header-right {
-      flex: 2;
+      flex: 1;
     }
   }
 
@@ -551,9 +636,12 @@ onUnmounted(() => {
   }
 }
 
-// 响应式设计 - 小屏幕
+// 响应式设计 - 平板和小屏幕
 @media (max-width: $pad_layout_breakpoint) {
   .header {
+    .header-middle {
+      display: none !important;
+    }
     display: flex;
     justify-content: space-between;
     padding: 0 10px;
@@ -593,7 +681,19 @@ onUnmounted(() => {
     }
 
     .header-middle {
-      width: 0;
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-middle > :first-child {
+      display: none;
+    }
+
+    .header-middle > :last-child {
+      width: 100%;
+      min-width: 200px;
     }
   }
 }
