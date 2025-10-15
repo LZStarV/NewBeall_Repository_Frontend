@@ -196,6 +196,19 @@ export interface SubproductHeader {
   subprojectParent: string; // 上级项目类名，如sprojects1
 }
 
+// 提交保存报价单产品类型
+export interface UploadQuotationProduct {
+  changeState: number;
+  costprice: number;
+  discountprice: number;
+  interestrateprice: number;
+  num: number;
+  productId: string;
+  profitprice: number;
+  remark: string | null;
+  subprojectClass: string;
+}
+
 // 临时报价单类型
 export interface Quotation {
   DeliveryAddress: string; // 详细地址
@@ -207,15 +220,16 @@ export interface Quotation {
   city: string; // 市
   clientBankAccount: string | null; // 客户-银行账号
   clientBankName: string | null; // 客户-开户行
-  clientId: number; // 客户单位id
+  clientId: string | number; // 客户单位id
   clientTexId: string | null; // 客户-税号
   companyAddres: string; // 我司-企业地址
   companyName: string; // 我司-设计单位
   contactPhone: string; // 我司-联系电话
+  companyEmail: string; // 我司-企业邮箱
   contacts: string; // 我司-联系人员
   deliveryMethod: string; // 交货方式，如"货到付款"
   explanation: string | null; // 报价单说明
-  orderdetailsList: (OrderDetail | SubproductHeader)[]; // 报价目录列表
+  orderdetailsList: (UploadQuotationProduct | SubproductHeader)[]; // 报价目录列表
   ordersCharacter: string; // 报价单性质，如"初步建议阶段"
   ordersId?: string; // 新建报价单暂无id
   ordersInquiryList?: OrderInquiry[];
@@ -238,7 +252,7 @@ export interface Quotation {
 export interface QuotationListResponse extends Quotation {
   chargePerson: number;
   chargePersonInfo: string;
-  clientId: number;
+  clientId: number | string;
   companyEmail: string;
   contacts: string;
   coopUser: string;

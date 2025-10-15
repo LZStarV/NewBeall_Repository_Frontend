@@ -12,3 +12,10 @@ export function getOrdersNoticeHandlerAuth() {
     '/auth/ordersNoticeHandlerAuth',
   );
 }
+
+// 写入报价单鉴权
+export function writeQuotationAuth() {
+  return http.post<{ code: string; data: string; msg: string }>(
+    '/auth/writeQuotationAuth',
+  );
+}

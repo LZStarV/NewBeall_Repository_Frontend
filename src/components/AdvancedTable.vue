@@ -33,8 +33,7 @@
       <!-- 表头 -->
       <div class="table-header">
         <div class="header-row">
-          <div
-v-for="col in visibleColumns" :key="col.key" class="header-cell" :style="{
+          <div v-for="col in visibleColumns" :key="col.key" class="header-cell" :style="{
             width: col.width
               ? typeof col.width === 'number'
                 ? `${col.width}px`
@@ -46,15 +45,13 @@ v-for="col in visibleColumns" :key="col.key" class="header-cell" :style="{
 
               <!-- 排序按钮 -->
               <div v-if="col.sortable" class="sort-controls">
-                <div
-class="sort-btn" :class="{
+                <div class="sort-btn" :class="{
                   active:
                     sortState.key === col.key && sortState.order === 'asc',
                 }" @click="handleSort(col.key, 'asc')">
                   <SvgIcon name="expand_light_reverse" width="10" height="10" />
                 </div>
-                <div
-class="sort-btn" :class="{
+                <div class="sort-btn" :class="{
                   active:
                     sortState.key === col.key && sortState.order === 'desc',
                 }" @click="handleSort(col.key, 'desc')">
@@ -70,8 +67,7 @@ class="sort-btn" :class="{
                   </div>
                   <template #content>
                     <div class="filter-content">
-                      <AdvancedSelector
-v-model="filterState[col.key]" :placeholder="`筛选 ${col.title}`"
+                      <AdvancedSelector v-model="filterState[col.key]" :placeholder="`筛选 ${col.title}`"
                         :options="getFilterOptions(col.key)" :clearable="true" :page-size="8"
                         @update:model-value="handleFilter" />
                     </div>
@@ -85,21 +81,18 @@ v-model="filterState[col.key]" :placeholder="`筛选 ${col.title}`"
 
       <!-- 表格主体 -->
       <div class="table-body">
-        <draggable
-v-if="enableDrag" v-model="localData" :item-key="props.rowKey" tag="div" class="draggable-container"
+        <draggable v-if="enableDrag" v-model="localData" :item-key="props.rowKey" tag="div" class="draggable-container"
           :animation="200" :ghost-class="'drag-ghost'" :chosen-class="'drag-chosen'" :drag-class="'drag-moving'"
           @end="handleDragEnd">
           <template #item="{ element, index }">
-            <div
-class="table-row" :class="{
+            <div class="table-row" :class="{
               selected: isRowSelected(element),
               clickable: clickable || rowSelection,
               'sub-project-row': element.isSubProject,
             }" :style="{
-                '--sub-project-color': element.backgroundColor || '',
-              }" @click="handleRowClick(element, index)">
-              <div
-v-for="col in visibleColumns" :key="col.key" class="table-cell"
+              '--sub-project-color': element.backgroundColor || '',
+            }" @click="handleRowClick(element, index)">
+              <div v-for="col in visibleColumns" :key="col.key" class="table-cell"
                 :class="[`align-${col.align || 'center'}`]" :style="{
                   width: col.width
                     ? typeof col.width === 'number'
@@ -108,27 +101,32 @@ v-for="col in visibleColumns" :key="col.key" class="table-cell"
                     : 'auto',
                 }">
                 <!-- 自定义渲染器 -->
-                <component
-:is="col.customRender" v-if="col.customRender" :data="element" :index="index" :column="col"
+                <component :is="col.customRender" v-if="col.customRender" :data="element" :index="index" :column="col"
                   @update:value="handleCellUpdate(index, col.key, $event)" @button-click="handleButtonClick" />
 
                 <!-- 名称列的特殊处理：子项目行显示删除按钮 -->
-                <template
-v-else-if="
+                <template v-else-if="
                   col.key === 'name' && element.isSubProject && element.name
                 ">
                   <div class="sub-project-name">
                     <span class="sub-project-title">{{
                       getColumnValue(element, col.key)
                     }}</span>
-                    <SvgIcon
-name="garbage" class="delete-sub-project-btn"
-                      title="删除子项目" width="14" height="14" @click.stop="handleDeleteSubProject(element, index)" />
+                    <SvgIcon name="garbage" @click.stop="handleDeleteSubProject(element, index)"
+                      class="delete-sub-project-btn" title="删除子项目" width="14" height="14" />
                   </div>
                 </template>
 
                 <!-- 默认文本渲染 -->
-                <span v-else>{{ getColumnValue(element, col.key) }}</span>
+                <template v-else>
+                  <lay-tooltip v-if="col.ellipsisTooltip" position="top"
+                    :content="getColumnValue(element, col.key) as string">
+                    <span :style="col.customStyle">{{ getColumnValue(element, col.key) }}</span>
+                  </lay-tooltip>
+                  <span :style="col.customStyle" v-else>{{ (typeof getColumnValue(element, col.key) === 'number' &&
+                    col.customStyle?.toFixed) ? Number(getColumnValue(element,
+                      col.key)).toFixed(col.customStyle.toFixed) : getColumnValue(element, col.key) }}</span>
+                </template>
               </div>
             </div>
           </template>
@@ -136,16 +134,12 @@ name="garbage" class="delete-sub-project-btn"
 
         <!-- 非拖拽模式 -->
         <div v-else class="static-container">
-          <div
-v-for="(row, index) in sortedData" :key="index" class="table-row" :class="{
+          <div v-for="(row, index) in sortedData" :key="index" class="table-row" :class="{
             selected: isRowSelected(row),
             clickable: clickable || rowSelection,
             'sub-project-row': row.isSubProject,
-          }" :style="{
-              '--sub-project-color': row.backgroundColor || '',
-            }" @click="handleRowClick(row, index)">
-            <div
-v-for="col in visibleColumns" :key="col.key" class="table-cell"
+          }" @click="handleRowClick(row, index)">
+            <div v-for="col in visibleColumns" :key="col.key" class="table-cell"
               :class="[`align-${col.align || 'center'}`]" :style="{
                 width: col.width
                   ? typeof col.width === 'number'
@@ -154,8 +148,7 @@ v-for="col in visibleColumns" :key="col.key" class="table-cell"
                   : 'auto',
               }">
               <!-- 自定义渲染器 -->
-              <component
-:is="col.customRender" v-if="col.customRender" :data="row" :index="index" :column="col"
+              <component :is="col.customRender" v-if="col.customRender" :data="row" :index="index" :column="col"
                 @update:value="handleCellUpdate(index, col.key, $event)" @button-click="handleButtonClick" />
 
               <!-- 名称列的特殊处理：子项目行显示删除按钮 -->
@@ -164,14 +157,19 @@ v-for="col in visibleColumns" :key="col.key" class="table-cell"
                   <span class="sub-project-title">{{
                     getColumnValue(row, col.key)
                   }}</span>
-                  <SvgIcon
-name="garbage" class="delete-sub-project-btn"
-                    title="删除子项目" width="14" height="14" @click.stop="handleDeleteSubProject(row, index)" />
+                  <SvgIcon name="garbage" @click.stop="handleDeleteSubProject(row, index)"
+                    class="delete-sub-project-btn" title="删除子项目" width="14" height="14" />
                 </div>
               </template>
 
               <!-- 默认文本渲染 -->
-              <span v-else>{{ getColumnValue(row, col.key) }}</span>
+              <template v-else>
+                <lay-tooltip v-if="col.ellipsisTooltip" position="top"
+                  :content="getColumnValue(row, col.key) as string">
+                  <span>{{ getColumnValue(row, col.key) }}</span>
+                </lay-tooltip>
+                <span v-else>{{ getColumnValue(row, col.key) }}</span>
+              </template>
             </div>
           </div>
         </div>
@@ -180,8 +178,7 @@ name="garbage" class="delete-sub-project-btn"
 
     <!-- 分页 -->
     <div v-if="pagination" class="table-pagination">
-      <lay-page
-v-model="currentPage" :total="filteredData.length" :limit="pageSize" :show-count="true"
+      <lay-page v-model="currentPage" :total="filteredData.length" :limit="pageSize" :show-count="true"
         :show-limit="true" :show-page="true" :show-skip="true" @change="handlePageChange"
         @limit="handlePageSizeChange" />
     </div>
@@ -211,6 +208,8 @@ export interface TableColumn {
   filterable?: boolean;
   visible?: boolean;
   required?: boolean;
+  ellipsisTooltip?: boolean; // 是否启用文本提示
+  customStyle?: Record<string, string | number | undefined> & { toFixed?: number }; // 自定义样式
   customRender?: ComponentOptions<unknown> | Component | null;
 }
 
@@ -371,11 +370,7 @@ const getFilterOptions = (columnKey: string) => {
     label: String(value),
   }));
 
-  // 添加"全选"选项到开头
-  return [
-    { value: '', label: '全部' },
-    ...options.sort((a, b) => a.label.localeCompare(b.label)),
-  ];
+  return options.sort((a, b) => a.label.localeCompare(b.label));
 };
 
 const getRowKey = (row: Record<string, unknown>): string | number => {
@@ -563,6 +558,7 @@ watch(
     localColumns.value = newColumns.map((col) => ({
       ...col,
       visible: col.visible !== false, // 默认为true，除非明确设置为false
+      ellipsisTooltip: col.ellipsisTooltip || false,
     }));
 
     // 初始化筛选状态

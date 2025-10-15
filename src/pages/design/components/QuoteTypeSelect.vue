@@ -1,25 +1,12 @@
 <template>
-  <AdvancedSelector
-    :model-value="modelValue"
-    :placeholder="placeholder"
-    :options="state.options"
-    :loading="state.loading"
-    value-key="value"
-    label-key="name"
-    @update:model-value="handleValueChange"
-  />
+  <AdvancedSelector :model-value="modelValue" :placeholder="placeholder" :options="state.options"
+    :loading="state.loading" value-key="value" label-key="name" @update:model-value="handleValueChange" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import ordersApi from '@/api/orders/ordersApi';
+import { getQuoteTypes, type QuoteTypeOption } from '@/utils/orderTypeUtils';
 import AdvancedSelector from '@/components/AdvancedSelector.vue';
-
-interface QuoteTypeOption {
-  name: string;
-  value: number;
-  selected: string;
-}
 
 interface QuoteTypeState {
   options: QuoteTypeOption[];
@@ -55,13 +42,14 @@ const state = ref<QuoteTypeState>({
 const getQuoteTypeData = async () => {
   try {
     state.value.loading = true;
-    const response = await ordersApi.getOrderType(
+    const quoteTypes = await getQuoteTypes(
       props.category,
       props.ordersId,
     );
 
-    if (response.data && Array.isArray(response.data)) {
-      state.value.options = response.data;
+    if (quoteTypes && Array.isArray(quoteTypes)) {
+      state.value.options = quoteTypes;
+      orderTypeList.value = quoteTypes;
     }
   } catch (error) {
     console.error(
@@ -72,6 +60,12 @@ const getQuoteTypeData = async () => {
     state.value.loading = false;
   }
 };
+
+// 对外提供报价单类型列表
+const orderTypeList = ref<QuoteTypeOption[]>([]);
+defineExpose({
+  orderTypeList,
+});
 
 // 值变化处理
 const handleValueChange = (value: number | string | object) => {

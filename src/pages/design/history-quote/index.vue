@@ -62,15 +62,13 @@
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-v-model:selected-key="selectedKey" :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars"
-        :loading="loading" :pagination="pagination" even @pagination="handlePagination"
+      <lay-table :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars" :loading="loading"
+        :pagination="pagination" v-model:selectedKey="selectedKey" even @pagination="handlePagination"
         @sort-change="sortChange">
         <template #toolbar>
           <div class="toolbar">
             <lay-tab v-model="current2" type="brief" @change="handleTabChange">
-              <lay-tab-item
-v-for="item in tabItem" :id="item.title" :key="item.title" :title="item.title"
+              <lay-tab-item v-for="item in tabItem" :id="item.title" :key="item.title" :title="item.title"
                 :icon="item.iconRenderFunction" />
             </lay-tab>
 
@@ -142,25 +140,22 @@ v-for="item in tabItem" :id="item.title" :key="item.title" :title="item.title"
 
     <!-- 编辑弹窗 -->
     <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
-      <QuotationEdit
-:show-customer-info-default="false" :is-new-quotation="false" @save="handleEditSave"
-        @cancel="editModalVisible = false" />
+      <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
+        :providedOrderId="selectedOrderId" @cancel="editModalVisible = false" />
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
     <DeleteConfirmModal v-model:visible="deleteModalVisible" :item-name="selectedName" @confirm="handleDeleteConfirm" />
 
     <!-- 导出确认弹窗 -->
-    <ExportQuotationModal
-v-model:visible="exportModalVisible" :export-options="exportOptions"
+    <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
       @confirm="handleExportConfirm" />
 
     <!-- 导入报价单弹窗 -->
     <ImportQuotationModal v-model:visible="importModalVisible" @confirm="handleImportConfirm" />
 
     <!-- 属性设置弹窗 -->
-    <ModalWindow
-:visible="propertyModalVisible" title="设置报价单属性" :btn="[
+    <ModalWindow :visible="propertyModalVisible" title="设置报价单属性" :btn="[
       {
         text: '确定',
         callback: handlePropertyConfirm,
@@ -178,8 +173,7 @@ v-model:visible="exportModalVisible" :export-options="exportOptions"
           <div class="section-header">
             <lay-switch v-model="propertyForm.shareOrdersEnabled" @change="handleAuditStatusChange" />
             <div class="status-display">
-              <span
-:class="{
+              <span :class="{
                 'status-auditing': selectedRowData?.shareOrders === 2,
               }">
                 {{ auditStatusText }}
@@ -190,8 +184,7 @@ v-model:visible="exportModalVisible" :export-options="exportOptions"
             <div class="integration-setting">
               <div class="setting-label">积分设置：</div>
               <lay-select v-model="propertyForm.ordersIntegration" placeholder="请选择积分">
-                <lay-select-option
-v-for="option in integrationOptions" :key="option.value" :value="option.value"
+                <lay-select-option v-for="option in integrationOptions" :key="option.value" :value="option.value"
                   :label="option.label" />
               </lay-select>
             </div>
@@ -210,10 +203,9 @@ v-for="option in integrationOptions" :key="option.value" :value="option.value"
             <lay-switch v-model="propertyForm.projectStatusEnabled" @change="handleProjectStatusChange" />
             <span class="section-title">项目状态</span>
           </div>
-          <div v-if="propertyForm.projectStatusEnabled" class="section-content">
+          <div class="section-content" v-if="propertyForm.projectStatusEnabled">
             <lay-select v-model="propertyForm.projectStatus" placeholder="请选择项目状态">
-              <lay-select-option
-v-for="option in projectStatusOptions" :key="option.value" :value="option.value"
+              <lay-select-option v-for="option in projectStatusOptions" :key="option.value" :value="option.value"
                 :label="option.label" />
             </lay-select>
           </div>
@@ -773,6 +765,9 @@ const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
     exportModalVisible,
   },
 );
+
+// 当前选中行的订单ID，用于编辑报价单数据获取
+const selectedOrderId = computed(() => (selectedRowData.value?.ordersId || ''));
 
 const { handleDelete, handleDeleteConfirm } = useQuotationDelete({
   selectedKey,

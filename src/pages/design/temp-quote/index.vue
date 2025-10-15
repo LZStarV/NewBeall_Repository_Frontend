@@ -2,45 +2,21 @@
   <div class="temp-quote-page">
     <!-- 顶部工具栏 -->
     <lay-card class="toolbar-card">
-      <lay-form
-        layout="inline"
-        :pane="true"
-        :label-width="80"
-        class="toolbar-form-items"
-      >
+      <lay-form layout="inline" :pane="true" :label-width="80" class="toolbar-form-items">
         <lay-form-item label="工程项目名">
-          <lay-input
-            v-model="quotationNameSearch"
-            placeholder="请输入工程项目名"
-            class="search-input"
-            mode="block"
-          />
+          <lay-input v-model="quotationNameSearch" placeholder="请输入工程项目名" class="search-input" mode="block" />
         </lay-form-item>
 
         <lay-form-item label="客户单位">
-          <lay-input
-            v-model="clientNameSearch"
-            placeholder="请输入客户单位"
-            class="search-input"
-            mode="block"
-          />
+          <lay-input v-model="clientNameSearch" placeholder="请输入客户单位" class="search-input" mode="block" />
         </lay-form-item>
 
         <lay-form-item label="报价类型">
-          <lay-input
-            v-model="quoteTypeSearch"
-            placeholder="请输入报价类型"
-            class="search-input"
-            mode="block"
-          />
+          <lay-input v-model="quoteTypeSearch" placeholder="请输入报价类型" class="search-input" mode="block" />
         </lay-form-item>
 
         <lay-form-item label="制单日期">
-          <lay-date-picker
-            v-model="createDate"
-            placeholder="请选择制单日期"
-            allow-clear
-          />
+          <lay-date-picker v-model="createDate" placeholder="请选择制单日期" allow-clear />
         </lay-form-item>
 
         <div class="toolbar-btns">
@@ -56,17 +32,9 @@
 
     <!-- 底部列表区域 -->
     <lay-card class="content-list-card">
-      <lay-table
-        v-model:selected-key="selectedKey"
-        :columns="columns"
-        :data-source="dataSource"
-        :default-toolbar="defaultToolbars"
-        :loading="loading"
-        :pagination="pagination"
-        even
-        @pagination="handlePaginationChange"
-        @sort-change="sortChange"
-      >
+      <lay-table :columns="columns" :data-source="dataSource" :default-toolbar="defaultToolbars" :loading="loading"
+        :pagination="pagination" v-model:selectedKey="selectedKey" even @pagination="handlePaginationChange"
+        @sort-change="sortChange">
         <!-- 顶部工具栏按钮 -->
         <template #toolbar>
           <div class="toolbar">
@@ -90,11 +58,7 @@
 
         <!-- 工程项目名称列自定义渲染 -->
         <template #projectName="{ row }">
-          <span
-            class="project-name-link"
-            :title="row.projectName"
-            @click="showDetailModal(row)"
-          >
+          <span class="project-name-link" :title="row.projectName" @click="showDetailModal(row)">
             {{ row.projectName }}
           </span>
         </template>
@@ -115,41 +79,20 @@
     </lay-card>
 
     <!-- 编辑弹窗 -->
-    <ModalWindow
-      :visible="editModalVisible"
-      title="编辑报价单"
-      :is-teleport="true"
-      @close="editModalVisible = false"
-    >
-      <QuotationEdit
-        :show-customer-info-default="false"
-        :is-new-quotation="false"
-        @save="handleEditSave"
-        @cancel="editModalVisible = false"
-      />
+    <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
+      <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
+        @cancel="editModalVisible = false" :providedOrderId="selectedOrderId" />
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
-    <DeleteConfirmModal
-      v-model:visible="deleteModalVisible"
-      :item-name="selectedName"
-      @confirm="handleDeleteConfirm"
-    />
+    <DeleteConfirmModal v-model:visible="deleteModalVisible" :item-name="selectedName" @confirm="handleDeleteConfirm" />
 
     <!-- 导出确认弹窗 -->
-    <ExportQuotationModal
-      v-model:visible="exportModalVisible"
-      :export-options="exportOptions"
-      @confirm="handleExportConfirm"
-    />
+    <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
+      @confirm="handleExportConfirm" />
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow
-      :visible="detailModalVisible"
-      :is-teleport="true"
-      title="详情"
-      @close="detailModalVisible = false"
-    >
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="详情" @close="detailModalVisible = false">
       <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
       <div v-else>
         <lay-empty />
@@ -189,6 +132,9 @@ const selectedName = computed(() => {
   );
   return selectedItem ? selectedItem.projectName : '';
 });
+
+// 当前选中行的订单ID，用于编辑报价单数据获取
+const selectedOrderId = computed(() => selectedKey.value || '');
 
 interface TempQuotationListResponse extends QuotationListResponse {
   status: string;
@@ -446,6 +392,7 @@ const showDetailModal = (row: QuotationListResponse) => {
 
   .content-list-card {
     height: 100%;
+
     :deep(.layui-card-body) {
       padding: 0 0 10px 0 !important;
       overflow: hidden;

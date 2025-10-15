@@ -212,7 +212,14 @@ export default {
 
   // 写入临时报价单
   writeQuotation(quotation: Quotation) {
-    return http.post<Quotation>('/orders/writeQuotation', quotation);
+    return http.post<
+      Quotation,
+      {
+        code: '200' | '300';
+        data: { orderId: string; sendType: boolean } | '';
+        msg: string;
+      }
+    >('/orders/writeQuotation', quotation);
   },
 
   // 获取临时报价列表
@@ -373,6 +380,20 @@ export default {
     formData.append('coopUser', coopUser);
     formData.append('projectName', projectName);
     return http.post<FormData>('/orders/coopStart', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 是否为合作单
+  isCoop(ordersId: string) {
+    const formData = new FormData();
+    formData.append('ordersId', ordersId);
+    return http.post<
+      FormData,
+      { code: '200' | '300'; data: boolean; msg: string }
+    >('/orders/isCoop', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
