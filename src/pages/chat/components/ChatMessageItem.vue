@@ -13,15 +13,8 @@
         <div class="message-bubble other-message">
           <template v-for="(part, index) in renderMessageContent" :key="index">
             <template v-if="typeof part === 'string'">{{ part }}</template>
-            <Avatar
-              v-else
-              :prefix="getEmojiPrefix(part.categoryId)"
-              :url="part.fileName"
-              :alt="part.emojiAlt"
-              size="1.25rem"
-              style="display: inline-block; vertical-align: middle"
-              :radius="false"
-            />
+            <Avatar v-else :prefix="getEmojiPrefix(part.categoryId)" :url="part.fileName" :alt="part.emojiAlt"
+              size="1.25rem" style="display: inline-block; vertical-align: middle" :radius="false" />
           </template>
         </div>
       </div>
@@ -34,30 +27,16 @@
           <span class="time">{{ parseDateTime(parseInt(time)) }}</span>
         </div>
         <div class="message-footer">
-          <span
-            v-if="unreadText"
-            class="unread-status"
-            @click="isGroupChat && handleShowReadStatus()"
-            >{{ unreadText }}</span
-          >
-          <span v-else class="read-status"
-            >{{ isGroupChat ? '全部' : '' }}已读</span
-          >
+          <template v-if="enableReadStatus">
+            <span v-if="unreadText" class="unread-status" @click="isGroupChat && handleShowReadStatus()">{{ unreadText
+              }}</span>
+            <span v-else class="read-status">{{ isGroupChat ? '全部' : '' }}已读</span>
+          </template>
           <div class="message-bubble my-message-bubble">
-            <template
-              v-for="(part, index) in renderMessageContent"
-              :key="index"
-            >
+            <template v-for="(part, index) in renderMessageContent" :key="index">
               <template v-if="typeof part === 'string'">{{ part }}</template>
-              <Avatar
-                v-else
-                :prefix="getEmojiPrefix(part.categoryId)"
-                :url="part.fileName"
-                size="1.25rem"
-                :alt="part.emojiAlt"
-                style="display: inline-block; vertical-align: middle"
-                :radius="false"
-              />
+              <Avatar v-else :prefix="getEmojiPrefix(part.categoryId)" :url="part.fileName" size="1.25rem"
+                :alt="part.emojiAlt" style="display: inline-block; vertical-align: middle" :radius="false" />
             </template>
           </div>
         </div>
@@ -80,17 +59,8 @@
           <div class="status-section">
             <h4>已读 ({{ readUsersList?.length }})</h4>
             <div class="user-list">
-              <div
-                v-for="user in readUsersList"
-                :key="user.id"
-                class="user-item"
-              >
-                <Avatar
-                  :url="user.avatar"
-                  :alt="user.name"
-                  radius
-                  size="2rem"
-                />
+              <div v-for="user in readUsersList" :key="user.id" class="user-item">
+                <Avatar :url="user.avatar" :alt="user.name" radius size="2rem" />
                 <span>{{ user.name }}</span>
               </div>
             </div>
@@ -98,17 +68,8 @@
           <div class="status-section">
             <h4>未读 ({{ unreadUsersList?.length }})</h4>
             <div class="user-list">
-              <div
-                v-for="user in unreadUsersList"
-                :key="user.id"
-                class="user-item"
-              >
-                <Avatar
-                  :url="user.avatar"
-                  :alt="user.name"
-                  radius
-                  size="2rem"
-                />
+              <div v-for="user in unreadUsersList" :key="user.id" class="user-item">
+                <Avatar :url="user.avatar" :alt="user.name" radius size="2rem" />
                 <span>{{ user.name }}</span>
               </div>
             </div>
@@ -141,6 +102,7 @@ interface Props {
   unreadUsers?: number[]; // 未读用户ID数组
   isGroupChat?: boolean; // 是否是群聊
   readUsers?: number[];
+  enableReadStatus?: boolean;
 }
 
 const {
@@ -152,6 +114,7 @@ const {
   unreadUsers = [],
   isGroupChat = false,
   readUsers = [],
+  enableReadStatus = true,
 } = defineProps<Props>();
 
 const showReadStatusDialog = ref(false);
@@ -289,15 +252,13 @@ const getEmojiPrefix = (categoryId: string) => {
 .other-message {
   background-color: #dbeafe;
   color: #1f2937;
-  border-radius: 0 $border-radius-middle $border-radius-middle
-    $border-radius-middle;
+  border-radius: 0 $border-radius-middle $border-radius-middle $border-radius-middle;
 }
 
 .my-message-bubble {
   background-color: $primary-color;
   color: white;
-  border-radius: $border-radius-middle 0 $border-radius-middle
-    $border-radius-middle;
+  border-radius: $border-radius-middle 0 $border-radius-middle $border-radius-middle;
 }
 
 .message-footer {
@@ -313,6 +274,7 @@ const getEmojiPrefix = (categoryId: string) => {
   margin-right: 0.25rem;
   cursor: pointer;
   text-wrap: nowrap;
+
   &:hover {
     text-decoration: underline;
   }
