@@ -165,6 +165,7 @@ import ordersApi from '@/api/orders/ordersApi';
 import { useToolbarSearch } from '@/composables/useToolbarSearch';
 import ModuleInfo from '../components/ModuleInfo.vue';
 import ModalWindow from '@/components/ModalWindow.vue';
+import { getQuoteTypes } from '@/utils/orderTypeUtils';
 
 // 下拉框选项类型
 interface SelectOption {
@@ -412,21 +413,21 @@ const loadSelectOptions = async () => {
     // 并行获取所有下拉框数据
     const [category1, category3, category4, category5, category6, category7] =
       await Promise.all([
-        ordersApi.getOrderType(1), // categorySearch1 对应 ordersType1
-        ordersApi.getOrderType(3), // categorySearch2 对应 ordersType3
-        ordersApi.getOrderType(4), // squareSearch 对应 ordersType4
-        ordersApi.getOrderType(5), // configSearch 对应 ordersType5
-        ordersApi.getOrderType(6), // countrySearch 对应 ordersType6
-        ordersApi.getOrderType(7), // pointNumberSearch 对应 ordersType7
+        getQuoteTypes(1), // categorySearch1 对应 ordersType1
+        getQuoteTypes(3), // categorySearch2 对应 ordersType3
+        getQuoteTypes(4), // squareSearch 对应 ordersType4
+        getQuoteTypes(5), // configSearch 对应 ordersType5
+        getQuoteTypes(6), // countrySearch 对应 ordersType6
+        getQuoteTypes(7), // pointNumberSearch 对应 ordersType7
       ]);
 
     // 更新选项数据
-    categoryOptions1.value = category1.data || [];
-    categoryOptions2.value = category3.data || [];
-    squareOptions.value = category4.data || [];
-    configOptions.value = category5.data || [];
-    countryOptions.value = category6.data || [];
-    pointNumberOptions.value = category7.data || [];
+    categoryOptions1.value = category1 || [];
+    categoryOptions2.value = category3 || [];
+    squareOptions.value = category4 || [];
+    configOptions.value = category5 || [];
+    countryOptions.value = category6 || [];
+    pointNumberOptions.value = category7 || [];
   } catch (error) {
     console.error('获取下拉框数据失败:', error);
   }

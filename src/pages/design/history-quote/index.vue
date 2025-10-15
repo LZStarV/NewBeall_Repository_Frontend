@@ -141,7 +141,7 @@
     <!-- 编辑弹窗 -->
     <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
       <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
-        @cancel="editModalVisible = false" />
+        :providedOrderId="selectedOrderId" @cancel="editModalVisible = false" />
     </ModalWindow>
 
     <!-- 删除确认弹窗 -->
@@ -765,6 +765,9 @@ const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
     exportModalVisible,
   },
 );
+
+// 当前选中行的订单ID，用于编辑报价单数据获取
+const selectedOrderId = computed(() => (selectedRowData.value?.ordersId || ''));
 
 const { handleDelete, handleDeleteConfirm } = useQuotationDelete({
   selectedKey,

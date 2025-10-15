@@ -220,7 +220,7 @@ export interface Quotation {
   city: string; // 市
   clientBankAccount: string | null; // 客户-银行账号
   clientBankName: string | null; // 客户-开户行
-  clientId: string; // 客户单位id
+  clientId: string | number; // 客户单位id
   clientTexId: string | null; // 客户-税号
   companyAddres: string; // 我司-企业地址
   companyName: string; // 我司-设计单位
@@ -252,7 +252,7 @@ export interface Quotation {
 export interface QuotationListResponse extends Quotation {
   chargePerson: number;
   chargePersonInfo: string;
-  clientId: string;
+  clientId: number | string;
   companyEmail: string;
   contacts: string;
   coopUser: string;
