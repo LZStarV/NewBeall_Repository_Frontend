@@ -5,14 +5,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import ordersApi from '@/api/orders/ordersApi';
+import { getQuoteTypes, type QuoteTypeOption } from '@/utils/orderTypeUtils';
 import AdvancedSelector from '@/components/AdvancedSelector.vue';
-
-interface QuoteTypeOption {
-  name: string;
-  value: number;
-  selected: string;
-}
 
 interface QuoteTypeState {
   options: QuoteTypeOption[];
@@ -48,14 +42,14 @@ const state = ref<QuoteTypeState>({
 const getQuoteTypeData = async () => {
   try {
     state.value.loading = true;
-    const response = await ordersApi.getOrderType(
+    const quoteTypes = await getQuoteTypes(
       props.category,
       props.ordersId,
     );
 
-    if (response.data && Array.isArray(response.data)) {
-      state.value.options = response.data;
-      orderTypeList.value = response.data;
+    if (quoteTypes && Array.isArray(quoteTypes)) {
+      state.value.options = quoteTypes;
+      orderTypeList.value = quoteTypes;
     }
   } catch (error) {
     console.error(

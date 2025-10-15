@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import areaApi from '@/api/area/areaApi';
+import { getProvinces, getCitiesOfProvince, getAreasOfCity } from '@/utils/areaUtils';
 import type { Province, City, Area } from '@/api/area/areaApi.type';
 
 interface Props {
@@ -92,13 +92,11 @@ const cityLoading = ref(false);
 const areaLoading = ref(false);
 
 // 获取所有省份
-const getProvinces = async () => {
+const loadProvinces = async () => {
   try {
     provinceLoading.value = true;
-    const response = await areaApi.getProvince();
-    if (response && Array.isArray(response)) {
-      provinces.value = response;
-    }
+    const response = await getProvinces();
+    provinces.value = response;
   } catch (error) {
     console.error('获取省份数据失败:', error);
   } finally {
@@ -107,13 +105,11 @@ const getProvinces = async () => {
 };
 
 // 获取省份下的城市
-const getCities = async (provinceCode: number) => {
+const loadCities = async (provinceCode: number) => {
   try {
     cityLoading.value = true;
-    const response = await areaApi.getCityOfProvince(provinceCode.toString());
-    if (response && Array.isArray(response)) {
-      cities.value = response;
-    }
+    const response = await getCitiesOfProvince(provinceCode);
+    cities.value = response;
   } catch (error) {
     console.error('获取城市数据失败:', error);
   } finally {
@@ -122,13 +118,11 @@ const getCities = async (provinceCode: number) => {
 };
 
 // 获取城市下的区县
-const getAreas = async (cityCode: number) => {
+const loadAreas = async (cityCode: number) => {
   try {
     areaLoading.value = true;
-    const response = await areaApi.getAreaOfCity(cityCode.toString());
-    if (response && Array.isArray(response)) {
-      areas.value = response;
-    }
+    const response = await getAreasOfCity(cityCode);
+    areas.value = response;
   } catch (error) {
     console.error('获取区县数据失败:', error);
   } finally {
@@ -149,12 +143,12 @@ const handleProvinceChange = async (value: string | number | object) => {
 
   // 获取新省份的城市数据
   if (provinceCode) {
-    await getCities(provinceCode);
+    await loadCities(provinceCode);
 
     // 如果有城市数据，自动选择第一个城市并获取其区县
     if (cities.value.length > 0) {
       selectedCity.value = cities.value[0].cityCode;
-      await getAreas(cities.value[0].cityCode);
+      await loadAreas(cities.value[0].cityCode);
 
       // 如果有区县数据，自动选择第一个区县
       if (areas.value.length > 0) {
@@ -177,7 +171,7 @@ const handleCityChange = async (value: string | number | object) => {
 
   // 获取新城市的区县数据
   if (cityCode) {
-    await getAreas(cityCode);
+    await loadAreas(cityCode);
 
     // 如果有区县数据，自动选择第一个区县
     if (areas.value.length > 0) {
@@ -206,16 +200,16 @@ const updateModelValue = () => {
 
 // 初始化数据
 onMounted(async () => {
-  await getProvinces();
+  await loadProvinces();
 
   // 如果有初始值，设置选择状态
   if (props.modelValue && props.modelValue.province) {
     selectedProvince.value = props.modelValue.province;
-    await getCities(props.modelValue.province);
+    await loadCities(props.modelValue.province);
 
     if (props.modelValue.city) {
       selectedCity.value = props.modelValue.city;
-      await getAreas(props.modelValue.city);
+      await loadAreas(props.modelValue.city);
 
       if (props.modelValue.area) {
         selectedArea.value = props.modelValue.area;

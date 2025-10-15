@@ -329,7 +329,8 @@ import {
   type QuotationItem,
   EMPTY_ROW_ID,
 } from '@/utils/orderUtils';
-import { getAreaNames, getQuoteTypeName, getAreaCodes } from '@/utils/areaUtils';
+import { getAreaNames, getAreaCodes } from '@/utils/areaUtils';
+import { getQuoteTypeName } from '@/utils/orderTypeUtils';
 import ordersApi from '@/api/orders/ordersApi';
 import SideToolbar from './SideToolbar.vue';
 import type { CompanyData } from '@/api/company/companyApi.type';
