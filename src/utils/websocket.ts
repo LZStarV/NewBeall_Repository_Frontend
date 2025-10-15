@@ -4,7 +4,7 @@ import env from './env';
 // 默认配置常量
 export const DEFAULT_RECONNECT_ATTEMPTS = 5; // 默认重连尝试次数
 export const DEFAULT_RECONNECT_INTERVAL = 2000; // 默认重连间隔时间（毫秒）
-export const DEFAULT_HEARTBEAT_INTERVAL = 36000; // 默认心跳间隔时间（毫秒）- 36秒
+export const DEFAULT_HEARTBEAT_INTERVAL = 36000; // 默认发起心跳请求间隔时间（毫秒）- 36秒
 export const DEFAULT_HEARTBEAT_TIMEOUT = 5000; // 默认心跳超时时间（毫秒）- 5秒
 // export const DEFAULT_PING_MESSAGE = JSON.stringify({ type: 'ping' }); // 默认心跳消息
 export const DEFAULT_PING_MESSAGE = 'ping'; // 默认心跳消息
@@ -57,8 +57,8 @@ export class WebSocketClient {
   private heartbeatInterval: number;
   private heartbeatTimeout: number;
   private pingMessage: string;
-  private heartbeatTimer: number | null = null; // 心跳定时器
-  private heartbeatTimeoutTimer: number | null = null; // 心跳超时定时器
+  private heartbeatTimer: number | null = null; // 心跳定时器，定时发送心跳请求
+  private heartbeatTimeoutTimer: number | null = null; // 发送心跳请求后启动的超时计时器
   private lastHeartbeatTime = 0; // 上次心跳时间
   private isManualDisconnect = false; // 是否为手动断开连接
 
@@ -312,9 +312,12 @@ export class WebSocketClient {
     const data = event.data;
     if (data === DEFAULT_PONG_MESSAGE) {
       console.log(`✅ 收到心跳回复${DEFAULT_PONG_MESSAGE} 连接正常`);
+      // 结束心跳超时检测计时器
+      this.clearHeartbeatTimeoutTimer();
       return; // 不传递心跳回复消息给业务回调
     } else {
       // 不是心跳回复消息，也更新心跳时间（任何消息都表示连接活跃）
+      this.clearHeartbeatTimeoutTimer();
       console.log('收到其他消息，连接活跃');
     }
 
@@ -406,6 +409,31 @@ export class WebSocketClient {
   }
 
   /**
+   * 设置心跳超时检测定时器
+   * 用于检测连接是否超时，超时后关闭连接触发重连
+   */
+  private setHeartbeatTimeoutTimer(): void {
+    // 清除已存在的心跳超时检测定时器
+    this.clearHeartbeatTimeoutTimer();
+    this.heartbeatTimeoutTimer = window.setTimeout(() => {
+      const now = Date.now();
+      const timeSinceLastHeartbeat = now - this.lastHeartbeatTime;
+      console.log(
+        `心跳检查: 距离上次消息 ${timeSinceLastHeartbeat}ms (超时阈值: ${this.heartbeatTimeout}ms)`,
+      );
+
+      if (timeSinceLastHeartbeat > this.heartbeatTimeout) {
+        console.warn(
+          `心跳超时，连接可能已断开 (${timeSinceLastHeartbeat}ms > ${this.heartbeatTimeout}ms)`,
+        );
+        this.socket?.close(WEBSOCKET_HEARTBEAT_TIMEOUT_CODE, '心跳超时'); // 关闭连接，触发重连
+      } else {
+        console.log('心跳检查正常');
+      }
+    }, this.heartbeatTimeout);
+  }
+
+  /**
    * 开始心跳检测。
    * 定期发送ping消息并检查连接状态。
    */
@@ -422,29 +450,24 @@ export class WebSocketClient {
           pingResult ? '成功' : '失败',
         );
 
-        // 设置心跳超时检测
-        this.heartbeatTimeoutTimer = window.setTimeout(() => {
-          const now = Date.now();
-          const timeSinceLastHeartbeat = now - this.lastHeartbeatTime;
-          console.log(
-            `心跳检查: 距离上次消息 ${timeSinceLastHeartbeat}ms (超时阈值: ${this.heartbeatTimeout}ms)`,
-          );
-
-          if (timeSinceLastHeartbeat > this.heartbeatTimeout) {
-            console.warn(
-              `心跳超时，连接可能已断开 (${timeSinceLastHeartbeat}ms > ${this.heartbeatTimeout}ms)`,
-            );
-            this.socket?.close(WEBSOCKET_HEARTBEAT_TIMEOUT_CODE, '心跳超时'); // 关闭连接，触发重连
-          } else {
-            console.log('心跳检查正常');
-          }
-        }, this.heartbeatTimeout);
+        // 设置心跳超时检测计时器
+        this.setHeartbeatTimeoutTimer();
       }
     }, this.heartbeatInterval);
   }
 
   /**
-   * 清除心跳检测定时器。
+   * 清除心跳超时检测定时器。
+   */
+  private clearHeartbeatTimeoutTimer(): void {
+    if (this.heartbeatTimeoutTimer !== null) {
+      clearTimeout(this.heartbeatTimeoutTimer);
+      this.heartbeatTimeoutTimer = null;
+    }
+  }
+
+  /**
+   * 清除心跳相关定时器。
    */
   private clearHeartbeat(): void {
     if (this.heartbeatTimer !== null) {
@@ -452,10 +475,7 @@ export class WebSocketClient {
       this.heartbeatTimer = null;
     }
 
-    if (this.heartbeatTimeoutTimer !== null) {
-      clearTimeout(this.heartbeatTimeoutTimer);
-      this.heartbeatTimeoutTimer = null;
-    }
+    this.clearHeartbeatTimeoutTimer();
   }
 
   /**
