@@ -1,20 +1,8 @@
 <template>
   <!-- 封装layui-vue模态框弹窗 -->
-  <lay-layer
-    v-model="windowVisible"
-    :teleport-disabled="!isTeleport"
-    :maxmin="maxmin"
-    :title="title"
-    :resize="resize"
-    :area="sizeArgs"
-    :btn="btn"
-    @close="emit('close')"
-  >
-    <div
-      ref="contentElement"
-      class="modal-content"
-      :style="syncHeight ? { height: contentHeight } : {}"
-    >
+  <lay-layer v-model="windowVisible" :teleport-disabled="!isTeleport" :maxmin="maxmin" :title="title" :resize="resize"
+    :area="sizeArgs" :btn="btn" @close="emit('close')">
+    <div ref="contentElement" class="modal-content" :style="syncHeight ? { height: contentHeight } : {}">
       <slot></slot>
     </div>
   </lay-layer>
@@ -23,6 +11,36 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import ResizeObserver from 'resize-observer-polyfill';
+import { debounce } from '@/utils/debounce';
+
+let currentLayerContent: HTMLElement | null = null;
+let originalOverflow: string = '';
+
+// 设置元素样式
+const setLayerContentStyle = (element: HTMLElement) => {
+  if (currentLayerContent === element) return; // 避免重复设置
+  // 保存原始样式
+  originalOverflow = element.style.overflow || 'auto';
+  // 设置新样式
+  element.style.overflow = 'hidden';
+  element.style.setProperty('overflow', 'hidden', 'important');
+  currentLayerContent = element;
+};
+
+// 恢复元素样式
+const restoreLayerContentStyle = () => {
+  if (currentLayerContent) {
+    // 恢复原始样式
+    if (originalOverflow) {
+      currentLayerContent.style.overflow = originalOverflow;
+    } else {
+      currentLayerContent.style.removeProperty('overflow');
+    }
+
+    currentLayerContent = null;
+    originalOverflow = '';
+  }
+};
 
 type BtnType = {
   text: string;
@@ -75,17 +93,17 @@ const setupHeightObserver = () => {
     ) as HTMLElement;
 
     if (layerContent && contentElement.value) {
+      // 设置元素样式，隐藏滚动条
+      setLayerContentStyle(layerContent);
       // 立即同步一次高度
       syncContentHeight(layerContent);
-
       // 创建 ResizeObserver 监听高度变化
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const target = entry.target as HTMLElement;
-          syncContentHeight(target);
+          debouncedSyncContentHeight(target);
         }
       });
-
       // 开始监听
       resizeObserver.observe(layerContent);
     }
@@ -113,12 +131,18 @@ const syncContentHeight = (layerContent: HTMLElement) => {
   contentElement.value.style.height = contentHeight.value;
 };
 
+// 防抖的syncContentHeight函数
+const debouncedSyncContentHeight = debounce(syncContentHeight, 50);
+
 // 清理高度监听器
 const cleanupHeightObserver = () => {
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;
   }
+
+  // 恢复元素样式
+  restoreLayerContentStyle();
 };
 
 // 监听外部visible的变化
@@ -162,6 +186,8 @@ onUnmounted(() => {
   cleanupHeightObserver();
 });
 </script>
+
+
 
 <style lang="scss" scoped>
 .modal-content {
