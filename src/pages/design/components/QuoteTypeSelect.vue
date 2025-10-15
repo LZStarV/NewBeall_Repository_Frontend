@@ -1,13 +1,6 @@
 <template>
-  <AdvancedSelector
-    :model-value="modelValue"
-    :placeholder="placeholder"
-    :options="state.options"
-    :loading="state.loading"
-    value-key="value"
-    label-key="name"
-    @update:model-value="handleValueChange"
-  />
+  <AdvancedSelector :model-value="modelValue" :placeholder="placeholder" :options="state.options"
+    :loading="state.loading" value-key="value" label-key="name" @update:model-value="handleValueChange" />
 </template>
 
 <script setup lang="ts">
@@ -62,6 +55,7 @@ const getQuoteTypeData = async () => {
 
     if (response.data && Array.isArray(response.data)) {
       state.value.options = response.data;
+      orderTypeList.value = response.data;
     }
   } catch (error) {
     console.error(
@@ -72,6 +66,12 @@ const getQuoteTypeData = async () => {
     state.value.loading = false;
   }
 };
+
+// 对外提供报价单类型列表
+const orderTypeList = ref<QuoteTypeOption[]>([]);
+defineExpose({
+  orderTypeList,
+});
 
 // 值变化处理
 const handleValueChange = (value: number | string | object) => {

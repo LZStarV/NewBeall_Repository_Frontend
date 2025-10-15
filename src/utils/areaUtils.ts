@@ -295,3 +295,199 @@ export function clearAllCache(): void {
   clearAreaCache();
   clearQuoteTypeCache();
 }
+
+/**
+ * 根据省份名称查找省份代码
+ * @param provinceName 省份名称
+ * @returns 省份代码，如果未找到则返回undefined
+ */
+export async function getProvinceCode(provinceName: string): Promise<number | undefined> {
+  if (!provinceName) return undefined;
+
+  try {
+    const provinces = await areaApi.getProvince();
+    if (provinces && Array.isArray(provinces)) {
+      // 更新缓存
+      provinces.forEach((province) => {
+        areaCache.provinces.set(province.provinceCode, province);
+      });
+
+      const province = provinces.find((p) => p.provinceName === provinceName);
+      return province?.provinceCode;
+    }
+  } catch (error) {
+    handleApiError(error, '获取省份数据');
+  }
+
+  return undefined;
+}
+
+/**
+ * 根据城市名称查找城市代码
+ * @param cityName 城市名称
+ * @param provinceCode 省份代码（可选，用于优化请求）
+ * @returns 城市代码，如果未找到则返回undefined
+ */
+export async function getCityCode(
+  cityName: string,
+  provinceCode?: number,
+): Promise<number | undefined> {
+  if (!cityName) return undefined;
+
+  try {
+    if (!provinceCode) {
+      // 获取所有省份的城市
+      const provinces = await areaApi.getProvince();
+      if (provinces && Array.isArray(provinces)) {
+        // 更新省份缓存
+        provinces.forEach((province) => {
+          areaCache.provinces.set(province.provinceCode, province);
+        });
+
+        // 遍历所有省份获取城市
+        for (const province of provinces) {
+          const cities = await areaApi.getCityOfProvince(
+            province.provinceCode.toString(),
+          );
+          if (cities && Array.isArray(cities)) {
+            cities.forEach((city) => {
+              areaCache.cities.set(city.cityCode, city);
+            });
+
+            // 查找匹配的城市
+            const city = cities.find((c) => c.cityName === cityName);
+            if (city) {
+              return city.cityCode;
+            }
+          }
+        }
+      }
+    } else {
+      // 直接获取指定省份的城市
+      const cities = await areaApi.getCityOfProvince(provinceCode.toString());
+      if (cities && Array.isArray(cities)) {
+        cities.forEach((city) => {
+          areaCache.cities.set(city.cityCode, city);
+        });
+
+        const city = cities.find((c) => c.cityName === cityName);
+        return city?.cityCode;
+      }
+    }
+  } catch (error) {
+    handleApiError(error, '获取城市数据');
+  }
+
+  return undefined;
+}
+
+/**
+ * 根据区县名称查找区县代码
+ * @param areaName 区县名称
+ * @param cityCode 城市代码（可选，用于优化请求）
+ * @returns 区县代码，如果未找到则返回undefined
+ */
+export async function getAreaCode(
+  areaName: string,
+  cityCode?: number,
+): Promise<number | undefined> {
+  if (!areaName) return undefined;
+
+  try {
+    if (!cityCode) {
+      // 获取所有地区数据
+      const provinces = await areaApi.getProvince();
+      if (provinces && Array.isArray(provinces)) {
+        // 更新省份缓存
+        provinces.forEach((province) => {
+          areaCache.provinces.set(province.provinceCode, province);
+        });
+
+        // 遍历所有省份和城市获取区县
+        for (const province of provinces) {
+          const cities = await areaApi.getCityOfProvince(
+            province.provinceCode.toString(),
+          );
+          if (cities && Array.isArray(cities)) {
+            cities.forEach((city) => {
+              areaCache.cities.set(city.cityCode, city);
+            });
+
+            // 获取每个城市的区县
+            for (const city of cities) {
+              const areas = await areaApi.getAreaOfCity(
+                city.cityCode.toString(),
+              );
+              if (areas && Array.isArray(areas)) {
+                areas.forEach((area) => {
+                  areaCache.areas.set(area.areaCode, area);
+                });
+
+                // 查找匹配的区县
+                const area = areas.find((a) => a.areaName === areaName);
+                if (area) {
+                  return area.areaCode;
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // 直接获取指定城市的区县
+      const areas = await areaApi.getAreaOfCity(cityCode.toString());
+      if (areas && Array.isArray(areas)) {
+        areas.forEach((area) => {
+          areaCache.areas.set(area.areaCode, area);
+        });
+
+        const area = areas.find((a) => a.areaName === areaName);
+        return area?.areaCode;
+      }
+    }
+  } catch (error) {
+    handleApiError(error, '获取区县数据');
+  }
+
+  return undefined;
+}
+
+/**
+ * 批量根据地区名称查找对应编号
+ * @param provinceName 省份名称
+ * @param cityName 城市名称
+ * @param areaName 区县名称
+ * @returns 包含省份、城市、区县编号的对象
+ */
+export async function getAreaCodes(
+  provinceName?: string,
+  cityName?: string,
+  areaName?: string,
+): Promise<{ province?: number; city?: number; area?: number }> {
+  let provinceCode: number | undefined;
+  let cityCode: number | undefined;
+  let areaCode: number | undefined;
+
+  // 按级联关系依次查找
+  if (provinceName) {
+    provinceCode = await getProvinceCode(provinceName);
+  }
+
+  if (cityName && provinceCode) {
+    cityCode = await getCityCode(cityName, provinceCode);
+  } else if (cityName) {
+    cityCode = await getCityCode(cityName);
+  }
+
+  if (areaName && cityCode) {
+    areaCode = await getAreaCode(areaName, cityCode);
+  } else if (areaName) {
+    areaCode = await getAreaCode(areaName);
+  }
+
+  return { 
+    province: provinceCode, 
+    city: cityCode, 
+    area: areaCode 
+  };
+}
