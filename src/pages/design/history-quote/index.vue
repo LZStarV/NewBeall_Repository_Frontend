@@ -131,7 +131,8 @@
     </lay-card>
 
     <!-- 详细信息弹窗 -->
-    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="详情" @close="detailModalVisible = false">
+    <ModalWindow :visible="detailModalVisible" :is-teleport="true" title="详情" :syncHeight="true"
+      @close="detailModalVisible = false">
       <QuotationInfo v-if="checkedRow" :selected-row="checkedRow" />
       <div v-else>
         <lay-empty />

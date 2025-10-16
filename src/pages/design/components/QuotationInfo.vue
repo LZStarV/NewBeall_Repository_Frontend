@@ -1,14 +1,68 @@
 <template>
   <!-- 操作记录面板按钮与容器 -->
+  <div class="panel-toggle" v-if="localQuotationData">
   <div v-if="localQuotationData" class="log-panel-toggle">
     <lay-button size="sm" type="normal" @click="toggleLogs">
       {{ showLogs ? '隐藏操作记录' : '查看操作记录' }}
+    </lay-button>
+    <lay-button size="sm" type="normal" @click="toggleCommentPanel">
+      {{ showCommentPanel ? '隐藏评论记录' : '查看评论记录' }}
     </lay-button>
   </div>
   <OperationLogPanel
 v-if="localQuotationData" :visible="showLogs" :order-id="localQuotationData.ordersId"
     :phase-type="phaseType" @update:visible="(v: boolean) => showLogs = v" @view-change="viewChange" />
+  <CommentPanel v-if="localQuotationData" :visible="showCommentPanel" :comment-list="commentList"
+    :order-id="localQuotationData.ordersId" :chat-type="1" @update:visible="(v: boolean) => showCommentPanel = v" />
 
+  <main class="detail-container">
+    <!-- 详情内容 -->
+    <div v-if="localQuotationData" class="detail-content">
+      <h3 class="detail-title">报价单信息</h3>
+      <lay-row :gutter="20">
+        <div class="head-info">
+          <div class="head-info-left">
+            <label>报价单编号:</label> {{ localQuotationData.ordersId }}
+          </div>
+          <div class="head-info-right">
+            <lay-checkbox v-model="stampChecked" value="stamp" skin="primary" size="sm">盖章</lay-checkbox>
+            <div class="head-info-item">
+              <label>制单人:</label> {{ localQuotationData.createPerson }}
+            </div>
+            <div class="head-info-item">
+              <label>制单时间:</label> {{ localQuotationData.createDate }}
+            </div>
+          </div>
+        </div>
+        <div class="seal-area" v-if="stampChecked">
+          <canvas ref="sealCanvasRef" width="240" height="240"></canvas>
+        </div>
+        <lay-col :xs="24" :md="12">
+          <!-- 客户信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <label class="form-head-label">客户单位</label>
+                <lay-input v-model="localQuotationData.clientName" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">客户地址</label>
+                <lay-input v-model="localQuotationData.clientAddress" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">联系人员</label>
+                <lay-input v-model="localQuotationData.clinetContact" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">联系电话</label>
+                <lay-input v-model="localQuotationData.clientPhone" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">客户邮箱</label>
+                <lay-input v-model="localQuotationData.clientEmail" disabled />
+              </div>
+            </div>
+          </div>
   <!-- 详情内容 -->
   <div v-if="localQuotationData" class="detail-content">
     <h3 class="detail-title">报价单信息</h3>
@@ -57,94 +111,95 @@ v-if="localQuotationData" :visible="showLogs" :order-id="localQuotationData.orde
           </div>
         </div>
 
-        <!-- 工程信息模块 -->
-        <div class="module-card">
-          <div class="module-content">
-            <div class="form-row">
-              <label class="form-head-label">工程项目名称</label>
-              <lay-input v-model="localQuotationData.projectName" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">项目负责人</label>
-              <lay-input v-model="localQuotationData.chargePerson" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">报价单类型</label>
-              <lay-input v-model="localQuotationData.orderstype" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">报价单性质</label>
-              <lay-input v-model="localQuotationData.ordersCharacter" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">工程项目备注</label>
-              <lay-input v-model="localQuotationData.projectRemark" disabled />
-            </div>
-          </div>
-        </div>
-      </lay-col>
-
-      <lay-col :xs="24" :md="12">
-        <!-- 我司信息模块 -->
-        <div class="module-card">
-          <div class="module-content">
-            <div class="form-row">
-              <label class="form-head-label">报价单位</label>
-              <lay-input v-model="localQuotationData.companyName" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">我司地址</label>
-              <lay-input v-model="localQuotationData.companyAddress" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">联系人员</label>
-              <lay-input v-model="localQuotationData.companyContact" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">联系电话</label>
-              <lay-input v-model="localQuotationData.companyPhone" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">邮箱地址</label>
-              <lay-input v-model="localQuotationData.companyEmail" disabled />
+          <!-- 工程信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <label class="form-head-label">工程项目名称</label>
+                <lay-input v-model="localQuotationData.projectName" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">项目负责人</label>
+                <lay-input v-model="localQuotationData.chargePerson" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">报价单类型</label>
+                <lay-input v-model="localQuotationData.orderstype" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">报价单性质</label>
+                <lay-input v-model="localQuotationData.ordersCharacter" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">工程项目备注</label>
+                <lay-input v-model="localQuotationData.projectRemark" disabled />
+              </div>
             </div>
           </div>
-        </div>
+        </lay-col>
 
-        <!-- 交货信息模块 -->
-        <div class="module-card">
-          <div class="module-content">
-            <div class="form-row">
-              <label class="form-head-label">交货方式</label>
-              <lay-input v-model="localQuotationData.deliveryMethod" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">交货时间</label>
-              <lay-input v-model="localQuotationData.deliveryTime" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">交货地点</label>
-              <lay-input v-model="localQuotationData.deliveryArea" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">详细地址</label>
-              <lay-input v-model="localQuotationData.deliveryAddress" disabled />
-            </div>
-            <div class="form-row">
-              <label class="form-head-label">结算方式</label>
-              <lay-input v-model="localQuotationData.settleMethod" disabled />
+        <lay-col :xs="24" :md="12">
+          <!-- 我司信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <label class="form-head-label">报价单位</label>
+                <lay-input v-model="localQuotationData.companyName" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">我司地址</label>
+                <lay-input v-model="localQuotationData.companyAddress" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">联系人员</label>
+                <lay-input v-model="localQuotationData.companyContact" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">联系电话</label>
+                <lay-input v-model="localQuotationData.companyPhone" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">邮箱地址</label>
+                <lay-input v-model="localQuotationData.companyEmail" disabled />
+              </div>
             </div>
           </div>
-        </div>
-      </lay-col>
-    </lay-row>
 
-    <!-- 报价产品信息 -->
-    <lay-row :gutter="20">
-      <h5>报价产品信息</h5>
-      <ProductionList :order-id="localQuotationData.ordersId" />
-    </lay-row>
-  </div>
+          <!-- 交货信息模块 -->
+          <div class="module-card">
+            <div class="module-content">
+              <div class="form-row">
+                <label class="form-head-label">交货方式</label>
+                <lay-input v-model="localQuotationData.deliveryMethod" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">交货时间</label>
+                <lay-input v-model="localQuotationData.deliveryTime" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">交货地点</label>
+                <lay-input v-model="localQuotationData.deliveryArea" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">详细地址</label>
+                <lay-input v-model="localQuotationData.deliveryAddress" disabled />
+              </div>
+              <div class="form-row">
+                <label class="form-head-label">结算方式</label>
+                <lay-input v-model="localQuotationData.settleMethod" disabled />
+              </div>
+            </div>
+          </div>
+        </lay-col>
+      </lay-row>
+
+      <!-- 报价产品信息 -->
+      <lay-row :gutter="20">
+        <h5>报价产品信息</h5>
+        <ProductionList :order-id="localQuotationData.ordersId" />
+      </lay-row>
+    </div>
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -152,10 +207,14 @@ import clinetApi from '@/api/client/clinetApi';
 import companyApi from '@/api/company/companyApi';
 import type { QuotationListResponse, OrderLogsRecord } from '@/api/orders/orderApi.type';
 import ordersApi from '@/api/orders/ordersApi';
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { createSeal, clearSeal } from '@/utils/createSeal';
 import OperationLogPanel from './OperationLogPanel.vue';
 import ProductionList from './ProductionList.vue';
+import { createOrderDetailCommentWebSocket, type CommentMessage } from '@/websocket/orderDetailComment';
+import { useChatStore } from '@/stores/chat';
+import type { WebSocketClient } from '@/utils/websocket';
+import CommentPanel from './CommentPanel.vue';
 
 interface QuotationFormData {
   ordersId: string;
@@ -214,7 +273,7 @@ const toggleLogs = () => {
 const viewChange = (record: OrderLogsRecord) => {
   // TODO: 打开侧滑/弹窗展示record对应的修改详情
   // 这里先占位，后续根据后端返回的变更详情接口实现
-   
+
   console.log('查看修改内容：', record);
 };
 
@@ -302,7 +361,7 @@ const updateQuotationData = async () => {
           });
         }
       } catch (e) {
-         
+        // eslint-disable-next-line no-console
         console.warn('获取我司详情失败，已跳过回退数据填充');
       }
     }
@@ -347,89 +406,51 @@ watch(stampChecked, async (checked) => {
     if (canvas) clearSeal([canvas]);
   }
 });
+
+// 引入连接websocket需要的用户id
+const chatStore = useChatStore();
+const userId = ref<string | number>();
+userId.value = chatStore.userInfoData?.id;
+let wsClient: WebSocketClient;
+
+const commentList = ref<CommentMessage[]>([]);
+const showCommentPanel = ref(false);
+
+// 开关评论记录面板
+const toggleCommentPanel = () => {
+  showCommentPanel.value = !showCommentPanel.value;
+};
+
+onMounted(() => {
+  // 初始化订单详情评论websocket连接
+  if (userId.value) {
+    wsClient = createOrderDetailCommentWebSocket(
+      userId.value,
+      props.selectedRow.ordersId,
+      '1',
+      (data) => {
+        console.log('收到新的订单详情评论消息:', data);
+        if (data.topicList) {
+          commentList.value = data.topicList;
+        }
+      },
+    );
+    wsClient?.connect();
+  }
+})
+
+onUnmounted(() => {
+  // 组件卸载时关闭websocket连接
+  wsClient?.disconnect();
+})
 </script>
 
 <style scoped lang="scss">
-// 操作记录面板样式
-.log-panel-toggle {
+// 面板展开按钮控制样式
+.panel-toggle {
   padding: 12px 20px 0 20px;
-}
-
-.operation-log-panel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 340px;
-  height: 100%;
-  background: #fff;
-  border-right: 1px solid #eee;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
   display: flex;
-  flex-direction: column;
-
-  .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-weight: 600;
-  }
-
-  .panel-body {
-    padding: 10px 12px;
-    overflow: auto;
-    flex: 1;
-  }
-
-  .log-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .log-item {
-    padding: 8px 6px;
-    border-bottom: 1px dashed #f0f0f0;
-  }
-
-  .log-line {
-    display: flex;
-    justify-content: space-between;
-    color: #888;
-    font-size: 12px;
-    margin-bottom: 4px;
-  }
-
-  .log-msg {
-    color: #333;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .loading,
-  .empty {
-    text-align: center;
-    color: #999;
-    padding: 12px 0;
-  }
-
-  .panel-footer {
-    text-align: center;
-    padding: 10px 0 4px 0;
-  }
-}
-
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(-20px);
-  opacity: 0;
+  justify-content: space-between;
 }
 
 // 每个子卡片的样式
@@ -456,6 +477,11 @@ watch(stampChecked, async (checked) => {
   align-items: center;
   justify-content: flex-end;
   height: 100%;
+}
+
+.detail-container {
+  height: 100%;
+  overflow-y: auto;
 }
 
 .detail-content {
