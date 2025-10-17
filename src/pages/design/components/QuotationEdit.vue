@@ -1,6 +1,6 @@
 <template>
   <main ref="scrollElement" class="scroll-container">
-    <lay-loading :type="2" :loading="isLoading" :delay="500">
+    <lay-loading :type="2" :loading="isLoading" :delay="0" class="loading-container">
       <lay-card class="quotation-edit-card">
         <div v-if="enableCustomerInfo">
           <lay-tooltip position="right" :content="showCustomerInfo ? '收起客户信息' : '显示客户信息'">
@@ -305,9 +305,8 @@
         @cancel="handleProductSelectCancel" />
     </lay-loading>
 
-
     <!-- 侧边控制工具栏 -->
-    <SideToolbar @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom" />
+    <SideToolbar v-show="!isLoading" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom" />
   </main>
 </template>
 
@@ -1465,6 +1464,10 @@ const scrollToBottom = () => {
       }
     }
   }
+}
+
+.loading-container {
+  height: 100%;
 }
 
 /* 滚动容器样式 */
