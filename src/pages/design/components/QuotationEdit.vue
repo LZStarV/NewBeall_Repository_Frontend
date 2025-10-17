@@ -306,7 +306,13 @@
     </lay-loading>
 
     <!-- 侧边控制工具栏 -->
-    <SideToolbar v-show="!isLoading" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom" />
+    <SideToolbar v-show="!isLoading" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom"
+      @collapse-all-sub-items="collapseAllSubItems" @toggle-total-price-preview="toggleTotalPricePreview" />
+
+    <!-- 总价预览 -->
+    <TotalPricePreview v-show="isTotalPricePreviewVisible"
+      :product-rate="productInterestRate?.useDefaultPrice ? defaultInterestRate : productInterestRate?.interestRate"
+      :total-cost="costStatistics.totalCost" :total-price="costStatistics.totalPrice" />
   </main>
 </template>
 
@@ -323,6 +329,7 @@ import SubProjectAddCell from '@/components/table-cells/SubProjectAddCell.vue';
 import SubProjectDrawer from './SubProjectDrawer.vue';
 import ProductInterestRateDialog from './ProductInterestRateDialog.vue';
 import ProductSelectModal from './ProductSelectModal.vue';
+import TotalPricePreview from './TotalPricePreview.vue';
 import { onMounted, ref, markRaw, watch, computed } from 'vue';
 import type {
   OrderModuleListResponse,
@@ -1287,22 +1294,31 @@ onMounted(async () => {
 });
 
 const scrollElement = useTemplateRef<HTMLElement>('scrollElement')
-const { x, y } = useScroll(scrollElement, { behavior: 'smooth' })
+const { y } = useScroll(scrollElement, { behavior: 'smooth' })
 
 // 侧边栏相关控制
 const scrollToTop = () => {
-  console.log('scrollToTop1', x.value, y.value);
   y.value = 0;
-  console.log('scrollToTop2', x.value, y.value);
 };
 
 const scrollToBottom = () => {
-  console.log('scrollToBottom11', x.value, y.value);
   if (scrollElement.value) {
-    console.log('scrollToBottom22', x.value, y.value);
     y.value = scrollElement.value.scrollHeight;
-    console.log('scrollToBottom33', x.value, y.value);
   }
+};
+
+// 控制折叠/展开所有子项目
+const isAllSubItemsCollapsed = ref(false);
+const collapseAllSubItems = (isCollapsed: boolean) => {
+  isAllSubItemsCollapsed.value = isCollapsed;
+  console.log('isAllSubItemsCollapsed', isAllSubItemsCollapsed.value);
+
+};
+
+// 控制总价预览展示与否
+const isTotalPricePreviewVisible = ref(false);
+const toggleTotalPricePreview = () => {
+  isTotalPricePreviewVisible.value = !isTotalPricePreviewVisible.value;
 };
 </script>
 

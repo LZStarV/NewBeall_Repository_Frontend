@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon.vue';
+import { computed, ref, type ComputedRef } from 'vue';
 
 interface SideToolbarItem {
   iconName: string;
@@ -35,8 +36,11 @@ const scrollToTop = () => {
   emits('scrollToTop');
 };
 
+const isAllSubItemsCollapsed = ref(false);
+
 const collapseAllSubItems = () => {
-  emits('collapseAllSubItems');
+  isAllSubItemsCollapsed.value = !isAllSubItemsCollapsed.value;
+  emits('collapseAllSubItems', isAllSubItemsCollapsed.value);
 };
 
 const toggleTotalPricePreview = () => {
@@ -63,11 +67,10 @@ const scrollToBottom = () => {
   emits('scrollToBottom');
 };
 
-
-const sideToolbarConfig: SideToolbarItem[] = [
+const sideToolbarConfig: ComputedRef<SideToolbarItem[]> = computed(() => [
   {
-    iconName: 'shrink_item',
-    name: '折叠所有子项目',
+    iconName: isAllSubItemsCollapsed.value ? 'enlarge_item' : 'shrink_item',
+    name: isAllSubItemsCollapsed.value ? '展开所有子项目' : '折叠所有子项目',
     btnAction: collapseAllSubItems,
   },
   {
@@ -95,7 +98,7 @@ const sideToolbarConfig: SideToolbarItem[] = [
     name: '临时产品载入数据库',
     btnAction: loadTempProductIntoDatabase,
   },
-]
+]);
 </script>
 
 <style scoped lang="scss">
