@@ -127,7 +127,7 @@ $sidebarWidthCollapsed: 80px;
       flex: 1;
       height: calc(100vh - $mainContentMarginTop - 20px);
       padding-right: 20px;
-      border-radius: $border-radius-extra-large;
+      border-radius: $border-radius-extra-large 0 0 $border-radius-extra-large;
       transition: margin-left 0.3s ease;
       z-index: 80;
 

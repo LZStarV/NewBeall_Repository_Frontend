@@ -1,12 +1,7 @@
 <template>
   <div class="new-quote-page">
-    <QuotationEdit
-      ref="quotationEditRef"
-      :quotation-menu-config="quotationMenuConfig"
-      :is-new-quotation="true"
-      @data-submit="handleDataSubmit"
-      @temp-save="handleTempSave"
-    />
+    <QuotationEdit ref="quotationEditRef" :quotation-menu-config="quotationMenuConfig" :is-new-quotation="true"
+      @data-submit="handleDataSubmit" @temp-save="handleTempSave" />
   </div>
 </template>
 
@@ -241,4 +236,9 @@ const handleTempSave = async (data: Quotation) => {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.new-quote-page {
+  height: calc(100%);
+  border-radius: $border-radius-extra-large;
+}
+</style>
