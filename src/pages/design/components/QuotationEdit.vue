@@ -1,304 +1,314 @@
 <template>
-  <lay-loading :type="2" :loading="isLoading" :delay="500">
-    <lay-card class="quotation-edit-card">
-      <div v-if="enableCustomerInfo">
-        <button class="show-customer-info-btn">
-          <SvgIcon :name="showCustomerInfo ? 'double_up' : 'double_down'"
-            @click="showCustomerInfo = !showCustomerInfo" />
-        </button>
-        <lay-row v-if="showCustomerInfo" :gutter="20">
-          <lay-col :xs="24" :md="12">
-            <!-- 客户信息模块 -->
-            <div class="module-card">
-              <div class="module-header">
-                <h5>客户信息</h5>
+  <main ref="scrollElement" class="scroll-container">
+    <lay-loading :type="2" :loading="isLoading" :delay="500">
+      <lay-card class="quotation-edit-card">
+        <div v-if="enableCustomerInfo">
+          <lay-tooltip position="right" :content="showCustomerInfo ? '收起客户信息' : '显示客户信息'">
+            <button class="show-customer-info-btn">
+              <SvgIcon :name="showCustomerInfo ? 'double_up' : 'double_down'"
+                @click="showCustomerInfo = !showCustomerInfo" />
+            </button>
+          </lay-tooltip>
+          <lay-row v-if="showCustomerInfo" :gutter="20">
+            <lay-col :xs="24" :md="12">
+              <!-- 客户信息模块 -->
+              <div class="module-card">
+                <div class="module-header">
+                  <h5>客户信息</h5>
+                </div>
+                <div class="module-content">
+                  <div class="form-row">
+                    <label class="form-head-label">客户单位</label>
+                    <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange" allow-clear>
+                      <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
+                        :label="client.contacts" />
+                    </lay-select>
+                    <lay-button type="normal" size="md" class="info-button">
+                      <SvgIcon name="group_chat" width="16" height="16" />
+                      客户详情
+                    </lay-button>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">客户地址</label>
+                    <lay-input v-model="customerInfo.address" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">联系人员</label>
+                    <lay-input v-model="customerInfo.contact" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">联系电话</label>
+                    <lay-input v-model="customerInfo.phone" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">客户邮箱</label>
+                    <lay-input v-model="customerInfo.email" disabled />
+                    <lay-button type="normal" size="md" class="info-button"
+                      @click="showCustomerBankInfo = !showCustomerBankInfo">
+                      {{ showCustomerBankInfo ? '收起信息' : '账户信息' }}
+                    </lay-button>
+                  </div>
+                  <div v-show="showCustomerBankInfo" class="bank-info-box">
+                    <div class="form-row">
+                      <label class="form-head-label">银行账号</label>
+                      <lay-input v-model="customerInfo.bankAccount" disabled />
+                    </div>
+                    <div class="form-row">
+                      <label class="form-head-label">开户行</label>
+                      <lay-input v-model="customerInfo.bankName" disabled />
+                    </div>
+                    <div class="form-row">
+                      <label class="form-head-label">税号</label>
+                      <lay-input v-model="customerInfo.taxNumber" disabled />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="module-content">
-                <div class="form-row">
-                  <label class="form-head-label">客户单位</label>
-                  <lay-select placeholder="请选择" v-model="customerName" @change="handleClientChange" allow-clear>
-                    <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
-                      :label="client.contacts" />
-                  </lay-select>
-                  <lay-button type="normal" size="md" class="info-button">
-                    <SvgIcon name="group_chat" width="16" height="16" />
-                    客户详情
-                  </lay-button>
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">客户地址</label>
-                  <lay-input v-model="customerInfo.address" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">联系人员</label>
-                  <lay-input v-model="customerInfo.contact" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">联系电话</label>
-                  <lay-input v-model="customerInfo.phone" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">客户邮箱</label>
-                  <lay-input v-model="customerInfo.email" disabled />
-                  <lay-button type="normal" size="md" class="info-button"
-                    @click="showCustomerBankInfo = !showCustomerBankInfo">
-                    {{ showCustomerBankInfo ? '收起信息' : '账户信息' }}
-                  </lay-button>
-                </div>
-                <div v-show="showCustomerBankInfo" class="bank-info-box">
-                  <div class="form-row">
-                    <label class="form-head-label">银行账号</label>
-                    <lay-input v-model="customerInfo.bankAccount" disabled />
-                  </div>
-                  <div class="form-row">
-                    <label class="form-head-label">开户行</label>
-                    <lay-input v-model="customerInfo.bankName" disabled />
-                  </div>
-                  <div class="form-row">
-                    <label class="form-head-label">税号</label>
-                    <lay-input v-model="customerInfo.taxNumber" disabled />
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- 项目信息模块 -->
-            <div class="module-card">
-              <div class="module-header">
-                <h5>项目信息</h5>
-              </div>
-              <div class="module-content">
-                <div class="form-row">
-                  <label class="form-head-label required">项目名称</label>
-                  <lay-input v-model="projectInfo.name" placeholder="" />
+              <!-- 项目信息模块 -->
+              <div class="module-card">
+                <div class="module-header">
+                  <h5>项目信息</h5>
                 </div>
-                <div class="form-row">
-                  <label class="form-head-label required">项目负责人</label>
-                  <lay-select v-model="projectInfo.manager" placeholder="请选择" allow-clear>
-                    <lay-select-option v-for="item in projectManagerList" :key="item.id" :value="item.id"
-                      :label="item.name" />
-                  </lay-select>
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label required">报价单类型</label>
-                  <div class="select-group">
-                    <QuoteTypeSelect v-model="projectInfo.quoteType1" :category="1" placeholder="请选择"
-                      ref="quoteTypeSelectRef1" />
-                    <QuoteTypeSelect v-model="projectInfo.quoteType2" :category="2" placeholder="请选择"
-                      ref="quoteTypeSelectRef2" />
-                    <QuoteTypeSelect v-model="projectInfo.quoteType3" :category="3" placeholder="请选择"
-                      ref="quoteTypeSelectRef3" />
+                <div class="module-content">
+                  <div class="form-row">
+                    <label class="form-head-label required">项目名称</label>
+                    <lay-input v-model="projectInfo.name" placeholder="" />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label required">项目负责人</label>
+                    <lay-select v-model="projectInfo.manager" placeholder="请选择" allow-clear>
+                      <lay-select-option v-for="item in projectManagerList" :key="item.id" :value="item.id"
+                        :label="item.name" />
+                    </lay-select>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label required">报价单类型</label>
+                    <div class="select-group">
+                      <QuoteTypeSelect v-model="projectInfo.quoteType1" :category="1" placeholder="请选择"
+                        ref="quoteTypeSelectRef1" />
+                      <QuoteTypeSelect v-model="projectInfo.quoteType2" :category="2" placeholder="请选择"
+                        ref="quoteTypeSelectRef2" />
+                      <QuoteTypeSelect v-model="projectInfo.quoteType3" :category="3" placeholder="请选择"
+                        ref="quoteTypeSelectRef3" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">报价单性质</label>
+                    <lay-select v-model="projectInfo.nature" placeholder="请选择" allow-clear>
+                      <lay-select-option value="初步建议阶段">
+                        初步建议阶段
+                      </lay-select-option>
+                      <lay-select-option value="顾问设计阶段">
+                        顾问设计阶段
+                      </lay-select-option>
+                      <lay-select-option value="项目投标阶段">
+                        项目投标阶段
+                      </lay-select-option>
+                      <lay-select-option value="设备采购阶段">
+                        设备采购阶段
+                      </lay-select-option>
+                    </lay-select>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">项目备注</label>
+                    <lay-input v-model="projectInfo.remark" />
                   </div>
                 </div>
-                <div class="form-row">
-                  <label class="form-head-label">报价单性质</label>
-                  <lay-select v-model="projectInfo.nature" placeholder="请选择" allow-clear>
-                    <lay-select-option value="初步建议阶段">
-                      初步建议阶段
-                    </lay-select-option>
-                    <lay-select-option value="顾问设计阶段">
-                      顾问设计阶段
-                    </lay-select-option>
-                    <lay-select-option value="项目投标阶段">
-                      项目投标阶段
-                    </lay-select-option>
-                    <lay-select-option value="设备采购阶段">
-                      设备采购阶段
-                    </lay-select-option>
-                  </lay-select>
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">项目备注</label>
-                  <lay-input v-model="projectInfo.remark" />
-                </div>
               </div>
-            </div>
-          </lay-col>
+            </lay-col>
 
-          <lay-col :xs="24" :md="12">
-            <!-- 我司信息模块 -->
-            <div class="module-card">
-              <div class="module-header">
-                <h5>我司信息</h5>
+            <lay-col :xs="24" :md="12">
+              <!-- 我司信息模块 -->
+              <div class="module-card">
+                <div class="module-header">
+                  <h5>我司信息</h5>
+                </div>
+                <div class="module-content">
+                  <div class="form-row">
+                    <label class="form-head-label">设计单位</label>
+                    <lay-input v-model="companyInfo.name" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">企业地址</label>
+                    <lay-input v-model="companyInfo.address" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">联系人员</label>
+                    <lay-input v-model="companyInfo.contact" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">联系电话</label>
+                    <lay-input v-model="companyInfo.phone" disabled />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">邮箱地址</label>
+                    <lay-input v-model="companyInfo.email" disabled />
+                    <lay-button type="normal" size="md" class="info-button"
+                      @click="showCompanyBankInfo = !showCompanyBankInfo">
+                      {{ showCompanyBankInfo ? '收起信息' : '账户信息' }}
+                    </lay-button>
+                  </div>
+                  <div v-show="showCompanyBankInfo" class="bank-info-box">
+                    <div class="form-row">
+                      <label class="form-head-label">我司银行账号</label>
+                      <lay-input v-model="companyInfo.bankAccount" disabled />
+                    </div>
+                    <div class="form-row">
+                      <label class="form-head-label">我司开户行</label>
+                      <lay-input v-model="companyInfo.bankName" disabled />
+                    </div>
+                    <div class="form-row">
+                      <label class="form-head-label">我司税号</label>
+                      <lay-input v-model="companyInfo.taxNumber" disabled />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="module-content">
-                <div class="form-row">
-                  <label class="form-head-label">设计单位</label>
-                  <lay-input v-model="companyInfo.name" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">企业地址</label>
-                  <lay-input v-model="companyInfo.address" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">联系人员</label>
-                  <lay-input v-model="companyInfo.contact" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">联系电话</label>
-                  <lay-input v-model="companyInfo.phone" disabled />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">邮箱地址</label>
-                  <lay-input v-model="companyInfo.email" disabled />
-                  <lay-button type="normal" size="md" class="info-button"
-                    @click="showCompanyBankInfo = !showCompanyBankInfo">
-                    {{ showCompanyBankInfo ? '收起信息' : '账户信息' }}
-                  </lay-button>
-                </div>
-                <div v-show="showCompanyBankInfo" class="bank-info-box">
-                  <div class="form-row">
-                    <label class="form-head-label">我司银行账号</label>
-                    <lay-input v-model="companyInfo.bankAccount" disabled />
-                  </div>
-                  <div class="form-row">
-                    <label class="form-head-label">我司开户行</label>
-                    <lay-input v-model="companyInfo.bankName" disabled />
-                  </div>
-                  <div class="form-row">
-                    <label class="form-head-label">我司税号</label>
-                    <lay-input v-model="companyInfo.taxNumber" disabled />
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- 交易信息模块 -->
-            <div class="module-card">
-              <div class="module-header">
-                <h5>交易信息</h5>
-              </div>
-              <div class="module-content">
-                <div class="form-row">
-                  <label class="form-head-label">交货方式</label>
-                  <lay-select v-model="tradeInfo.deliveryMethod" placeholder="请选择" allow-clear>
-                    <lay-select-option value="货到付款">
-                      货到付款
-                    </lay-select-option>
-                    <lay-select-option value="款到发货">
-                      款到发货
-                    </lay-select-option>
-                    <lay-select-option value="其它">其它</lay-select-option>
-                  </lay-select>
+              <!-- 交易信息模块 -->
+              <div class="module-card">
+                <div class="module-header">
+                  <h5>交易信息</h5>
                 </div>
-                <div class="form-row">
-                  <label class="form-head-label">交货时间</label>
-                  <lay-date-picker v-model="tradeInfo.deliveryTime" placeholder="点击选择交货时间" allow-clear />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">交货地点</label>
-                  <AreaSelect v-model="tradeInfo.area" />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">详细地址</label>
-                  <lay-input v-model="tradeInfo.address" placeholder="" />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">结算方式</label>
-                  <lay-select v-model="tradeInfo.paymentMethod" placeholder="请选择" allow-clear>
-                    <lay-select-option v-for="item in settleList" :key="item.id" :value="item.id"
-                      :label="item.method" />
-                  </lay-select>
-                </div>
-              </div>
-            </div>
-          </lay-col>
-        </lay-row>
-      </div>
-      <div v-else>
-        <!-- 显示简单的报价单信息 -->
-        <lay-row v-if="showCustomerInfo" :gutter="20">
-          <lay-col :xs="24" :md="12">
-            <!-- 客户信息模块 -->
-            <div class="module-card">
-              <div class="module-content">
-                <div class="form-row">
-                  <label class="form-head-label required">模块名</label>
-                  <lay-input v-model="modelInfo.name" />
-                </div>
-                <div class="form-row">
-                  <label class="form-head-label">供应商信息</label>
-                  <lay-select v-model="modelInfo.gyClient" placeholder="请选择" allow-clear>
-                    <lay-select-option value="option1" label="选项1" />
-                  </lay-select>
-                  <lay-button type="normal" size="md" class="info-button">
-                    供应商
-                  </lay-button>
-                  <lay-button type="normal" size="md" class="info-button">
-                    详情
-                  </lay-button>
+                <div class="module-content">
+                  <div class="form-row">
+                    <label class="form-head-label">交货方式</label>
+                    <lay-select v-model="tradeInfo.deliveryMethod" placeholder="请选择" allow-clear>
+                      <lay-select-option value="货到付款">
+                        货到付款
+                      </lay-select-option>
+                      <lay-select-option value="款到发货">
+                        款到发货
+                      </lay-select-option>
+                      <lay-select-option value="其它">其它</lay-select-option>
+                    </lay-select>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">交货时间</label>
+                    <lay-date-picker v-model="tradeInfo.deliveryTime" placeholder="点击选择交货时间" allow-clear />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">交货地点</label>
+                    <AreaSelect v-model="tradeInfo.area" />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">详细地址</label>
+                    <lay-input v-model="tradeInfo.address" placeholder="" />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">结算方式</label>
+                    <lay-select v-model="tradeInfo.paymentMethod" placeholder="请选择" allow-clear>
+                      <lay-select-option v-for="item in settleList" :key="item.id" :value="item.id"
+                        :label="item.method" />
+                    </lay-select>
+                  </div>
                 </div>
               </div>
-            </div>
-          </lay-col>
-          <lay-col :xs="24" :md="12">
-            <!-- 客户信息模块 -->
-            <div class="module-card">
-              <div class="module-content">
-                <div class="form-row">
-                  <QuoteTypeSelect v-model="modelInfo.ordersType1" :category="1"
-                    :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
-                  <QuoteTypeSelect v-model="modelInfo.ordersType3" :category="3"
-                    :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
-                </div>
-              </div>
-            </div>
-          </lay-col>
-        </lay-row>
-      </div>
-      <lay-row :gutter="20">
-        <div class="module-card">
-          <div class="module-header">
-            <h5>报价目录</h5>
-            <div class="module-header-toolbar">
-              <button v-for="btn of quotationMenuConfig" :key="btn.name" class="toolbar-btn" :title="btn.name"
-                @click="btn.btnAction">
-                <SvgIcon :name="btn.iconName" width="1.25rem" height="1.25rem" />
-              </button>
-            </div>
-          </div>
-          <div class="module-content">
-            <!-- 表格区域 -->
-            <AdvancedTable :columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
-              :enable-drag="true" :pagination="false" :show-toolbar="false" :row-key="'id'" :responsive="true"
-              @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate" @row-drag="handleRowDrag"
-              @button-click="handleButtonClick" @row-click="handleRowClick" />
-            <!-- 成本统计-->
-            <div class="cost-statistics">
-              <div class="cost-statistics-item">
-                <span class="cost-statistics-item-label">总成本合计 (A): </span>
-                <span class="cost-statistics-item-value">{{ costStatistics.totalCost.toFixed(2) }}</span>
-              </div>
-              <div class="cost-statistics-item">
-                <span class="cost-statistics-item-label">总售价合计 (B): </span>
-                <span class="cost-statistics-item-value">{{ costStatistics.totalPrice.toFixed(2) }}</span>
-              </div>
-              <div class="cost-statistics-item">
-                <span class="cost-statistics-item-label">毛利率 (B - A) / B: </span>
-                <span class="cost-statistics-item-value">{{ ((costStatistics.totalPrice ? (costStatistics.totalPrice -
-                  costStatistics.totalCost) / costStatistics.totalPrice : 0) * 100).toFixed(2) }}%</span>
-              </div>
-              <div class="cost-statistics-item">
-                <span class="cost-statistics-item-label">开项: </span>
-                <span class="cost-statistics-item-value">{{ openItemCount }}</span>
-              </div>
-            </div>
-          </div>
+            </lay-col>
+          </lay-row>
         </div>
-      </lay-row>
-    </lay-card>
-    <SideToolbar />
+        <div v-else>
+          <!-- 显示简单的报价单信息 -->
+          <lay-row v-if="showCustomerInfo" :gutter="20">
+            <lay-col :xs="24" :md="12">
+              <!-- 客户信息模块 -->
+              <div class="module-card">
+                <div class="module-content">
+                  <div class="form-row">
+                    <label class="form-head-label required">模块名</label>
+                    <lay-input v-model="modelInfo.name" />
+                  </div>
+                  <div class="form-row">
+                    <label class="form-head-label">供应商信息</label>
+                    <lay-select v-model="modelInfo.gyClient" placeholder="请选择" allow-clear>
+                      <lay-select-option value="option1" label="选项1" />
+                    </lay-select>
+                    <lay-button type="normal" size="md" class="info-button">
+                      供应商
+                    </lay-button>
+                    <lay-button type="normal" size="md" class="info-button">
+                      详情
+                    </lay-button>
+                  </div>
+                </div>
+              </div>
+            </lay-col>
+            <lay-col :xs="24" :md="12">
+              <!-- 客户信息模块 -->
+              <div class="module-card">
+                <div class="module-content">
+                  <div class="form-row">
+                    <QuoteTypeSelect v-model="modelInfo.ordersType1" :category="1"
+                      :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
+                    <QuoteTypeSelect v-model="modelInfo.ordersType3" :category="3"
+                      :orders-id="enableCustomerInfo ? '' : modelData.ordersId" placeholder="请选择" />
+                  </div>
+                </div>
+              </div>
+            </lay-col>
+          </lay-row>
+        </div>
+        <lay-row :gutter="20">
+          <div class="module-card">
+            <div class="module-header">
+              <h5>报价目录</h5>
+              <div class="module-header-toolbar">
+                <lay-tooltip position="top" v-for="btn of quotationMenuConfig" :key="btn.name" :content="btn.name">
+                  <button class="toolbar-btn" @click="btn.btnAction">
+                    <SvgIcon :name="btn.iconName" width="1.25rem" height="1.25rem" />
+                  </button>
+                </lay-tooltip>
+              </div>
+            </div>
+            <div class="module-content">
+              <!-- 表格区域 -->
+              <AdvancedTable :columns="quotationColumns" :data-source="quotationData as Record<string, unknown>[]"
+                :enable-drag="true" :pagination="false" :show-toolbar="false" :row-key="'id'" :responsive="true"
+                @update:data-source="handleQuotationDataUpdate" @cell-update="handleCellUpdate"
+                @row-drag="handleRowDrag" @button-click="handleButtonClick" @row-click="handleRowClick" />
+              <!-- 成本统计-->
+              <div class="cost-statistics">
+                <div class="cost-statistics-item">
+                  <span class="cost-statistics-item-label">总成本合计 (A): </span>
+                  <span class="cost-statistics-item-value">{{ costStatistics.totalCost.toFixed(2) }}</span>
+                </div>
+                <div class="cost-statistics-item">
+                  <span class="cost-statistics-item-label">总售价合计 (B): </span>
+                  <span class="cost-statistics-item-value">{{ costStatistics.totalPrice.toFixed(2) }}</span>
+                </div>
+                <div class="cost-statistics-item">
+                  <span class="cost-statistics-item-label">毛利率 (B - A) / B: </span>
+                  <span class="cost-statistics-item-value">{{ ((costStatistics.totalPrice ? (costStatistics.totalPrice
+                    -
+                    costStatistics.totalCost) / costStatistics.totalPrice : 0) * 100).toFixed(2) }}%</span>
+                </div>
+                <div class="cost-statistics-item">
+                  <span class="cost-statistics-item-label">开项: </span>
+                  <span class="cost-statistics-item-value">{{ openItemCount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </lay-row>
+      </lay-card>
 
-    <!-- 新建子项目 drawer -->
-    <SubProjectDrawer v-model:visible="showSubProjectDrawer" @submit="handleSubProjectSubmit" />
+      <!-- 新建子项目 drawer -->
+      <SubProjectDrawer v-model:visible="showSubProjectDrawer" @submit="handleSubProjectSubmit" />
 
-    <!-- 产品利率输入弹窗 -->
-    <ProductInterestRateDialog v-model:visible="showProductInterestRateDialog"
-      @confirm="handleProductInterestRateConfirm" />
+      <!-- 产品利率输入弹窗 -->
+      <ProductInterestRateDialog v-model:visible="showProductInterestRateDialog"
+        @confirm="handleProductInterestRateConfirm" />
 
-    <!-- 产品选择模态框 -->
-    <ProductSelectModal ref="productSelectModalRef" @select="handleProductSelect" @cancel="handleProductSelectCancel" />
-  </lay-loading>
+      <!-- 产品选择模态框 -->
+      <ProductSelectModal ref="productSelectModalRef" @select="handleProductSelect"
+        @cancel="handleProductSelectCancel" />
+    </lay-loading>
+
+
+    <!-- 侧边控制工具栏 -->
+    <SideToolbar @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom" />
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -342,6 +352,8 @@ import clientApi from '@/api/client/clinetApi';
 import type { OrderProduct } from '@/api/product/productApi.type';
 import CompanyLinkCell from '@/components/table-cells/CompanyLinkCell.vue';
 import env from '@/utils/env';
+import { useScroll } from '@vueuse/core'
+import { useTemplateRef } from 'vue'
 
 // 报价目录菜单配置
 interface ButtonAction {
@@ -1274,6 +1286,25 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+const scrollElement = useTemplateRef<HTMLElement>('scrollElement')
+const { x, y } = useScroll(scrollElement, { behavior: 'smooth' })
+
+// 侧边栏相关控制
+const scrollToTop = () => {
+  console.log('scrollToTop1', x.value, y.value);
+  y.value = 0;
+  console.log('scrollToTop2', x.value, y.value);
+};
+
+const scrollToBottom = () => {
+  console.log('scrollToBottom11', x.value, y.value);
+  if (scrollElement.value) {
+    console.log('scrollToBottom22', x.value, y.value);
+    y.value = scrollElement.value.scrollHeight;
+    console.log('scrollToBottom33', x.value, y.value);
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -1309,13 +1340,14 @@ onMounted(async () => {
 }
 
 .quotation-edit-card {
+  height: 100%;
   position: relative;
 
   .show-customer-info-btn {
     @include button-style($primary-color);
     color: #949494;
     position: absolute;
-    top: 20px;
+    top: 25px;
     left: 0;
     padding: 10px;
     z-index: 10;
@@ -1433,5 +1465,18 @@ onMounted(async () => {
       }
     }
   }
+}
+
+/* 滚动容器样式 */
+.scroll-container {
+  height: 100%;
+  /* 减去顶部导航和其他元素的高度 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  border-radius: $border-radius-extra-large;
+  padding-right: 20px;
+  margin-right: -20px;
+  background-clip: content-box;
 }
 </style>

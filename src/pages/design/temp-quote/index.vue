@@ -79,7 +79,8 @@
     </lay-card>
 
     <!-- 编辑弹窗 -->
-    <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false">
+    <ModalWindow :visible="editModalVisible" title="编辑报价单" :is-teleport="true" @close="editModalVisible = false"
+      :syncHeight="true">
       <QuotationEdit :showCustomerInfoDefault="false" :is-new-quotation="false" @save="handleEditSave"
         @cancel="editModalVisible = false" :providedOrderId="selectedOrderId" />
     </ModalWindow>
