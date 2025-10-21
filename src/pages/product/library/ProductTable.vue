@@ -228,7 +228,7 @@ const pagination = reactive({
 
 // 列显示控制
 const columnVisibility = reactive({
-  proId: true,             // 产品编号
+  proId: false,             // 产品编号
   name: true,              // 产品名称
   brand: true,             // 品牌
   model: true,             // 型号

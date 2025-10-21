@@ -98,8 +98,8 @@ export interface ProductForm {
   isOpen: boolean;
   autoHandle: boolean;
   pictureaddress: string;
-  mainCategoryId: string; // 产品大类
-  subCategoryId: string; // 产品小类
+  mainCategoryId: string;
+  subCategoryId: string;
 }
 // 表格列配置
 export const allColumns: any[] = [
@@ -110,17 +110,24 @@ export const allColumns: any[] = [
     customSlot: 'checkbox',
     fixed: 'left',
   },
-  { title: '产品编号', key: 'proId', width: '100px' },
-  { title: '产品名称', key: 'name', width: '100px', customSlot: 'productName' },
-  { title: '品牌', key: 'brand', width: '100px' },
-  { title: '型号', key: 'model', width: '100px' },
+  { title: '产品编号', key: 'proId', width: '100px', ellipsisTooltip: true },
+  {
+    title: '产品名称',
+    key: 'name',
+    width: '100px',
+    customSlot: 'productName',
+    ellipsisTooltip: true,
+  },
+  { title: '品牌', key: 'brand', width: '100px', ellipsisTooltip: true },
+  { title: '型号', key: 'model', width: '100px', ellipsisTooltip: true },
   {
     title: '参数/特性',
     key: 'trait',
     width: '100px',
     customSlot: 'parameters',
+    ellipsisTooltip: true,
   },
-  { title: '单位', key: 'unit', width: '60px' },
+  { title: '单位', key: 'unit', width: '60px', ellipsisTooltip: true },
   { title: '成本', key: 'purchaseprice', width: '80px' },
   { title: '参考售价', key: 'price', width: '80px' },
   { title: '市场指导价', key: 'marketprice', width: '100px' },
