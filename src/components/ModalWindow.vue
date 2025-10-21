@@ -55,12 +55,12 @@ const windowVisible = ref(false);
 const {
   visible,
   title,
-  isTeleport = false, // 是否可以提升到整个页面，如果不可以，那就要求上层组件position: relative
+  isTeleport = true, // 是否可以提升到整个页面，如果不可以，那就要求上层组件position: relative
   btn = ref([]), // 传入的按钮配置
   syncHeight = false, // 是否让内容高度与layui-layer-content保持一致
   maxmin = true, // 默认可以最大化/最小化
   resize = true, // 默认可以调整大小
-  sizeArgs = ['80%', '80%'],
+  sizeArgs = ['80%', '80vh'],
 } = defineProps<{
   visible: boolean;
   title: string;
@@ -186,8 +186,6 @@ onUnmounted(() => {
   cleanupHeightObserver();
 });
 </script>
-
-
 
 <style lang="scss" scoped>
 .modal-content {
