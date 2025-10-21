@@ -23,7 +23,7 @@
                       <lay-select-option v-for="client of clientInfoList" :key="client.id" :value="client"
                         :label="client.contacts" />
                     </lay-select>
-                    <lay-button type="normal" size="md" class="info-button">
+                    <lay-button type="normal" size="md" class="info-button" @click="toggleClientDetailModal">
                       <SvgIcon name="group_chat" width="16" height="16" />
                       客户详情
                     </lay-button>
@@ -313,6 +313,11 @@
     <TotalPricePreview v-show="isTotalPricePreviewVisible"
       :product-rate="productInterestRate?.useDefaultPrice ? defaultInterestRate : productInterestRate?.interestRate"
       :total-cost="costStatistics.totalCost" :total-price="costStatistics.totalPrice" />
+
+    <!-- 客户详情弹窗 -->
+    <ModalWindow title="选择客户" :visible="isClientDetailModalVisible" :btn="clientSelectorBtns">
+      <ClientDetailSelector @select-user="handleSelectUser" />
+    </ModalWindow>
   </main>
 </template>
 
@@ -330,6 +335,7 @@ import SubProjectDrawer from './SubProjectDrawer.vue';
 import ProductInterestRateDialog from './ProductInterestRateDialog.vue';
 import ProductSelectModal from './ProductSelectModal.vue';
 import TotalPricePreview from './TotalPricePreview.vue';
+import ClientDetailSelector from '@/pages/supply/customer-management/index.vue';
 import { onMounted, ref, markRaw, watch, computed } from 'vue';
 import type {
   OrderModuleListResponse,
@@ -360,6 +366,7 @@ import CompanyLinkCell from '@/components/table-cells/CompanyLinkCell.vue';
 import env from '@/utils/env';
 import { useScroll } from '@vueuse/core'
 import { useTemplateRef } from 'vue'
+import ModalWindow from '@/components/ModalWindow.vue';
 
 // 报价目录菜单配置
 interface ButtonAction {
@@ -938,7 +945,7 @@ const handleClientChange = ((value: ClientType) => {
     taxNumber: '',   // 预留
   };
   showCustomerBankInfo.value = false; // 收起账户信息面板
-}) as ((value: string | number | object) => void);
+}) as ((value: string | number | object | ClientType) => void);
 
 // 获取客户单位信息列表
 const getClientInfoList = async () => {
@@ -954,14 +961,14 @@ const getMyCompanyInfo = async () => {
   const res = await companyApi.getMyCompanyDetailed();
   myCompanyInfo.value = res.data.company;
   companyInfo.value = {
-    name: myCompanyInfo.value.companyName,
-    address: myCompanyInfo.value.companyAddress,
-    contact: myCompanyInfo.value.name,
-    phone: myCompanyInfo.value.companyPhone,
-    email: myCompanyInfo.value.email,
-    bankAccount: myCompanyInfo.value.bankAccount,
-    bankName: myCompanyInfo.value.bankName,
-    taxNumber: myCompanyInfo.value.taxId,
+    name: myCompanyInfo.value?.companyName || '',
+    address: myCompanyInfo.value?.companyAddress || '',
+    contact: myCompanyInfo.value?.name || '',
+    phone: myCompanyInfo.value?.companyPhone || '',
+    email: myCompanyInfo.value?.email || '',
+    bankAccount: myCompanyInfo.value?.bankAccount || '',
+    bankName: myCompanyInfo.value?.bankName || '',
+    taxNumber: myCompanyInfo.value?.taxId || '',
   };
 };
 
@@ -1320,6 +1327,49 @@ const isTotalPricePreviewVisible = ref(false);
 const toggleTotalPricePreview = () => {
   isTotalPricePreviewVisible.value = !isTotalPricePreviewVisible.value;
 };
+
+// 客户选择弹窗和数据相关控制
+const isClientDetailModalVisible = ref(false);
+const selectedClientIds = ref<number[]>([]);
+// 响应客户选择弹窗的选择事件
+const handleSelectUser = (selectedIds: number[]) => {
+  selectedClientIds.value = selectedIds;
+};
+
+const toggleClientDetailModal = () => {
+  isClientDetailModalVisible.value = !isClientDetailModalVisible.value;
+};
+
+const handleClientSelect = () => {
+  if (selectedClientIds.value.length === 0) {
+    notify.error('请选择客户');
+    return;
+  }
+  if (selectedClientIds.value.length > 1) {
+    notify.error('只能选择一个客户');
+    return;
+  }
+  // 选择客户成功后，将客户信息添加到报价单
+  const clientId = selectedClientIds.value[0];
+  const client = clientInfoList.value!.find((item) => item.id === clientId);
+  if (client) {
+    customerName.value = client;
+    handleClientChange(customerName.value);
+    isClientDetailModalVisible.value = false;
+  }
+};
+
+// 客户选择弹窗按钮配置
+const clientSelectorBtns = [
+  {
+    text: '确定',
+    callback: handleClientSelect,
+  },
+  {
+    text: '取消',
+    callback: toggleClientDetailModal,
+  },
+]
 </script>
 
 <style scoped lang="scss">
