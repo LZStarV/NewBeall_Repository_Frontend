@@ -31,17 +31,73 @@
 
         <!-- 数据表格区域 -->
         <lay-card>
-            <div class="table-container">
-                <!-- 表格操作按钮 -->
-                <div class="table-actions">
-                    <button class="action-btn refresh-btn" @click="handleRefreshTable">
-                        <i class="layui-icon layui-icon-refresh"></i>
-                    </button>
-                    <button class="action-btn view-btn">
-                        <i class="layui-icon layui-icon-list"></i>
-                    </button>
-                </div>
+            <!-- 工具栏区域 -->
+            <div class="fixed-table-toolbar">
+                <div class="toolbar-spacer"></div>
+                <span data-title="刷新" @click="handleRefreshTable" class="btnIcon invite-but">
+                    <lay-icon type="layui-icon-refresh" />
+                </span>
 
+                <!-- 列可见性控制 -->
+                <div class="dropdown-container">
+                    <button type="button" aria-label="columns" class="btn btn-default btn-outline dropdown-toggle"
+                        @click="toggleColumnsDropdown">
+                        <lay-icon type="layui-icon-shrink-right" />
+                    </button>
+                    <ul class="dropdown-menu" :class="{ 'show': showColumnsDropdown }">
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.id" @change="updateVisibleColumns" />
+                                id
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.company"
+                                    @change="updateVisibleColumns" /> 客户公司
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.demandName"
+                                    @change="updateVisibleColumns" /> 方案名
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.price"
+                                    @change="updateVisibleColumns" /> 方案预计价格
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.demandDetails"
+                                    @change="updateVisibleColumns" /> 方案详情
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.releaseTime"
+                                    @change="updateVisibleColumns" /> 发布时间
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.status"
+                                    @change="updateVisibleColumns" /> 状态
+                            </label>
+                        </li>
+                        <li role="menuitem">
+                            <label>
+                                <input type="checkbox" v-model="columnVisibility.action"
+                                    @change="updateVisibleColumns" /> 操作
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="table-container">
                 <!-- 数据表格 -->
                 <lay-table :columns="tableColumns" :data-source="tableData" :page="pagination"
                     @change="handleTableChange" :loading="loading">
@@ -52,7 +108,8 @@
 
                     <!-- 客户公司列 -->
                     <template #company="{ row }">
-                        <a href="#" class="company-link" @click.prevent="handleViewCompany(row)">{{ row.company }}</a>
+                        <a href="#" class="company-link" @click.prevent="handleViewCompanyHomepage(row)">{{ row.company
+                        }}</a>
                     </template>
 
                     <!-- 方案名称列 -->
@@ -76,18 +133,20 @@
             </div>
         </lay-card>
 
-        <!-- 公司详情弹窗 -->
-        <CompanyDetail :visible="companyDetailVisible" :selected-company="selectedCompany"
-            @close="closeCompanyDetail" />
+        <!-- 需求详情弹窗 -->
+        <DemandDetailModal :visible="detailModalVisible" :demand="selectedDemand" @close="closeDetailModal" />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import Notify from '@/utils/notify'
+import DemandDetailModal from './DemandDetailModal.vue'
 import { getConnectedDemandList } from './Api/Api'
-import { tableColumns, tableData, type ConnectedDemand } from './type'
-import CompanyDetail from './CompanyDetail.vue'
+import { tableColumns as allTableColumns, tableData, type ConnectedDemand } from './type'
+
+const router = useRouter()
 
 // 搜索表单
 const filterForm = reactive({
@@ -107,9 +166,32 @@ const pagination = reactive({
 const loading = ref(false)
 const searchLoading = ref(false)
 
-// 公司详情弹窗状态
-const companyDetailVisible = ref(false)
-const selectedCompany = ref<ConnectedDemand | null>(null)
+// 列可见性控制
+const columnVisibility = reactive({
+    id: false,              // id
+    company: true,          // 客户公司
+    demandName: true,       // 方案名
+    price: false,           // 方案预计价格
+    demandDetails: true,    // 方案详情
+    releaseTime: true,      // 发布时间
+    status: true,           // 状态
+    action: true            // 操作
+})
+
+const showColumnsDropdown = ref(false)
+
+// 计算可见列
+const tableColumns = computed(() => {
+    return allTableColumns.filter(column => {
+        if (column.type === 'checkbox') return true
+        if (!column.key) return true
+        return columnVisibility[column.key as keyof typeof columnVisibility] !== false
+    })
+})
+
+// 详情弹窗状态
+const detailModalVisible = ref(false)
+const selectedDemand = ref<ConnectedDemand | null>(null)
 
 // 表格变化处理
 const handleTableChange = async (pageData: { order: string; current: number; limit: number }) => {
@@ -166,16 +248,32 @@ const handleQuickSearch = (event: KeyboardEvent) => {
     }
 }
 
-// 查看公司详情
-const handleViewCompany = (demand: ConnectedDemand) => {
-    selectedCompany.value = demand
-    companyDetailVisible.value = true
+// 更新可见列
+const updateVisibleColumns = () => {
+    // 列显示状态更新时的处理逻辑
 }
 
-// 关闭公司详情弹窗
-const closeCompanyDetail = () => {
-    companyDetailVisible.value = false
-    selectedCompany.value = null
+// 切换列下拉菜单
+const toggleColumnsDropdown = () => {
+    showColumnsDropdown.value = !showColumnsDropdown.value
+}
+
+// 查看公司主页
+const handleViewCompanyHomepage = (_demand: ConnectedDemand) => {
+    // 跳转到公司主页
+    router.push('/supply/company-homepage')
+}
+
+// 查看需求详情
+const handleViewCompany = (demand: ConnectedDemand) => {
+    selectedDemand.value = demand
+    detailModalVisible.value = true
+}
+
+// 关闭详情弹窗
+const closeDetailModal = () => {
+    detailModalVisible.value = false
+    selectedDemand.value = null
 }
 
 // 查看报价
@@ -228,7 +326,7 @@ const fetchTableData = async () => {
 
         if (responseData && responseData.rows && Array.isArray(responseData.rows)) {
             tableData.value = responseData.rows.map((item: any) => ({
-                id: item.id?.toString() || '',
+                id: item.pid?.toString() || '',
                 selected: false,
                 company: item.company?.companyName || '',
                 demandName: item.programme?.schemename || '',
@@ -242,7 +340,7 @@ const fetchTableData = async () => {
             pagination.total = responseData.total || responseData.rows.length
         } else if (Array.isArray(responseData)) {
             tableData.value = responseData.map((item: any) => ({
-                id: item.id?.toString() || '',
+                id: item.pid?.toString() || '',
                 selected: false,
                 company: item.company?.companyName || '',
                 demandName: item.programme?.schemename || '',
@@ -449,42 +547,127 @@ onMounted(async () => {
     }
 }
 
-// 表格区域样式
-.table-container {
-    position: relative;
+// 工具栏样式
+.fixed-table-toolbar {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-    .table-actions {
-        position: absolute;
-        top: 0;
-        right: 0;
-        display: flex;
+    .toolbar-spacer {
+        flex: 1;
+    }
+
+    .btnIcon,
+    .btn {
+        display: inline-flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 16px;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        border: 1px solid #e8e8e8;
+        background-color: #fff;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
 
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background-color: transparent;
+        &:hover {
+            background-color: #f0f8ff;
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+
+        .layui-icon {
+            font-size: 14px;
+        }
+    }
+
+    .invite-but {
+        position: relative;
+
+        &::before {
+            content: attr(data-title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
             border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
             transition: all 0.2s ease;
-            color: #666;
+            z-index: 1000;
+        }
 
+        &:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    .dropdown-container {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        display: none;
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 12px;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+
+        &.show {
+            display: block;
+        }
+
+        li {
             &:hover {
                 background-color: #f5f5f5;
-                color: #1890ff;
             }
 
-            i {
-                font-size: 14px;
+            label {
+                display: block;
+                padding: 8px 15px;
+                font-weight: normal;
+                line-height: 1.4;
+                color: #333;
+                white-space: nowrap;
+                cursor: pointer;
+                margin: 0;
+
+                input[type="checkbox"] {
+                    margin-right: 8px;
+                }
             }
         }
     }
+}
+
+// 表格区域样式
+.table-container {
+    position: relative;
 
     .company-link,
     .action-link {
