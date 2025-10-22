@@ -5,6 +5,12 @@
       {{ showLogs ? '隐藏跟进记录' : '查看跟进记录' }}
     </lay-button>
   </div>
+  <ClientInfoLogPanel
+    v-if="clientInfo"
+    :visible="showLogs"
+    :notes="clientInfo.note"
+    @update:visible="(v: boolean) => (showLogs = v)"
+  />
 
   <main class="detail-container">
     <!-- 详情内容 -->
@@ -45,7 +51,7 @@
               </div>
               <div class="form-row">
                 <label class="form-head-label">创建人</label>
-                <lay-input v-model="clientInfo.createuser" disabled />
+                <lay-input v-model="clientInfo.createUserName" disabled />
               </div>
             </div>
           </div>
@@ -112,6 +118,7 @@ import clinetApi from '@/api/client/clinetApi';
 import type { ClientType } from '@/api/client/clinetApi.type';
 import { getClientCategoryList, getClientSizeList } from '@/utils/clientUtils';
 import { onMounted, ref } from 'vue';
+import ClientInfoLogPanel from './ClientInfoLogPanel.vue';
 
 const props = defineProps<{
   clientId: string | number;
@@ -134,6 +141,10 @@ const getClientInfo = async () => {
       clientInfo.value.clientSize = getClientSizeList(
         Number(clientInfo.value.clientSize),
       );
+      // 消除note的HTML换行实体
+      clientInfo.value.note = clientInfo.value.note
+        .replace(/&#10;/g, '\n')
+        .replace(/&#13;/g, '\r');
     }
   }
 };
