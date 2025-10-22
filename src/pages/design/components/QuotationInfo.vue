@@ -13,7 +13,7 @@
   <CommentPanel v-if="localQuotationData" :visible="showCommentPanel" :comment-list="commentList"
     :order-id="localQuotationData.ordersId" :chat-type="1" @update:visible="(v: boolean) => showCommentPanel = v" />
 
-  <main ref="scrollElement" class="detail-container">
+  <main ref="scrollElement" class="detail-container" @click.stop="closeAllModal">
     <!-- 详情内容 -->
     <div v-if="localQuotationData" class="detail-content">
       <h3 class="detail-title">报价单信息</h3>
@@ -150,11 +150,18 @@
         <ProductionList :order-id="localQuotationData.ordersId" />
       </lay-row>
     </div>
-
-    <!-- 侧边控制工具栏 -->
-    <SideToolbar v-show="localQuotationData" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom"
-      @toggleCommentPanel="toggleCommentPanel" />
   </main>
+
+      <!-- 侧边控制工具栏 -->
+      <SideToolbar v-show="localQuotationData" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom"
+      @toggleCommentPanel="toggleCommentPanel" @export-excel="handleExport" @toggle-total-price-preview="toggleTotalPricePreview" />
+
+    <!-- 总价预览 -->
+    <TotalPricePreview v-show="isTotalPricePreviewVisible" class="total-price-preview" :total-cost="props.selectedRow.purchasepriceSum" :total-price="props.selectedRow.priceSum" />
+
+  <!-- 导出确认弹窗 -->
+  <ExportQuotationModal v-model:visible="exportModalVisible" :export-options="exportOptions"
+    @confirm="handleExportConfirm" />
 </template>
 
 <script setup lang="ts">
@@ -162,7 +169,7 @@ import clinetApi from '@/api/client/clinetApi';
 import companyApi from '@/api/company/companyApi';
 import type { QuotationListResponse, OrderLogsRecord } from '@/api/orders/orderApi.type';
 import ordersApi from '@/api/orders/ordersApi';
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue';
 import { createSeal, clearSeal } from '@/utils/createSeal';
 import OperationLogPanel from './OperationLogPanel.vue';
 import ProductionList from './ProductionList.vue';
@@ -173,6 +180,9 @@ import CommentPanel from './CommentPanel.vue';
 import SideToolbar from './SideToolbar/QuotationInfoSideToolbar.vue'
 import { useScroll } from '@vueuse/core'
 import { useTemplateRef } from 'vue'
+import ExportQuotationModal from '@/pages/design/components/ExportQuotationModal.vue';
+import { useQuotationExport } from '@/composables/design/useQuotationExport';
+import TotalPricePreview from './TotalPricePreview.vue';
 
 interface QuotationFormData {
   ordersId: string;
@@ -394,6 +404,31 @@ const scrollToBottom = () => {
   }
 };
 
+const orderId = computed(() => props.selectedRow.ordersId);
+
+// 导出确认弹窗相关状态
+const exportModalVisible = ref(false);
+
+const { exportOptions, handleExport, handleExportConfirm } = useQuotationExport(
+  {
+    selectedKey: orderId,
+    exportModalVisible,
+  },
+);
+
+// 控制总价预览展示与否
+const isTotalPricePreviewVisible = ref(false);
+const toggleTotalPricePreview = () => {
+  isTotalPricePreviewVisible.value = !isTotalPricePreviewVisible.value;
+};
+
+// 点击空白区域关闭所有弹框
+const closeAllModal = () => {
+  isTotalPricePreviewVisible.value = false;
+  showLogs.value = false;
+  showCommentPanel.value = false;
+}
+
 onMounted(() => {
   // 初始化订单详情评论websocket连接
   if (userId.value) {
@@ -525,5 +560,10 @@ onUnmounted(() => {
   position: absolute;
   right: 200px;
   display: block;
+}
+
+.total-price-preview {
+  top: 60%;
+  transform: translate(0%, -50%);
 }
 </style>
