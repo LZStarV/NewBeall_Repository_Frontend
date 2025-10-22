@@ -113,7 +113,7 @@
         </template>
         <!-- 客户单位列自定义渲染 -->
         <template #contacts="{ row }">
-          <span class="project-name-link" :title="row.contacts" @click="showDetailModal(row)">
+          <span class="project-name-link" :title="row.contacts" @click="showClinetModal(row)">
             {{ row.contacts }}
           </span>
         </template>
@@ -244,6 +244,15 @@
         </div>
       </div>
     </ModalWindow>
+
+        <!-- 客户信息弹窗 -->
+    <ModalWindow :visible="clinetModalVisible" :is-teleport="true" title="客户信息" :syncHeight="true"
+      @close="clinetModalVisible = false">
+      <ClientInfo v-if="checkedRow" :client-id="checkedRow?.clientId" />
+      <div v-else>
+        <lay-empty />
+      </div>
+    </ModalWindow>
   </div>
 </template>
 
@@ -270,6 +279,7 @@ import type {
 import QuotationInfo from '../components/QuotationInfo.vue';
 import { useChatStore } from '@/stores/chat';
 import type { UserInfo } from '@/pages/chat/Chat.type';
+import ClientInfo from '../components/ClientInfo.vue';
 
 // 导入自定义hooks
 import { useQuotationActions } from '@/composables/design/useQuotationActions';
@@ -318,6 +328,7 @@ const detailModalVisible = ref(false);
 const checkedRow = ref<QuotationListResponse | null>(null); // 用户点击的行数据（通过工程名称和客户单位点击）
 const editModalVisible = ref(false);
 const deleteModalVisible = ref(false);
+const clinetModalVisible = ref(false);
 
 // 导出确认弹窗相关状态
 const exportModalVisible = ref(false);
@@ -496,6 +507,12 @@ const pagination = reactive({
 const showDetailModal = (row: QuotationListResponse) => {
   checkedRow.value = row;
   detailModalVisible.value = true;
+};
+
+// 显示客户信息弹窗
+const showClinetModal = (row: QuotationListResponse) => {
+  checkedRow.value = row;
+  clinetModalVisible.value = true;
 };
 
 // 跳转到聊天页面

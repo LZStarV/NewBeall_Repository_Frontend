@@ -1,6 +1,6 @@
 <template>
   <div class="total-price-preview">
-    <div class="total-price-preview-item">
+    <div v-if="productRate || isDefaultProductInterestRate" class="total-price-preview-item">
       <strong>预设产品利率：</strong><span>{{ isDefaultProductInterestRate ? '默认市场指导价' : productRate.toFixed(2) }}%</span>
     </div>
     <div class="total-price-preview-item">
@@ -54,6 +54,7 @@ const { productRate, totalCost, totalPrice } = defineProps({
   top: 50%;
   transform: translate(0%, -70%);
   right: 50px;
+  z-index: 10000;
 
   .total-price-preview-item {
     display: flex;

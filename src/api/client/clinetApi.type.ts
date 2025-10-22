@@ -17,6 +17,7 @@ export interface ClientType {
   contacts: string;
   createtime: string;
   createuser: number;
+  createUserName: string;
   delflag: number;
   email: string;
   fax: string;

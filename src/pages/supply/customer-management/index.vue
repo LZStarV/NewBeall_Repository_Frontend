@@ -634,6 +634,9 @@ const toggleDuplicateView = async () => {
   await handler.getClientList();
 };
 
+// 定义导出客户数据的emit事件
+const emit = defineEmits(['select-user']);
+
 // 切换客户选中状态
 const toggleCustomerSelection = (customerId: number) => {
   const index = activeCustomers.value.indexOf(customerId);
@@ -644,6 +647,8 @@ const toggleCustomerSelection = (customerId: number) => {
     // 如果未选中，则添加到选中列表
     activeCustomers.value.push(customerId);
   }
+  // 导出选中客户的id列表
+  emit('select-user', activeCustomers.value);
 };
 
 // 关闭模态框
