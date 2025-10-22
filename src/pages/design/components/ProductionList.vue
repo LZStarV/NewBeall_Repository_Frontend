@@ -29,10 +29,17 @@
         :pagination="false"
         even
         @sort-change="(key, sort) => sortChange(key, sort, index)"
+        :style="{
+          borderRadius: shouldShowTitle(group)
+            ? '0 0 var(--table-border-radius) var(--table-border-radius)'
+            : 'var(--table-border-radius)',
+          border: `1px solid ${shouldShowTitle(group) ? extractRgbColor(group.subprojectColor) : '#eee'}`,
+          borderTop: shouldShowTitle(group) ? '0px' : '',
+        }"
       >
         <!-- 参数详情列自定义渲染 -->
         <template #parameterShow="{ row }">
-          <lay-tooltip>
+          <lay-tooltip v-if="JSON.parse(row.param).length > 0">
             <span class="parameter-show-span">查看参数</span>
             <template #content>
               <div class="parameter-container">
@@ -47,6 +54,7 @@
               </div>
             </template>
           </lay-tooltip>
+          <span v-else>暂无参数</span>
         </template>
 
         <!-- 图片列自定义渲染 -->
@@ -113,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import type {
   TableColumn,
   TableDefaultToolbar,
@@ -282,7 +290,8 @@ const groupDataBySubprojectClass = (data: ProductionItem[]): GroupedData[] => {
     if (!groups.has(key)) {
       groups.set(key, []);
     }
-    if (!item.isSubprojectHeader) groups.get(key)!.push(item);
+    // 如果没有subprojectColor，说明不是标题级别的，直接加入
+    if (!item.subprojectColor) groups.get(key)!.push(item);
     // 记录子项目颜色
     if (item.isSubprojectHeader && item.subprojectColor) {
       subprojectColor = item.subprojectColor;
@@ -398,8 +407,6 @@ const getProductionList = async () => {
       pagination.pageSize,
     )) as unknown as { count: number; data: OrderProduct[] };
 
-    console.log(response.data);
-
     if (response && Array.isArray(response.data)) {
       // 为每个产品添加计算的总金额，处理NaN值
       dataSource.value = response.data.map((item, index) => {
@@ -474,12 +481,6 @@ watch(
   },
   { immediate: true },
 );
-
-onMounted(() => {
-  if (props.orderId) {
-    getProductionList();
-  }
-});
 </script>
 
 <style scoped lang="scss">
@@ -522,6 +523,18 @@ onMounted(() => {
 
     &:last-child {
       margin-bottom: 0;
+    }
+    // 隐藏不是第一个表格的表头
+    &:not(:first-child) {
+      :deep(.layui-table-box) {
+        .layui-table-header {
+          display: none;
+        }
+      }
+    }
+    // 四周边框显示出来
+    :deep(.layui-table-has-bottom-width) {
+      border-width: 1px !important;
     }
   }
 
@@ -605,8 +618,8 @@ onMounted(() => {
   // 产品图片样式
   .product-image {
     .product-img {
-      height: 40px;
-      width: 60px;
+      height: 20px;
+      width: 40px;
       object-fit: contain;
       border-radius: 4px;
       cursor: pointer;
@@ -653,3 +666,4 @@ onMounted(() => {
   }
 }
 </style>
+
