@@ -354,7 +354,7 @@ import {
 import { getAreaNames, getAreaCodes } from '@/utils/areaUtils';
 import { getQuoteTypeName } from '@/utils/orderTypeUtils';
 import ordersApi from '@/api/orders/ordersApi';
-import SideToolbar from './SideToolbar.vue';
+import SideToolbar from './SideToolbar/QuotationEditSideToolbar.vue';
 import type { CompanyData } from '@/api/company/companyApi.type';
 import companyApi from '@/api/company/companyApi';
 import { layer } from '@layui/layui-vue';

@@ -13,7 +13,7 @@
   <CommentPanel v-if="localQuotationData" :visible="showCommentPanel" :comment-list="commentList"
     :order-id="localQuotationData.ordersId" :chat-type="1" @update:visible="(v: boolean) => showCommentPanel = v" />
 
-  <main class="detail-container">
+  <main ref="scrollElement" class="detail-container">
     <!-- 详情内容 -->
     <div v-if="localQuotationData" class="detail-content">
       <h3 class="detail-title">报价单信息</h3>
@@ -150,6 +150,10 @@
         <ProductionList :order-id="localQuotationData.ordersId" />
       </lay-row>
     </div>
+
+    <!-- 侧边控制工具栏 -->
+    <SideToolbar v-show="localQuotationData" @scrollToTop="scrollToTop" @scrollToBottom="scrollToBottom"
+      @toggleCommentPanel="toggleCommentPanel" />
   </main>
 </template>
 
@@ -166,6 +170,9 @@ import { createOrderDetailCommentWebSocket, type CommentMessage } from '@/websoc
 import { useChatStore } from '@/stores/chat';
 import type { WebSocketClient } from '@/utils/websocket';
 import CommentPanel from './CommentPanel.vue';
+import SideToolbar from './SideToolbar/QuotationInfoSideToolbar.vue'
+import { useScroll } from '@vueuse/core'
+import { useTemplateRef } from 'vue'
 
 interface QuotationFormData {
   ordersId: string;
@@ -370,6 +377,21 @@ const showCommentPanel = ref(false);
 // 开关评论记录面板
 const toggleCommentPanel = () => {
   showCommentPanel.value = !showCommentPanel.value;
+};
+
+// 控制移动到顶部和底部
+const scrollElement = useTemplateRef<HTMLElement>('scrollElement')
+const { y } = useScroll(scrollElement, { behavior: 'smooth' })
+
+// 侧边栏相关控制
+const scrollToTop = () => {
+  y.value = 0;
+};
+
+const scrollToBottom = () => {
+  if (scrollElement.value) {
+    y.value = scrollElement.value.scrollHeight;
+  }
 };
 
 onMounted(() => {
